@@ -1,113 +1,162 @@
-# Control inteligente de semáforos mediante World Models
+# Traffic World Model
 
-Proyecto de grado — Ingeniería de Sistemas, Universidad del Quindío (2026)
+Proyecto de investigación y desarrollo para controlar semáforos inteligentes mediante World Models en una intersección simulada de SUMO.
 
-Diseño e implementación de un sistema basado en **World Models** (Ha & Schmidhuber, 2018)
-para aprender la dinámica del tráfico de una intersección simulada en **SUMO**, y usar ese
-modelo aprendido para apoyar el entrenamiento y/o selección de acciones de un controlador
-semafórico — comparando este enfoque contra un agente de Reinforcement Learning entrenado
-directamente contra el simulador.
+## Objetivo
 
-## Idea central
+Diseñar un pipeline para aprender la dinámica del tráfico de una intersección con una representación compacta del estado y luego usar esa aproximación para apoyar la toma de decisiones del controlador semafórico.
 
+La idea central es:
+
+```text
+SUMO -> Estado del tráfico -> Autoencoder/VAE -> representación latente
+-> Modelo temporal (LSTM/Transformer) -> predicción de z_{t+1}
+-> Dream Environment -> Controlador -> Acción -> SUMO
 ```
-SUMO → Estado del tráfico → Autoencoder/VAE → z → Modelo temporal (LSTM/Transformer)
-     → Predicción de z_{t+1} y recompensa → Dream Environment → Controller → Acción → SUMO
-```
 
-En vez de que el agente aprenda interactuando miles de veces con el simulador real,
-primero se le enseña una aproximación comprimida y temporal de cómo se comporta el
-tráfico ("V" + "M"), y luego el controlador ("C") puede entrenarse o decidir usando
-esa aproximación, reduciendo potencialmente el número de interacciones necesarias
-con SUMO.
+La implementación actual ya estableció la capa de infraestructura y la integración con SUMO, y en este punto el proyecto está avanzando en la definición del estado del tráfico usando TraCI.
 
 ## Estado actual del proyecto
 
-- [x] Entorno de desarrollo reproducible (Python 3.11, entorno virtual, `requirements.txt`)
-- [x] SUMO 1.27.1 instalado y verificado (consola + GUI + netedit)
-- [x] `traci`, `sumolib`, `sumo-rl`, `gymnasium`, `stable-baselines3` integrados
-- [x] Pipeline TraCI ↔ Python validado con la red de ejemplo de `sumo-rl`
-- [x] Red propia de una intersección construida con `netgenerate` (4 brazos, 1 semáforo)
-- [x] Demanda de tráfico propia definida (350 veh/h por brazo, sin giros en U)
-- [x] Validación visual en `sumo-gui`: semáforo cambiando de fase, vehículos fluyendo
-- [x] Pipeline TraCI ↔ Python re-validado apuntando a la red propia
-- [ ] Definición final del vector de estado y función de recompensa personalizada
-- [ ] Recolección de dataset de trayectorias `(s_t, a_t, r_t, s_{t+1})`
-- [ ] Autoencoder / VAE sobre el vector de estado
-- [ ] Modelo temporal (LSTM) para predicción de `z_{t+1}`
-- [ ] Dream Environment / imaginación
-- [ ] Controlador (RL) y comparación contra baselines
+### ✅ Completado
+
+- Entorno reproducible en Python 3.11 con dependencias definidas en `requirements.txt`.
+- Integración con SUMO + TraCI + `sumo-rl`.
+- Red propia de una intersección construida y versionada bajo `environments/single-intersection/`.
+- Wrapper de entorno centralizado en `environments/traffic_environment.py`.
+- Arquitectura modular separada en:
+  - `configs/` para configuración del entorno
+  - `environments/` para builder/reward y lógica del entorno
+  - `scripts/` para pruebas y ejecuciones por etapa
+  - `training/`, `evaluation/` y `models/` para la fase de aprendizaje
+- Estado personalizado construido desde TraCI mediante `environments/custom_state_builder.py`.
+- Smoke test funcional del entorno.
+
+### 🔄 En desarrollo
+
+- Definición final del vector de estado personalizado.
+- Función de recompensa del proyecto alineada con la lógica de tráfico.
+- Recolección de dataset de transiciones `(s_t, a_t, r_t, s_{t+1})`.
+- Entrenamiento del autoencoder / VAE.
+- Modelo temporal para dinámica latente.
+- Controlador semafórico y comparación con baselines.
 
 ## Estructura del repositorio
 
-```
+```text
 traffic-world-model/
-├── data/
-│   ├── raw/                 # trayectorias crudas recolectadas de SUMO
-│   └── processed/           # datasets ya normalizados/estructurados
-├── docs/                    # propuesta de proyecto y documentación
-├── environments/
-│   └── single-intersection/ # red propia: .net.xml, .rou.xml, .sumocfg
-├── experiments/             # resultados y configuraciones de experimentos
-├── models/
-│   ├── encoder/             # Autoencoder / VAE
-│   ├── dynamics/            # modelo temporal (LSTM / Transformer)
-│   └── controller/          # controlador (RL)
-├── notebooks/                # exploración y visualización
-├── scripts/                 # scripts ejecutables por etapa del pipeline
-├── external_sumo_rl/         # clon de referencia de LucasAlegre/sumo-rl (no versionado)
+├── configs/                      # configuración del entorno, entrenamiento y modelos
+│   ├── environment.py
+│   ├── environment_config.py
+│   ├── reward.py
+│   ├── training.py
+│   ├── world_model.py
+│   ├── raw/
+│   └── processed/
+├── data/                         # datos de tráfico y datasets
+│   ├── raw/
+│   └── processed/
+├── docs/                         # documentación y material auxiliar
+├── environments/                 # entorno SUMO y definiciones del estado/recompensa
+│   ├── __init__.py
+│   ├── custom_state_builder.py
+│   ├── default_reward_function.py
+│   ├── default_state_builder.py
+│   ├── reward_function.py
+│   ├── single-intersection/
+│   ├── state_builder.py
+│   ├── traffic_environment.py
+│   └── __pycache__/
+├── evaluation/                   # scripts y resultados de evaluación
+├── experiments/                  # experimentos y registros
+├── external_sumo_rl/             # referencia del proyecto original sumo-rl
+├── models/                       # módulos de encoder, dynamics y controller
+├── notebooks/                    # exploración y visualización
+├── scripts/                      # entrypoints del proyecto
+│   ├── collect_dataset.py
+│   ├── evaluate_world_model.py
+│   ├── test_environment.py
+│   ├── test_sumo_rl.py
+│   ├── train_controller.py
+│   ├── train_representation.py
+│   ├── train_world_model.py
+│   └── visualize_dataset.py
+├── tests/                        # pruebas del proyecto
+├── training/                     # pipeline de entrenamiento
+├── utils/                        # utilidades varias
+├── external_sumo_rl/             # copia de referencia de sumo-rl
+├── LICENSE
+├── README.md
 ├── requirements.txt
-└── README.md
+└── .gitignore
 ```
 
-## La red del proyecto: `single-intersection`
+## Red de simulación
 
-Construida con `netgenerate` (100% reproducible, ver comando exacto abajo), representa
-una intersección en cruz con 4 brazos de 200 m cada uno, un carril por sentido, y un
-semáforo de 2 fases (Norte-Sur / Este-Oeste) en el nodo central.
+La red base del proyecto está en:
 
-Comando de generación de la geometría:
+- `environments/single-intersection/single-intersection.net.xml`
+- `environments/single-intersection/single-intersection.rou.xml`
+- `environments/single-intersection/single-intersection.sumocfg`
+
+Se trata de una intersección de 4 brazos con un único semáforo controlando los cruces principales. La topología está diseñada para ser una base reproducible para la investigación del problema de tráfico inteligente.
+
+## Arquitectura actual del entorno
+
+El punto de entrada principal del proyecto es `TrafficEnvironment`, ubicado en `environments/traffic_environment.py`.
+
+Este wrapper:
+
+- encapsula la creación del simulador `sumo_rl.SumoEnvironment`
+- centraliza el ciclo de `reset()` y `step()`
+- permite inyectar un `state_builder` y un `reward_function`
+- mantiene la lógica del proyecto separada de las API internas de SUMO
+
+La implementación actual del estado usa TraCI y no depende directamente de la observación nativa de `sumo-rl`.
+
+## Cómo reproducir el entorno
+
+### 1) Crear entorno virtual
 
 ```powershell
-netgenerate --grid --grid.number=1 --grid.length=200 --grid.attach-length=200 `
-  --default.lanenumber=1 --default.speed=13.89 --tls.set=A0 `
-  --output-file environments/single-intersection/single-intersection.net.xml
-```
-
-Demanda de tráfico (`single-intersection.rou.xml`): 350 veh/h por brazo, repartidos en
-recto (200), izquierda (90) y derecha (60) — un régimen moderado, no saturado, elegido
-deliberadamente para que las comparaciones entre baselines y World Model no queden
-contaminadas por una red en colapso desde el inicio.
-
-## Cómo reproducir lo que hay hasta ahora
-
-```powershell
-# 1. Crear y activar el entorno virtual
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+```
 
-# 2. Verificar que SUMO está instalado y accesible
+### 2) Verificar que SUMO esté disponible
+
+```powershell
 sumo --version
+```
 
-# 3. Validar el pipeline completo (SUMO + TraCI + sumo-rl) contra nuestra propia red
+### 3) Ejecutar la prueba de humo del entorno
+
+```powershell
+python scripts\test_environment.py
+```
+
+También puede validarse la compatibilidad con el ejemplo de `sumo-rl` mediante:
+
+```powershell
 python scripts\test_sumo_rl.py
 ```
 
-## Referencias principales
+## Convenciones de desarrollo
 
-- Ha, D., & Schmidhuber, J. (2018). *World Models*.
-- Hafner, D., et al. (2020). *Dream to Control: Learning Behaviors by Latent Imagination*.
-- Alegre, L. N. (2019). *SUMO-RL* — https://github.com/LucasAlegre/sumo-rl
-- Tallec, C., et al. *Reimplementation of World Models in PyTorch* — https://github.com/ctallec/world-models
-- Dai et al. (2022). *Image-based traffic signal control via world models*.
+- La lógica del proyecto no debe depender directamente de la implementación interna del simulador cuando exista una abstracción estable.
+- La interfaz del entorno se mantiene en `TrafficEnvironment` como punto de integración.
+- El estado y la recompensa se construyen mediante componentes dedicados, con posibilidad de reemplazo por versiones más complejas sin romper el resto del sistema.
+- El trabajo actual sigue priorizando la infraestructura y el estado del tráfico antes de entrar en la fase de VAE, dynamics y controlador.
 
-## Notas de reproducibilidad
+## Referencias
 
-- Todos los archivos de red (`.net.xml`, `.rou.xml`, `.sumocfg`) están versionados en
-  `environments/`, junto con el comando exacto de `netgenerate` usado para generarlos.
-- `external_sumo_rl/` es solo una copia de referencia del repositorio de `sumo-rl`
-  (clonada para consultar redes de ejemplo); no se versiona ni se modifica directamente.
-- Las semillas, configuración de simulación y versiones de modelos se documentarán en
-  `experiments/` a partir de la etapa de recolección de datos.
+- Ha, D., & Schmidhuber, J. (2018). World Models.
+- Hafner, D., et al. (2020). Dream to Control: Learning Behaviors by Latent Imagination.
+- Alegre, L. N. (2019). SUMO-RL.
+- LucasAlegre/sumo-rl (repositorio de referencia).
+
+## Nota final
+
+El README se actualizó para reflejar el estado real del proyecto en este momento: infraestructura funcional, entorno centralizado, estado personalizado con TraCI y preparación de la etapa de aprendizaje del World Model.
