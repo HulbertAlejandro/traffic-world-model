@@ -3,3 +3,8 @@ pandas
 matplotlib
 jupyter
 ipykernel
+traci
+sumolib
+sumo-rl
+gymnasium
+stable-baselines3

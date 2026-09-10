@@ -27,3 +27,5 @@ data/processed/*
 
 # Logs
 logs/
+
+external_sumo_rl/
