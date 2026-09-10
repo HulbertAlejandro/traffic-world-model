@@ -1,27 +1,36 @@
-"""Traffic environment wrapper over sumo-rl.
+"""
+Traffic environment wrapper over sumo-rl.
 
-This module is the single integration point between the project and SUMO. The
-rest of the codebase should depend only on this abstraction.
+This module is the single integration point between the project and SUMO.
+Everything outside this class should ignore how the simulator works.
 """
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 import sumo_rl
 
 from configs.environment import EnvironmentConfig
+from environments.custom_state_builder import CustomStateBuilder
 from environments.default_reward_function import DefaultRewardFunction
-from environments.default_state_builder import DefaultStateBuilder
 
 
 class TrafficEnvironment:
-    """Project-level simulation environment built on top of sumo-rl."""
+    """
+    Project wrapper around SUMO-RL.
+
+    The rest of the project should interact only with this class.
+    """
 
     def __init__(self, config: EnvironmentConfig | None = None):
+
         self.config = config or EnvironmentConfig()
 
-        self.state_builder = DefaultStateBuilder()
+        # Nuestro estado propio
+        self.state_builder = CustomStateBuilder()
+
+        # Recompensa (por ahora sigue siendo la de sumo-rl)
         self.reward_function = DefaultRewardFunction()
 
         self._env = sumo_rl.SumoEnvironment(
@@ -34,33 +43,41 @@ class TrafficEnvironment:
         )
 
         self._current_state = None
-        self._last_observation = None
+
         self._last_reward = 0.0
-        self._last_info: dict[str, Any] = {}
+        self._last_info = {}
+
+    ####################################################################
+    # Gym API
+    ####################################################################
 
     def reset(self, **kwargs):
-        """Reset the simulator and return the project state."""
-        observation, info = self._env.reset(**kwargs)
+
+        _, info = self._env.reset(**kwargs)
+
         info = dict(info)
 
-        self._last_observation = observation
         self._last_info = info
 
-        state = self.state_builder.build(observation, self)
+        state = self.state_builder.build(self)
+
         self._current_state = state
+
         return state, info
 
     def step(self, action):
-        """Run a simulation step and compute the project reward from state data."""
-        observation, simulator_reward, terminated, truncated, info = self._env.step(action)
+
+        _, simulator_reward, terminated, truncated, info = self._env.step(action)
+
         info = dict(info)
 
-        self._last_observation = observation
         self._last_reward = simulator_reward
         self._last_info = info
 
         state = self._current_state
-        next_state = self.state_builder.build(observation, self)
+
+        next_state = self.state_builder.build(self)
+
         info["raw_reward"] = float(simulator_reward)
 
         reward = self.reward_function.compute(
@@ -71,19 +88,36 @@ class TrafficEnvironment:
         )
 
         self._current_state = next_state
-        return next_state, reward, terminated, truncated, info
 
-    def get_state(self, observation=None):
-        """Return the current project state.
+        return (
+            next_state,
+            reward,
+            terminated,
+            truncated,
+            info,
+        )
 
-        This method is the extension point for the future custom traffic state.
+    ####################################################################
+    # API del proyecto
+    ####################################################################
+
+    def get_state(self):
         """
-        if observation is None:
-            return self._current_state
-        return self.state_builder.build(observation, self)
+        Devuelve el estado actual construido mediante TraCI.
+        """
+        return self._current_state
 
-    def compute_reward(self, state, action, next_state, info):
-        """Compute the project reward using the project-level transition API."""
+    def compute_reward(
+        self,
+        state,
+        action,
+        next_state,
+        info,
+    ):
+        """
+        Calcula la recompensa del proyecto.
+        """
+
         return self.reward_function.compute(
             state=state,
             action=action,
@@ -91,8 +125,18 @@ class TrafficEnvironment:
             info=info,
         )
 
+    ####################################################################
+    # Properties
+    ####################################################################
+
     @property
     def env(self):
+        """
+        Acceso explícito al entorno interno.
+
+        Solo debe usarse desde componentes de infraestructura
+        (por ejemplo StateBuilder).
+        """
         return self._env
 
     @property
@@ -103,12 +147,12 @@ class TrafficEnvironment:
     def observation_space(self):
         return self._env.observation_space
 
-    def close(self):
-        """Close the simulator."""
-        self._env.close()
+    ####################################################################
+    # Utils
+    ####################################################################
 
-    def __getattr__(self, item: str) -> Any:
-        return getattr(self._env, item)
+    def close(self):
+        self._env.close()
 
     def __del__(self):
         try:
