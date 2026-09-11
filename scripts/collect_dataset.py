@@ -1,4 +1,4 @@
-"""Collect a discrete transition dataset for the traffic world-model pipeline."""
+"""Collect raw episode datasets for the traffic world-model pipeline."""
 
 from __future__ import annotations
 
@@ -14,28 +14,33 @@ if str(ROOT_DIR) not in sys.path:
 from environments import ProjectActionSpace, TrafficEnvironment
 
 
-DATASET_PATH = ROOT_DIR / "data" / "processed" / "dataset.npz"
+DATASET_ROOT = ROOT_DIR / "datasets"
+RAW_DIR = DATASET_ROOT / "raw"
+PROCESSED_DIR = DATASET_ROOT / "processed"
+RAW_DIR.mkdir(parents=True, exist_ok=True)
+PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def collect_dataset(
-    num_episodes: int = 5,
+    num_episodes: int = 3,
     steps_per_episode: int = 60,
-    output_path: str | Path = DATASET_PATH,
-) -> dict[str, np.ndarray]:
-    """Collect a dataset of transitions using the project-defined state and actions."""
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_dir: str | Path = RAW_DIR,
+) -> list[Path]:
+    """Collect one `.npz` file per episode in the raw datasets folder."""
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     env = TrafficEnvironment()
     action_space = ProjectActionSpace()
-
-    states = []
-    actions = []
-    rewards = []
-    next_states = []
+    saved_paths: list[Path] = []
 
     try:
-        for _ in range(num_episodes):
+        for episode_idx in range(num_episodes):
+            states = []
+            actions = []
+            rewards = []
+            next_states = []
+
             state, _ = env.reset()
             for _ in range(steps_per_episode):
                 action = action_space.sample()
@@ -49,24 +54,25 @@ def collect_dataset(
                 state = next_state
                 if terminated or truncated:
                     break
+
+            dataset = {
+                "states": np.asarray(states, dtype=np.float32),
+                "actions": np.asarray(actions, dtype=np.int64),
+                "rewards": np.asarray(rewards, dtype=np.float32),
+                "next_states": np.asarray(next_states, dtype=np.float32),
+            }
+
+            output_path = output_dir / f"episode_{episode_idx:03d}.npz"
+            np.savez(output_path, **dataset)
+            saved_paths.append(output_path)
     finally:
         env.close()
 
-    dataset = {
-        "states": np.asarray(states, dtype=np.float32),
-        "actions": np.asarray(actions, dtype=np.int64),
-        "rewards": np.asarray(rewards, dtype=np.float32),
-        "next_states": np.asarray(next_states, dtype=np.float32),
-    }
-
-    np.savez(output_path, **dataset)
-    return dataset
+    return saved_paths
 
 
 if __name__ == "__main__":
-    dataset = collect_dataset()
-    print(f"Dataset saved to: {output_path if False else DATASET_PATH}")
-    print(f"States shape: {dataset['states'].shape}")
-    print(f"Actions shape: {dataset['actions'].shape}")
-    print(f"Rewards shape: {dataset['rewards'].shape}")
-    print(f"Next states shape: {dataset['next_states'].shape}")
+    files = collect_dataset()
+    print(f"Saved raw episodes to: {RAW_DIR}")
+    for item in files:
+        print(f"- {item.name}")

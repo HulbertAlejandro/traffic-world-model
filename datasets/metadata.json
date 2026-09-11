@@ -1,0 +1,16 @@
+{
+  "name": "traffic_world_model_dataset",
+  "version": "1.0",
+  "description": "Transition dataset for SUMO traffic control experiments.",
+  "keys": [
+    "states",
+    "actions",
+    "rewards",
+    "next_states"
+  ],
+  "split": {
+    "train_ratio": 0.7,
+    "validation_ratio": 0.15,
+    "test_ratio": 0.15
+  }
+}
