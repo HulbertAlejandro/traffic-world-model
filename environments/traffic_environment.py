@@ -9,11 +9,13 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 import sumo_rl
 
 from configs.environment import EnvironmentConfig
 from environments.custom_state_builder import CustomStateBuilder
-from environments.default_reward_function import DefaultRewardFunction
+from environments.project_action_space import ProjectActionSpace
+from environments.project_reward_function import ProjectRewardFunction
 
 
 class TrafficEnvironment:
@@ -29,9 +31,10 @@ class TrafficEnvironment:
 
         # Nuestro estado propio
         self.state_builder = CustomStateBuilder()
+        self._action_space = ProjectActionSpace()
 
-        # Recompensa (por ahora sigue siendo la de sumo-rl)
-        self.reward_function = DefaultRewardFunction()
+        # Recompensa del proyecto
+        self.reward_function = ProjectRewardFunction()
 
         self._env = sumo_rl.SumoEnvironment(
             net_file=str(self.config.net_file),
@@ -67,6 +70,9 @@ class TrafficEnvironment:
 
     def step(self, action):
 
+        if action not in self.action_space:
+            raise ValueError(f"Invalid action: {action!r}")
+
         _, simulator_reward, terminated, truncated, info = self._env.step(action)
 
         info = dict(info)
@@ -75,10 +81,16 @@ class TrafficEnvironment:
         self._last_info = info
 
         state = self._current_state
-
         next_state = self.state_builder.build(self)
 
         info["raw_reward"] = float(simulator_reward)
+        info["phase_change"] = float(int(action == 1))
+
+        vector = np.asarray(next_state, dtype=np.float32)
+        if vector.size >= 20:
+            info["waiting_total"] = float(np.sum(vector[8:12]))
+            info["queue_total"] = float(np.sum(vector[4:8]))
+            info["throughput"] = float(np.sum(vector[:4]))
 
         reward = self.reward_function.compute(
             state=state,
@@ -141,7 +153,7 @@ class TrafficEnvironment:
 
     @property
     def action_space(self):
-        return self._env.action_space
+        return self._action_space
 
     @property
     def observation_space(self):
