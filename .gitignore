@@ -13,12 +13,10 @@ __pycache__/
 # Jupyter
 .ipynb_checkpoints/
 
-# Data
-data/raw/*
-!data/raw/.gitkeep
-
-data/processed/*
-!data/processed/.gitkeep
+# Datasets generados (regenerables por script, no se versionan)
+datasets/raw/*.npz
+datasets/processed/*
+!datasets/processed/.gitkeep
 
 # Models
 *.pth
