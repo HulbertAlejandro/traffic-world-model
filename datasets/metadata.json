@@ -1,16 +1,21 @@
 {
   "name": "traffic_world_model_dataset",
-  "version": "1.0",
+  "version": "1.1",
   "description": "Transition dataset for SUMO traffic control experiments.",
   "keys": [
     "states",
     "actions",
     "rewards",
-    "next_states"
+    "next_states",
+    "episode_id",
+    "time_step",
+    "terminated",
+    "truncated"
   ],
-  "split": {
-    "train_ratio": 0.7,
-    "validation_ratio": 0.15,
-    "test_ratio": 0.15
+  "notes": {
+    "state": "Observation BEFORE the action is applied (see next_state).",
+    "next_state": "Observation immediately AFTER env.step(action).",
+    "episode_id": "Constant per source episode file; used to guarantee train/validation/test splits never mix transitions from the same trajectory.",
+    "time_step": "0-indexed position of the transition within its episode."
   }
 }

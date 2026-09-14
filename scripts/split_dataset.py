@@ -8,6 +8,7 @@ apparent generalization performance.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -29,7 +30,12 @@ def split_dataset(
     seed: int = 42,
 ) -> dict[str, Path]:
     """Assign whole episode files to train/validation/test and merge each
-    group separately into `<split>_raw.npz` (still unnormalized)."""
+    group separately into `<split>_raw.npz` (still unnormalized).
+
+    Also writes ``split_metadata.json`` next to the output files, recording
+    the ratios, seed, and per-split episode/transition counts actually used
+    for this run -- generated from real values instead of hand-maintained.
+    """
     raw_dir = Path(raw_dir)
     output_dir = Path(output_dir) if output_dir is not None else PROCESSED_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -55,6 +61,7 @@ def split_dataset(
     }
 
     saved_paths: dict[str, Path] = {}
+    run_summary: dict[str, dict] = {}
     for name, group_files in groups.items():
         if not group_files:
             raise ValueError(
@@ -62,10 +69,33 @@ def split_dataset(
                 "Collect more episodes or adjust the ratios."
             )
         output_path = output_dir / f"{name}_raw.npz"
-        merge_files(group_files, output_path)
+        merged = merge_files(group_files, output_path)
         saved_paths[name] = output_path
+        run_summary[name] = {
+            "num_episodes": len(group_files),
+            "num_transitions": int(merged["states"].shape[0]),
+        }
+
+    _write_split_metadata(output_dir, train_ratio, validation_ratio, test_ratio, seed, run_summary)
 
     return saved_paths
+
+
+def _write_split_metadata(
+    output_dir: Path,
+    train_ratio: float,
+    validation_ratio: float,
+    test_ratio: float,
+    seed: int,
+    run_summary: dict[str, dict],
+) -> None:
+    """Persist the actual parameters and resulting sizes of this split run."""
+    metadata = {
+        "ratios": {"train": train_ratio, "validation": validation_ratio, "test": test_ratio},
+        "seed": seed,
+        "splits": run_summary,
+    }
+    (output_dir / "split_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":
@@ -73,3 +103,4 @@ if __name__ == "__main__":
     print("Saved per-split raw (unnormalized) datasets:")
     for name, path in saved.items():
         print(f"- {name}: {path}")
+    print(f"Run metadata written to: {PROCESSED_DIR / 'split_metadata.json'}")
