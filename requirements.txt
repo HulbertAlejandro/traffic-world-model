@@ -8,3 +8,5 @@ sumolib
 sumo-rl
 gymnasium
 stable-baselines3
+torch
+pytest
