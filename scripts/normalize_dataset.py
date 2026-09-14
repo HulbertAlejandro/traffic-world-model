@@ -13,10 +13,15 @@ PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _load_split(path: str | Path) -> dict[str, np.ndarray]:
+    """Load one split file, preserving each field's natural dtype.
+
+    ``actions`` stays int64 (discrete action ids) throughout the pipeline.
+    Only ``states``/``next_states``/``rewards`` are floating point.
+    """
     with np.load(path) as data:
         return {
             "states": data["states"].astype(np.float32),
-            "actions": data["actions"].astype(np.float32),
+            "actions": data["actions"].astype(np.int64),
             "rewards": data["rewards"].astype(np.float32),
             "next_states": data["next_states"].astype(np.float32),
             "episode_id": data["episode_id"].astype(np.int64),
@@ -36,32 +41,19 @@ def normalize_dataset(
     fit: bool | None = None,
     **kwargs,
 ):
-    """Normalize one or more dataset splits using train-only statistics.
-
-    The primary API is:
-        normalize_dataset(train_path, validation_path, test_path, output_dir, scaler_path)
-
-    A legacy test may still pass ``fit=True`` or ``output_path=...``; those are
-    accepted for compatibility and ignored when they are no longer part of the
-    active contract.
-    """
+    """Normalize one or more dataset splits using train-only statistics."""
     if "output_path" in kwargs and output_dir is None:
         output_dir = kwargs["output_path"]
     if kwargs and set(kwargs) - {"output_path"}:
         unexpected = ", ".join(sorted(kwargs))
         raise TypeError(f"normalize_dataset() got unexpected keyword argument(s): {unexpected}")
     if fit is not None:
-        # Legacy flag retained for compatibility; it does not alter the current
-        # train-only normalization semantics.
-        pass
+        pass  # Legacy flag retained for compatibility; no effect on semantics.
 
     train_path = Path(train_path)
-    if output_dir is None:
-        output_dir = PROCESSED_DIR
-    output_dir = Path(output_dir)
+    output_dir = Path(output_dir) if output_dir is not None else PROCESSED_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
-    if scaler_path is None:
-        scaler_path = output_dir / "scaler.pkl"
+    scaler_path = Path(scaler_path) if scaler_path is not None else output_dir / "scaler.pkl"
 
     train_data = _load_split(train_path)
     state_mean = train_data["states"].mean(axis=0, keepdims=True)
@@ -69,7 +61,7 @@ def normalize_dataset(
     state_std[state_std < 1e-8] = 1.0
 
     scaler = {"state_mean": state_mean, "state_std": state_std}
-    with Path(scaler_path).open("wb") as handle:
+    with scaler_path.open("wb") as handle:
         pickle.dump(scaler, handle)
 
     saved_paths = {}

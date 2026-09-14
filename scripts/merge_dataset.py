@@ -1,4 +1,14 @@
-"""Merge a group of per-episode `.npz` files into a single pooled dataset."""
+"""Merge groups of per-episode `.npz` files into pooled datasets.
+
+``merge_files`` is the reusable building block used by ``split_dataset.py``
+to merge each train/validation/test group separately, without ever mixing
+episodes across splits.
+
+Running this file directly instead pools EVERY episode in ``datasets/raw/``
+into a single ``all_episodes.npz``. That file is for exploration only (e.g.
+inspecting the overall distribution across the whole collected dataset) --
+never use ``all_episodes.npz`` to train or evaluate a model.
+"""
 
 from __future__ import annotations
 
@@ -21,9 +31,8 @@ _BOOL_FIELDS = {"terminated": bool, "truncated": bool}
 def merge_files(files: list[Path], output_path: str | Path) -> dict[str, np.ndarray]:
     """Concatenate a specific list of episode files, in the given order.
 
-    Unlike merging an entire directory, this function is meant to be called
-    once per train/validation/test group of episode files (see
-    ``split_dataset.py``), so that episode boundaries never cross a split.
+    Does not decide WHICH episodes belong together -- that is
+    ``split_dataset.py``'s responsibility.
     """
     if not files:
         raise ValueError("No files provided to merge.")
@@ -49,6 +58,7 @@ if __name__ == "__main__":
     files = sorted(RAW_DIR.glob("episode_*.npz"))
     if not files:
         raise FileNotFoundError(f"No dataset files found in {RAW_DIR!s}")
-    dataset = merge_files(files, PROCESSED_DIR / "all_raw.npz")
-    print(f"Merged {len(files)} episodes -> {PROCESSED_DIR / 'all_raw.npz'}")
+    dataset = merge_files(files, PROCESSED_DIR / "all_episodes.npz")
+    print(f"[exploration only] Pooled {len(files)} episodes -> {PROCESSED_DIR / 'all_episodes.npz'}")
+    print("This file has NO train/validation/test separation. Use scripts/split_dataset.py to train.")
     print(f"Total transitions: {dataset['states'].shape[0]}")
