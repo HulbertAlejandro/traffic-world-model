@@ -1,4 +1,4 @@
-"""Normalize a dataset with StandardScaler-like statistics."""
+"""Normalize dataset splits using a scaler fitted only on the training split."""
 
 from __future__ import annotations
 
@@ -12,46 +12,79 @@ PROCESSED_DIR = ROOT / "datasets" / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 
+def _load_split(path: str | Path) -> dict[str, np.ndarray]:
+    with np.load(path) as data:
+        return {
+            "states": data["states"].astype(np.float32),
+            "actions": data["actions"].astype(np.float32),
+            "rewards": data["rewards"].astype(np.float32),
+            "next_states": data["next_states"].astype(np.float32),
+            "episode_id": data["episode_id"].astype(np.int64),
+            "time_step": data["time_step"].astype(np.int64),
+            "terminated": data["terminated"].astype(bool),
+            "truncated": data["truncated"].astype(bool),
+        }
+
+
 def normalize_dataset(
-    input_path: str | Path,
-    output_path: str | Path | None = None,
+    train_path: str | Path,
+    validation_path: str | Path | None = None,
+    test_path: str | Path | None = None,
+    output_dir: str | Path | None = None,
     scaler_path: str | Path | None = None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, np.ndarray]]:
-    input_path = Path(input_path)
-    if output_path is None:
-        output_path = PROCESSED_DIR / "normalized_dataset.npz"
+):
+    train_path = Path(train_path)
+    if output_dir is None:
+        output_dir = PROCESSED_DIR
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     if scaler_path is None:
-        scaler_path = PROCESSED_DIR / "scaler.pkl"
+        scaler_path = output_dir / "scaler.pkl"
 
-    with np.load(input_path) as data:
-        states = data["states"].astype(np.float32)
-        actions = data["actions"].astype(np.float32)
-        rewards = data["rewards"].astype(np.float32)
-        next_states = data["next_states"].astype(np.float32)
-
-    state_mean = states.mean(axis=0, keepdims=True)
-    state_std = states.std(axis=0, keepdims=True)
+    train_data = _load_split(train_path)
+    state_mean = train_data["states"].mean(axis=0, keepdims=True)
+    state_std = train_data["states"].std(axis=0, keepdims=True)
     state_std[state_std < 1e-8] = 1.0
 
-    normalized_states = (states - state_mean) / state_std
-    normalized_next_states = (next_states - state_mean) / state_std
-
-    scaler = {
-        "state_mean": state_mean,
-        "state_std": state_std,
-    }
+    scaler = {"state_mean": state_mean, "state_std": state_std}
     with Path(scaler_path).open("wb") as handle:
         pickle.dump(scaler, handle)
 
-    np.savez(output_path, states=normalized_states, actions=actions, rewards=rewards, next_states=normalized_next_states)
-    return normalized_states, actions, rewards, normalized_next_states, scaler
+    saved_paths = {}
+    for name, source in {"train": train_path, "validation": validation_path, "test": test_path}.items():
+        if source is None:
+            continue
+        data = _load_split(source)
+        normalized_states = (data["states"] - state_mean) / state_std
+        normalized_next_states = (data["next_states"] - state_mean) / state_std
+        output_path = output_dir / f"{name}.npz"
+        np.savez(
+            output_path,
+            states=normalized_states,
+            actions=data["actions"],
+            rewards=data["rewards"],
+            next_states=normalized_next_states,
+            episode_id=data["episode_id"],
+            time_step=data["time_step"],
+            terminated=data["terminated"],
+            truncated=data["truncated"],
+        )
+        saved_paths[name] = output_path
+
+    return saved_paths, scaler
 
 
 if __name__ == "__main__":
-    input_path = PROCESSED_DIR / "merged_dataset.npz"
-    if not input_path.exists():
-        raise FileNotFoundError(f"Merged dataset not found: {input_path}")
+    train_path = PROCESSED_DIR / "train_raw.npz"
+    validation_path = PROCESSED_DIR / "validation_raw.npz"
+    test_path = PROCESSED_DIR / "test_raw.npz"
 
-    _, _, _, _, scaler = normalize_dataset(input_path)
-    print(f"Saved normalized dataset to: {PROCESSED_DIR / 'normalized_dataset.npz'}")
+    for required in (train_path, validation_path, test_path):
+        if not required.exists():
+            raise FileNotFoundError(f"Required split dataset not found: {required}")
+
+    saved, scaler = normalize_dataset(train_path, validation_path, test_path)
+    print("Saved normalized splits:")
+    for name, path in saved.items():
+        print(f"- {name}: {path}")
     print(f"Scaler keys: {list(scaler.keys())}")
