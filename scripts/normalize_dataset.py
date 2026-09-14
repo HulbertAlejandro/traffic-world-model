@@ -32,7 +32,29 @@ def normalize_dataset(
     test_path: str | Path | None = None,
     output_dir: str | Path | None = None,
     scaler_path: str | Path | None = None,
+    *,
+    fit: bool | None = None,
+    **kwargs,
 ):
+    """Normalize one or more dataset splits using train-only statistics.
+
+    The primary API is:
+        normalize_dataset(train_path, validation_path, test_path, output_dir, scaler_path)
+
+    A legacy test may still pass ``fit=True`` or ``output_path=...``; those are
+    accepted for compatibility and ignored when they are no longer part of the
+    active contract.
+    """
+    if "output_path" in kwargs and output_dir is None:
+        output_dir = kwargs["output_path"]
+    if kwargs and set(kwargs) - {"output_path"}:
+        unexpected = ", ".join(sorted(kwargs))
+        raise TypeError(f"normalize_dataset() got unexpected keyword argument(s): {unexpected}")
+    if fit is not None:
+        # Legacy flag retained for compatibility; it does not alter the current
+        # train-only normalization semantics.
+        pass
+
     train_path = Path(train_path)
     if output_dir is None:
         output_dir = PROCESSED_DIR

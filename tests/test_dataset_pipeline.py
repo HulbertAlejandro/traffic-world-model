@@ -4,7 +4,7 @@ import numpy as np
 
 from datasets.transition_dataset import TransitionDataset
 from scripts.merge_dataset import merge_files
-from scripts.normalize_dataset import normalize_split
+from scripts.normalize_dataset import normalize_dataset
 
 
 def _make_episode(path, episode_id: int, num_transitions: int = 10, state_dim: int = 4):
@@ -30,9 +30,13 @@ def test_transition_dataset_returns_full_contract(tmp_path):
     merge_files([raw_path], merged_path)
 
     scaler_path = tmp_path / "scaler.pkl"
-    normalize_split(merged_path, tmp_path / "train.npz", scaler_path, fit=True)
+    saved, _ = normalize_dataset(
+        train_path=merged_path,
+        output_dir=tmp_path,
+        scaler_path=scaler_path,
+    )
 
-    dataset = TransitionDataset(tmp_path / "train.npz")
+    dataset = TransitionDataset(saved["train"])
 
     assert len(dataset) == 10
     state, action, reward, next_state, episode_id, time_step, terminated, truncated = dataset[0]

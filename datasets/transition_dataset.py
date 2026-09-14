@@ -28,8 +28,8 @@ class TransitionDataset(Dataset):
         self.next_states = torch.from_numpy(np.asarray(data["next_states"], dtype=np.float32))
         self.episode_ids = torch.from_numpy(np.asarray(data.get("episode_id", np.zeros(len(self.states), dtype=np.int64)), dtype=np.int64))
         self.time_steps = torch.from_numpy(np.asarray(data.get("time_step", np.arange(len(self.states), dtype=np.int64)), dtype=np.int64))
-        self.terminated = torch.from_numpy(np.asarray(data.get("terminated", np.zeros(len(self.states), dtype=bool)), dtype=torch.bool))
-        self.truncated = torch.from_numpy(np.asarray(data.get("truncated", np.zeros(len(self.states), dtype=bool)), dtype=torch.bool))
+        self.terminated = torch.from_numpy(np.asarray(data.get("terminated", np.zeros(len(self.states), dtype=bool)), dtype=np.bool_))
+        self.truncated = torch.from_numpy(np.asarray(data.get("truncated", np.zeros(len(self.states), dtype=bool)), dtype=np.bool_))
 
     def __len__(self) -> int:
         return len(self.states)
