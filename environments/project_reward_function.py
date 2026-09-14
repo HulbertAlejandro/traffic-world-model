@@ -11,6 +11,11 @@ class ProjectRewardFunction:
     The reward combines congestion penalties, throughput gains, and phase-change penalties:
 
         R_t = -alpha * waiting - beta * queue + gamma * throughput - delta * changes
+
+    The throughput term is intentionally based on arrivals completed in the last
+    control interval, not on the instantaneous number of vehicles present in the
+    lanes. The latter is a congestion signal and would reward accumulation rather
+    than throughput.
     """
 
     def __init__(self, config: RewardConfig | None = None) -> None:

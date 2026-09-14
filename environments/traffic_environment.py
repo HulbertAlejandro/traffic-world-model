@@ -49,6 +49,7 @@ class TrafficEnvironment:
 
         self._last_reward = 0.0
         self._last_info = {}
+        self._last_arrived_count = 0
 
     ####################################################################
     # Gym API
@@ -61,6 +62,9 @@ class TrafficEnvironment:
         info = dict(info)
 
         self._last_info = info
+
+        if self._env.sumo is not None:
+            self._last_arrived_count = int(self._env.sumo.simulation.getArrivedNumber())
 
         state = self.state_builder.build(self)
 
@@ -86,11 +90,22 @@ class TrafficEnvironment:
         info["raw_reward"] = float(simulator_reward)
         info["phase_change"] = float(int(action == 1))
 
-        vector = np.asarray(next_state, dtype=np.float32)
-        if vector.size >= 20:
-            info["waiting_total"] = float(np.sum(vector[8:12]))
-            info["queue_total"] = float(np.sum(vector[4:8]))
-            info["throughput"] = float(np.sum(vector[:4]))
+        # Throughput must reflect vehicles that actually left the network in the
+        # last control interval. Counting how many vehicles are currently visible in
+        # the lanes is a congestion metric, not a completion metric, and would
+        # reward the model for accumulating backlog.
+        if self._env.sumo is not None:
+            arrived_now = int(self._env.sumo.simulation.getArrivedNumber())
+            info["throughput"] = float(max(0, arrived_now - self._last_arrived_count))
+            self._last_arrived_count = arrived_now
+        else:
+            info["throughput"] = 0.0
+
+        if isinstance(next_state, np.ndarray):
+            vector = np.asarray(next_state, dtype=np.float32)
+            if vector.size >= 20:
+                info["waiting_total"] = float(np.sum(vector[8:12]))
+                info["queue_total"] = float(np.sum(vector[4:8]))
 
         reward = self.reward_function.compute(
             state=state,
