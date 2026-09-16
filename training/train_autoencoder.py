@@ -14,6 +14,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import torch
 from torch import nn
 from torch.optim import Adam
@@ -31,6 +32,7 @@ DATASET_DIR = PROJECT_ROOT / "datasets" / "processed"
 
 TRAIN_DATASET = DATASET_DIR / "train.npz"
 VALIDATION_DATASET = DATASET_DIR / "validation.npz"
+RESULTS_DIR = PROJECT_ROOT / "results"
 
 
 def create_dataloader(
@@ -106,6 +108,26 @@ def save_checkpoint(
     torch.save(model.state_dict(), output_path)
 
 
+def save_loss_curve(
+    history: dict[str, list[float]],
+    output_path: Path,
+) -> None:
+    """Save train and validation loss curves for the completed run."""
+    figure, axis = plt.subplots(figsize=(8, 5))
+    epochs = range(1, len(history["train_loss"]) + 1)
+    axis.plot(epochs, history["train_loss"], label="Train Loss")
+    axis.plot(epochs, history["validation_loss"], label="Validation Loss")
+    axis.set_xlabel("Epoch")
+    axis.set_ylabel("MSE Loss")
+    axis.set_title("Autoencoder reconstruction loss")
+    axis.legend()
+    axis.grid(alpha=0.25)
+    figure.tight_layout()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(output_path, dpi=150)
+    plt.close(figure)
+
+
 def main() -> None:
     """Train the Autoencoder using the normalized train/validation splits."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -138,6 +160,8 @@ def main() -> None:
 
     best_checkpoint = config.checkpoint_dir / "autoencoder_best.pt"
     last_checkpoint = config.checkpoint_dir / "autoencoder_last.pt"
+    loss_curve = RESULTS_DIR / "autoencoder_loss.png"
+    history = {"train_loss": [], "validation_loss": []}
 
     print()
     print("Starting training...")
@@ -163,16 +187,22 @@ def main() -> None:
             f"Validation: {validation_loss:.6f}"
         )
 
+        history["train_loss"].append(train_loss)
+        history["validation_loss"].append(validation_loss)
+
         save_checkpoint(model, last_checkpoint)
 
         if validation_loss < best_validation_loss:
             best_validation_loss = validation_loss
             save_checkpoint(model, best_checkpoint)
 
+    save_loss_curve(history, loss_curve)
+
     print()
     print("Training finished.")
     print(f"Best validation loss: {best_validation_loss:.6f}")
     print(f"Best model saved to: {best_checkpoint}")
+    print(f"Loss curve saved to: {loss_curve}")
 
 
 if __name__ == "__main__":
