@@ -11,6 +11,7 @@ Those responsibilities belong to the temporal model implemented later.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import torch
@@ -18,11 +19,13 @@ from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from configs import RepresentationConfig
 from datasets.transition_dataset import TransitionDataset
 from models.representation import Autoencoder
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 DATASET_DIR = PROJECT_ROOT / "datasets" / "processed"
 
