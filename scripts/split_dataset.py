@@ -47,6 +47,17 @@ def split_dataset(
     if not files:
         raise FileNotFoundError(f"No dataset files found in {raw_dir!s}")
 
+    min_required = max(
+        1, *(int(np.ceil(1.0 / ratio)) for ratio in (train_ratio, validation_ratio, test_ratio))
+    )
+    if len(files) < min_required:
+        raise ValueError(
+            f"Found {len(files)} episode files, but ratios "
+            f"({train_ratio}/{validation_ratio}/{test_ratio}) need at least "
+            f"{min_required} episodes for every split to receive at least one. "
+            "Collect more episodes or adjust the ratios."
+        )
+
     rng = np.random.default_rng(seed)
     shuffled = [files[i] for i in rng.permutation(len(files))]
 

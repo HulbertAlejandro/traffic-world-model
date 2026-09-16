@@ -15,9 +15,10 @@ from configs.environment import EnvironmentConfig
 from environments.custom_state_builder import CustomStateBuilder
 from environments.project_action_space import ProjectActionSpace
 from environments.project_reward_function import ProjectRewardFunction
+from environments.traffic_state import TrafficState
 
 
-class TrafficEnvironment:
+class TrafficEnvironment(gym.Env):
     """Project wrapper around SUMO-RL. The rest of the project should
     interact only with this class."""
 
@@ -118,7 +119,7 @@ class TrafficEnvironment:
         """Devuelve el estado actual como objeto de dominio ``TrafficState``."""
         return self._current_state_obj
 
-    def compute_reward(self, state, action, next_state, info):
+    def compute_project_reward(self, state, action, next_state, info):
         return self.reward_function.compute(
             state=state, action=action, next_state=next_state, info=info,
         )
@@ -147,9 +148,8 @@ class TrafficEnvironment:
         if self._observation_space is None:
             size = self.state_builder.state_size()
             if size == 0:
-                # Force TraCI resolution of lanes/phases if not done yet.
-                self.state_builder.build_state()
-                size = self.state_builder.state_size()
+                # Gymnasium/SB3 inspect spaces before reset opens TraCI.
+                size = TrafficState().size
             self._observation_space = gym.spaces.Box(
                 low=-np.inf, high=np.inf, shape=(size,), dtype=np.float32,
             )
