@@ -31,6 +31,7 @@ class RepresentationConfig:
     hidden_dim: int = 16
     latent_dim: int = 16
     activation: str = "relu"
+    seed: int = 0
 
     learning_rate: float = 1e-3
     optimizer: str = "adam"
@@ -52,4 +53,11 @@ class RepresentationConfig:
                 f"input_dim ({self.input_dim}) for the bottleneck to compress "
                 "anything; if you want no compression, that's Experimento 0's "
                 "raw-vector baseline, not this config."
+            )
+        if self.seed < 0:
+            raise ValueError(f"seed must be non-negative, got {self.seed}")
+        if self.activation not in {"relu", "tanh", "gelu", "leaky_relu"}:
+            raise ValueError(
+                f"activation must be one of {{relu, tanh, gelu, leaky_relu}}, "
+                f"got {self.activation}"
             )

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -24,11 +25,34 @@ def load_autoencoder(
     device: torch.device,
 ) -> Autoencoder:
     """Load an Autoencoder checkpoint in evaluation mode."""
-    config = RepresentationConfig(input_dim=input_dim)
+    checkpoint_path = Path(checkpoint_path)
+    fallback_latent_dim = max(1, min(16, input_dim - 1))
+    config = RepresentationConfig(
+        input_dim=input_dim,
+        latent_dim=fallback_latent_dim,
+    )
+
+    config_path = checkpoint_path.with_suffix(".json")
+    if config_path.exists():
+        payload = json.loads(config_path.read_text())
+        config = RepresentationConfig(
+            input_dim=int(payload.get("input_dim", input_dim)),
+            hidden_dim=int(payload.get("hidden_dim", config.hidden_dim)),
+            latent_dim=int(payload.get("latent_dim", config.latent_dim)),
+            activation=str(payload.get("activation", config.activation)),
+            learning_rate=float(payload.get("learning_rate", config.learning_rate)),
+            optimizer=str(payload.get("optimizer", config.optimizer)),
+            batch_size=int(payload.get("batch_size", config.batch_size)),
+            epochs=int(payload.get("epochs", config.epochs)),
+            seed=int(payload.get("seed", config.seed)),
+            checkpoint_dir=Path(payload.get("checkpoint_dir", config.checkpoint_dir)),
+        )
+
     model = Autoencoder(
         input_dim=config.input_dim,
         hidden_dim=config.hidden_dim,
         latent_dim=config.latent_dim,
+        activation=config.activation,
     ).to(device)
     state_dict = torch.load(checkpoint_path, map_location=device, weights_only=True)
     model.load_state_dict(state_dict)

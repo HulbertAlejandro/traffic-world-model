@@ -11,10 +11,12 @@ Those responsibilities belong to the temporal model implemented later.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from torch import nn
 from torch.optim import Adam
@@ -102,10 +104,27 @@ def validate(
 def save_checkpoint(
     model: Autoencoder,
     output_path: Path,
+    config: RepresentationConfig | None = None,
 ) -> None:
-    """Save the model parameters to a checkpoint path."""
+    """Save the model parameters and the config used to train it."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), output_path)
+
+    if config is not None:
+        metadata = {
+            "input_dim": config.input_dim,
+            "hidden_dim": config.hidden_dim,
+            "latent_dim": config.latent_dim,
+            "activation": config.activation,
+            "learning_rate": config.learning_rate,
+            "optimizer": config.optimizer,
+            "batch_size": config.batch_size,
+            "epochs": config.epochs,
+            "seed": config.seed,
+            "checkpoint_dir": str(config.checkpoint_dir),
+        }
+        config_path = output_path.with_suffix(".json")
+        config_path.write_text(json.dumps(metadata, indent=2))
 
 
 def save_loss_curve(
@@ -135,7 +154,12 @@ def main() -> None:
 
     train_dataset = TransitionDataset(TRAIN_DATASET)
     input_dim = train_dataset.states.shape[1]
-    config = RepresentationConfig(input_dim=input_dim)
+    config = RepresentationConfig(input_dim=input_dim, seed=0)
+
+    torch.manual_seed(config.seed)
+    np.random.seed(config.seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(config.seed)
 
     train_loader = create_dataloader(
         TRAIN_DATASET,
@@ -152,6 +176,7 @@ def main() -> None:
         input_dim=config.input_dim,
         hidden_dim=config.hidden_dim,
         latent_dim=config.latent_dim,
+        activation=config.activation,
     ).to(device)
 
     criterion = nn.MSELoss()
@@ -190,11 +215,11 @@ def main() -> None:
         history["train_loss"].append(train_loss)
         history["validation_loss"].append(validation_loss)
 
-        save_checkpoint(model, last_checkpoint)
+        save_checkpoint(model, last_checkpoint, config=config)
 
         if validation_loss < best_validation_loss:
             best_validation_loss = validation_loss
-            save_checkpoint(model, best_checkpoint)
+            save_checkpoint(model, best_checkpoint, config=config)
 
     save_loss_curve(history, loss_curve)
 

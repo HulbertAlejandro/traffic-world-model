@@ -15,6 +15,7 @@ class Autoencoder(nn.Module):
         input_dim: int,
         hidden_dim: int,
         latent_dim: int,
+        activation: str = "relu",
     ) -> None:
         super().__init__()
 
@@ -22,12 +23,14 @@ class Autoencoder(nn.Module):
             input_dim=input_dim,
             hidden_dim=hidden_dim,
             latent_dim=latent_dim,
+            activation=activation,
         )
 
         self.decoder = Decoder(
             latent_dim=latent_dim,
             hidden_dim=hidden_dim,
             output_dim=input_dim,
+            activation=activation,
         )
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:

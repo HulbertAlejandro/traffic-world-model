@@ -32,13 +32,17 @@ La implementación actual ya estableció la capa de infraestructura y la integra
 - Estado personalizado construido desde TraCI mediante `environments/custom_state_builder.py`.
 - Smoke test funcional del entorno.
 
+### ✅ Completado
+
+- Entrenamiento y evaluación del autoencoder de representación del estado.
+- Generación y validación de splits normalizados para representación.
+- Persistencia del config de entrenamiento junto con cada checkpoint.
+- Regresión mínima automatizada para la capa de representación.
+
 ### 🔄 En desarrollo
 
-- Definición final del vector de estado personalizado.
-- Función de recompensa del proyecto alineada con la lógica de tráfico.
-- Recolección de dataset de transiciones `(s_t, a_t, r_t, s_{t+1})`.
-- Entrenamiento del autoencoder / VAE.
 - Modelo temporal para dinámica latente.
+- Dream Environment y planificación latente.
 - Controlador semafórico y comparación con baselines.
 
 ## Estructura del repositorio

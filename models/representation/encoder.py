@@ -4,6 +4,22 @@ import torch
 from torch import nn
 
 
+def _get_activation(activation: str) -> nn.Module:
+    """Return the configured activation function from its string name."""
+    activations = {
+        "relu": nn.ReLU(),
+        "tanh": nn.Tanh(),
+        "gelu": nn.GELU(),
+        "leaky_relu": nn.LeakyReLU(),
+    }
+    if activation not in activations:
+        raise ValueError(
+            f"Unsupported activation '{activation}'. "
+            f"Expected one of: {sorted(activations)}."
+        )
+    return activations[activation]
+
+
 class Encoder(nn.Module):
     """Compresses the traffic state into a latent representation."""
 
@@ -12,12 +28,13 @@ class Encoder(nn.Module):
         input_dim: int,
         hidden_dim: int,
         latent_dim: int,
+        activation: str = "relu",
     ) -> None:
         super().__init__()
 
         self.network = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(),
+            _get_activation(activation),
             nn.Linear(hidden_dim, latent_dim),
         )
 
