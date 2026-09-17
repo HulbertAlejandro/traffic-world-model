@@ -35,3 +35,9 @@ class WorldModelConfig:
 
         if self.latent_dim <= 0:
             raise ValueError(f"latent_dim must be positive, got {self.latent_dim}")
+        if self.sequence_length <= 0:
+            raise ValueError(
+                f"sequence_length must be positive, got {self.sequence_length}"
+            )
+        if self.hidden_dim <= 0:
+            raise ValueError(f"hidden_dim must be positive, got {self.hidden_dim}")
