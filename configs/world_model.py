@@ -19,6 +19,7 @@ class WorldModelConfig:
 
     representation: RepresentationConfig | None = None
     latent_dim: int | None = None
+    action_dim: int = 2
     sequence_length: int = 16
     hidden_dim: int = 128
 
@@ -35,6 +36,8 @@ class WorldModelConfig:
 
         if self.latent_dim <= 0:
             raise ValueError(f"latent_dim must be positive, got {self.latent_dim}")
+        if self.action_dim <= 0:
+            raise ValueError(f"action_dim must be positive, got {self.action_dim}")
         if self.sequence_length <= 0:
             raise ValueError(
                 f"sequence_length must be positive, got {self.sequence_length}"

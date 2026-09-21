@@ -7,10 +7,22 @@ from .base import TemporalModel
 
 
 class LatentDynamicsLSTM(nn.Module, TemporalModel):
-    """Single-step latent dynamics model for predicting the next latent state.
+    """Latent dynamics model for the traffic World Model.
 
-    The world model consumes a sequence of latent vectors together with the
-    corresponding action sequence and predicts the next latent state.
+    The model consumes a temporal window of latent states paired with the
+    traffic-light actions taken at each step:
+
+        [(z_t, a_t), (z_{t+1}, a_{t+1}), ..., (z_{t+L-1}, a_{t+L-1})]
+
+    and predicts both the next latent state and its associated reward:
+
+        (z_hat_{t+L}, r_hat_{t+L})
+
+    This mirrors the LSTM -> Dense -> prediction pattern used for the
+    Autoencoder, extended with a second output head for the reward, as
+    specified in Section 15 of the project proposal. No Mixture Density
+    Network is used: both outputs are deterministic point predictions
+    trained with MSE loss.
     """
 
     def __init__(
@@ -48,13 +60,14 @@ class LatentDynamicsLSTM(nn.Module, TemporalModel):
             batch_first=True,
             dropout=dropout if self.num_layers > 1 else 0.0,
         )
-        self.output_head = nn.Linear(self.hidden_dim, self.latent_dim)
+        self.latent_head = nn.Linear(self.hidden_dim, self.latent_dim)
+        self.reward_head = nn.Linear(self.hidden_dim, 1)
 
     def forward(
         self,
         latent_sequence: torch.Tensor,
         action_sequence: torch.Tensor,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if latent_sequence.ndim != 3:
             raise ValueError(
                 "latent_sequence must have shape (batch, sequence_length, latent_dim), "
@@ -91,15 +104,11 @@ class LatentDynamicsLSTM(nn.Module, TemporalModel):
                 f"expected {self.sequence_length}, got {latent_sequence.shape[1]}"
             )
 
-        combined = torch.cat(
-            [latent_sequence, action_sequence],
-            dim=-1,
-        )
-
+        combined = torch.cat([latent_sequence, action_sequence], dim=-1)
         outputs, _ = self.lstm(combined)
-
         last_hidden = outputs[:, -1, :]
 
-        prediction = self.output_head(last_hidden)
+        next_latent = self.latent_head(last_hidden)
+        next_reward = self.reward_head(last_hidden).squeeze(-1)
 
-        return prediction
+        return next_latent, next_reward
