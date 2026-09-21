@@ -9,8 +9,8 @@ Diseñar un pipeline para aprender la dinámica del tráfico de una intersecció
 La idea central es:
 
 ```text
-SUMO -> Estado del tráfico -> Autoencoder/VAE -> representación latente
--> Modelo temporal (LSTM/Transformer) -> predicción de z_{t+1}
+SUMO -> Estado del tráfico -> Autoencoder/VAE -> representación latente z_t
+-> Modelo temporal (LSTM/Transformer) recibe (z_t, a_t) y predice z_{t+1}
 -> Dream Environment -> Controlador -> Acción -> SUMO
 ```
 

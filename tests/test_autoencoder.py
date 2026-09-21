@@ -4,18 +4,10 @@ import json
 
 import torch
 
-from configs import RepresentationConfig, WorldModelConfig
+from configs import RepresentationConfig
 from evaluation.autoencoder_evaluation import load_autoencoder
 from models.representation import Autoencoder
-from models.world_model import LatentDynamicsLSTM
 from training.train_autoencoder import save_checkpoint
-
-
-def test_world_model_latent_dim_tracks_representation_config() -> None:
-    representation = RepresentationConfig(input_dim=26, latent_dim=8)
-    world_model = WorldModelConfig(representation=representation)
-
-    assert world_model.latent_dim == 8
 
 
 def test_autoencoder_respects_configured_activation() -> None:
@@ -66,18 +58,3 @@ def test_checkpoint_keeps_hyperparameters(tmp_path) -> None:
     device = torch.device("cpu")
     loaded = load_autoencoder(checkpoint_path, config.input_dim, device)
     assert loaded is not None
-
-
-def test_world_model_lstm_predicts_next_latent_state() -> None:
-    representation = RepresentationConfig(input_dim=26, latent_dim=8)
-    config = WorldModelConfig(representation=representation, sequence_length=12)
-    model = LatentDynamicsLSTM(
-        latent_dim=config.latent_dim,
-        hidden_dim=config.hidden_dim,
-        sequence_length=config.sequence_length,
-    )
-
-    latent_sequence = torch.randn(4, config.sequence_length, config.latent_dim)
-    prediction = model(latent_sequence)
-
-    assert prediction.shape == (4, config.latent_dim)

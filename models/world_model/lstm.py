@@ -3,18 +3,20 @@ from __future__ import annotations
 import torch
 from torch import nn
 
+from .base import TemporalModel
 
-class LatentDynamicsLSTM(nn.Module):
+
+class LatentDynamicsLSTM(nn.Module, TemporalModel):
     """Single-step latent dynamics model for predicting the next latent state.
 
-    The world model consumes a sequence of latent vectors, such as
-    ``(z_t, z_{t+1}, ..., z_{t+sequence_length-1})``, and returns the predicted
-    next latent state ``z_{t+sequence_length}``.
+    The world model consumes a sequence of latent vectors together with the
+    corresponding action sequence and predicts the next latent state.
     """
 
     def __init__(
         self,
         latent_dim: int,
+        action_dim: int,
         hidden_dim: int = 128,
         num_layers: int = 1,
         sequence_length: int | None = None,
@@ -24,6 +26,8 @@ class LatentDynamicsLSTM(nn.Module):
 
         if latent_dim <= 0:
             raise ValueError(f"latent_dim must be positive, got {latent_dim}")
+        if action_dim <= 0:
+            raise ValueError(f"action_dim must be positive, got {action_dim}")
         if hidden_dim <= 0:
             raise ValueError(f"hidden_dim must be positive, got {hidden_dim}")
         if num_layers <= 0:
@@ -32,12 +36,13 @@ class LatentDynamicsLSTM(nn.Module):
             raise ValueError(f"dropout must be non-negative, got {dropout}")
 
         self.latent_dim = int(latent_dim)
+        self.action_dim = int(action_dim)
         self.hidden_dim = int(hidden_dim)
         self.num_layers = int(num_layers)
         self.sequence_length = sequence_length
 
         self.lstm = nn.LSTM(
-            input_size=self.latent_dim,
+            input_size=self.latent_dim + self.action_dim,
             hidden_size=self.hidden_dim,
             num_layers=self.num_layers,
             batch_first=True,
@@ -45,16 +50,40 @@ class LatentDynamicsLSTM(nn.Module):
         )
         self.output_head = nn.Linear(self.hidden_dim, self.latent_dim)
 
-    def forward(self, latent_sequence: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        latent_sequence: torch.Tensor,
+        action_sequence: torch.Tensor,
+    ) -> torch.Tensor:
         if latent_sequence.ndim != 3:
             raise ValueError(
                 "latent_sequence must have shape (batch, sequence_length, latent_dim), "
                 f"got {tuple(latent_sequence.shape)}"
             )
+        if action_sequence.ndim != 3:
+            raise ValueError(
+                "action_sequence must have shape (batch, sequence_length, action_dim), "
+                f"got {tuple(action_sequence.shape)}"
+            )
+        if latent_sequence.shape[0] != action_sequence.shape[0]:
+            raise ValueError(
+                "latent_sequence and action_sequence must have the same batch size; "
+                f"got {latent_sequence.shape[0]} and {action_sequence.shape[0]}"
+            )
+        if latent_sequence.shape[1] != action_sequence.shape[1]:
+            raise ValueError(
+                "latent_sequence and action_sequence must have the same sequence_length; "
+                f"got {latent_sequence.shape[1]} and {action_sequence.shape[1]}"
+            )
         if latent_sequence.shape[-1] != self.latent_dim:
             raise ValueError(
                 "latent_sequence last dimension must equal latent_dim; "
                 f"expected {self.latent_dim}, got {latent_sequence.shape[-1]}"
+            )
+        if action_sequence.shape[-1] != self.action_dim:
+            raise ValueError(
+                "action_sequence last dimension must equal action_dim; "
+                f"expected {self.action_dim}, got {action_sequence.shape[-1]}"
             )
         if self.sequence_length is not None and latent_sequence.shape[1] != self.sequence_length:
             raise ValueError(
@@ -62,5 +91,15 @@ class LatentDynamicsLSTM(nn.Module):
                 f"expected {self.sequence_length}, got {latent_sequence.shape[1]}"
             )
 
-        outputs, _ = self.lstm(latent_sequence)
-        return self.output_head(outputs[:, -1, :])
+        combined = torch.cat(
+            [latent_sequence, action_sequence],
+            dim=-1,
+        )
+
+        outputs, _ = self.lstm(combined)
+
+        last_hidden = outputs[:, -1, :]
+
+        prediction = self.output_head(last_hidden)
+
+        return prediction
