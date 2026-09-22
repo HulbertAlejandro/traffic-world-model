@@ -20,30 +20,38 @@
       `max_dream_steps` 7 (antes 10) y recorte de recompensa al rango empírico
       `[-165.05, 1.00]` (percentiles 1/99 reales), con seguimiento en
       `info["consecutive_action_streak"]` e `info["reward_clipped"]`. 29/29 tests en
-      verde. **Pendiente de commit** — aprobado por el autor, ver PROJECT_STATUS.md
-      para el detalle completo, incluida la limitación honesta que queda: el recorte
-      acota el problema, no lo corrige de raíz.
+      verde, commiteado y subido. Ver PROJECT_STATUS.md para el detalle completo,
+      incluida la limitación honesta que queda: el recorte acota el problema, no lo
+      corrige de raíz.
+- [x] Controlador PPO implementado y entrenado dentro del Dream Environment
+      (`configs/controller.py`, `training/train_controller.py`,
+      `scripts/evaluate_controller.py`, commit `86228ae`, 33/33 tests en verde).
+      Entrenado 50,176 timesteps con curva de validación ruidosa y no monótona.
+      Supera a las 4 políticas de referencia en la autoevaluación dentro del propio
+      Dream Environment, pero con una salvedad seria sin resolver — ver
+      PROJECT_STATUS.md: su tasa de `reward_clipped` (13.3%) es más alta que la de la
+      política "alternando" (4.8%) pese a evitar rachas largas, posible señal de que
+      explota el recorte en vez de aprender control real. **Resultado explícitamente
+      NO validado** hasta contrastarlo con SUMO real.
 
-## Siguiente paso recomendado — Confirmar commit, luego Controlador PPO dentro del Dream Environment
+## Siguiente paso recomendado — Validar el controlador PPO contra SUMO real
 
-- [ ] Commitear y subir las mitigaciones de extrapolación OOD del Dream Environment
-      (cambios ya aprobados, ver arriba).
+El controlador ya está entrenado y autoevaluado dentro del Dream Environment, pero esa
+autoevaluación no prueba nada sobre desempeño real de control de tráfico — el paso que
+sigue es exactamente ese contraste:
 
-Con `DreamEnvironment` implementado y probado, el orden de la propuesta indica que
-sigue el controlador:
-
-- [ ] Entrenar un controlador PPO (Stable-Baselines3) usando `DreamEnvironment` como
-      entorno de entrenamiento, sin tocar SUMO.
-- [ ] Definir el criterio de evaluación del controlador entrenado en el Dream
-      Environment: ¿se evalúa primero dentro del propio Dream Environment, o se pasa
-      directo a SUMO real?
+- [ ] Evaluar el controlador PPO entrenado (`best_model.zip`) dentro de
+      `TrafficEnvironment` (SUMO real), no solo dentro de `DreamEnvironment`.
+- [ ] Investigar directamente la salvedad del `reward_clipped`: ¿el PPO realmente
+      explota el recorte de recompensa, o hay otra explicación? Comparar la
+      distribución de acciones elegidas por PPO contra las políticas de referencia
+      podría dar una pista antes de gastar tiempo de cómputo en SUMO real.
 - [ ] Decidir si `max_dream_steps=7` es suficiente horizonte de entrenamiento para PPO,
-      o si conviene revisarlo una vez haya resultados preliminares.
-- [ ] Monitorear `info["reward_clipped"]` e `info["consecutive_action_streak"]` durante
-      el entrenamiento del PPO — si el agente pasa mucho tiempo en zonas de racha larga
-      (que el recorte solo acota, no corrige), es señal de que la limitación conocida
-      del Dream Environment está afectando el entrenamiento real, no solo el sanity
-      check manual.
+      o si conviene revisarlo a la luz de los resultados en SUMO real.
+- [ ] Si la validación en SUMO confirma que el PPO no aprendió control genuino, decidir
+      si el camino a seguir es reentrenar con recompensa no recortada en tramos más
+      cortos, cambiar el diseño del Dream Environment, o alguna otra alternativa —
+      discutir antes de implementar.
 
 ## Pendiente, no bloqueante
 

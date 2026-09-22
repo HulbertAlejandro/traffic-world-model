@@ -1,8 +1,55 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: mitigaciones de extrapolación OOD del `DreamEnvironment`
-aplicadas y verificadas (29/29 tests en verde), **pendientes de commit** — aprobadas
-por el autor pero aún no subidas a GitHub.
+Última verificación: controlador PPO implementado y entrenado dentro del
+`DreamEnvironment` (`86228ae`), 33/33 tests en verde, confirmado contra el repo real.
+**Resultado NO validado todavía contra SUMO real** — ver la sección de abajo antes de
+asumir que el controlador "funciona".
+
+## ✅ Controlador PPO — implementado y entrenado dentro del Dream Environment
+
+**Commit**: `86228ae` (`configs/controller.py`, `training/train_controller.py`,
+`scripts/evaluate_controller.py`, `tests/test_controller.py`; 4 tests nuevos, 33/33 en
+verde). Los checkpoints generados (`models/checkpoints/controller/*.zip`,
+`evaluations.npz`) NO se commitearon, mismo criterio que los demás pesos entrenados del
+proyecto.
+
+**Qué es**: un `PPO` de Stable-Baselines3 (`MlpPolicy`) entrenado enteramente dentro de
+`DreamEnvironment` — nunca toca SUMO durante el entrenamiento. `ControllerConfig`
+define los hiperparámetros (punto de partida razonable, no afinado empíricamente:
+`total_timesteps=50_000`, `learning_rate=3e-4`, `n_steps=256`, `gamma=0.99`), con
+`EvalCallback` evaluando sobre `validation_latent.npz` cada ~1000 timesteps y guardando
+el mejor checkpoint por recompensa de validación.
+
+**Entrenamiento real ejecutado**: 50,176 timesteps, 196 iteraciones. Curva de
+evaluación **ruidosa y no monótona** — oscila entre ~-46 y ~-77 durante todo el
+entrenamiento, sin convergencia limpia (mejor punto observado: -46.55 en el timestep
+30,000; valor final en el timestep 50,000: -62.90). No hay una mejora clara y estable
+como función del número de pasos de entrenamiento.
+
+**Evaluación en el split de test** (`scripts/evaluate_controller.py`, nunca visto por
+el PPO ni por el LSTM; 30 episodios × hasta 7 pasos = 210 pasos por política):
+
+```
+Politica                  |    mean |    std |      min |      max | streak>=5 | clipped
+PPO (entrenado)           |  -53.53 |  31.65 |  -147.04 |  -17.89  |  0/210 (0.0%)  | 28/210 (13.3%)
+Accion aleatoria          | -144.80 | 100.49 |  -545.40 |  -32.01  |  5/210 (2.4%)  | 16/210 (7.6%)
+Siempre mantener (0)      | -521.80 | 239.24 | -1124.76 | -141.49  | 90/210 (42.9%) | 25/210 (11.9%)
+Siempre cambiar (1)       | -493.38 | 197.05 |  -969.11 | -173.03  | 90/210 (42.9%) | 32/210 (15.2%)
+Alternando cada paso      | -129.59 |  59.60 |  -303.31 |  -43.02  |  0/210 (0.0%)  | 10/210 (4.8%)
+```
+
+PPO supera a las 4 políticas de referencia en `mean` (-53.53, la menos negativa) y
+nunca entra en racha de acción ≥5.
+
+**⚠️ Salvedad importante, NO resuelta — dicha sin suavizar**: la tasa de
+`reward_clipped` de PPO (13.3%) es **más alta** que la de la política "alternando"
+(4.8%), a pesar de que PPO evita rachas largas por completo. Es un posible síntoma de
+que la política está explotando el recorte de recompensa para volver artificialmente
+barato el error de extrapolación del modelo, en vez de aprender control de tráfico
+genuino — no se puede distinguir con la evidencia disponible cuál de las dos
+explicaciones es la correcta. **Este resultado NO debe interpretarse como desempeño
+validado** hasta contrastarlo contra SUMO real (`TrafficEnvironment`) — paso siguiente
+necesario antes de cualquier afirmación sobre la calidad de este controlador.
 
 ## ✅ Dream Environment — mitigaciones de extrapolación fuera de distribución (OOD)
 
@@ -104,8 +151,9 @@ válido, step válido, truncamiento en `max_dream_steps`, rechazo de episodios m
 que `sequence_length`, y rechazo de acción inválida — **27/27 tests en verde** (22
 previos + 5 nuevos), sin regresiones.
 
-**Qué NO hace todavía**: no hay ningún controlador (PPO) usándolo aún — eso es el
-siguiente paso. `DreamEnvironment` en sí mismo es solo el mecanismo de imaginación.
+**Qué NO hacía todavía en este punto**: no había ningún controlador (PPO) usándolo aún.
+**Actualización**: el controlador PPO ya se implementó y entrenó — ver la sección
+"Controlador PPO" al inicio de este documento.
 
 ## ✅ Sobreajuste residual del LSTM — investigado y cerrado (conclusión: no era el cuello de botella real)
 
@@ -149,19 +197,19 @@ handoff anterior.
 
 ## ⚪ No implementado todavía
 
-- Controlador PPO (Stable-Baselines3) entrenado dentro del `DreamEnvironment`.
-- Transformer, TSMixer, evaluación final comparativa.
+- Evaluación del controlador PPO contra SUMO real (`TrafficEnvironment`) — necesaria
+  antes de validar la salvedad del `reward_clipped` de arriba.
+- Transformer, TSMixer, evaluación final comparativa (tiempo fijo vs. RL directo vs.
+  World Model).
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Después de implementar `DreamEnvironment`, se hizo un sanity check manual con el
-checkpoint real (no visto por los tests automatizados, que usan pesos aleatorios) y se
-encontró que políticas de acción constante producían recompensas imaginadas
-implausiblemente extremas — extrapolación OOD del LSTM ante rachas de acción que casi
-no existen en los datos reales. Se aplicaron dos mitigaciones basadas en evidencia
-(`max_dream_steps` 10→7, recorte de recompensa al rango empírico
-`[-165.05, 1.00]`), verificadas con 29/29 tests y una segunda corrida del sanity check.
-**Estos cambios de código están aprobados por el autor pero aún NO están commiteados
-ni subidos a GitHub** — próximo paso inmediato: confirmar el commit. Siguiente paso
-natural del proyecto, después de eso: controlador PPO entrenado dentro de
-`DreamEnvironment`.
+Se implementó y entrenó el controlador PPO dentro del `DreamEnvironment` (33/33 tests
+en verde, commit `86228ae` subido a GitHub). El entrenamiento corrió sin errores y el
+PPO superó a las 4 políticas de referencia en la autoevaluación dentro del propio Dream
+Environment, pero quedó una salvedad seria sin resolver: su tasa de `reward_clipped`
+es más alta que la de la política "alternando" pese a evitar rachas largas, lo cual
+podría indicar que está explotando el recorte de recompensa en vez de aprender control
+real. Documentado explícitamente como resultado no validado. Siguiente paso natural:
+evaluar este controlador contra SUMO real antes de sacar cualquier conclusión sobre su
+calidad.
