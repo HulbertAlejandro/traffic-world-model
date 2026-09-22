@@ -1,7 +1,74 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: Dream Environment implementado (`c2bbd8c`, `16ec05d`), 27/27
-tests en verde, confirmado contra el repo real vía `git clone`.
+Última verificación: mitigaciones de extrapolación OOD del `DreamEnvironment`
+aplicadas y verificadas (29/29 tests en verde), **pendientes de commit** — aprobadas
+por el autor pero aún no subidas a GitHub.
+
+## ✅ Dream Environment — mitigaciones de extrapolación fuera de distribución (OOD)
+
+**Contexto**: antes de construir el controlador PPO, se hizo una verificación manual
+del `DreamEnvironment` con el checkpoint real entrenado (no pesos aleatorios), corriendo
+4 políticas simples (aleatoria, siempre mantener, siempre cambiar, alternando) durante
+20 episodios imaginados cada una y sumando la recompensa total por episodio.
+
+**Hallazgo**: con `max_dream_steps=10` (el valor original), las políticas de acción
+constante ("siempre mantener"/"siempre cambiar") produjeron recompensas imaginadas
+totales ~4.7x-5.6x más negativas que el orden de magnitud esperado (`10 × reward_mean
+por paso`), mientras que las políticas aleatoria y alternada caían justo en el rango
+esperado. Diagnóstico confirmado con los datos reales: en `train_latent.npz`, de 881
+rachas de acción idéntica consecutiva observadas en 28 episodios, solo **1** llega a
+longitud 10 o más (una racha de 12). El LSTM prácticamente nunca vio secuencias de 10
+acciones repetidas durante el entrenamiento — esas dos políticas alimentan al modelo
+con entradas fuera de distribución (OOD), y el salto de magnitud es extrapolación
+inestable, no una señal físicamente plausible de la dinámica del tráfico.
+
+**Se descartó explícitamente** "corregir" la acción antes de alimentar al LSTM
+replicando el filtrado de `min_green` de SUMO: el LSTM se entrenó con la acción
+*solicitada* cruda (`ProjectActionSpace.sample()`), nunca con la acción realmente
+aplicada tras el filtro de `min_green` — alimentarlo con la versión filtrada
+introduciría un patrón distinto, igualmente no visto en entrenamiento, sin resolver
+el problema real.
+
+**Dos mitigaciones aplicadas, ambas basadas en evidencia de los datos reales, ninguna
+inventada**:
+
+1. `max_dream_steps` bajado de 10 a 7 — el histograma real de rachas
+   (`{5: 27, 6: 11, 7: 5, 8: 2, 9: 3, 12: 1}`) muestra que 5-7 pasos está bien
+   representado en los datos; 8+ es raro. Mejora el problema (constante-acción bajó de
+   ~4.7x-5.6x a ~3.7x-3.9x del orden de magnitud esperado) pero **no lo resuelve**.
+2. Recorte (`torch.clamp`) de la recompensa imaginada al rango
+   `[REWARD_CLIP_MIN=-165.05, REWARD_CLIP_MAX=1.00]` — percentiles 1 y 99 de las
+   recompensas reales en `train_latent.npz` (min real=-324.10, max real=2.90;
+   percentiles preferidos sobre el min/max crudo para ignorar outliers extremos raros).
+   Expuesto en `info["reward_clipped"]` para monitorear, una vez entrenado el PPO, qué
+   tan seguido se activa.
+
+**Verificación final, con ambas mitigaciones activas** (20 episodios × hasta 7 pasos
+= 140 pasos por política):
+
+```
+Acción aleatoria     | mean= -180.75 | reward_clipped:  12/140 ( 8.6%)
+Siempre mantener (0) | mean= -601.31 | reward_clipped:  23/140 (16.4%)
+Siempre cambiar (1)  | mean= -533.04 | reward_clipped:  29/140 (20.7%)
+Alternando cada paso | mean= -158.09 | reward_clipped:   4/140 ( 2.9%)
+```
+
+El recorte se activa 5-7 veces más seguido en las políticas de acción constante que en
+aleatoria/alternada — confirma que el diagnóstico está bien dirigido. **Pero, dicho sin
+suavizar**: las políticas de acción constante siguen ~3.4x-3.8x por encima del orden de
+magnitud esperado (`7 × reward_mean ≈ -156.52`) incluso con el recorte activo — el
+recorte acota la consecuencia de un solo paso malo, pero no corrige que el modelo
+sistemáticamente predice peor (no solo en outliers) cuando la acción no cambia. Esto
+queda documentado como limitación conocida, no como problema resuelto; se decidió
+aprobar y avanzar con el controlador PPO de todas formas, monitoreando
+`info["reward_clipped"]` y `info["consecutive_action_streak"]` una vez el PPO esté
+entrenando.
+
+**Tests**: `test_action_streak_tracked_in_info` (rastrea rachas de acción vía
+`info["consecutive_action_streak"]`) y
+`test_imagined_reward_is_clipped_to_empirical_range` (recorte, verificado
+determinísticamente con `monkeypatch` sobre un rango estrecho) — **29/29 tests en
+verde** (27 previos + 2 nuevos).
 
 ## ✅ Dream Environment — implementado (primera versión)
 
@@ -21,10 +88,12 @@ ningún momento. Responde las tres preguntas de diseño que quedaban abiertas en
   acción de la ventana actual y llama a `predict_next_step` (la misma función que usa
   `rollout_episode` en la evaluación), así que la lógica de ventaneo y desnormalización
   de recompensa tiene una única fuente de verdad para evaluación e imaginación.
-- **Horizonte de imaginación**: `max_dream_steps=10` por defecto — coincide con el
-  rango de horizontes efectivamente validado en el Experimento 1
-  (`evaluate_world_model.py` mide hasta horizonte 10); más allá de eso no hay evidencia
-  de qué tan confiables son las predicciones del modelo.
+- **Horizonte de imaginación**: `max_dream_steps=10` por defecto en esta versión
+  inicial — coincide con el rango de horizontes efectivamente validado en el
+  Experimento 1 (`evaluate_world_model.py` mide hasta horizonte 10); más allá de eso
+  no hay evidencia de qué tan confiables son las predicciones del modelo. **Revisado
+  después**: ver la sección "Dream Environment — mitigaciones de extrapolación fuera
+  de distribución (OOD)" más arriba — bajado a 7 tras un sanity check manual.
 - **Interfaz**: se optó por `reset`/`step` al estilo `TrafficEnvironment` (no una
   función simple de "evaluar una secuencia de acciones candidata"), para poder pasar
   `DreamEnvironment` directamente a un controlador tipo PPO de Stable-Baselines3 más
@@ -85,9 +154,14 @@ handoff anterior.
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se implementó `DreamEnvironment`: primero un refactor sin cambio de comportamiento
-(`predict_next_step` extraído de `rollout_episode`, verificado número por número),
-luego la clase en sí, compatible con `gymnasium.Env`, sembrada con episodios reales e
-imaginando en espacio latente. 27/27 tests en verde, ambos commits verificados en
-GitHub. Siguiente paso natural: controlador PPO entrenado dentro de
+Después de implementar `DreamEnvironment`, se hizo un sanity check manual con el
+checkpoint real (no visto por los tests automatizados, que usan pesos aleatorios) y se
+encontró que políticas de acción constante producían recompensas imaginadas
+implausiblemente extremas — extrapolación OOD del LSTM ante rachas de acción que casi
+no existen en los datos reales. Se aplicaron dos mitigaciones basadas en evidencia
+(`max_dream_steps` 10→7, recorte de recompensa al rango empírico
+`[-165.05, 1.00]`), verificadas con 29/29 tests y una segunda corrida del sanity check.
+**Estos cambios de código están aprobados por el autor pero aún NO están commiteados
+ni subidos a GitHub** — próximo paso inmediato: confirmar el commit. Siguiente paso
+natural del proyecto, después de eso: controlador PPO entrenado dentro de
 `DreamEnvironment`.
