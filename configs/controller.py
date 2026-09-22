@@ -22,6 +22,16 @@ class ControllerConfig:
     n_epochs: int = 10
     gamma: float = 0.99
 
+    # Overrides DreamEnvironment's own default (7) for THIS training run only --
+    # a deliberate design choice, not a global change to DreamEnvironment. Gives
+    # the policy room to experience longer action streaks during training than
+    # DreamEnvironment allows by default in its other uses (evaluation/analysis),
+    # at the cost of noisier z/reward predictions in the later steps of each
+    # imagined episode (the LSTM's own compounding error grows with horizon, per
+    # Experimento 1). 20 chosen to comfortably cover the streak lengths (up to
+    # 14) observed to cause catastrophic failures in the SUMO evaluation.
+    dream_max_steps: int = 20
+
     def __post_init__(self) -> None:
         if self.seed < 0:
             raise ValueError(f"seed must be non-negative, got {self.seed}")
@@ -37,3 +47,5 @@ class ControllerConfig:
             raise ValueError(f"n_epochs must be positive, got {self.n_epochs}")
         if not (0.0 < self.gamma <= 1.0):
             raise ValueError(f"gamma must be in (0, 1], got {self.gamma}")
+        if self.dream_max_steps <= 0:
+            raise ValueError(f"dream_max_steps must be positive, got {self.dream_max_steps}")

@@ -54,10 +54,12 @@ def main() -> None:
     train_env = DreamEnvironment(
         checkpoint_path=WORLD_MODEL_CHECKPOINT,
         latent_episodes_path=TRAIN_LATENT_PATH,
+        max_dream_steps=config.dream_max_steps,
     )
     eval_env = DreamEnvironment(
         checkpoint_path=WORLD_MODEL_CHECKPOINT,
         latent_episodes_path=VALIDATION_LATENT_PATH,
+        max_dream_steps=config.dream_max_steps,
     )
 
     model = PPO(

@@ -67,6 +67,11 @@ def test_controller_config_rejects_invalid_gamma():
         ControllerConfig(gamma=1.5)
 
 
+def test_controller_config_rejects_invalid_dream_max_steps():
+    with pytest.raises(ValueError, match="dream_max_steps"):
+        ControllerConfig(dream_max_steps=0)
+
+
 def test_ppo_trains_a_few_steps_inside_dream_environment(tmp_path):
     checkpoint_path = _make_checkpoint(tmp_path)
     latent_path = _make_latent_episodes(tmp_path, episode_lengths=[20, 20])
