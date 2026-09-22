@@ -38,23 +38,31 @@
       (cercana a "alternando", muy por debajo de las políticas constantes) —
       **debilita pero no descarta** la sospecha de explotación (no distingue de un
       patrón temporal más sutil). Ver PROJECT_STATUS.md para el detalle completo.
-      **Resultado del PPO sigue explícitamente NO validado** hasta contrastarlo con
-      SUMO real.
+- [x] Controlador PPO evaluado contra SUMO real y validado — bloque completo: puente
+      `EncodedTrafficEnvironment` (commit `915bd79`), diagnóstico de 4 episodios
+      catastróficos (3 de 4 por rachas de acción de 6-14 pasos no vistas en
+      entrenamiento; el cuarto, seed=3005, un pico puntual de `waiting_total`
+      documentado como limitación conocida sin resolver), fix
+      `ControllerConfig.dream_max_steps=20` (commit `8d84d52`), y verificación en dos
+      corridas con semillas distintas (3000 y 5000) confirmando que el arreglo
+      generaliza. 35/35 tests en verde. **Resultado final**: PPO v2 supera a tiempo
+      fijo en reward/espera/cola de forma consistente, pero nunca en throughput — ver
+      PROJECT_STATUS.md para el detalle numérico completo y la interpretación honesta.
 
-## Siguiente paso recomendado — Validar el controlador PPO contra SUMO real
+## Siguiente paso recomendado — Baseline de RL directo (PPO sin Dream Environment)
 
-El controlador ya está entrenado y autoevaluado dentro del Dream Environment, y la
-sospecha más grave sobre el `reward_clipped` ya se investigó tanto como es razonable
-hacerlo sin tocar SUMO — el paso que sigue es el contraste real:
+Con el controlador PPO ya validado contra SUMO real, falta la pieza que la propuesta
+pide explícitamente (Sección 18) para responder la pregunta de investigación completa:
 
-- [ ] Evaluar el controlador PPO entrenado (`best_model.zip`) dentro de
-      `TrafficEnvironment` (SUMO real), no solo dentro de `DreamEnvironment`.
-- [ ] Decidir si `max_dream_steps=7` es suficiente horizonte de entrenamiento para PPO,
-      o si conviene revisarlo a la luz de los resultados en SUMO real.
-- [ ] Si la validación en SUMO confirma que el PPO no aprendió control genuino, decidir
-      si el camino a seguir es reentrenar con recompensa no recortada en tramos más
-      cortos, cambiar el diseño del Dream Environment, o alguna otra alternativa —
-      discutir antes de implementar.
+- [ ] Entrenar un PPO directamente contra `TrafficEnvironment` (SUMO real), sin pasar
+      por el Dream Environment, como baseline de "RL directo".
+- [ ] Comparar ese baseline contra el PPO v2 (entrenado en el sueño) usando el mismo
+      protocolo de evaluación ya validado (scripts/evaluate_controller_sumo.py,
+      semillas de EVALUACIÓN 3000 y 5000) -- la semilla de entrenamiento del baseline
+      de RL directo es independiente y no necesita coincidir con nada ya usado.
+- [ ] Con ese resultado, responder la pregunta de investigación del proyecto: ¿el
+      World Model realmente redujo las interacciones necesarias con SUMO frente a
+      entrenar RL directo, sin perder desempeño de control?
 
 ## Pendiente, no bloqueante
 

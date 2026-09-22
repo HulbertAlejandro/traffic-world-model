@@ -1,9 +1,83 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: investigada la magnitud del recorte de recompensa en el PPO
-(`8044262`), 34/34 tests en verde. La sospecha de explotación profunda del recorte se
-debilitó pero no se descartó. **Resultado del PPO sigue NO validado contra SUMO real**
-— ver la sección de abajo antes de asumir que el controlador "funciona".
+Última verificación: controlador PPO validado contra SUMO real (`915bd79`, `8d84d52`),
+35/35 tests en verde. **El controlador SÍ supera a tiempo fijo en reward/espera/cola,
+verificado en dos corridas independientes con semillas distintas** — ver el detalle
+completo abajo, incluida la salvedad de throughput que no se suaviza.
+
+## ✅ Evaluación del controlador PPO contra SUMO real
+
+**Qué se construyó**: `environments/encoded_traffic_environment.py`
+(`EncodedTrafficEnvironment`, commit `915bd79`) — envuelve `TrafficEnvironment`
+corriendo el Autoencoder congelado en vivo para traducir el estado crudo de 26
+dimensiones a `z` antes de que la política PPO (entrenada enteramente en `z` dentro
+del Dream Environment) lo vea. Es el único punto del proyecto donde el Encoder corre
+contra datos vivos de SUMO en vez de episodios pre-codificados. Junto con él,
+`scripts/evaluate_controller_sumo.py`, que compara PPO contra tiempo fijo y acción
+aleatoria usando métricas reales de tráfico (espera, cola, throughput) de
+`TrafficEnvironment`, no solo el reward abstracto.
+
+**Primera corrida — resultado engañoso con muestra pequeña**: con 5 episodios
+(`seed_base=3000`), PPO parecía ganarle a tiempo fijo (-453.18 vs -547.40). Al subir a
+15 episodios, el panorama se invirtió: PPO quedó **peor** que tiempo fijo en promedio
+(-682.09 vs -570.27), con una desviación estándar enorme (`652.41`, ~7.5x la de tiempo
+fijo). Inspeccionando los 15 valores uno por uno se reveló un **patrón bimodal, no
+ruido uniforme**: 11 de 15 episodios de PPO eran claramente mejores que tiempo fijo
+(media ≈-348), pero 4 episodios eran catastróficos (-927.80, -1033.40, -2540.60,
+-1902.50), arrastrando el promedio.
+
+**Diagnóstico de los 4 episodios catastróficos**: 3 de 4 (seeds 3001, 3011, 3013)
+mostraron rachas de la misma acción de **6, 9 y 14 pasos consecutivos** — más allá de
+lo que la política pudo experimentar durante el entrenamiento, ya que cada episodio
+imaginado del Dream Environment se truncaba a `max_dream_steps=7`. Cuanto más larga la
+racha, peor el resultado. El cuarto episodio (seed=3005) es un **modo de fallo
+distinto**: un pico puntual de `waiting_total=83.00` en el paso 30 (≈10x cualquier
+otro valor del mismo episodio), sin racha anormal (`max_run=4`, igual que un episodio
+bueno) y sin un salto correspondiente en el número de vehículos — apunta a una mala
+decisión de fase en un momento puntual, no a un patrón de acción problemático. **Este
+cuarto modo de fallo queda documentado como limitación conocida, NO resuelta** — no se
+investigó más a fondo ni se intentó corregir.
+
+**Fix aplicado**: `ControllerConfig.dream_max_steps=20` (commit `8d84d52`) — un campo
+nuevo, exclusivo de este entrenamiento, que **no toca** el default de
+`DreamEnvironment` (sigue en 7, usado sin cambios en `evaluate_controller.py` y
+`analyze_controller_actions.py`). Se respaldó el modelo anterior como
+`best_model_v1_dream7.zip`/`ppo_controller_final_v1_dream7.zip`/
+`evaluations_v1_dream7.npz` antes de sobrescribir, y se reentrenó completo (50,176
+timesteps).
+
+**Resultado v2, verificado con dos corridas independientes**:
+
+```
+                              |           reward |    espera_prom |    cola_prom |   throughput
+PPO v2, seed_base=3000        | -290.05 +/-  57.70 | 3.92 +/- 0.81 | 1.09 +/- 0.16 | 13.40 +/- 3.88
+PPO v2, seed_base=5000 (nuevo)| -316.76 +/-  52.76 | 4.28 +/- 0.73 | 1.16 +/- 0.16 | 12.40 +/- 2.92
+Tiempo fijo, seed_base=3000   | -570.27 +/-  86.70 | 8.05 +/- 1.25 | 1.66 +/- 0.21 | 13.67 +/- 2.55
+Tiempo fijo, seed_base=5000   | -605.27 +/- 123.47 | 8.57 +/- 1.75 | 1.73 +/- 0.28 | 13.87 +/- 2.63
+```
+
+Cero episodios catastróficos en ninguna de las dos corridas de PPO v2 (rangos
+-201.10 a -367.00, y -247.40 a -440.80). La desviación estándar del reward de PPO se
+mantiene del mismo orden en ambas semillas (`57.70` vs `52.76`) — **confirma que el
+arreglo generaliza**, no es casualidad de las semillas ya usadas para diagnosticar.
+
+**Conclusión final, sin suavizar**: PPO v2 supera consistentemente a tiempo fijo en
+reward, espera promedio (~45-50% menos) y cola promedio (~30-35% menos), en ambas
+corridas, sin solapamiento de rango. **Pero en throughput, PPO nunca fue mejor que
+tiempo fijo en ninguna corrida del proyecto** (empatado en la primera, levemente peor
+en la segunda) — es un patrón consistente a través de todas las corridas, no ruido de
+una sola muestra. Interpretación más plausible: el World Model aprendió a priorizar
+reducir espera y cola, posiblemente a costa del flujo total de vehículos — un patrón
+de comportamiento identificable y honesto, no una política que "gana en todo".
+
+**Qué falta**: la propuesta (Sección 18) pide explícitamente un baseline de "RL
+directo" — un PPO entrenado directamente contra SUMO, sin pasar por el Dream
+Environment. Sin ese baseline, **no se puede responder completamente si el World Model
+realmente ahorró interacciones con SUMO frente a la alternativa directa** — solo que
+el enfoque funciona en términos absolutos (supera a tiempo fijo).
+
+**Tests**: `test_controller_config_rejects_invalid_dream_max_steps` — **35/35 tests en
+verde** (34 previos + 1 nuevo).
 
 ## ✅ Controlador PPO — implementado y entrenado dentro del Dream Environment
 
@@ -235,20 +309,19 @@ handoff anterior.
 
 ## ⚪ No implementado todavía
 
-- Evaluación del controlador PPO contra SUMO real (`TrafficEnvironment`) — necesaria
-  antes de validar la salvedad del `reward_clipped` de arriba.
-- Transformer, TSMixer, evaluación final comparativa (tiempo fijo vs. RL directo vs.
-  World Model).
+- **Baseline de RL directo** (PPO entrenado directo contra SUMO, sin Dream
+  Environment) — pedido explícito de la Sección 18 de la propuesta, necesario para
+  responder si el World Model ahorró interacciones con SUMO frente a la alternativa
+  directa.
+- Transformer, TSMixer, evaluación final comparativa de los tres enfoques (tiempo
+  fijo vs. RL directo vs. World Model).
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Después de entrenar el controlador PPO y encontrar la salvedad del `reward_clipped`
-(13.3% en PPO vs. 4.8% en "alternando"), se investigó la hipótesis de explotación del
-recorte con una medición más barata que SUMO real: la magnitud del recorte, no solo su
-frecuencia (`info["raw_predicted_reward"]` expuesto, `scripts/analyze_controller_actions.py`
-creado, commit `8044262`, 34/34 tests en verde). Resultado: la magnitud del recorte en
-PPO es pequeña y cercana a la de "alternando", muy por debajo de las políticas
-constantes — debilita la sospecha de explotación profunda, aunque no la descarta del
-todo (no se puede distinguir de un patrón temporal más sutil con este análisis).
-Siguiente paso natural: evaluar este controlador contra SUMO real antes de sacar
-cualquier conclusión sobre su calidad.
+Se cerró el bloque completo de evaluación del controlador PPO contra SUMO real: el
+puente `EncodedTrafficEnvironment`, el diagnóstico de los episodios catastróficos
+(rachas de acción no vistas en entrenamiento), el fix (`dream_max_steps=20`) y su
+verificación en dos corridas con semillas distintas — commits `915bd79` y `8d84d52`,
+35/35 tests en verde. Resultado: PPO v2 supera a tiempo fijo en reward/espera/cola de
+forma consistente y generalizable, con la salvedad honesta de throughput sin mejorar.
+Siguiente paso natural: el baseline de RL directo que pide la propuesta.
