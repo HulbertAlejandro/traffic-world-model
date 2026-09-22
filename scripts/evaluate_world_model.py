@@ -24,6 +24,7 @@ if str(ROOT_DIR) not in sys.path:
 from evaluation.world_model_evaluation import (
     aggregate_by_horizon,
     load_episodes,
+    load_reward_scaler,
     load_world_model,
     plot_compounding_error,
     rollout_episode,
@@ -59,6 +60,10 @@ def main() -> None:
     action_dim = hparams["action_dim"]
     latent_dim = hparams["latent_dim"]
 
+    reward_scaler = load_reward_scaler(CHECKPOINT_PATH)
+    reward_mean = reward_scaler["reward_mean"]
+    reward_std = reward_scaler["reward_std"]
+
     episodes = load_episodes(TEST_LATENT_PATH)
     if not episodes:
         raise ValueError(f"No episodes found in {TEST_LATENT_PATH}.")
@@ -76,7 +81,8 @@ def main() -> None:
     skipped_episodes = 0
     for episode in episodes.values():
         records = rollout_episode(
-            model, episode, sequence_length, action_dim, max_horizon, device
+            model, episode, sequence_length, action_dim, max_horizon, device,
+            reward_mean=reward_mean, reward_std=reward_std,
         )
         if not records:
             skipped_episodes += 1

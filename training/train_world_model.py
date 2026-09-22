@@ -48,7 +48,23 @@ def _set_seeds(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-def train_one_epoch(model, loader, optimizer, device) -> float:
+def compute_reward_scaler(train_latent_path: Path) -> dict[str, float]:
+    """Fit reward mean/std using ONLY the training split, same principle
+    already used for state normalization in scripts/normalize_dataset.py."""
+    with np.load(train_latent_path) as data:
+        rewards = data["rewards"].astype(np.float32)
+    reward_mean = float(rewards.mean())
+    reward_std = float(rewards.std())
+    if reward_std < 1e-8:
+        reward_std = 1.0
+    return {"reward_mean": reward_mean, "reward_std": reward_std}
+
+
+def save_reward_scaler(scaler: dict[str, float], path: Path) -> None:
+    path.write_text(json.dumps(scaler, indent=2), encoding="utf-8")
+
+
+def train_one_epoch(model, loader, optimizer, device, reward_mean, reward_std) -> float:
     model.train()
     total_loss = 0.0
     for latent_window, action_window, target_latent, target_reward, _, _ in loader:
@@ -56,11 +72,12 @@ def train_one_epoch(model, loader, optimizer, device) -> float:
         action_window = action_window.to(device)
         target_latent = target_latent.to(device)
         target_reward = target_reward.to(device)
+        target_reward_normalized = (target_reward - reward_mean) / reward_std
 
         optimizer.zero_grad()
         pred_latent, pred_reward = model(latent_window, action_window)
         loss = nn.functional.mse_loss(pred_latent, target_latent) + REWARD_LOSS_WEIGHT * nn.functional.mse_loss(
-            pred_reward, target_reward
+            pred_reward, target_reward_normalized
         )
         loss.backward()
         optimizer.step()
@@ -70,7 +87,7 @@ def train_one_epoch(model, loader, optimizer, device) -> float:
 
 
 @torch.no_grad()
-def validate(model, loader, device) -> float:
+def validate(model, loader, device, reward_mean, reward_std) -> float:
     model.eval()
     total_loss = 0.0
     for latent_window, action_window, target_latent, target_reward, _, _ in loader:
@@ -78,10 +95,11 @@ def validate(model, loader, device) -> float:
         action_window = action_window.to(device)
         target_latent = target_latent.to(device)
         target_reward = target_reward.to(device)
+        target_reward_normalized = (target_reward - reward_mean) / reward_std
 
         pred_latent, pred_reward = model(latent_window, action_window)
         loss = nn.functional.mse_loss(pred_latent, target_latent) + REWARD_LOSS_WEIGHT * nn.functional.mse_loss(
-            pred_reward, target_reward
+            pred_reward, target_reward_normalized
         )
         total_loss += loss.item() * latent_window.size(0)
 
@@ -117,6 +135,11 @@ def main() -> None:
 
     config = WorldModelConfig(representation=representation, sequence_length=16)
 
+    reward_scaler = compute_reward_scaler(train_latent_path)
+    save_reward_scaler(reward_scaler, CHECKPOINT_DIR / "reward_scaler.json")
+    reward_mean = torch.tensor(reward_scaler["reward_mean"], device=device)
+    reward_std = torch.tensor(reward_scaler["reward_std"], device=device)
+
     train_dataset = LatentSequenceDataset(
         train_latent_path, sequence_length=config.sequence_length, action_dim=config.action_dim
     )
@@ -140,8 +163,8 @@ def main() -> None:
     best_validation_loss = float("inf")
 
     for epoch in range(1, EPOCHS + 1):
-        train_loss = train_one_epoch(model, train_loader, optimizer, device)
-        validation_loss = validate(model, validation_loader, device)
+        train_loss = train_one_epoch(model, train_loader, optimizer, device, reward_mean, reward_std)
+        validation_loss = validate(model, validation_loader, device, reward_mean, reward_std)
 
         train_losses.append(train_loss)
         validation_losses.append(validation_loss)

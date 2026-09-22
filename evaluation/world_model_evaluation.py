@@ -73,6 +73,21 @@ def load_world_model(
     return model, hparams
 
 
+def load_reward_scaler(checkpoint_path: str | Path) -> dict[str, float]:
+    """Load the reward normalization stats saved by training/train_world_model.py.
+
+    Lives next to the checkpoint under a fixed name (not the checkpoint's own
+    stem) because it is a property of the training run, shared by both the
+    ``_last`` and ``_best`` checkpoints it produced.
+    """
+    scaler_path = Path(checkpoint_path).parent / "reward_scaler.json"
+    if not scaler_path.exists():
+        raise FileNotFoundError(
+            f"Missing reward scaler file: {scaler_path}. Run training/train_world_model.py first."
+        )
+    return json.loads(scaler_path.read_text(encoding="utf-8"))
+
+
 def load_episodes(path: str | Path) -> dict[int, dict[str, np.ndarray]]:
     """Group an encoded latent dataset (``z``/``actions``/``rewards``) by episode.
 
@@ -109,6 +124,8 @@ def rollout_episode(
     action_dim: int,
     max_horizon: int,
     device: torch.device,
+    reward_mean: float = 0.0,
+    reward_std: float = 1.0,
 ) -> list[dict[str, float]]:
     """Autoregressively roll one episode forward and score every horizon.
 
@@ -170,6 +187,7 @@ def rollout_episode(
             )
             pred_z = pred_z.squeeze(0).cpu()
             pred_r = pred_r.squeeze(0).cpu()
+            pred_r = pred_r * reward_std + reward_mean  # de-normalize to interpretable reward units
 
             true_idx = start + sequence_length + h - 1
             true_z = z[true_idx]
