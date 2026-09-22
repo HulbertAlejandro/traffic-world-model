@@ -1,0 +1,114 @@
+from __future__ import annotations
+
+import numpy as np
+import pytest
+import torch
+
+from environments.dream_environment import DreamEnvironment
+from models.world_model import LatentDynamicsLSTM
+
+
+LATENT_DIM = 4
+ACTION_DIM = 2
+SEQUENCE_LENGTH = 5
+
+
+def _make_checkpoint(tmp_path):
+    model = LatentDynamicsLSTM(
+        latent_dim=LATENT_DIM, action_dim=ACTION_DIM, sequence_length=SEQUENCE_LENGTH
+    )
+    checkpoint_path = tmp_path / "world_model_best.pt"
+    torch.save(model.state_dict(), checkpoint_path)
+    hparams_path = checkpoint_path.with_suffix(".json")
+    hparams_path.write_text(
+        f'{{"latent_dim": {LATENT_DIM}, "action_dim": {ACTION_DIM}, '
+        f'"hidden_dim": 128, "sequence_length": {SEQUENCE_LENGTH}}}',
+        encoding="utf-8",
+    )
+    (checkpoint_path.parent / "reward_scaler.json").write_text(
+        '{"reward_mean": 0.0, "reward_std": 1.0}', encoding="utf-8"
+    )
+    return checkpoint_path
+
+
+def _make_latent_episodes(tmp_path, episode_lengths):
+    rng = np.random.default_rng(0)
+    z, actions, rewards, episode_id, time_step = [], [], [], [], []
+    for ep_id, length in enumerate(episode_lengths):
+        z.append(rng.normal(size=(length, LATENT_DIM)).astype(np.float32))
+        actions.append(rng.integers(0, ACTION_DIM, size=length).astype(np.int64))
+        rewards.append(rng.normal(size=length).astype(np.float32))
+        episode_id.append(np.full(length, ep_id, dtype=np.int64))
+        time_step.append(np.arange(length, dtype=np.int64))
+
+    path = tmp_path / "train_latent.npz"
+    np.savez(
+        path,
+        z=np.concatenate(z),
+        next_z=np.concatenate(z),  # unused by load_episodes, placeholder
+        actions=np.concatenate(actions),
+        rewards=np.concatenate(rewards),
+        episode_id=np.concatenate(episode_id),
+        time_step=np.concatenate(time_step),
+    )
+    return path
+
+
+def test_reset_returns_valid_observation(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])
+
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+    observation, info = env.reset(seed=0)
+
+    assert observation.shape == (LATENT_DIM,)
+    assert info["seeded_from_real_data"] is True
+
+
+def test_step_returns_valid_transition(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])
+
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+    env.reset(seed=0)
+    observation, reward, terminated, truncated, info = env.step(1)
+
+    assert observation.shape == (LATENT_DIM,)
+    assert isinstance(reward, float)
+    assert terminated is False
+    assert truncated is False
+    assert info["dream_step"] == 1
+
+
+def test_episode_truncates_at_max_dream_steps(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])
+
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+    env.reset(seed=0)
+
+    truncated = False
+    for _ in range(3):
+        _, _, terminated, truncated, _ = env.step(0)
+        assert terminated is False
+
+    assert truncated is True
+
+
+def test_rejects_episodes_shorter_than_sequence_length(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[2])  # shorter than SEQUENCE_LENGTH=5
+
+    with pytest.raises(ValueError, match="No episode"):
+        DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+
+
+def test_rejects_invalid_action(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])
+
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+    env.reset(seed=0)
+
+    with pytest.raises(ValueError, match="Invalid action"):
+        env.step(99)
