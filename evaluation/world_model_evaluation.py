@@ -117,6 +117,37 @@ def load_episodes(path: str | Path) -> dict[int, dict[str, np.ndarray]]:
 
 
 @torch.no_grad()
+def predict_next_step(
+    model: LatentDynamicsLSTM,
+    window_z: torch.Tensor,
+    window_actions_onehot: torch.Tensor,
+    device: torch.device,
+    reward_mean: float = 0.0,
+    reward_std: float = 1.0,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Predict the next latent state and de-normalized reward for one window.
+
+    ``window_z`` has shape (sequence_length, latent_dim), ``window_actions_onehot``
+    has shape (sequence_length, action_dim) -- both CPU tensors for a single
+    (non-batched) window. Returns CPU tensors: ``pred_z`` (latent_dim,) and
+    ``pred_r`` (scalar tensor), the latter already de-normalized to real units.
+
+    Shared by ``rollout_episode`` (Experimento 1, fed the episode's true recorded
+    actions) and ``environments.dream_environment.DreamEnvironment`` (fed a
+    policy's candidate/imagined actions) -- the windowing and de-normalization
+    logic is a single source of truth for both, instead of being duplicated.
+    """
+    pred_z, pred_r = model(
+        window_z.unsqueeze(0).to(device),
+        window_actions_onehot.unsqueeze(0).to(device),
+    )
+    pred_z = pred_z.squeeze(0).cpu()
+    pred_r = pred_r.squeeze(0).cpu()
+    pred_r = pred_r * reward_std + reward_mean
+    return pred_z, pred_r
+
+
+@torch.no_grad()
 def rollout_episode(
     model: LatentDynamicsLSTM,
     episode: dict[str, np.ndarray],
@@ -180,14 +211,7 @@ def rollout_episode(
 
         for h in range(1, max_horizon + 1):
             action_window = actions_onehot[start + h - 1 : start + h - 1 + sequence_length]
-
-            pred_z, pred_r = model(
-                window_z.unsqueeze(0).to(device),
-                action_window.unsqueeze(0).to(device),
-            )
-            pred_z = pred_z.squeeze(0).cpu()
-            pred_r = pred_r.squeeze(0).cpu()
-            pred_r = pred_r * reward_std + reward_mean  # de-normalize to interpretable reward units
+            pred_z, pred_r = predict_next_step(model, window_z, action_window, device, reward_mean, reward_std)
 
             true_idx = start + sequence_length + h - 1
             true_z = z[true_idx]
