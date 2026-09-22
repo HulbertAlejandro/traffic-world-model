@@ -112,3 +112,35 @@ def test_rejects_invalid_action(tmp_path):
 
     with pytest.raises(ValueError, match="Invalid action"):
         env.step(99)
+
+
+def test_action_streak_tracked_in_info(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])
+
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+    env.reset(seed=0)
+
+    _, _, _, _, info = env.step(1)
+    assert info["consecutive_action_streak"] == 1
+    _, _, _, _, info = env.step(1)
+    assert info["consecutive_action_streak"] == 2
+    _, _, _, _, info = env.step(0)
+    assert info["consecutive_action_streak"] == 1
+
+
+def test_imagined_reward_is_clipped_to_empirical_range(tmp_path, monkeypatch):
+    import environments.dream_environment as dream_env_module
+
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])
+
+    monkeypatch.setattr(dream_env_module, "REWARD_CLIP_MIN", -1.0)
+    monkeypatch.setattr(dream_env_module, "REWARD_CLIP_MAX", 1.0)
+
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+    env.reset(seed=0)
+
+    for _ in range(3):
+        _, reward, _, _, _ = env.step(1)
+        assert -1.0 <= reward <= 1.0

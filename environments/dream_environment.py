@@ -19,13 +19,33 @@ Design
   ``evaluation.world_model_evaluation.rollout_episode``, so the windowing logic
   has a single source of truth for both evaluation and imagination).
 - ``max_dream_steps`` caps how long an imagined episode runs before being
-  truncated. Default is 10, matching the horizon range actually validated in
-  Experimento 1 (evaluate_world_model.py measured up to horizon 10); beyond
-  that, no evidence exists about how reliable the model's predictions are.
+  truncated. Default is 7, NOT the horizon-10 range validated in Experimento 1.
+  This was lowered after a manual sanity check revealed that constant-action
+  policies (always 0 / always 1) produced implausibly extreme rewards when run
+  for 10 imagined steps. Root cause: the LSTM was trained on raw *requested*
+  actions (not SUMO's min_green-filtered actual actions), and runs of 10+
+  identical requested actions are almost absent from the training data (1
+  occurrence out of 881 observed runs across the training split). Capping at 7
+  keeps imagined rollouts within the run-length range the model actually saw
+  during training (runs of 5-7 steps: 43 occurrences; 8+: only 6).
 - This environment operates entirely in latent (z) space. It never calls the
   Encoder live -- it reuses already-encoded episodes (the same *_latent.npz
   files produced by scripts/encode_latent_dataset.py) as the source of seed
   windows, and predicts purely in z-space from there.
+- Imagined rewards are CLIPPED to ``[REWARD_CLIP_MIN, REWARD_CLIP_MAX]``, the
+  1st/99th percentile of the real rewards observed in
+  ``datasets/processed/train_latent.npz`` (min=-324.10, max=2.90 in that
+  split; percentiles chosen over the raw min/max to ignore rare extreme
+  outliers). This is a second, complementary mitigation to lowering
+  ``max_dream_steps`` to 7: that change reduces how often the model is fed
+  action-run lengths it rarely saw in training, but constant-action policies
+  still diverged ~3.7-3.9x past the expected reward magnitude in a manual
+  sanity check even at 7 steps. Clipping does not fix the underlying
+  extrapolation behavior -- it bounds its consequence, so a single bad
+  imagined step cannot dominate an episode's total imagined reward.
+  ``info["reward_clipped"]`` reports, per step, whether this triggered --
+  intended to be monitored once a PPO controller trains inside this
+  environment, to see how often the underlying extrapolation problem bites.
 """
 
 from __future__ import annotations
@@ -52,6 +72,12 @@ from evaluation.world_model_evaluation import (
 DEFAULT_LATENT_EPISODES_PATH = ROOT_DIR / "datasets" / "processed" / "train_latent.npz"
 DEFAULT_CHECKPOINT_PATH = ROOT_DIR / "models" / "checkpoints" / "world_model_best.pt"
 
+# 1st/99th percentile of real rewards in datasets/processed/train_latent.npz,
+# computed directly from that file (not invented): see the module docstring
+# for why clipping to this empirical range exists.
+REWARD_CLIP_MIN = -165.05
+REWARD_CLIP_MAX = 1.00
+
 
 class DreamEnvironment(gym.Env):
     """Gymnasium-compatible environment that imagines transitions with the
@@ -66,7 +92,7 @@ class DreamEnvironment(gym.Env):
         self,
         checkpoint_path: str | Path = DEFAULT_CHECKPOINT_PATH,
         latent_episodes_path: str | Path = DEFAULT_LATENT_EPISODES_PATH,
-        max_dream_steps: int = 10,
+        max_dream_steps: int = 7,
         device: torch.device | None = None,
     ) -> None:
         super().__init__()
@@ -108,6 +134,8 @@ class DreamEnvironment(gym.Env):
         self._window_z: torch.Tensor | None = None
         self._window_actions_onehot: torch.Tensor | None = None
         self._steps_taken = 0
+        self._last_action: int | None = None
+        self._action_streak: int = 0
         self._rng = np.random.default_rng()
 
     def reset(self, *, seed: int | None = None, options: dict | None = None):
@@ -127,6 +155,8 @@ class DreamEnvironment(gym.Env):
         self._window_z = z.clone()
         self._window_actions_onehot = F.one_hot(actions, num_classes=self.action_dim).float()
         self._steps_taken = 0
+        self._last_action = None
+        self._action_streak = 0
 
         observation = self._window_z[-1].numpy().astype(np.float32)
         info: dict = {"seeded_from_real_data": True}
@@ -137,6 +167,12 @@ class DreamEnvironment(gym.Env):
             raise RuntimeError("Call reset() before step().")
         if action not in range(self.action_dim):
             raise ValueError(f"Invalid action: {action!r}")
+
+        if action == self._last_action:
+            self._action_streak += 1
+        else:
+            self._action_streak = 1
+        self._last_action = action
 
         # Only the LAST action in the window (paired with the current/last z)
         # is hypothetical -- it is what we are choosing to imagine right now.
@@ -153,6 +189,8 @@ class DreamEnvironment(gym.Env):
             self.reward_mean,
             self.reward_std,
         )
+        was_clipped = bool(pred_r.item() < REWARD_CLIP_MIN or pred_r.item() > REWARD_CLIP_MAX)
+        pred_r = torch.clamp(pred_r, min=REWARD_CLIP_MIN, max=REWARD_CLIP_MAX)
 
         # Roll the window forward: drop the oldest step, append the imagined
         # transition. The action just taken becomes the new last "historical"
@@ -168,7 +206,12 @@ class DreamEnvironment(gym.Env):
 
         observation = pred_z.numpy().astype(np.float32)
         reward = float(pred_r.item())
-        info = {"dream_step": self._steps_taken, "imagined": True}
+        info = {
+            "dream_step": self._steps_taken,
+            "imagined": True,
+            "consecutive_action_streak": self._action_streak,
+            "reward_clipped": was_clipped,
+        }
 
         return observation, reward, terminated, truncated, info
 
