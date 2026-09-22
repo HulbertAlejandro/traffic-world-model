@@ -37,6 +37,7 @@ SEED = 0
 LEARNING_RATE = 1e-3
 BATCH_SIZE = 32
 EPOCHS = 100
+EARLY_STOPPING_PATIENCE = 15
 REWARD_LOSS_WEIGHT = 1.0
 
 
@@ -157,10 +158,11 @@ def main() -> None:
         sequence_length=config.sequence_length,
     ).to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 
     train_losses, validation_losses = [], []
     best_validation_loss = float("inf")
+    epochs_without_improvement = 0
 
     for epoch in range(1, EPOCHS + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, device, reward_mean, reward_std)
@@ -173,8 +175,18 @@ def main() -> None:
         if validation_loss < best_validation_loss:
             best_validation_loss = validation_loss
             save_checkpoint(model, config, CHECKPOINT_DIR / "world_model_best.pt")
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
 
         print(f"Epoch {epoch:03d} | train_loss={train_loss:.6f} | val_loss={validation_loss:.6f}")
+
+        if epochs_without_improvement >= EARLY_STOPPING_PATIENCE:
+            print(
+                f"Early stopping en época {epoch} (sin mejora en "
+                f"{EARLY_STOPPING_PATIENCE} épocas)."
+            )
+            break
 
     plt.figure(figsize=(6, 4))
     plt.plot(train_losses, label="Train Loss")
