@@ -57,7 +57,7 @@ class TrafficEnvironment(gym.Env):
         if self._env.sumo is not None:
             self._last_arrived_count = int(self._env.sumo.simulation.getArrivedNumber())
 
-        state_obj = self.state_builder.build_state()
+        state_obj = self.state_builder.build_state(sumo_rl_env=self._env)
         state = state_obj.to_vector()
 
         self._current_state_obj = state_obj
@@ -76,7 +76,7 @@ class TrafficEnvironment(gym.Env):
         self._last_info = info
 
         state = self._current_state
-        next_state_obj = self.state_builder.build_state()
+        next_state_obj = self.state_builder.build_state(sumo_rl_env=self._env)
         next_state = next_state_obj.to_vector()
 
         info["raw_reward"] = float(simulator_reward)
