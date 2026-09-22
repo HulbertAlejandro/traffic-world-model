@@ -7,10 +7,16 @@ wrapper runs the frozen Encoder live, on every real step, translating
 TrafficEnvironment's raw observations into z before the policy sees them --
 this is the ONLY place in the project where the Encoder runs against live
 SUMO data instead of pre-encoded episodes.
+
+The Autoencoder was trained on states normalized with the train-split
+statistics saved by scripts/normalize_dataset.py (scaler.pkl). Live SUMO
+states must go through that exact same normalization before encoding, or z
+lands outside the latent space the World Model and the PPO policy learned in.
 """
 
 from __future__ import annotations
 
+import pickle
 import sys
 from pathlib import Path
 
@@ -27,6 +33,7 @@ from environments.traffic_environment import TrafficEnvironment
 from evaluation.autoencoder_evaluation import load_autoencoder
 
 DEFAULT_AUTOENCODER_CHECKPOINT = ROOT_DIR / "models" / "checkpoints" / "autoencoder_best.pt"
+DEFAULT_SCALER_PATH = ROOT_DIR / "datasets" / "processed" / "scaler.pkl"
 
 
 class EncodedTrafficEnvironment(gym.Env):
@@ -37,6 +44,7 @@ class EncodedTrafficEnvironment(gym.Env):
     def __init__(
         self,
         autoencoder_checkpoint: str | Path = DEFAULT_AUTOENCODER_CHECKPOINT,
+        scaler_path: str | Path = DEFAULT_SCALER_PATH,
         environment_config: EnvironmentConfig | None = None,
         device: torch.device | None = None,
     ) -> None:
@@ -46,6 +54,18 @@ class EncodedTrafficEnvironment(gym.Env):
         self._env = TrafficEnvironment(environment_config)
 
         input_dim = self._env.observation_space.shape[0]
+
+        # Same scaler.pkl written by scripts/normalize_dataset.py (keys
+        # "state_mean"/"state_std", shape (1, input_dim), fit on train only).
+        with Path(scaler_path).open("rb") as handle:
+            scaler = pickle.load(handle)
+        self.state_mean = np.asarray(scaler["state_mean"], dtype=np.float32).reshape(-1)
+        self.state_std = np.asarray(scaler["state_std"], dtype=np.float32).reshape(-1)
+        if self.state_mean.shape != (input_dim,) or self.state_std.shape != (input_dim,):
+            raise ValueError(
+                f"Scaler shape {self.state_mean.shape} does not match state size {input_dim}."
+            )
+
         self.autoencoder = load_autoencoder(autoencoder_checkpoint, input_dim, self.device)
         self.autoencoder.eval()
         for param in self.autoencoder.parameters():
@@ -64,8 +84,9 @@ class EncodedTrafficEnvironment(gym.Env):
         )
 
     def _encode(self, raw_state: np.ndarray) -> np.ndarray:
+        normalized_state = (np.asarray(raw_state, dtype=np.float32) - self.state_mean) / self.state_std
         with torch.no_grad():
-            state_tensor = torch.from_numpy(raw_state).float().unsqueeze(0).to(self.device)
+            state_tensor = torch.from_numpy(normalized_state).float().unsqueeze(0).to(self.device)
             z = self.autoencoder.encode(state_tensor)
         return z.squeeze(0).cpu().numpy().astype(np.float32)
 
