@@ -19,7 +19,7 @@ PROCESSED_DIR = DATASET_ROOT / "processed"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-DEFAULT_NUM_EPISODES = 20
+DEFAULT_NUM_EPISODES = 40
 
 
 def collect_dataset(
