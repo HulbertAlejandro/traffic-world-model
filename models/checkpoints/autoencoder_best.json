@@ -1,0 +1,12 @@
+{
+  "input_dim": 26,
+  "hidden_dim": 16,
+  "latent_dim": 16,
+  "activation": "relu",
+  "learning_rate": 0.001,
+  "optimizer": "adam",
+  "batch_size": 32,
+  "epochs": 100,
+  "seed": 0,
+  "checkpoint_dir": "C:\\Users\\hulbe\\VisualProjects\\traffic-world-model\\models\\checkpoints"
+}

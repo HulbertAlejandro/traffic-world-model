@@ -37,7 +37,12 @@ def encode_split(split_path: Path, encoder_checkpoint: Path, device: torch.devic
         terminated = data["terminated"]
         truncated = data["truncated"]
 
-    autoencoder = load_autoencoder(checkpoint_path=encoder_checkpoint, device=device)
+    input_dim = states.shape[1]
+    autoencoder = load_autoencoder(
+        checkpoint_path=encoder_checkpoint,
+        input_dim=input_dim,
+        device=device,
+    )
     autoencoder.eval()
     for param in autoencoder.parameters():
         param.requires_grad = False
