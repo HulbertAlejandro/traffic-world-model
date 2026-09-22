@@ -46,6 +46,11 @@ Design
   ``info["reward_clipped"]`` reports, per step, whether this triggered --
   intended to be monitored once a PPO controller trains inside this
   environment, to see how often the underlying extrapolation problem bites.
+  ``info["raw_predicted_reward"]`` additionally exposes the UNCLIPPED value,
+  so the MAGNITUDE of the extrapolation can be measured, not just whether it
+  happened -- landing barely outside the empirical range is a very different
+  situation from landing deep in hallucinated territory that the clip is
+  quietly masking.
 """
 
 from __future__ import annotations
@@ -189,7 +194,8 @@ class DreamEnvironment(gym.Env):
             self.reward_mean,
             self.reward_std,
         )
-        was_clipped = bool(pred_r.item() < REWARD_CLIP_MIN or pred_r.item() > REWARD_CLIP_MAX)
+        raw_pred_r_value = float(pred_r.item())
+        was_clipped = bool(raw_pred_r_value < REWARD_CLIP_MIN or raw_pred_r_value > REWARD_CLIP_MAX)
         pred_r = torch.clamp(pred_r, min=REWARD_CLIP_MIN, max=REWARD_CLIP_MAX)
 
         # Roll the window forward: drop the oldest step, append the imagined
@@ -211,6 +217,7 @@ class DreamEnvironment(gym.Env):
             "imagined": True,
             "consecutive_action_streak": self._action_streak,
             "reward_clipped": was_clipped,
+            "raw_predicted_reward": raw_pred_r_value,
         }
 
         return observation, reward, terminated, truncated, info

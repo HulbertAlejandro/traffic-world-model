@@ -144,3 +144,21 @@ def test_imagined_reward_is_clipped_to_empirical_range(tmp_path, monkeypatch):
     for _ in range(3):
         _, reward, _, _, _ = env.step(1)
         assert -1.0 <= reward <= 1.0
+
+
+def test_raw_predicted_reward_exposed_in_info(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])
+
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3)
+    env.reset(seed=0)
+
+    _, reward, _, _, info = env.step(1)
+    assert "raw_predicted_reward" in info
+    assert isinstance(info["raw_predicted_reward"], float)
+    # el valor reportado como reward YA debe estar recortado; el crudo puede
+    # coincidir o no dependiendo de si el recorte se activó
+    if info["reward_clipped"]:
+        assert info["raw_predicted_reward"] != reward
+    else:
+        assert abs(info["raw_predicted_reward"] - reward) < 1e-5
