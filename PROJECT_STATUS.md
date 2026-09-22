@@ -1,9 +1,9 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: controlador PPO implementado y entrenado dentro del
-`DreamEnvironment` (`86228ae`), 33/33 tests en verde, confirmado contra el repo real.
-**Resultado NO validado todavía contra SUMO real** — ver la sección de abajo antes de
-asumir que el controlador "funciona".
+Última verificación: investigada la magnitud del recorte de recompensa en el PPO
+(`8044262`), 34/34 tests en verde. La sospecha de explotación profunda del recorte se
+debilitó pero no se descartó. **Resultado del PPO sigue NO validado contra SUMO real**
+— ver la sección de abajo antes de asumir que el controlador "funciona".
 
 ## ✅ Controlador PPO — implementado y entrenado dentro del Dream Environment
 
@@ -41,15 +41,53 @@ Alternando cada paso      | -129.59 |  59.60 |  -303.31 |  -43.02  |  0/210 (0.0
 PPO supera a las 4 políticas de referencia en `mean` (-53.53, la menos negativa) y
 nunca entra en racha de acción ≥5.
 
-**⚠️ Salvedad importante, NO resuelta — dicha sin suavizar**: la tasa de
+**⚠️ Salvedad importante, planteada sin resolver en la corrida original**: la tasa de
 `reward_clipped` de PPO (13.3%) es **más alta** que la de la política "alternando"
-(4.8%), a pesar de que PPO evita rachas largas por completo. Es un posible síntoma de
-que la política está explotando el recorte de recompensa para volver artificialmente
-barato el error de extrapolación del modelo, en vez de aprender control de tráfico
-genuino — no se puede distinguir con la evidencia disponible cuál de las dos
-explicaciones es la correcta. **Este resultado NO debe interpretarse como desempeño
-validado** hasta contrastarlo contra SUMO real (`TrafficEnvironment`) — paso siguiente
-necesario antes de cualquier afirmación sobre la calidad de este controlador.
+(4.8%), a pesar de que PPO evita rachas largas por completo. Se planteó como posible
+síntoma de que la política está explotando el recorte de recompensa para volver
+artificialmente barato el error de extrapolación del modelo, en vez de aprender control
+de tráfico genuino.
+
+**Investigación de seguimiento — commit `8044262`**: antes de gastar cómputo en SUMO
+real, se investigó la hipótesis con una medición más precisa: la **magnitud** del
+recorte (`|raw_predicted_reward - bound|`), no solo su frecuencia. Se expuso
+`info["raw_predicted_reward"]` (el valor crudo del LSTM antes de `torch.clamp`) en
+`DreamEnvironment.step()`, y se creó `scripts/analyze_controller_actions.py` para
+comparar PPO contra las políticas de referencia:
+
+```
+Rango de recorte: [-165.05, 1.0]
+
+Politica                  |  n_clips |  mag_media |    mag_max |  accion=0 |  accion=1
+-------------------------------------------------------------------------------------
+PPO (entrenado)           |       25 |       3.05 |      18.25 |       100 |       110
+Alternando cada paso      |        9 |       2.75 |       4.89 |       120 |        90
+Siempre mantener (0)      |       29 |      10.15 |      31.60 |       210 |         0
+Siempre cambiar (1)       |       34 |      32.84 |      91.25 |         0 |       210
+```
+
+**Resultado, sin suavizar**: la magnitud del recorte en PPO (`mag_media=3.05`,
+`mag_max=18.25`) es cercana a la de "alternando" (`2.75`/`4.89`) y muy por debajo de
+las políticas constantes (`10-33` de media, hasta `91` de máximo). Cuando PPO dispara
+el recorte, el valor crudo queda apenas fuera del rango empírico — no profundamente en
+territorio alucinado, como sí ocurre con las políticas constantes. La distribución de
+acciones de PPO tampoco es degenerada (100 vs. 110, similar al balance de "alternando").
+Esto **debilita, pero no descarta por completo**, la hipótesis de explotación del
+recorte: no se puede descartar con este análisis que PPO esté eligiendo secuencias de
+acción específicas (no necesariamente rachas largas ni una acción constante) que
+empujan la predicción justo más allá del borde del rango con más frecuencia que
+"alternando" — el conteo marginal de acciones no distingue eso de un patrón temporal
+particular más sutil.
+
+**Conclusión de esta investigación**: no resuelve la pregunta de fondo (¿control
+genuino o artefacto del Dream Environment?), pero sí reduce la prioridad de la
+sospecha más grave (explotación profunda del recorte) lo suficiente como para proceder
+a la validación contra SUMO real sin gastar más tiempo en análisis dentro del Dream
+Environment. **El resultado del PPO sigue sin estar validado** hasta esa evaluación en
+`TrafficEnvironment`.
+
+**Tests**: `test_raw_predicted_reward_exposed_in_info` — **34/34 tests en verde** (33
+previos + 1 nuevo).
 
 ## ✅ Dream Environment — mitigaciones de extrapolación fuera de distribución (OOD)
 
@@ -204,12 +242,13 @@ handoff anterior.
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se implementó y entrenó el controlador PPO dentro del `DreamEnvironment` (33/33 tests
-en verde, commit `86228ae` subido a GitHub). El entrenamiento corrió sin errores y el
-PPO superó a las 4 políticas de referencia en la autoevaluación dentro del propio Dream
-Environment, pero quedó una salvedad seria sin resolver: su tasa de `reward_clipped`
-es más alta que la de la política "alternando" pese a evitar rachas largas, lo cual
-podría indicar que está explotando el recorte de recompensa en vez de aprender control
-real. Documentado explícitamente como resultado no validado. Siguiente paso natural:
-evaluar este controlador contra SUMO real antes de sacar cualquier conclusión sobre su
-calidad.
+Después de entrenar el controlador PPO y encontrar la salvedad del `reward_clipped`
+(13.3% en PPO vs. 4.8% en "alternando"), se investigó la hipótesis de explotación del
+recorte con una medición más barata que SUMO real: la magnitud del recorte, no solo su
+frecuencia (`info["raw_predicted_reward"]` expuesto, `scripts/analyze_controller_actions.py`
+creado, commit `8044262`, 34/34 tests en verde). Resultado: la magnitud del recorte en
+PPO es pequeña y cercana a la de "alternando", muy por debajo de las políticas
+constantes — debilita la sospecha de explotación profunda, aunque no la descarta del
+todo (no se puede distinguir de un patrón temporal más sutil con este análisis).
+Siguiente paso natural: evaluar este controlador contra SUMO real antes de sacar
+cualquier conclusión sobre su calidad.

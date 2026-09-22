@@ -28,24 +28,27 @@
       `scripts/evaluate_controller.py`, commit `86228ae`, 33/33 tests en verde).
       Entrenado 50,176 timesteps con curva de validación ruidosa y no monótona.
       Supera a las 4 políticas de referencia en la autoevaluación dentro del propio
-      Dream Environment, pero con una salvedad seria sin resolver — ver
-      PROJECT_STATUS.md: su tasa de `reward_clipped` (13.3%) es más alta que la de la
-      política "alternando" (4.8%) pese a evitar rachas largas, posible señal de que
-      explota el recorte en vez de aprender control real. **Resultado explícitamente
-      NO validado** hasta contrastarlo con SUMO real.
+      Dream Environment, pero con una salvedad seria — ver PROJECT_STATUS.md: su tasa
+      de `reward_clipped` (13.3%) es más alta que la de la política "alternando"
+      (4.8%) pese a evitar rachas largas.
+- [x] Investigada la hipótesis de explotación del recorte de recompensa, con la
+      magnitud del recorte (no solo su frecuencia): `info["raw_predicted_reward"]`
+      expuesto, `scripts/analyze_controller_actions.py` creado, commit `8044262`,
+      34/34 tests en verde. Resultado: la magnitud del recorte en PPO es pequeña
+      (cercana a "alternando", muy por debajo de las políticas constantes) —
+      **debilita pero no descarta** la sospecha de explotación (no distingue de un
+      patrón temporal más sutil). Ver PROJECT_STATUS.md para el detalle completo.
+      **Resultado del PPO sigue explícitamente NO validado** hasta contrastarlo con
+      SUMO real.
 
 ## Siguiente paso recomendado — Validar el controlador PPO contra SUMO real
 
-El controlador ya está entrenado y autoevaluado dentro del Dream Environment, pero esa
-autoevaluación no prueba nada sobre desempeño real de control de tráfico — el paso que
-sigue es exactamente ese contraste:
+El controlador ya está entrenado y autoevaluado dentro del Dream Environment, y la
+sospecha más grave sobre el `reward_clipped` ya se investigó tanto como es razonable
+hacerlo sin tocar SUMO — el paso que sigue es el contraste real:
 
 - [ ] Evaluar el controlador PPO entrenado (`best_model.zip`) dentro de
       `TrafficEnvironment` (SUMO real), no solo dentro de `DreamEnvironment`.
-- [ ] Investigar directamente la salvedad del `reward_clipped`: ¿el PPO realmente
-      explota el recorte de recompensa, o hay otra explicación? Comparar la
-      distribución de acciones elegidas por PPO contra las políticas de referencia
-      podría dar una pista antes de gastar tiempo de cómputo en SUMO real.
 - [ ] Decidir si `max_dream_steps=7` es suficiente horizonte de entrenamiento para PPO,
       o si conviene revisarlo a la luz de los resultados en SUMO real.
 - [ ] Si la validación en SUMO confirma que el PPO no aprendió control genuino, decidir
