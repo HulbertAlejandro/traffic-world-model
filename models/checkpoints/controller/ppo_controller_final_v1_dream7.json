@@ -1,0 +1,10 @@
+{
+  "seed": 0,
+  "total_timesteps": 50000,
+  "learning_rate": 0.0003,
+  "n_steps": 256,
+  "batch_size": 64,
+  "n_epochs": 10,
+  "gamma": 0.99,
+  "dream_max_steps": 7
+}
