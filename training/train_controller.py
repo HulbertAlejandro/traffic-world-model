@@ -7,8 +7,10 @@ never touching the real simulator during training.
 
 from __future__ import annotations
 
+import json
 import random
 import sys
+from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
@@ -41,6 +43,14 @@ def _set_seeds(seed: int) -> None:
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
     set_random_seed(seed)
+
+
+def save_hyperparameters(checkpoint_path: Path, config: ControllerConfig) -> None:
+    """Write the ControllerConfig used in this run next to a PPO checkpoint,
+    same sibling-.json pattern as autoencoder_best.json / world_model_best.json."""
+    checkpoint_path.with_suffix(".json").write_text(
+        json.dumps(asdict(config), indent=2), encoding="utf-8"
+    )
 
 
 def main() -> None:
@@ -87,6 +97,8 @@ def main() -> None:
 
     final_path = CONTROLLER_DIR / "ppo_controller_final.zip"
     model.save(final_path)
+    save_hyperparameters(final_path, config)
+    save_hyperparameters(CONTROLLER_DIR / "best_model.zip", config)
     print(f"Final policy saved to: {final_path}")
     print(f"Best policy (by validation-seeded dream reward) saved to: {CONTROLLER_DIR / 'best_model.zip'}")
 
