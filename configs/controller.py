@@ -14,7 +14,10 @@ class ControllerConfig:
     total_timesteps can be generous without a real time cost.
     """
 
-    seed: int = 0
+    # 1, not 0: the Dream-trained PPO with reward normalization was verified with
+    # training seeds 0, 1 and 2 (seed_base=3000: -351.61, -291.26, -289.04);
+    # seed 1 was adopted as the official checkpoint, so re-training reproduces it.
+    seed: int = 1
     total_timesteps: int = 50_000
     learning_rate: float = 3e-4
     n_steps: int = 256

@@ -1,5 +1,5 @@
 {
-  "seed": 1,
+  "seed": 0,
   "total_timesteps": 50000,
   "learning_rate": 0.0003,
   "n_steps": 256,
