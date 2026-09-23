@@ -51,9 +51,7 @@ La implementación actual ya estableció la capa de infraestructura y la integra
 traffic-world-model/
 ├── configs/                      # configuración del entorno, entrenamiento y modelos
 │   ├── environment.py
-│   ├── environment_config.py
 │   ├── reward.py
-│   ├── training.py
 │   ├── world_model.py
 │   ├── raw/
 │   └── processed/
@@ -64,11 +62,7 @@ traffic-world-model/
 ├── environments/                 # entorno SUMO y definiciones del estado/recompensa
 │   ├── __init__.py
 │   ├── custom_state_builder.py
-│   ├── default_reward_function.py
-│   ├── default_state_builder.py
-│   ├── reward_function.py
 │   ├── single-intersection/
-│   ├── state_builder.py
 │   ├── traffic_environment.py
 │   └── __pycache__/
 ├── evaluation/                   # scripts y resultados de evaluación
@@ -80,10 +74,7 @@ traffic-world-model/
 │   ├── collect_dataset.py
 │   ├── evaluate_world_model.py
 │   ├── test_environment.py
-│   ├── test_sumo_rl.py
-│   ├── train_controller.py
 │   ├── train_representation.py
-│   ├── train_world_model.py
 │   └── visualize_dataset.py
 ├── tests/                        # pruebas del proyecto
 ├── training/                     # pipeline de entrenamiento
@@ -113,7 +104,7 @@ Este wrapper:
 
 - encapsula la creación del simulador `sumo_rl.SumoEnvironment`
 - centraliza el ciclo de `reset()` y `step()`
-- permite inyectar un `state_builder` y un `reward_function`
+- recibe solo un `EnvironmentConfig` opcional y usa internamente `CustomStateBuilder` y `ProjectRewardFunction` (sin mecanismo de inyección)
 - mantiene la lógica del proyecto separada de las API internas de SUMO
 
 La implementación actual del estado usa TraCI y no depende directamente de la observación nativa de `sumo-rl`.
@@ -139,12 +130,6 @@ sumo --version
 
 ```powershell
 python scripts\test_environment.py
-```
-
-También puede validarse la compatibilidad con el ejemplo de `sumo-rl` mediante:
-
-```powershell
-python scripts\test_sumo_rl.py
 ```
 
 ## Convenciones de desarrollo

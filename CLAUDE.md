@@ -89,11 +89,11 @@ definida en `models/world_model/base.py::TemporalModel`).
 ## Estructura del repositorio
 
 ```
-configs/        EnvironmentConfig, RewardConfig, RepresentationConfig, TrainingConfig, WorldModelConfig
+configs/        EnvironmentConfig, RewardConfig, RepresentationConfig, WorldModelConfig
 datasets/       transition_dataset.py, latent_sequence_dataset.py, metadata.json, raw/, processed/ (generados)
 docs/           PROPUESTA.md (propuesta académica completa)
 environments/   TrafficEnvironment, CustomStateBuilder, TrafficState, ProjectActionSpace,
-                ProjectRewardFunction, contratos Protocol, single-intersection/ (red SUMO propia)
+                ProjectRewardFunction, single-intersection/ (red SUMO propia)
 models/
   representation/  Encoder, Decoder, Autoencoder
   world_model/     base.py (Protocol TemporalModel), lstm.py (LatentDynamicsLSTM, con reward_head)
@@ -101,8 +101,8 @@ training/       train_autoencoder.py, train_world_model.py
 evaluation/     autoencoder_evaluation.py, evaluate_autoencoder.py,
                 world_model_evaluation.py, evaluate_world_model.py
 scripts/        collect_dataset.py, split_dataset.py, merge_dataset.py, normalize_dataset.py,
-                visualize_dataset.py, encode_latent_dataset.py, test_environment.py, test_sumo_rl.py,
-                train_controller.py (placeholder), evaluate_world_model.py (script real, ya no placeholder)
+                visualize_dataset.py, encode_latent_dataset.py, test_environment.py,
+                evaluate_world_model.py (script real, ya no placeholder)
 tests/          test_traffic_environment.py, test_dataset_pipeline.py, test_autoencoder.py,
                 test_world_model.py, test_latent_sequence_dataset.py, test_world_model_evaluation.py
 pytest.ini, requirements.txt, .gitignore, README.md, LICENSE

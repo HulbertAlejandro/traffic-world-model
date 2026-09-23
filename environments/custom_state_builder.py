@@ -60,8 +60,8 @@ class CustomStateBuilder:
     def build(self, observation=None, env=None) -> np.ndarray:
         """Build the project state from TraCI and return the flat vector.
 
-        ``observation`` is accepted (and ignored) so this class stays a
-        drop-in replacement for ``DefaultStateBuilder.build(observation, env)``.
+        ``observation`` is accepted (and ignored) to keep the
+        ``build(observation, env)`` call signature.
         ``env`` (the sumo_rl environment) is forwarded to ``build_state`` --
         see that method's docstring for why it is needed.
         """

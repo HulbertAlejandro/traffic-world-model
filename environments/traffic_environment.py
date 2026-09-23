@@ -131,7 +131,7 @@ class TrafficEnvironment(gym.Env):
     @property
     def env(self):
         """Acceso explícito al entorno interno. Solo debe usarse desde
-        componentes de infraestructura (por ejemplo StateBuilder)."""
+        componentes de infraestructura (por ejemplo CustomStateBuilder)."""
         return self._env
 
     @property
