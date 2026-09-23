@@ -35,7 +35,12 @@ if str(ROOT_DIR) not in sys.path:
 from configs import ControllerConfig
 from environments.reseeding_wrapper import ReseedingWrapper
 from environments.traffic_environment import TrafficEnvironment
-from training.train_controller import build_normalized_envs, save_hyperparameters
+from training.train_controller import (
+    SaveVecNormalizeOnBest,
+    build_normalized_envs,
+    save_hyperparameters,
+    vecnormalize_path,
+)
 
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints"
 CONTROLLER_DIRECT_DIR = CHECKPOINT_DIR / "controller_direct"
@@ -60,13 +65,21 @@ def _set_seeds(seed: int) -> None:
 
 
 def main() -> None:
-    config = ControllerConfig()
+    # Run config, fixed up front because it now also builds the envs:
+    # - total_timesteps: the direct budget actually used, not the Dream default.
+    # - seed=0 explicitly: ControllerConfig's default moved to 1 for the Dream
+    #   PPO; keeping 0 here means observation normalization is the only change
+    #   from the previous direct-RL run.
+    # - normalize_obs=True: unlike the Dream PPO (z, unit scale), this policy
+    #   receives the RAW 26-dim state, whose per-dimension std spans 0.02 to 38
+    #   (and far beyond the dataset range under bad early policies).
+    # dream_max_steps is still written to the .json (it is a ControllerConfig
+    # field) but has no effect here: this run never touches the Dream Environment.
+    config = replace(
+        ControllerConfig(), seed=0, total_timesteps=DIRECT_TOTAL_TIMESTEPS, normalize_obs=True
+    )
     _set_seeds(config.seed)
 
-    # Reward normalization only (see build_normalized_envs). NOTE: unlike the
-    # Dream PPO, this policy receives the RAW, unnormalized 26-dim state;
-    # observation normalization is deliberately left out of this change so only
-    # one variable (reward scale) differs from earlier runs.
     train_env, eval_env = build_normalized_envs(
         lambda: ReseedingWrapper(TrafficEnvironment(), ReseedingWrapper.training_seeds()),
         lambda: ReseedingWrapper(TrafficEnvironment(), ReseedingWrapper.fixed_eval_seeds()),
@@ -92,21 +105,21 @@ def main() -> None:
         eval_freq=max(config.n_steps, 1000),
         n_eval_episodes=5,
         deterministic=True,
+        callback_on_new_best=SaveVecNormalizeOnBest(CONTROLLER_DIRECT_DIR / "best_model.zip"),
     )
 
     print(f"Training PPO DIRECTLY against real SUMO -- {DIRECT_TOTAL_TIMESTEPS} real timesteps.")
     print("This will be noticeably slower than Dream Environment training (real SUMO, not imagined).")
     model.learn(total_timesteps=DIRECT_TOTAL_TIMESTEPS, callback=eval_callback)
 
-    # Record the budget actually used, not ControllerConfig's Dream default.
-    # dream_max_steps is still written (it is a ControllerConfig field) but has
-    # no effect here: this run never touches the Dream Environment.
-    run_config = replace(config, total_timesteps=DIRECT_TOTAL_TIMESTEPS)
     final_path = CONTROLLER_DIRECT_DIR / "ppo_controller_direct_final.zip"
     model.save(final_path)
-    save_hyperparameters(final_path, run_config)
-    save_hyperparameters(CONTROLLER_DIRECT_DIR / "best_model.zip", run_config)
-    train_env.save(str(CONTROLLER_DIRECT_DIR / "vec_normalize.pkl"))
+    save_hyperparameters(final_path, config)
+    save_hyperparameters(CONTROLLER_DIRECT_DIR / "best_model.zip", config)
+    # best_model_vecnormalize.pkl was written by SaveVecNormalizeOnBest when the
+    # best model was saved; these are the (different) end-of-training statistics
+    # that belong to the final policy.
+    train_env.save(str(vecnormalize_path(final_path)))
     print(f"Final policy saved to: {final_path}")
     print(f"Best policy saved to: {CONTROLLER_DIRECT_DIR / 'best_model.zip'}")
 

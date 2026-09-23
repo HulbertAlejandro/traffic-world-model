@@ -41,6 +41,12 @@ class ControllerConfig:
     # the discounted return), not the raw one.
     normalize_reward: bool = True
     reward_clip: float = 10.0
+    # Observation normalization (VecNormalize norm_obs). False for the Dream PPO
+    # (z is already on a unit scale); the direct-RL script turns it on because
+    # its policy sees the raw 26-dim state. When True, the policy can only be
+    # evaluated together with its saved <checkpoint>_vecnormalize.pkl, and the
+    # evaluation scripts read this field from the checkpoint's sidecar .json.
+    normalize_obs: bool = False
 
     def __post_init__(self) -> None:
         if self.seed < 0:

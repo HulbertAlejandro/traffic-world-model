@@ -10,7 +10,13 @@ from stable_baselines3.common.vec_env import VecNormalize
 from configs import ControllerConfig
 from environments.dream_environment import DreamEnvironment
 from models.world_model import LatentDynamicsLSTM
-from training.train_controller import build_normalized_envs
+from training.train_controller import (
+    SaveVecNormalizeOnBest,
+    build_normalized_envs,
+    load_obs_normalizer,
+    save_hyperparameters,
+    vecnormalize_path,
+)
 
 
 LATENT_DIM = 4
@@ -110,6 +116,61 @@ def test_normalized_env_stack_trains_and_syncs_through_eval_callback(tmp_path):
     # non-trivial count here can only come from sync_envs_normalization.
     assert eval_env.ret_rms.count > 1
     assert eval_env.norm_reward is False and eval_env.training is False
+
+
+def test_obs_normalization_stats_saved_with_best_model_and_reloaded(tmp_path):
+    """normalize_obs=True: the stats snapshot saved alongside best_model.zip is
+    exactly what load_obs_normalizer applies, and it really transforms obs."""
+    import pickle
+
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[20, 20])
+    config = ControllerConfig(n_steps=16, batch_size=8, n_epochs=1, normalize_obs=True)
+    best_path = tmp_path / "best_model.zip"
+
+    train_env, eval_env = build_normalized_envs(
+        lambda: DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=5),
+        lambda: DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=5, eval_seed=0),
+        config,
+    )
+    model = PPO("MlpPolicy", train_env, n_steps=16, batch_size=8, n_epochs=1, seed=0, verbose=0)
+    callback = EvalCallback(
+        eval_env, eval_freq=16, n_eval_episodes=2, deterministic=True, verbose=0,
+        log_path=str(tmp_path), best_model_save_path=str(tmp_path),
+        callback_on_new_best=SaveVecNormalizeOnBest(best_path),
+    )
+    model.learn(total_timesteps=48, callback=callback)
+    save_hyperparameters(best_path, config)
+
+    stats_path = vecnormalize_path(best_path)
+    assert best_path.exists() and stats_path.exists()
+    with stats_path.open("rb") as handle:
+        saved = pickle.load(handle)
+    assert saved.norm_obs and saved.obs_rms.count > 1
+
+    normalize = load_obs_normalizer(best_path, DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=5))
+    obs = np.linspace(-3.0, 3.0, LATENT_DIM).astype(np.float32)
+    expected = np.clip(
+        (obs - saved.obs_rms.mean) / np.sqrt(saved.obs_rms.var + saved.epsilon), -saved.clip_obs, saved.clip_obs
+    )
+    np.testing.assert_allclose(normalize(obs), expected, rtol=1e-6)
+    assert not np.allclose(normalize(obs), obs)
+
+
+def test_obs_normalizer_is_identity_for_old_checkpoints_and_strict_when_stats_missing(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[20, 20])
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=5)
+    obs = np.arange(LATENT_DIM, dtype=np.float32)
+
+    old = tmp_path / "old_model.zip"
+    old.with_suffix(".json").write_text('{"seed": 0}', encoding="utf-8")  # predates normalize_obs
+    np.testing.assert_array_equal(load_obs_normalizer(old, env)(obs), obs)
+
+    no_stats = tmp_path / "normalized_model.zip"
+    no_stats.with_suffix(".json").write_text('{"normalize_obs": true}', encoding="utf-8")
+    with pytest.raises(FileNotFoundError):
+        load_obs_normalizer(no_stats, env)
 
 
 def test_ppo_trains_a_few_steps_inside_dream_environment(tmp_path):

@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from stable_baselines3 import PPO
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
@@ -58,14 +58,14 @@ def save_hyperparameters(checkpoint_path: Path, config: ControllerConfig) -> Non
 
 
 def build_normalized_envs(make_train_env, make_eval_env, config: ControllerConfig):
-    """Wrap a training and an evaluation env for PPO with reward normalization.
+    """Wrap a training and an evaluation env for PPO with VecNormalize.
 
-    Reward (not observation) normalization: the value function never learned
-    (explained_variance ~0 in every run) and value_loss matched the variance of
-    unnormalized returns (std in the hundreds to thousands) -- see
-    PROJECT_STATUS.md. Observations are left untouched, so a trained policy is
-    used at inference exactly as before and no normalization statistics are
-    needed to evaluate it.
+    Reward normalization: the value function never learned (explained_variance
+    ~0 in every run) and value_loss matched the variance of unnormalized returns
+    (std in the hundreds to thousands) -- see PROJECT_STATUS.md. Observation
+    normalization is opt-in (config.normalize_obs): off for the Dream PPO, on
+    for the direct-RL PPO. With it off, a trained policy is used at inference
+    exactly as before; with it on, see load_obs_normalizer().
 
     Monitor sits BELOW VecNormalize so episode logs keep the real reward. The
     eval env must be wrapped the same way: EvalCallback copies the training
@@ -75,7 +75,7 @@ def build_normalized_envs(make_train_env, make_eval_env, config: ControllerConfi
     """
     train_env = VecNormalize(
         DummyVecEnv([lambda: Monitor(make_train_env())]),
-        norm_obs=False,
+        norm_obs=config.normalize_obs,
         norm_reward=config.normalize_reward,
         clip_reward=config.reward_clip,
         gamma=config.gamma,
@@ -83,10 +83,58 @@ def build_normalized_envs(make_train_env, make_eval_env, config: ControllerConfi
     eval_env = VecNormalize(
         DummyVecEnv([lambda: Monitor(make_eval_env())]),
         training=False,
-        norm_obs=False,
+        norm_obs=config.normalize_obs,
         norm_reward=False,
     )
     return train_env, eval_env
+
+
+def vecnormalize_path(checkpoint_path: Path) -> Path:
+    """VecNormalize statistics that belong to a checkpoint:
+    best_model.zip -> best_model_vecnormalize.pkl."""
+    checkpoint_path = Path(checkpoint_path)
+    return checkpoint_path.with_name(checkpoint_path.stem + "_vecnormalize.pkl")
+
+
+class SaveVecNormalizeOnBest(BaseCallback):
+    """EvalCallback(callback_on_new_best=...): snapshot the normalization
+    statistics at the moment best_model.zip is saved. With norm_obs=True the
+    policy depends on those statistics, and they keep changing after the best
+    checkpoint; EvalCallback synced exactly these into the eval env right before
+    the evaluation that selected the model."""
+
+    def __init__(self, best_model_path: Path, verbose: int = 0) -> None:
+        super().__init__(verbose)
+        self.best_model_path = Path(best_model_path)
+
+    def _on_step(self) -> bool:
+        self.model.get_vec_normalize_env().save(str(vecnormalize_path(self.best_model_path)))
+        return True
+
+
+def load_obs_normalizer(checkpoint_path: Path, env):
+    """Return obs -> obs as the given checkpoint's policy expects it.
+
+    Reads normalize_obs from the checkpoint's sidecar .json (missing field =
+    False, i.e. every checkpoint trained before this option existed). If True,
+    loads <checkpoint>_vecnormalize.pkl and returns its normalize_obs(), which
+    works on a single unbatched observation and never updates the statistics.
+    `env` only provides the observation space VecNormalize.load() validates
+    against; it is never stepped through. A normalize_obs=True checkpoint
+    without its .pkl raises instead of being evaluated un-normalized."""
+    checkpoint_path = Path(checkpoint_path)
+    metadata = json.loads(checkpoint_path.with_suffix(".json").read_text(encoding="utf-8"))
+    if not metadata.get("normalize_obs", False):
+        return lambda obs: obs
+    stats_path = vecnormalize_path(checkpoint_path)
+    if not stats_path.exists():
+        raise FileNotFoundError(
+            f"{checkpoint_path.name} was trained with normalize_obs=True but {stats_path} is missing."
+        )
+    vec_normalize = VecNormalize.load(str(stats_path), DummyVecEnv([lambda: env]))
+    vec_normalize.training = False
+    vec_normalize.norm_reward = False
+    return vec_normalize.normalize_obs
 
 
 def main() -> None:
@@ -143,9 +191,9 @@ def main() -> None:
     model.save(final_path)
     save_hyperparameters(final_path, config)
     save_hyperparameters(CONTROLLER_DIR / "best_model.zip", config)
-    # Only needed to resume training (or if norm_obs is ever enabled);
-    # evaluating the policy does not require it.
-    train_env.save(str(CONTROLLER_DIR / "vec_normalize.pkl"))
+    # Only needed to resume training: this policy is trained with
+    # normalize_obs=False, so evaluating it does not require these statistics.
+    train_env.save(str(vecnormalize_path(final_path)))
     print(f"Final policy saved to: {final_path}")
     print(f"Best policy (by real-SUMO evaluation reward) saved to: {CONTROLLER_DIR / 'best_model.zip'}")
 

@@ -23,6 +23,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from environments.encoded_traffic_environment import EncodedTrafficEnvironment
 from environments.traffic_environment import TrafficEnvironment
+from training.train_controller import load_obs_normalizer
 
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints"
 DREAM_PPO_PATH = CHECKPOINT_DIR / "controller" / "best_model.zip"
@@ -70,13 +71,16 @@ def main() -> None:
 
     dream_model = PPO.load(DREAM_PPO_PATH)
     direct_model = PPO.load(DIRECT_PPO_PATH)
+    # Identity for checkpoints trained without observation normalization;
+    # otherwise the statistics saved together with this exact checkpoint.
+    normalize_direct = load_obs_normalizer(DIRECT_PPO_PATH, direct_env)
 
     def dream_policy(obs, step):
         action, _ = dream_model.predict(obs, deterministic=True)
         return int(action)
 
     def direct_policy(obs, step):
-        action, _ = direct_model.predict(obs, deterministic=True)
+        action, _ = direct_model.predict(normalize_direct(obs), deterministic=True)
         return int(action)
 
     def fixed_time_policy(obs, step):

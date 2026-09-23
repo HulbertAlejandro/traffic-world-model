@@ -31,6 +31,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from environments.encoded_traffic_environment import EncodedTrafficEnvironment
 from environments.traffic_environment import TrafficEnvironment
+from training.train_controller import load_obs_normalizer
 
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints"
 DREAM_PPO_PATH = CHECKPOINT_DIR / "controller" / "best_model.zip"
@@ -71,7 +72,7 @@ def run_policy(env, policy_fn, num_episodes, seed_base):
             (("reward", rewards), ("waiting", waiting), ("queue", queue), ("throughput", throughput))}
 
 
-def counterfactual_agreement(dream_env, dream_model, direct_model, seeds):
+def counterfactual_agreement(dream_env, dream_model, direct_model, normalize_direct, seeds):
     """Dream PPO drives SUMO; every real state is also shown to the direct PPO
     and the rule. Returns per-pair disagreement counts and the dream PPO's
     episode rewards (to check they reproduce the performance table)."""
@@ -86,7 +87,7 @@ def counterfactual_agreement(dream_env, dream_model, direct_model, seeds):
         while not (terminated or truncated):
             actions = {
                 "sueno": int(dream_model.predict(dream_env._encode(raw_state), deterministic=True)[0]),
-                "directo": int(direct_model.predict(raw_state, deterministic=True)[0]),
+                "directo": int(direct_model.predict(normalize_direct(raw_state), deterministic=True)[0]),
                 "regla": 1 - ts.green_phase,
             }
             blocked = ts.time_since_last_phase_change < ts.yellow_time + ts.min_green
@@ -117,12 +118,15 @@ def main() -> None:
     direct_env = TrafficEnvironment()
     dream_model = PPO.load(DREAM_PPO_PATH)
     direct_model = PPO.load(DIRECT_PPO_PATH)
+    # Identity for checkpoints trained without observation normalization;
+    # otherwise the statistics saved together with this exact checkpoint.
+    normalize_direct = load_obs_normalizer(DIRECT_PPO_PATH, direct_env)
 
     policies = [
         ("PPO (sueno)", dream_env,
          lambda obs, step: int(dream_model.predict(obs, deterministic=True)[0])),
         ("PPO (RL directo)", direct_env,
-         lambda obs, step: int(direct_model.predict(obs, deterministic=True)[0])),
+         lambda obs, step: int(direct_model.predict(normalize_direct(obs), deterministic=True)[0])),
         ("Tiempo fijo (ciclo=5)", direct_env,
          lambda obs, step: 1 if step % FIXED_TIME_SWITCH_EVERY == 0 else 0),
         ("Regla: pedir fase contraria", direct_env,
@@ -150,7 +154,7 @@ def main() -> None:
     print("2) ACUERDO CONTRAFACTUAL SOBRE LOS MISMOS ESTADOS REALES (el PPO del sueno conduce SUMO)")
     print("=" * 118)
     seeds = [base + i for base in SEED_BASES for i in range(NUM_EPISODES)]
-    counts, dream_rewards = counterfactual_agreement(dream_env, dream_model, direct_model, seeds)
+    counts, dream_rewards = counterfactual_agreement(dream_env, dream_model, direct_model, normalize_direct, seeds)
     expected = np.concatenate([dream_table_rewards[base] for base in SEED_BASES])
     reproduced = bool(np.allclose(dream_rewards, expected, atol=0.05))
     print(f"Trayectorias del PPO del sueno reproducen la tabla 1: {'si' if reproduced else 'NO'}")
