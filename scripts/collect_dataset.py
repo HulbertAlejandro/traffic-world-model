@@ -19,13 +19,14 @@ PROCESSED_DIR = DATASET_ROOT / "processed"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-DEFAULT_NUM_EPISODES = 40
+DEFAULT_NUM_EPISODES = 80
 
 
 def collect_dataset(
     num_episodes: int = DEFAULT_NUM_EPISODES,
     steps_per_episode: int = 60,
     output_dir: str | Path = RAW_DIR,
+    seed_start: int = 0,
 ) -> list[Path]:
     """Collect one `.npz` file per episode, with full transition metadata.
 
@@ -33,6 +34,11 @@ def collect_dataset(
     ``time_step`` (0-indexed within the episode), plus ``terminated`` and
     ``truncated`` flags, so later stages can split by episode and reconstruct
     trajectories without guessing episode boundaries.
+
+    Episode ``i`` resets SUMO with seed ``seed_start + i``: sumo_rl only changes
+    its traffic seed when reset() receives one (otherwise it reuses the last
+    one), so without this every episode would share the same traffic
+    realization -- same principle as environments/reseeding_wrapper.py.
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -46,7 +52,7 @@ def collect_dataset(
             states, actions, rewards, next_states = [], [], [], []
             terminated_flags, truncated_flags = [], []
 
-            state, _ = env.reset()
+            state, _ = env.reset(seed=seed_start + episode_idx)
             for time_step in range(steps_per_episode):
                 action = action_space.sample()
                 next_state, reward, terminated, truncated, _ = env.step(action)

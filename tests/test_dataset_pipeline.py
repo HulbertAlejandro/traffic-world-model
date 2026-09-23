@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 
+import scripts.collect_dataset as collect_module
 from datasets.transition_dataset import TransitionDataset
+from scripts.collect_dataset import collect_dataset
 from scripts.merge_dataset import merge_files
 from scripts.normalize_dataset import normalize_dataset
 from scripts.split_dataset import split_dataset
@@ -88,3 +90,26 @@ def test_split_dataset_does_not_mix_episodes(tmp_path):
 
     total_ids = set().union(*episode_ids_per_split.values())
     assert total_ids == set(range(10))
+
+
+class _SeedRecordingEnv:
+    """Stands in for TrafficEnvironment: records the seed of every reset()."""
+
+    seeds_seen: list = []
+
+    def reset(self, **kwargs):
+        _SeedRecordingEnv.seeds_seen.append(kwargs.get("seed"))
+        return np.zeros(4, dtype=np.float32), {}
+
+    def step(self, action):
+        return np.zeros(4, dtype=np.float32), 0.0, False, False, {}
+
+    def close(self):
+        pass
+
+
+def test_collect_dataset_reseeds_every_episode(tmp_path, monkeypatch):
+    _SeedRecordingEnv.seeds_seen = []
+    monkeypatch.setattr(collect_module, "TrafficEnvironment", _SeedRecordingEnv)
+    collect_dataset(num_episodes=3, steps_per_episode=2, output_dir=tmp_path, seed_start=100)
+    assert _SeedRecordingEnv.seeds_seen == [100, 101, 102]
