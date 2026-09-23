@@ -1,8 +1,9 @@
-"""Train a PPO controller inside the Dream Environment (no SUMO interaction).
+"""Train a PPO controller inside the Dream Environment.
 
 This is the core experiment enabled by the World Model: the controller learns
 entirely from imagined rollouts produced by the trained LatentDynamicsLSTM,
-never touching the real simulator during training.
+never touching the real simulator during training. Checkpoint SELECTION is the
+one exception: see the EvalCallback comment in main().
 """
 
 from __future__ import annotations
@@ -25,6 +26,8 @@ if str(ROOT_DIR) not in sys.path:
 
 from configs import ControllerConfig
 from environments.dream_environment import DreamEnvironment
+from environments.encoded_traffic_environment import EncodedTrafficEnvironment
+from environments.reseeding_wrapper import ReseedingWrapper
 
 PROCESSED_DIR = ROOT_DIR / "datasets" / "processed"
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints"
@@ -32,7 +35,6 @@ CONTROLLER_DIR = CHECKPOINT_DIR / "controller"
 CONTROLLER_DIR.mkdir(parents=True, exist_ok=True)
 
 TRAIN_LATENT_PATH = PROCESSED_DIR / "train_latent.npz"
-VALIDATION_LATENT_PATH = PROCESSED_DIR / "validation_latent.npz"
 WORLD_MODEL_CHECKPOINT = CHECKPOINT_DIR / "world_model_best.pt"
 
 
@@ -57,7 +59,7 @@ def main() -> None:
     config = ControllerConfig()
     _set_seeds(config.seed)
 
-    for required in (TRAIN_LATENT_PATH, VALIDATION_LATENT_PATH, WORLD_MODEL_CHECKPOINT):
+    for required in (TRAIN_LATENT_PATH, WORLD_MODEL_CHECKPOINT):
         if not required.exists():
             raise FileNotFoundError(f"Missing {required}. Run the earlier pipeline stages first.")
 
@@ -66,11 +68,16 @@ def main() -> None:
         latent_episodes_path=TRAIN_LATENT_PATH,
         max_dream_steps=config.dream_max_steps,
     )
-    eval_env = DreamEnvironment(
-        checkpoint_path=WORLD_MODEL_CHECKPOINT,
-        latent_episodes_path=VALIDATION_LATENT_PATH,
-        max_dream_steps=config.dream_max_steps,
-    )
+    # Checkpoint selection runs on REAL SUMO, not on imagined rollouts: an
+    # investigation found imagined reward does not predict real reward (Pearson
+    # ~0.08 over 25 checkpoints of the same run), so picking the best
+    # checkpoint by imagined reward was, in practice, close to random -- see
+    # PROJECT_STATUS.md. Training itself still uses zero real SUMO steps, but
+    # this selection costs real interactions: 10 evaluations x 5 episodes x 60
+    # steps = 3,000 real SUMO steps per run. ReseedingWrapper gives every
+    # evaluation the same 5 fixed traffic seeds (20000-20004); without it,
+    # sumo_rl would reuse one seed for all episodes.
+    eval_env = ReseedingWrapper(EncodedTrafficEnvironment(), ReseedingWrapper.fixed_eval_seeds())
 
     model = PPO(
         "MlpPolicy",
@@ -88,8 +95,8 @@ def main() -> None:
         eval_env,
         best_model_save_path=str(CONTROLLER_DIR),
         log_path=str(CONTROLLER_DIR),
-        eval_freq=max(config.n_steps, 1000),
-        n_eval_episodes=20,
+        eval_freq=5000,
+        n_eval_episodes=5,
         deterministic=True,
     )
 
@@ -100,7 +107,10 @@ def main() -> None:
     save_hyperparameters(final_path, config)
     save_hyperparameters(CONTROLLER_DIR / "best_model.zip", config)
     print(f"Final policy saved to: {final_path}")
-    print(f"Best policy (by validation-seeded dream reward) saved to: {CONTROLLER_DIR / 'best_model.zip'}")
+    print(f"Best policy (by real-SUMO evaluation reward) saved to: {CONTROLLER_DIR / 'best_model.zip'}")
+
+    train_env.close()
+    eval_env.close()
 
 
 if __name__ == "__main__":
