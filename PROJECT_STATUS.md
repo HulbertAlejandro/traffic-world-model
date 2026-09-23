@@ -1,15 +1,192 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: el controlador PPO **v1** (`dream_max_steps=7`) es el resultado
-oficial del método World Model, evaluado contra SUMO real con el puente
-`EncodedTrafficEnvironment` ya corregido (bug de normalización, `990c6e5`); 36/36 tests en
-verde. **v1 supera a tiempo fijo en los 30 episodios evaluados (dos semillas), sin
-solapamiento de rangos, con ~50% menos espera y ~31% menos cola; en throughput empata o
-queda levemente por debajo.** La historia completa, incluido un diagnóstico y un fix
-(`dream_max_steps=20`) que resultaron ser artefactos de ese bug, está en la sección
-siguiente.
+Última verificación: bloque del baseline de RL directo cerrado (commits `6c648d4`,
+`1a2874c`), 39/39 tests en verde. **Hallazgo final: ni el PPO entrenado en el sueño
+(v1, resultado oficial del método World Model) ni el PPO de RL directo aprendieron
+control dependiente del estado.** Ambos convergen a la misma regla simple, "pedir siempre
+la fase contraria", que es la mejor política encontrada en este escenario de demanda baja
+y simétrica. **En este escenario no hay ahorro demostrable de interacciones reales con
+SUMO**: el pipeline World Model consumió 2,400 transiciones reales (dataset) y el RL
+directo llegó a la misma regla en ≤2,600. Ver la sección siguiente.
+
+## ✅ Baseline de RL directo y hallazgo final: ambos métodos convergen a la misma regla, sin ahorro de interacciones demostrable en este escenario
+
+### 1. Qué se construyó
+
+- **`environments/reseeding_wrapper.py`** (`ReseedingWrapper`). sumo-rl solo cambia la
+  semilla de tráfico cuando `reset()` la recibe explícitamente; si no, reutiliza la
+  última (`SumoEnvironment.reset`). Stable-Baselines3 llama a `reset()` sin semilla en
+  cada frontera de episodio, así que sin el wrapper el PPO directo habría entrenado y
+  se habría evaluado siempre sobre la misma realización de tráfico. El wrapper asigna
+  una semilla nueva en cada episodio de entrenamiento (10000, 10001, …) y un conjunto
+  fijo que cicla en `EvalCallback` (20000–20004); una semilla explícita siempre gana.
+  Verificado con un registro de cada `reset()` real:
+  - Entrenamiento: 171 reinicios, 171 semillas únicas. La primera es 0 (la pasa SB3
+    explícitamente por `PPO(seed=0)`), después 10000–10169 consecutivas.
+  - `EvalCallback`: 60 reinicios. Cada una de las 10 evaluaciones cubre exactamente una
+    vez las 5 semillas, rotadas una posición porque `DummyVecEnv` reinicia
+    automáticamente tras el quinto episodio y consume una semilla que se descarta. Esto
+    solo funciona porque `n_eval_episodes` (5) coincide con la longitud del ciclo.
+  - 3 tests nuevos (`tests/test_reseeding_wrapper.py`), sin SUMO.
+- **`training/train_controller_direct.py`**: PPO (`MlpPolicy`, mismos hiperparámetros de
+  `ControllerConfig`) entrenado directamente sobre el estado crudo de 26 dimensiones de
+  `TrafficEnvironment`, sin Autoencoder ni Dream Environment. Presupuesto deliberadamente
+  modesto: 10,000 timesteps (SB3 completa hasta 10,240, múltiplo de `n_steps`), más
+  10 evaluaciones × 5 episodios × 60 pasos = 3,000 pasos de evaluación. Duró 262 s. Su
+  `.json` de hiperparámetros registra `total_timesteps=10000`; `dream_max_steps` aparece
+  porque es un campo de `ControllerConfig`, pero no tiene efecto en esta corrida.
+- **`scripts/evaluate_direct_vs_dream.py`**: v1, PPO directo y tiempo fijo contra SUMO
+  real, mismo protocolo de siempre (15 episodios, `seed_base=3000` y `5000`, semillas
+  distintas de las de entrenamiento y `EvalCallback`).
+
+### 2. Primera señal de alarma
+
+- **PPO directo y v1 dan un reward casi idéntico episodio por episodio**: 22 de 30
+  episodios difieren en menos de 1 punto (por ejemplo -294.0/-293.7, -257.0/-257.0,
+  -261.1/-261.1), a pesar de haber aprendido en espacios completamente distintos (`z`
+  imaginado frente a estado crudo real).
+- **`explained_variance` se mantuvo entre -0.002 y 0.0003 durante todo el
+  entrenamiento directo**: la función de valor no aprendió nada.
+- **La curva de `EvalCallback` se estanca desde el timestep 2000**:
+
+  ```
+  timestep | reward (5 episodios, semillas 20000-20004)
+     1000  | -549.12 +/- 287.15
+     2000  | -285.20 +/-  47.56
+     3000  | -285.06 +/-  35.52
+     4000  | -285.14 +/-  35.51
+     5000  | -285.18 +/-  35.50
+     6000  | -285.02 +/-  35.59
+     7000  | -285.02 +/-  35.55
+     8000  | -286.08 +/-  35.13
+     9000  | -284.34 +/-  35.60
+    10000  | -284.10 +/-  35.58   <- best_model.zip
+  ```
+
+  Después del timestep 2000 las mejoras son de décimas. El reward del rollout
+  (política estocástica, media de los últimos 100 episodios) baja de -2020 a -330.
+
+### 3. Investigación: dos pruebas
+
+**(a) Reglas triviales, evaluadas de forma independiente** (su propio
+`TrafficEnvironment`, mismo `run_policy` del script de evaluación):
+
+```
+                                          |             reward |    espera_prom |    cola_prom |   throughput
+"Pedir siempre la fase contraria", 3000   |  -287.83 +/-  23.87 |  3.82 +/- 0.32 | 1.15 +/- 0.09 | 13.47 +/- 2.03
+"Pedir siempre la fase contraria", 5000   |  -293.43 +/-  41.28 |  3.90 +/- 0.56 | 1.17 +/- 0.11 | 13.87 +/- 2.53
+"Alternar 0/1 cada paso", 3000            |  -733.53 +/-  64.83 | 10.50 +/- 0.93 | 1.90 +/- 0.15 | 13.40 +/- 2.47
+"Alternar 0/1 cada paso", 5000            |  -748.60 +/-  55.87 | 10.69 +/- 0.81 | 1.96 +/- 0.13 | 13.47 +/- 3.10
+```
+
+"Pedir siempre la fase contraria" (acción = `1 - green_phase`, es decir, cambiar en
+cuanto `min_green` lo permite) **reproduce a v1 casi exacto**: la misma espera, cola y
+throughput a dos decimales, la misma desviación del reward, y un reward por episodio
+0.0–0.1 peor que v1. "Alternar 0/1 cada paso" es mucho peor que tiempo fijo, porque la
+mitad de sus peticiones caen en pasos bloqueados por `min_green`.
+
+**(b) Comparación contrafactual sobre las trayectorias reales de v1** (v1 conduce SUMO
+en las semillas 3000–3014 y 5000–5014; en cada estado real se pregunta qué elegirían
+v1, el PPO directo y la regla, sin ejecutar nada más). Los 30 rewards de v1 reproducen
+sus valores oficiales. Un paso está "bloqueado" cuando
+`time_since_last_phase_change < yellow_time + min_green`: ahí ninguna acción cambia el
+tráfico, solo la penalización de 0.1 (ver nota técnica, punto 7).
+
+```
+1800 pasos, 930 bloqueados por min_green (51.7%; 31 de 60 en cada episodio)
+
+Par                   | acuerdo total | desacuerdos | en pasos bloqueados | acuerdo en pasos NO bloqueados
+v1 / PPO directo      |     78.7%     |     383     |     376 (98.2%)     |   99.2%  (7 de 870)
+v1 / regla            |     97.5%     |      45     |      45 (100%)      |  100.0%  (0 de 870)
+PPO directo / regla   |     79.8%     |     364     |     357 (98.1%)     |   99.2%  (7 de 870)
+```
+
+En los pasos donde la acción sí afecta al tráfico, **v1 coincide con la regla en 870 de
+870** y el PPO directo en 863 de 870. Los desacuerdos restantes caen casi enteramente en
+pasos bloqueados, donde la acción no tiene efecto real y solo mueve la penalización de
+0.1.
+
+### 4. Conclusión honesta
+
+**Ninguno de los dos PPO aprendió control dependiente del estado del tráfico.** Ambos
+redescubrieron la misma regla simple, "pedir siempre la fase contraria", que es la mejor
+política encontrada para este escenario concreto (demanda baja y simétrica, dos fases).
+No está demostrado que sea óptima: supera a tiempo fijo y a "alternar 0/1", y dos
+optimizadores independientes convergieron a ella, lo que la señala como la mejor
+estrategia alcanzable aquí, pero no es una prueba de optimalidad.
+
+**En este escenario no hay ahorro demostrable de interacciones reales con SUMO.**
+Contando todo lo que cada método necesitó de SUMO real para llegar a esa regla:
+
+| Método | Pasos reales de SUMO hasta la regla |
+|---|---|
+| World Model (v1) | **2,400** (dataset de 40 episodios × 60 pasos con acciones aleatorias, usado para entrenar y seleccionar el Autoencoder y el LSTM, sembrar el Dream Environment y validar el PPO) + 0 durante el entrenamiento del PPO |
+| RL directo | **≤2,000** de entrenamiento + 600 de evaluación = **≤2,600** (primera evaluación en el timestep 2000 ya en -285.20; como se evaluaba cada 1000 pasos, 2000 es una cota superior) |
+
+Los dos costos son del mismo orden de magnitud, y el del RL directo es una cota superior.
+El PPO v1 sí entrenó con cero pasos reales, pero el método World Model completo no: su
+costo en SUMO está en la recolección del dataset.
+
+La pregunta de investigación ("¿puede un modelo aprendido de la dinámica reducir las
+interacciones necesarias con SUMO sin perder desempeño?") se responde así para este
+escenario: **ambos métodos alcanzan el mismo desempeño con un costo de interacción
+comparable; no hay reducción demostrable.** Además, la comparación sostiene conclusiones
+sobre el costo para llegar a la regla, no sobre la calidad de control, porque ninguno de
+los dos aprendió control. El ahorro de interacciones que predice la propuesta solo sería
+demostrable en un escenario donde el RL directo necesitara **sustancialmente más de
+2,400 pasos reales** para converger. Este escenario, por ser demasiado simple, nunca lo
+exige (ver punto 6).
+
+### 5. Tabla final (SUMO real, 15 episodios por semilla, mismo protocolo)
+
+```
+                                       |             reward |     espera_prom |     cola_prom |    throughput
+PPO v1 (World Model), seed_base=3000   |  -287.76 +/-  23.87 |  3.82 +/-  0.32 | 1.15 +/- 0.09 | 13.47 +/- 2.03
+PPO v1 (World Model), seed_base=5000   |  -293.35 +/-  41.28 |  3.90 +/-  0.56 | 1.17 +/- 0.11 | 13.87 +/- 2.53
+PPO RL directo, seed_base=3000         |  -293.57 +/-  37.21 |  3.91 +/-  0.49 | 1.16 +/- 0.12 | 13.47 +/- 2.31
+PPO RL directo, seed_base=5000         |  -297.63 +/-  38.60 |  3.96 +/-  0.52 | 1.18 +/- 0.10 | 13.67 +/- 2.65
+Tiempo fijo (ciclo=5), seed_base=3000  |  -570.27 +/-  86.70 |  8.05 +/-  1.25 | 1.66 +/- 0.21 | 13.67 +/- 2.55
+Tiempo fijo (ciclo=5), seed_base=5000  |  -605.27 +/- 123.47 |  8.57 +/-  1.75 | 1.73 +/- 0.28 | 13.87 +/- 2.63
+Regla "fase contraria", seed_base=3000 |  -287.83 +/-  23.87 |  3.82 +/-  0.32 | 1.15 +/- 0.09 | 13.47 +/- 2.03
+Regla "fase contraria", seed_base=5000 |  -293.43 +/-  41.28 |  3.90 +/-  0.56 | 1.17 +/- 0.11 | 13.87 +/- 2.53
+```
+
+La regla "fase contraria" es la referencia del techo alcanzado en este escenario (la
+mejor política encontrada, sin aprendizaje). Frente a ella, v1 empata y el PPO directo
+queda levemente por debajo: su peor episodio es -403.6 (semilla 3009), frente a -314.1
+de la regla en la misma semilla. Las ventajas de v1 sobre tiempo fijo documentadas en
+la sección anterior (~50% menos espera, ~31% menos cola) siguen siendo ciertas
+numéricamente, pero son ventajas de la regla, no de control aprendido.
+
+### 6. Limitación más importante del proyecto (trabajo futuro)
+
+El escenario actual (demanda baja y simétrica: 200/90/60 vehículos por hora por acceso
+para recto/izquierda/derecha, dos fases) es **demasiado simple para que el control
+dependiente del estado aporte ventaja sobre una regla fija**: cambiar de fase en cuanto
+se pueda ya alcanza el mejor resultado encontrado. Un escenario con **demanda asimétrica
+o variable en el tiempo** es necesario para que la comparación distinga los métodos por
+calidad de control, y no solo por costo de aprendizaje. También es la condición para
+poder medir el ahorro de interacciones que predice la propuesta: requiere un problema
+donde el RL directo necesite sustancialmente más interacciones reales que las 2,400 del
+dataset del World Model.
+
+### 7. Nota técnica adicional (sin corregir)
+
+`ProjectRewardFunction` resta `delta × phase_change` (`delta=0.1`), y
+`TrafficEnvironment.step()` define `info["phase_change"] = float(action == 1)`. Es decir,
+se penaliza **pedir la fase 1**, no cambiar efectivamente de fase. Tiene la misma raíz
+que la confusión de semántica de acción ya documentada (la acción es el índice de fase
+verde destino, no "mantener/cambiar"). Es la única señal que distingue entre sí las
+acciones en pasos bloqueados por `min_green`, y es la explicación más probable (no
+verificada paso a paso) de las diferencias de 0.0–0.1 por episodio entre v1 y la regla.
 
 ## ✅ Controlador PPO contra SUMO real: historia completa y resultado oficial (v1)
+
+> **Actualización posterior**: el bloque del baseline de RL directo (sección de arriba)
+> mostró que v1 equivale en la práctica a la regla "pedir siempre la fase contraria"
+> (100% de acuerdo en los pasos donde la acción afecta al tráfico). Los números de esta
+> sección siguen siendo correctos, pero describen esa regla, no control aprendido
+> dependiente del estado.
 
 Esta sección reemplaza por completo la versión anterior. Cuenta en orden cronológico lo
 que realmente pasó. **Los pasos (a)–(d) se hicieron sin saberlo con un puente de
@@ -442,26 +619,28 @@ handoff anterior.
 3. Documentación de `ProjectActionSpace` engañosa: la acción es el índice de fase
    verde destino, no "mantener/cambiar" (ver notas técnicas de la sección del
    controlador PPO).
+4. `ProjectRewardFunction.phase_change` penaliza pedir la fase 1, no cambiar
+   efectivamente de fase (misma raíz que el punto 3; ver la sección del baseline de RL
+   directo, punto 7).
 
 ## ⚪ No implementado todavía
 
-- **Baseline de RL directo** (PPO entrenado directo contra SUMO, sin Dream
-  Environment) — pedido explícito de la Sección 18 de la propuesta, necesario para
-  responder si el World Model ahorró interacciones con SUMO frente a la alternativa
-  directa.
-- Transformer, TSMixer, evaluación final comparativa de los tres enfoques (tiempo
-  fijo vs. RL directo vs. World Model).
+- **Escenario de demanda asimétrica o variable en el tiempo**, para que el control
+  dependiente del estado aporte ventaja sobre una regla fija y la comparación distinga
+  métodos por calidad de control (ver la sección del baseline de RL directo, punto 6).
+- Transformer y TSMixer como sustitutos del LSTM (extensiones opcionales). En el
+  escenario actual no podrían mostrar mejor control, porque la política ya converge a
+  una regla fija.
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Al preparar el baseline de RL directo se encontró y corrigió un bug en
-`EncodedTrafficEnvironment`: no normalizaba con `scaler.pkl` (commit `990c6e5`). Eso
-obligó a re-evaluar todo lo medido con ese puente. v2 resultó peor de lo documentado;
-v1, re-evaluado, no tiene ningún episodio catastrófico y supera a v2 y a tiempo fijo en
-las 30 comparaciones. El diagnóstico de rachas y el fix `dream_max_steps=20` eran
-artefactos del bug. Decisión: v1 es el resultado oficial, `dream_max_steps` vuelve a 7 y
-el checkpoint de v2 se conserva como `best_model_v2_dream20_deprecated.zip`. Siguiente
-paso: el baseline de RL directo que pide la propuesta (Sección 18), comparado contra v1.
-Queda pendiente decidir si se cambia la semilla de SUMO en cada `reset` de entrenamiento
-y evaluación: sin eso, sumo-rl reutiliza la misma semilla y el PPO directo vería siempre
-el mismo tráfico.
+Se cerró el bloque del baseline de RL directo (Sección 18): `ReseedingWrapper`,
+`train_controller_direct.py` y `evaluate_direct_vs_dream.py` (commits `6c648d4`,
+`1a2874c`), 39/39 tests en verde. El PPO directo dio un reward casi idéntico al de v1
+episodio por episodio, y la investigación mostró por qué: ambos convergen a la regla
+"pedir siempre la fase contraria" (100% y 99.2% de acuerdo con ella en los pasos donde la
+acción afecta al tráfico). Ninguno aprendió control dependiente del estado, y en este
+escenario no hay ahorro demostrable de interacciones reales (2,400 del World Model
+frente a ≤2,600 del RL directo). La limitación central del proyecto es el escenario de
+demanda, demasiado simple. Siguiente paso a decidir: rediseñar el escenario de demanda
+(asimétrica o variable) o documentar esta conclusión como resultado final del trabajo.

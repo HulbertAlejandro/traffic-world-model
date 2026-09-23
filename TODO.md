@@ -52,26 +52,17 @@
       -421.69/-419.65 de v2 corregido) ya no son el resultado del método. Ver
       PROJECT_STATUS.md, sección "Controlador PPO contra SUMO real: historia completa y
       resultado oficial (v1)", incluida la lección metodológica.
-
-## Siguiente paso recomendado — Baseline de RL directo (PPO sin Dream Environment)
-
-Con el controlador PPO ya validado contra SUMO real, falta la pieza que la propuesta
-pide explícitamente (Sección 18) para responder la pregunta de investigación completa:
-
-- [ ] Entrenar un PPO directamente contra `TrafficEnvironment` (SUMO real), sin pasar
-      por el Dream Environment, como baseline de "RL directo".
-- [ ] Decidir antes de entrenar: cambiar la semilla de SUMO en cada `reset` de
-      entrenamiento y de `EvalCallback`. sumo-rl solo cambia la semilla si `reset()`
-      la recibe; si no, reutiliza la anterior, y el PPO directo entrenaría y se
-      evaluaría siempre sobre el mismo tráfico.
-- [ ] Comparar ese baseline contra el PPO v1 (resultado oficial del método,
-      `models/checkpoints/controller/best_model.zip`) usando el mismo protocolo de
-      evaluación ya validado (scripts/evaluate_controller_sumo.py, semillas de
-      EVALUACIÓN 3000 y 5000) -- la semilla de entrenamiento del baseline de RL directo
-      es independiente y no necesita coincidir con nada ya usado.
-- [ ] Con ese resultado, responder la pregunta de investigación del proyecto: ¿el
-      World Model realmente redujo las interacciones necesarias con SUMO frente a
-      entrenar RL directo, sin perder desempeño de control?
+- [x] Baseline de RL directo (Sección 18): `ReseedingWrapper`, `train_controller_direct.py`
+      y `evaluate_direct_vs_dream.py` (commits `6c648d4`, `1a2874c`), 39/39 tests en
+      verde. **Hallazgo**: ni v1 ni el PPO directo aprendieron control dependiente del
+      estado. Ambos convergen a la regla "pedir siempre la fase contraria", la mejor
+      política encontrada en este escenario (100% y 99.2% de acuerdo con ella en los pasos
+      donde la acción afecta al tráfico). **Sin ahorro demostrable de interacciones
+      reales** en este escenario: 2,400 del World Model (dataset) frente a ≤2,600 del RL
+      directo. Ver PROJECT_STATUS.md, sección "Baseline de RL directo y hallazgo final".
+- [x] Evaluación final en SUMO real: tiempo fijo vs. RL directo vs. World Model (más la
+      regla "fase contraria" como referencia). Tabla final en la misma sección de
+      PROJECT_STATUS.md.
 
 ## Pendiente, no bloqueante
 
@@ -83,10 +74,15 @@ pide explícitamente (Sección 18) para responder la pregunta de investigación 
       (confirmado en sumo_rl.TrafficSignal.set_next_phase). No es bloqueante porque el
       pipeline completo usa la convención de forma consistente, pero la documentación es
       engañosa para cualquiera que lea el código después.
+- [ ] Corregir `ProjectRewardFunction.phase_change`: hoy penaliza pedir la fase 1
+      (`action == 1`), no cambiar efectivamente de fase. Misma raíz que el punto
+      anterior; ver PROJECT_STATUS.md, sección del baseline de RL directo, punto 7.
 
 ## Después (orden según la propuesta del proyecto)
 
-- [ ] Evaluación final en SUMO real: tiempo fijo vs. RL directo vs. World Model.
+- [ ] Rediseñar el escenario de demanda (asimétrica o variable en el tiempo) para que el
+      control dependiente del estado aporte ventaja medible sobre una regla fija -- el
+      escenario actual no permite distinguir métodos por calidad de control.
 - [ ] Extensiones opcionales (misma prioridad): sustituir el LSTM por Transformer, y
       por separado, por TSMixer — reutilizando el mismo protocolo de comparación que
       ya se usó en el Experimento 0 (mismos hiperparámetros, mismo criterio de
