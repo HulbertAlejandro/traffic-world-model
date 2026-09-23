@@ -28,6 +28,8 @@ models/checkpoints/controller/*.zip
 models/checkpoints/controller/*.npz
 models/checkpoints/controller_direct/*.zip
 models/checkpoints/controller_direct/*.npz
+models/checkpoints/controller/*.pkl
+models/checkpoints/controller_direct/*.pkl
 
 # Logs
 logs/

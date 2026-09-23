@@ -35,7 +35,7 @@ if str(ROOT_DIR) not in sys.path:
 from configs import ControllerConfig
 from environments.reseeding_wrapper import ReseedingWrapper
 from environments.traffic_environment import TrafficEnvironment
-from training.train_controller import save_hyperparameters
+from training.train_controller import build_normalized_envs, save_hyperparameters
 
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints"
 CONTROLLER_DIRECT_DIR = CHECKPOINT_DIR / "controller_direct"
@@ -63,8 +63,15 @@ def main() -> None:
     config = ControllerConfig()
     _set_seeds(config.seed)
 
-    train_env = ReseedingWrapper(TrafficEnvironment(), ReseedingWrapper.training_seeds())
-    eval_env = ReseedingWrapper(TrafficEnvironment(), ReseedingWrapper.fixed_eval_seeds())
+    # Reward normalization only (see build_normalized_envs). NOTE: unlike the
+    # Dream PPO, this policy receives the RAW, unnormalized 26-dim state;
+    # observation normalization is deliberately left out of this change so only
+    # one variable (reward scale) differs from earlier runs.
+    train_env, eval_env = build_normalized_envs(
+        lambda: ReseedingWrapper(TrafficEnvironment(), ReseedingWrapper.training_seeds()),
+        lambda: ReseedingWrapper(TrafficEnvironment(), ReseedingWrapper.fixed_eval_seeds()),
+        config,
+    )
 
     model = PPO(
         "MlpPolicy",
@@ -99,6 +106,7 @@ def main() -> None:
     model.save(final_path)
     save_hyperparameters(final_path, run_config)
     save_hyperparameters(CONTROLLER_DIRECT_DIR / "best_model.zip", run_config)
+    train_env.save(str(CONTROLLER_DIRECT_DIR / "vec_normalize.pkl"))
     print(f"Final policy saved to: {final_path}")
     print(f"Best policy saved to: {CONTROLLER_DIRECT_DIR / 'best_model.zip'}")
 

@@ -18,7 +18,9 @@ import numpy as np
 import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.utils import set_random_seed
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
@@ -55,6 +57,38 @@ def save_hyperparameters(checkpoint_path: Path, config: ControllerConfig) -> Non
     )
 
 
+def build_normalized_envs(make_train_env, make_eval_env, config: ControllerConfig):
+    """Wrap a training and an evaluation env for PPO with reward normalization.
+
+    Reward (not observation) normalization: the value function never learned
+    (explained_variance ~0 in every run) and value_loss matched the variance of
+    unnormalized returns (std in the hundreds to thousands) -- see
+    PROJECT_STATUS.md. Observations are left untouched, so a trained policy is
+    used at inference exactly as before and no normalization statistics are
+    needed to evaluate it.
+
+    Monitor sits BELOW VecNormalize so episode logs keep the real reward. The
+    eval env must be wrapped the same way: EvalCallback copies the training
+    statistics into it before every evaluation (sync_envs_normalization) and
+    fails otherwise. training=False freezes those statistics; norm_reward=False
+    keeps the reported evaluation reward real, comparable with earlier tables.
+    """
+    train_env = VecNormalize(
+        DummyVecEnv([lambda: Monitor(make_train_env())]),
+        norm_obs=False,
+        norm_reward=config.normalize_reward,
+        clip_reward=config.reward_clip,
+        gamma=config.gamma,
+    )
+    eval_env = VecNormalize(
+        DummyVecEnv([lambda: Monitor(make_eval_env())]),
+        training=False,
+        norm_obs=False,
+        norm_reward=False,
+    )
+    return train_env, eval_env
+
+
 def main() -> None:
     config = ControllerConfig()
     _set_seeds(config.seed)
@@ -63,11 +97,6 @@ def main() -> None:
         if not required.exists():
             raise FileNotFoundError(f"Missing {required}. Run the earlier pipeline stages first.")
 
-    train_env = DreamEnvironment(
-        checkpoint_path=WORLD_MODEL_CHECKPOINT,
-        latent_episodes_path=TRAIN_LATENT_PATH,
-        max_dream_steps=config.dream_max_steps,
-    )
     # Checkpoint selection runs on REAL SUMO, not on imagined rollouts: an
     # investigation found imagined reward does not predict real reward (Pearson
     # ~0.08 over 25 checkpoints of the same run), so picking the best
@@ -77,7 +106,15 @@ def main() -> None:
     # steps = 3,000 real SUMO steps per run. ReseedingWrapper gives every
     # evaluation the same 5 fixed traffic seeds (20000-20004); without it,
     # sumo_rl would reuse one seed for all episodes.
-    eval_env = ReseedingWrapper(EncodedTrafficEnvironment(), ReseedingWrapper.fixed_eval_seeds())
+    train_env, eval_env = build_normalized_envs(
+        lambda: DreamEnvironment(
+            checkpoint_path=WORLD_MODEL_CHECKPOINT,
+            latent_episodes_path=TRAIN_LATENT_PATH,
+            max_dream_steps=config.dream_max_steps,
+        ),
+        lambda: ReseedingWrapper(EncodedTrafficEnvironment(), ReseedingWrapper.fixed_eval_seeds()),
+        config,
+    )
 
     model = PPO(
         "MlpPolicy",
@@ -106,6 +143,9 @@ def main() -> None:
     model.save(final_path)
     save_hyperparameters(final_path, config)
     save_hyperparameters(CONTROLLER_DIR / "best_model.zip", config)
+    # Only needed to resume training (or if norm_obs is ever enabled);
+    # evaluating the policy does not require it.
+    train_env.save(str(CONTROLLER_DIR / "vec_normalize.pkl"))
     print(f"Final policy saved to: {final_path}")
     print(f"Best policy (by real-SUMO evaluation reward) saved to: {CONTROLLER_DIR / 'best_model.zip'}")
 

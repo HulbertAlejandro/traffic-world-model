@@ -4,10 +4,13 @@ import numpy as np
 import pytest
 import torch
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.vec_env import VecNormalize
 
 from configs import ControllerConfig
 from environments.dream_environment import DreamEnvironment
 from models.world_model import LatentDynamicsLSTM
+from training.train_controller import build_normalized_envs
 
 
 LATENT_DIM = 4
@@ -70,6 +73,43 @@ def test_controller_config_rejects_invalid_gamma():
 def test_controller_config_rejects_invalid_dream_max_steps():
     with pytest.raises(ValueError, match="dream_max_steps"):
         ControllerConfig(dream_max_steps=0)
+
+
+def test_controller_config_rejects_invalid_reward_clip():
+    with pytest.raises(ValueError, match="reward_clip"):
+        ControllerConfig(reward_clip=0.0)
+
+
+def test_normalized_env_stack_trains_and_syncs_through_eval_callback(tmp_path):
+    """The exact wrapping used by both training scripts, with synthetic models
+    (a DreamEnvironment stands in for the SUMO-based eval env). EvalCallback
+    calls sync_envs_normalization before each evaluation and asserts both stacks
+    are wrapped the same way, so a mis-wrapped eval env fails here, not after
+    minutes of real training."""
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[20, 20])
+    config = ControllerConfig(n_steps=16, batch_size=8, n_epochs=1)
+
+    train_env, eval_env = build_normalized_envs(
+        lambda: DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=5),
+        lambda: DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=5, eval_seed=0),
+        config,
+    )
+    model = PPO("MlpPolicy", train_env, n_steps=16, batch_size=8, n_epochs=1, seed=0, verbose=0)
+    # log_path is required for EvalCallback to record evaluations_timesteps
+    # (both training scripts pass one too).
+    callback = EvalCallback(
+        eval_env, eval_freq=16, n_eval_episodes=2, deterministic=True, verbose=0, log_path=str(tmp_path)
+    )
+    model.learn(total_timesteps=48, callback=callback)
+
+    assert len(callback.evaluations_timesteps) >= 1          # at least one evaluation ran
+    assert isinstance(model.get_vec_normalize_env(), VecNormalize)
+    assert train_env.ret_rms.count > 1                       # training stats were updated
+    # eval_env has training=False, so it never updates its own statistics: a
+    # non-trivial count here can only come from sync_envs_normalization.
+    assert eval_env.ret_rms.count > 1
+    assert eval_env.norm_reward is False and eval_env.training is False
 
 
 def test_ppo_trains_a_few_steps_inside_dream_environment(tmp_path):

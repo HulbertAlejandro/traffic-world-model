@@ -31,6 +31,14 @@ class ControllerConfig:
     # Reverted to 7; the field is kept so the horizon stays an explicit knob.
     dream_max_steps: int = 7
 
+    # Reward normalization (VecNormalize) during PPO training, in both the
+    # Dream-trained and the direct-RL scripts. Recorded here so every
+    # checkpoint's sidecar .json says whether it was trained with it.
+    # reward_clip bounds the NORMALIZED reward (in units of the running std of
+    # the discounted return), not the raw one.
+    normalize_reward: bool = True
+    reward_clip: float = 10.0
+
     def __post_init__(self) -> None:
         if self.seed < 0:
             raise ValueError(f"seed must be non-negative, got {self.seed}")
@@ -48,3 +56,5 @@ class ControllerConfig:
             raise ValueError(f"gamma must be in (0, 1], got {self.gamma}")
         if self.dream_max_steps <= 0:
             raise ValueError(f"dream_max_steps must be positive, got {self.dream_max_steps}")
+        if self.reward_clip <= 0:
+            raise ValueError(f"reward_clip must be positive, got {self.reward_clip}")
