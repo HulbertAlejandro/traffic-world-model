@@ -18,21 +18,23 @@
     <route id="west_left" edges="left0A0 A0bottom0"/>
     <route id="west_right" edges="left0A0 A0top0"/>
 
-    <!-- Demanda por brazo: 200 (recto) + 90 (izquierda) + 60 (derecha) = 350 veh/h por brazo -->
+    <!-- Demanda ASIMETRICA. Via principal Norte/Sur: 286 (recto) + 129 (izquierda) + 85 (derecha) = 500 veh/h por brazo.
+         Via secundaria Este/Oeste: 85 (recto) + 40 (izquierda) + 25 (derecha) = 150 veh/h por brazo.
+         La demanda simetrica anterior (350 veh/h por brazo) esta en single-intersection_symmetric_backup.rou.xml -->
 
-    <flow id="north_straight_flow" type="passenger" route="north_straight" begin="0" end="3600" vehsPerHour="200" departLane="random" departSpeed="max"/>
-    <flow id="north_left_flow" type="passenger" route="north_left" begin="0" end="3600" vehsPerHour="90" departLane="random" departSpeed="max"/>
-    <flow id="north_right_flow" type="passenger" route="north_right" begin="0" end="3600" vehsPerHour="60" departLane="random" departSpeed="max"/>
+    <flow id="north_straight_flow" type="passenger" route="north_straight" begin="0" end="3600" vehsPerHour="286" departLane="random" departSpeed="max"/>
+    <flow id="north_left_flow" type="passenger" route="north_left" begin="0" end="3600" vehsPerHour="129" departLane="random" departSpeed="max"/>
+    <flow id="north_right_flow" type="passenger" route="north_right" begin="0" end="3600" vehsPerHour="85" departLane="random" departSpeed="max"/>
 
-    <flow id="south_straight_flow" type="passenger" route="south_straight" begin="0" end="3600" vehsPerHour="200" departLane="random" departSpeed="max"/>
-    <flow id="south_left_flow" type="passenger" route="south_left" begin="0" end="3600" vehsPerHour="90" departLane="random" departSpeed="max"/>
-    <flow id="south_right_flow" type="passenger" route="south_right" begin="0" end="3600" vehsPerHour="60" departLane="random" departSpeed="max"/>
+    <flow id="south_straight_flow" type="passenger" route="south_straight" begin="0" end="3600" vehsPerHour="286" departLane="random" departSpeed="max"/>
+    <flow id="south_left_flow" type="passenger" route="south_left" begin="0" end="3600" vehsPerHour="129" departLane="random" departSpeed="max"/>
+    <flow id="south_right_flow" type="passenger" route="south_right" begin="0" end="3600" vehsPerHour="85" departLane="random" departSpeed="max"/>
 
-    <flow id="east_straight_flow" type="passenger" route="east_straight" begin="0" end="3600" vehsPerHour="200" departLane="random" departSpeed="max"/>
-    <flow id="east_left_flow" type="passenger" route="east_left" begin="0" end="3600" vehsPerHour="90" departLane="random" departSpeed="max"/>
-    <flow id="east_right_flow" type="passenger" route="east_right" begin="0" end="3600" vehsPerHour="60" departLane="random" departSpeed="max"/>
+    <flow id="east_straight_flow" type="passenger" route="east_straight" begin="0" end="3600" vehsPerHour="85" departLane="random" departSpeed="max"/>
+    <flow id="east_left_flow" type="passenger" route="east_left" begin="0" end="3600" vehsPerHour="40" departLane="random" departSpeed="max"/>
+    <flow id="east_right_flow" type="passenger" route="east_right" begin="0" end="3600" vehsPerHour="25" departLane="random" departSpeed="max"/>
 
-    <flow id="west_straight_flow" type="passenger" route="west_straight" begin="0" end="3600" vehsPerHour="200" departLane="random" departSpeed="max"/>
-    <flow id="west_left_flow" type="passenger" route="west_left" begin="0" end="3600" vehsPerHour="90" departLane="random" departSpeed="max"/>
-    <flow id="west_right_flow" type="passenger" route="west_right" begin="0" end="3600" vehsPerHour="60" departLane="random" departSpeed="max"/>
+    <flow id="west_straight_flow" type="passenger" route="west_straight" begin="0" end="3600" vehsPerHour="85" departLane="random" departSpeed="max"/>
+    <flow id="west_left_flow" type="passenger" route="west_left" begin="0" end="3600" vehsPerHour="40" departLane="random" departSpeed="max"/>
+    <flow id="west_right_flow" type="passenger" route="west_right" begin="0" end="3600" vehsPerHour="25" departLane="random" departSpeed="max"/>
 </routes>
