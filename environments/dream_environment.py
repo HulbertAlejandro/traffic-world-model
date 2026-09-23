@@ -34,8 +34,8 @@ Design
   windows, and predicts purely in z-space from there.
 - Imagined rewards are CLIPPED to ``[REWARD_CLIP_MIN, REWARD_CLIP_MAX]``, the
   1st/99th percentile of the real rewards observed in
-  ``datasets/processed/train_latent.npz`` (min=-324.10, max=2.90 in that
-  split; percentiles chosen over the raw min/max to ignore rare extreme
+  ``datasets/processed/train_latent.npz`` (min=-504.10, max=2.00 in that
+  split under the asymmetric 500/150 veh/h demand; percentiles chosen over the raw min/max to ignore rare extreme
   outliers). This is a second, complementary mitigation to lowering
   ``max_dream_steps`` to 7: that change reduces how often the model is fed
   action-run lengths it rarely saw in training, but constant-action policies
@@ -79,8 +79,10 @@ DEFAULT_CHECKPOINT_PATH = ROOT_DIR / "models" / "checkpoints" / "world_model_bes
 
 # 1st/99th percentile of real rewards in datasets/processed/train_latent.npz,
 # computed directly from that file (not invented): see the module docstring
-# for why clipping to this empirical range exists.
-REWARD_CLIP_MIN = -165.05
+# for why clipping to this empirical range exists. Must be recomputed whenever
+# the dataset is regenerated: under the earlier symmetric demand they were
+# [-165.05, 1.00]; recomputed for the asymmetric 500/150 veh/h demand.
+REWARD_CLIP_MIN = -266.13
 REWARD_CLIP_MAX = 1.00
 
 
