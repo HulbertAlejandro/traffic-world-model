@@ -8,6 +8,5 @@
   "gamma": 0.99,
   "dream_max_steps": 7,
   "normalize_reward": true,
-  "reward_clip": 10.0,
-  "normalize_obs": true
+  "reward_clip": 10.0
 }
