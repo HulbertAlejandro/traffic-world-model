@@ -22,6 +22,10 @@ datasets/processed/*
 *.pth
 *.pt
 *.ckpt
+# PPO controller: pesos SB3 (.zip) y evaluaciones de EvalCallback (.npz);
+# los .json de hiperparámetros junto a cada checkpoint sí se versionan
+models/checkpoints/controller/*.zip
+models/checkpoints/controller/*.npz
 
 # Logs
 logs/
