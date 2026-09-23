@@ -26,6 +26,8 @@ datasets/processed/*
 # los .json de hiperparámetros junto a cada checkpoint sí se versionan
 models/checkpoints/controller/*.zip
 models/checkpoints/controller/*.npz
+models/checkpoints/controller_direct/*.zip
+models/checkpoints/controller_direct/*.npz
 
 # Logs
 logs/
