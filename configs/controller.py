@@ -22,15 +22,14 @@ class ControllerConfig:
     n_epochs: int = 10
     gamma: float = 0.99
 
-    # Overrides DreamEnvironment's own default (7) for THIS training run only --
-    # a deliberate design choice, not a global change to DreamEnvironment. Gives
-    # the policy room to experience longer action streaks during training than
-    # DreamEnvironment allows by default in its other uses (evaluation/analysis),
-    # at the cost of noisier z/reward predictions in the later steps of each
-    # imagined episode (the LSTM's own compounding error grows with horizon, per
-    # Experimento 1). 20 chosen to comfortably cover the streak lengths (up to
-    # 14) observed to cause catastrophic failures in the SUMO evaluation.
-    dream_max_steps: int = 20
+    # Imagined horizon for THIS training run; matches DreamEnvironment's own
+    # default (7). A value of 20 was tried (commit 8d84d52) to cover long action
+    # streaks that seemed to cause catastrophic SUMO episodes, but that diagnosis
+    # turned out to be an artifact of the EncodedTrafficEnvironment normalization
+    # bug (commit 990c6e5): with the corrected bridge, the policy trained with 7
+    # (v1) beats the one trained with 20 (v2) in all 30 evaluated episodes.
+    # Reverted to 7; the field is kept so the horizon stays an explicit knob.
+    dream_max_steps: int = 7
 
     def __post_init__(self) -> None:
         if self.seed < 0:
