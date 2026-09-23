@@ -1,83 +1,216 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: controlador PPO validado contra SUMO real (`915bd79`, `8d84d52`),
-35/35 tests en verde. **El controlador SÍ supera a tiempo fijo en reward/espera/cola,
-verificado en dos corridas independientes con semillas distintas** — ver el detalle
-completo abajo, incluida la salvedad de throughput que no se suaviza.
+Última verificación: el controlador PPO **v1** (`dream_max_steps=7`) es el resultado
+oficial del método World Model, evaluado contra SUMO real con el puente
+`EncodedTrafficEnvironment` ya corregido (bug de normalización, `990c6e5`); 36/36 tests en
+verde. **v1 supera a tiempo fijo en los 30 episodios evaluados (dos semillas), sin
+solapamiento de rangos, con ~50% menos espera y ~31% menos cola; en throughput empata o
+queda levemente por debajo.** La historia completa, incluido un diagnóstico y un fix
+(`dream_max_steps=20`) que resultaron ser artefactos de ese bug, está en la sección
+siguiente.
 
-## ✅ Evaluación del controlador PPO contra SUMO real
+## ✅ Controlador PPO contra SUMO real: historia completa y resultado oficial (v1)
 
-**Qué se construyó**: `environments/encoded_traffic_environment.py`
-(`EncodedTrafficEnvironment`, commit `915bd79`) — envuelve `TrafficEnvironment`
-corriendo el Autoencoder congelado en vivo para traducir el estado crudo de 26
-dimensiones a `z` antes de que la política PPO (entrenada enteramente en `z` dentro
-del Dream Environment) lo vea. Es el único punto del proyecto donde el Encoder corre
-contra datos vivos de SUMO en vez de episodios pre-codificados. Junto con él,
-`scripts/evaluate_controller_sumo.py`, que compara PPO contra tiempo fijo y acción
-aleatoria usando métricas reales de tráfico (espera, cola, throughput) de
-`TrafficEnvironment`, no solo el reward abstracto.
+Esta sección reemplaza por completo la versión anterior. Cuenta en orden cronológico lo
+que realmente pasó. **Los pasos (a)–(d) se hicieron sin saberlo con un puente de
+evaluación defectuoso**; sus números se conservan como registro, no como resultados
+válidos. El resultado oficial está en la tabla final de esta sección.
 
-**Primera corrida — resultado engañoso con muestra pequeña**: con 5 episodios
-(`seed_base=3000`), PPO parecía ganarle a tiempo fijo (-453.18 vs -547.40). Al subir a
-15 episodios, el panorama se invirtió: PPO quedó **peor** que tiempo fijo en promedio
-(-682.09 vs -570.27), con una desviación estándar enorme (`652.41`, ~7.5x la de tiempo
-fijo). Inspeccionando los 15 valores uno por uno se reveló un **patrón bimodal, no
-ruido uniforme**: 11 de 15 episodios de PPO eran claramente mejores que tiempo fijo
-(media ≈-348), pero 4 episodios eran catastróficos (-927.80, -1033.40, -2540.60,
--1902.50), arrastrando el promedio.
+**Infraestructura de evaluación**: `environments/encoded_traffic_environment.py`
+(`EncodedTrafficEnvironment`, commit `915bd79`) envuelve `TrafficEnvironment` y corre el
+Encoder congelado en vivo para traducir el estado crudo de 26 dimensiones a `z` antes de
+que la política PPO (entrenada enteramente en `z` dentro del Dream Environment) lo vea.
+Junto con él, `scripts/evaluate_controller_sumo.py` compara PPO contra tiempo fijo y
+acción aleatoria con métricas reales de tráfico (espera, cola, throughput) de
+`TrafficEnvironment`, no solo con el reward abstracto. Protocolo: 15 episodios por
+semilla base, semillas de evaluación `seed_base=3000` y `seed_base=5000`.
 
-**Diagnóstico de los 4 episodios catastróficos**: 3 de 4 (seeds 3001, 3011, 3013)
-mostraron rachas de la misma acción de **6, 9 y 14 pasos consecutivos** — más allá de
-lo que la política pudo experimentar durante el entrenamiento, ya que cada episodio
-imaginado del Dream Environment se truncaba a `max_dream_steps=7`. Cuanto más larga la
-racha, peor el resultado. El cuarto episodio (seed=3005) es un **modo de fallo
-distinto**: un pico puntual de `waiting_total=83.00` en el paso 30 (≈10x cualquier
-otro valor del mismo episodio), sin racha anormal (`max_run=4`, igual que un episodio
-bueno) y sin un salto correspondiente en el número de vehículos — apunta a una mala
-decisión de fase en un momento puntual, no a un patrón de acción problemático. **Este
-cuarto modo de fallo queda documentado como limitación conocida, NO resuelta** — no se
-investigó más a fondo ni se intentó corregir.
+### (a) v1 entrenado (`max_dream_steps=7`) y primera evaluación, con el bug sin saberlo
 
-**Fix aplicado**: `ControllerConfig.dream_max_steps=20` (commit `8d84d52`) — un campo
-nuevo, exclusivo de este entrenamiento, que **no toca** el default de
-`DreamEnvironment` (sigue en 7, usado sin cambios en `evaluate_controller.py` y
-`analyze_controller_actions.py`). Se respaldó el modelo anterior como
-`best_model_v1_dream7.zip`/`ppo_controller_final_v1_dream7.zip`/
-`evaluations_v1_dream7.npz` antes de sobrescribir, y se reentrenó completo (50,176
-timesteps).
+v1 es el PPO entrenado dentro del Dream Environment con su horizonte por defecto de 7
+pasos; el detalle del entrenamiento está en la sección "Controlador PPO — implementado y
+entrenado dentro del Dream Environment", más abajo. Primera evaluación en SUMO: con 5
+episodios PPO parecía ganar a tiempo fijo (-453.18 frente a -547.40). Con 15 episodios
+(`seed_base=3000`) se invirtió: **-682.09 ± 652.41** frente a -570.27 ± 86.70, con un
+patrón bimodal. 11 de 15 episodios eran mejores que tiempo fijo (media ≈-348), pero 4
+eran catastróficos: -927.80, -1033.40, -2540.60 y -1902.50.
 
-**Resultado v2, verificado con dos corridas independientes**:
+### (b) Diagnóstico, también con el bug sin saberlo
+
+Tres de los cuatro episodios catastróficos (seeds 3001, 3011, 3013) tenían rachas de la
+misma acción de 6, 9 y 14 pasos, más largas que el horizonte de 7 pasos del Dream
+Environment. Se concluyó que la política no había podido experimentar esas rachas
+durante el entrenamiento. El cuarto (seed 3005) se clasificó como un modo de fallo
+distinto: un pico puntual de `waiting_total=83.00` en el paso 30, sin racha anormal
+(`max_run=4`). Quedó documentado como limitación conocida no resuelta. **Ver (i): todo
+este diagnóstico resultó ser un artefacto del bug.**
+
+### (c) Fix aplicado por ese diagnóstico: `dream_max_steps=20` → v2
+
+Nuevo campo `ControllerConfig.dream_max_steps=20` (commit `8d84d52`), exclusivo de este
+entrenamiento, sin tocar el default de `DreamEnvironment` (7). Se respaldó v1 como
+`best_model_v1_dream7.zip`, `ppo_controller_final_v1_dream7.zip` y
+`evaluations_v1_dream7.npz`, y se reentrenó completo como v2 (50,176 timesteps).
+
+### (d) v2 evaluado, todavía con el bug: parecía mejor que v1
 
 ```
-                              |           reward |    espera_prom |    cola_prom |   throughput
-PPO v2, seed_base=3000        | -290.05 +/-  57.70 | 3.92 +/- 0.81 | 1.09 +/- 0.16 | 13.40 +/- 3.88
-PPO v2, seed_base=5000 (nuevo)| -316.76 +/-  52.76 | 4.28 +/- 0.73 | 1.16 +/- 0.16 | 12.40 +/- 2.92
-Tiempo fijo, seed_base=3000   | -570.27 +/-  86.70 | 8.05 +/- 1.25 | 1.66 +/- 0.21 | 13.67 +/- 2.55
-Tiempo fijo, seed_base=5000   | -605.27 +/- 123.47 | 8.57 +/- 1.75 | 1.73 +/- 0.28 | 13.87 +/- 2.63
+                              |            reward |    espera_prom |    cola_prom |   throughput
+v2 (con bug), seed_base=3000  | -290.05 +/-  57.70 | 3.92 +/- 0.81 | 1.09 +/- 0.16 | 13.40 +/- 3.88
+v2 (con bug), seed_base=5000  | -316.76 +/-  52.76 | 4.28 +/- 0.73 | 1.16 +/- 0.16 | 12.40 +/- 2.92
 ```
 
-Cero episodios catastróficos en ninguna de las dos corridas de PPO v2 (rangos
--201.10 a -367.00, y -247.40 a -440.80). La desviación estándar del reward de PPO se
-mantiene del mismo orden en ambas semillas (`57.70` vs `52.76`) — **confirma que el
-arreglo generaliza**, no es casualidad de las semillas ya usadas para diagnosticar.
+Sin episodios catastróficos en ninguna semilla. Se documentó como resultado final del
+método (commit `a5483e1`). **Estos números no son válidos**: ver (e)–(f).
 
-**Conclusión final, sin suavizar**: PPO v2 supera consistentemente a tiempo fijo en
-reward, espera promedio (~45-50% menos) y cola promedio (~30-35% menos), en ambas
-corridas, sin solapamiento de rango. **Pero en throughput, PPO nunca fue mejor que
-tiempo fijo en ninguna corrida del proyecto** (empatado en la primera, levemente peor
-en la segunda) — es un patrón consistente a través de todas las corridas, no ruido de
-una sola muestra. Interpretación más plausible: el World Model aprendió a priorizar
-reducir espera y cola, posiblemente a costa del flujo total de vehículos — un patrón
-de comportamiento identificable y honesto, no una política que "gana en todo".
+### (e) Se encuentra el bug real: el puente no normalizaba con `scaler.pkl`
 
-**Qué falta**: la propuesta (Sección 18) pide explícitamente un baseline de "RL
-directo" — un PPO entrenado directamente contra SUMO, sin pasar por el Dream
-Environment. Sin ese baseline, **no se puede responder completamente si el World Model
-realmente ahorró interacciones con SUMO frente a la alternativa directa** — solo que
-el enfoque funciona en términos absolutos (supera a tiempo fijo).
+Al preparar el baseline de RL directo se vio que `EncodedTrafficEnvironment` codificaba
+el estado crudo de SUMO **sin aplicar `scaler.pkl`**, el scaler con el que
+`scripts/normalize_dataset.py` normalizó los datos de entrenamiento del Autoencoder. El
+`z` resultante caía fuera del espacio latente donde aprendieron el LSTM y el PPO. Fix
+(commit `990c6e5`): cargar `scaler.pkl` en `__init__` y aplicar
+`(raw - state_mean) / state_std` antes de `encode()`, con el test
+`test_state_is_normalized_with_scaler_before_encode`.
 
-**Tests**: `test_controller_config_rejects_invalid_dream_max_steps` — **35/35 tests en
-verde** (34 previos + 1 nuevo).
+Antes de diagnosticar, se descartó que `scaler.pkl` y `autoencoder_best.pt` vinieran de
+datasets distintos. Ambos salen de la misma pasada del pipeline (21/09, 22:26:08 a
+22:27:06), sobre los 40 episodios (28/6/6) generados con el fix de fase ya aplicado: la
+fase alterna (52.2%/47.8%) y `remaining` está en [0, 5], no en el 86400 del bug antiguo.
+Numéricamente: `scaler.mean` coincide exactamente con la media de `train_raw.npz`;
+`train.npz` es exactamente `(train_raw - mean) / std`; el Autoencoder reconstruye
+`train.npz` con MSE 0.0186 frente a 15.83 sobre el estado crudo; y `train_latent.npz` es
+bit a bit `encode(train.npz)`.
+
+### (f) v2 re-evaluado con el puente corregido: peor de lo documentado, aún mejor que tiempo fijo
+
+```
+                              |            reward |    espera_prom |    cola_prom |   throughput
+v2 (corregido), seed_base=3000| -421.69 +/-  98.90 | 5.82 +/- 1.44 | 1.38 +/- 0.23 | 13.60 +/- 2.50
+v2 (corregido), seed_base=5000| -419.65 +/-  75.22 | 5.81 +/- 1.07 | 1.36 +/- 0.18 | 13.40 +/- 2.65
+```
+
+Sigue superando a tiempo fijo, comparando episodio por episodio con la misma semilla
+(15/15 y 14/15), pero los rangos ya se solapan y el margen es menor: ~28-32% menos espera
+y ~17-21% menos cola. Sin episodios catastróficos.
+
+### (g) Por qué el `z` con bug daba mejor reward en v2: investigado, causa no identificada
+
+Hipótesis probadas en orden:
+
+1. **"El `z` con bug está degenerado/saturado": descartada.** Sobre 10 pasos reales
+   (seed 3000, acciones aleatorias), el `z` sin normalizar tenía **mayor** desviación
+   estándar que el correcto en **16/16** dimensiones. No era degeneración sino estar
+   fuera de rango: [-20.72, 22.54] frente a [-13.51, 11.30] en todo `train_latent.npz`
+   (dim 15: media 10.25 frente a un máximo de entrenamiento de 8.24). El `z` correcto
+   cae en [-6.18, 4.30].
+2. **Qué decide la política con cada `z` sobre los mismos estados.** Comparación
+   contrafactual: 15 trayectorias guiadas por la versión correcta, 900 pasos, y en cada
+   paso se pregunta qué habría elegido cada versión. Discrepan en el 32.2% de los pasos,
+   con un sesgo en una sola dirección: cuando la correcta elige 1, la del bug elige 0 en
+   273/453 (60%); a la inversa, solo en 17/447 (3.8%). Las rachas contrafactuales llegan
+   a 12, frente a un máximo de 6 en la versión correcta. Estas cifras son decisiones
+   sobre estados ajenos, no el comportamiento de la versión con bug en su propia
+   trayectoria.
+3. **"El bug hace menos cambios de fase y ahorra amarillo": descartada** con
+   trayectorias propias (cada política conduce SUMO, seeds 3000–3014; el amarillo se
+   mide por segundo simulado leyendo `TrafficSignal.is_yellow`):
+
+   ```
+   Politica                 |       reward medio | cambios/ep | amarillo_s/ep | verde F0 % | verde F1 %
+   v2 corregido             |  -421.69 +/-  98.90 | 24.0 +/- 1.1 |  48.0 +/- 2.2 |       50.4 |       49.6
+   v2 con bug               |  -290.05 +/-  57.70 | 26.5 +/- 0.6 |  52.9 +/- 1.2 |       56.3 |       43.7
+   Tiempo fijo (ciclo=5)    |  -570.27 +/-  86.70 | 22.0 +/- 0.0 |  44.0 +/- 0.0 |       65.6 |       34.4
+   ```
+
+   La versión con bug hacía **más** cambios y más amarillo, no menos. Estas corridas
+   reproducen exactamente los rewards ya reportados de las tres políticas.
+4. **Mecanismo causal: NO identificado.** El bug sesgaba la política hacia la fase 0,
+   pero por qué ese patrón puntuaba mejor queda como **curiosidad abierta**, no
+   investigada a fondo. La única hipótesis no descartada, que no se midió, es el
+   *momento* de los cambios respecto al estado de las colas.
+
+### (h) Re-evaluación de v1 con el puente corregido, por si el diagnóstico original también estaba contaminado
+
+Mismo protocolo, sin reentrenar. Como control, el mismo checkpoint v1 con el puente
+viejo reproduce **exactamente** -682.09 ± 652.41, con los mismos cuatro episodios
+catastróficos en las mismas semillas (3001, 3005, 3011, 3013). El checkpoint es el
+diagnosticado en (a)–(b), y lo único que cambia entre corridas es la normalización.
+
+### (i) Resultado: v1 corregido es el mejor controlador del proyecto; el diagnóstico de (b) era un artefacto
+
+- **Cero episodios catastróficos en v1**: el peor de 30 es -366.00. Las seeds que antes
+  fallaban dan ahora -271.00 (3001), -312.00 (3005), -263.10 (3011) y -312.10 (3013).
+  Esto incluye la seed 3005, el "modo de fallo distinto": también era el bug.
+- **v1 supera a v2 corregido en las 30 comparaciones** episodio por episodio (15/15 en
+  cada semilla), por unos 130 puntos de reward y con menos varianza.
+- **v1 supera a tiempo fijo en las 30 comparaciones, sin solapamiento de rangos**:
+  v1 [-338.00, -257.00] frente a tiempo fijo [-766.20, -425.20] (`seed_base=3000`);
+  v1 [-366.00, -232.00] frente a [-808.20, -418.20] (`seed_base=5000`).
+- Conclusión: las rachas de acción largas de (b) no eran una limitación real de
+  `max_dream_steps=7`. Eran el efecto de alimentar a la política con un `z` fuera de
+  distribución. Con el `z` correcto, el horizonte de 20 **empeoró** la política real.
+
+### (j) Decisión final
+
+Se revierte `ControllerConfig.dream_max_steps` a 7 (commit posterior a `990c6e5`) y v1
+pasa a ser el checkpoint oficial (`models/checkpoints/controller/best_model.zip`). v2 se
+conserva como `best_model_v2_dream20_deprecated.zip`, como evidencia de un cambio que
+parecía buena idea y no lo fue.
+
+### Resultado oficial del método World Model (PPO v1, puente corregido)
+
+```
+                               |             reward |     espera_prom |     cola_prom |    throughput
+PPO v1, seed_base=3000         |  -287.76 +/-  23.87 |  3.82 +/-  0.32 | 1.15 +/- 0.09 | 13.47 +/- 2.03
+PPO v1, seed_base=5000         |  -293.35 +/-  41.28 |  3.90 +/-  0.56 | 1.17 +/- 0.11 | 13.87 +/- 2.53
+Tiempo fijo, seed_base=3000    |  -570.27 +/-  86.70 |  8.05 +/-  1.25 | 1.66 +/- 0.21 | 13.67 +/- 2.55
+Tiempo fijo, seed_base=5000    |  -605.27 +/- 123.47 |  8.57 +/-  1.75 | 1.73 +/- 0.28 | 13.87 +/- 2.63
+Aleatoria, seed_base=3000      | -1753.63 +/- 946.86 | 26.29 +/- 14.62 | 3.12 +/- 1.17 | 14.47 +/- 2.80
+Aleatoria, seed_base=5000      | -1702.63 +/- 879.77 | 25.51 +/- 13.62 | 3.03 +/- 1.05 | 12.87 +/- 2.25
+```
+
+Frente a tiempo fijo: reward ~50% mejor (49.5% y 51.5%), **espera ~53-55% menor** (52.5%
+y 54.5%), **cola ~31-32% menor** (30.7% y 32.4%). **Throughput: PPO sigue sin ser mejor
+que tiempo fijo** (13.47 frente a 13.67; empate exacto en 13.87). Esta salvedad se ha
+mantenido en todas las corridas del proyecto, con y sin bug.
+
+### Lección metodológica
+
+Se investigó un fallo y se "arregló" (`dream_max_steps=20`, un reentrenamiento completo)
+**sin haber descartado antes un bug en la propia herramienta de evaluación**. El
+diagnóstico de (b) era internamente coherente (rachas más largas → peores episodios) y
+por eso pareció confirmado, pero medía un síntoma del puente defectuoso, no del
+controlador. Además, el "fix" pareció funcionar en (d) porque se evaluó con la misma
+herramienta rota. Lección: cuando una evaluación da resultados inesperados, verificar
+primero que la herramienta de evaluación reproduce fielmente las condiciones de
+entrenamiento (aquí, la misma normalización de entrada) antes de cambiar el modelo o su
+entrenamiento. Y re-evaluar todo lo medido con una herramienta después de corregirla, no
+solo el último resultado.
+
+### Notas técnicas (observaciones, no corregidas)
+
+- **Semántica de la acción**: la acción **no** significa "mantener/cambiar" como dice el
+  docstring de `ProjectActionSpace`. sumo-rl la trata como **índice de fase verde
+  destino** (`TrafficSignal.set_next_phase`): solo hay cambio si
+  `new_phase != green_phase` y ya pasaron `yellow_time + min_green`. Con 2 fases,
+  `acción=1` equivale a "cambiar" solo cuando la fase actual es la 0; cuando es la 1,
+  `acción=1` significa mantener y `acción=0` significa cambiar. En las trayectorias
+  medidas cada fase ocupa ~50% del tiempo, así que la coincidencia con la documentación
+  es de alrededor de la mitad de los pasos. El pipeline es coherente internamente
+  (dataset, LSTM y PPO usan la misma convención), pero hay que leer retroactivamente así
+  los nombres ya usados: "Siempre cambiar (1)" = "siempre pedir la fase 1"; "Siempre
+  mantener (0)" = "siempre pedir la fase 0"; una racha de acción = "sostener una fase";
+  "Tiempo fijo (ciclo=5)" no es un ciclo simétrico (63.3% de los pasos en fase 0). Queda
+  pendiente en TODO.md.
+- **La política aleatoria se reproduce exactamente entre corridas** (-1753.63 ± 946.86 y
+  -1702.63 ± 879.77 en todas las ejecuciones, incluso en procesos distintos), aunque usa
+  `np.random` sin semilla explícita. Explicación más probable, no verificada: al cargar
+  el modelo, `PPO.load` llama a `set_random_seed` con la semilla guardada, lo que fija la
+  semilla global de numpy antes de que corra la política aleatoria. No se investigó más.
+
+**Tests**: 36/36 en verde (`test_controller_config_rejects_invalid_dream_max_steps`,
+`test_state_is_normalized_with_scaler_before_encode`, más los previos).
 
 ## ✅ Controlador PPO — implementado y entrenado dentro del Dream Environment
 
@@ -306,6 +439,9 @@ handoff anterior.
 1. Cuenta o app desconocida en GitHub — sigue sin resolver.
 2. `DOCUMENTACION_PROYECTO.md` sigue desactualizado (no incluye LSTM, bug de fase,
    Experimento 0, cierre del sobreajuste, ni Dream Environment).
+3. Documentación de `ProjectActionSpace` engañosa: la acción es el índice de fase
+   verde destino, no "mantener/cambiar" (ver notas técnicas de la sección del
+   controlador PPO).
 
 ## ⚪ No implementado todavía
 
@@ -318,10 +454,14 @@ handoff anterior.
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se cerró el bloque completo de evaluación del controlador PPO contra SUMO real: el
-puente `EncodedTrafficEnvironment`, el diagnóstico de los episodios catastróficos
-(rachas de acción no vistas en entrenamiento), el fix (`dream_max_steps=20`) y su
-verificación en dos corridas con semillas distintas — commits `915bd79` y `8d84d52`,
-35/35 tests en verde. Resultado: PPO v2 supera a tiempo fijo en reward/espera/cola de
-forma consistente y generalizable, con la salvedad honesta de throughput sin mejorar.
-Siguiente paso natural: el baseline de RL directo que pide la propuesta.
+Al preparar el baseline de RL directo se encontró y corrigió un bug en
+`EncodedTrafficEnvironment`: no normalizaba con `scaler.pkl` (commit `990c6e5`). Eso
+obligó a re-evaluar todo lo medido con ese puente. v2 resultó peor de lo documentado;
+v1, re-evaluado, no tiene ningún episodio catastrófico y supera a v2 y a tiempo fijo en
+las 30 comparaciones. El diagnóstico de rachas y el fix `dream_max_steps=20` eran
+artefactos del bug. Decisión: v1 es el resultado oficial, `dream_max_steps` vuelve a 7 y
+el checkpoint de v2 se conserva como `best_model_v2_dream20_deprecated.zip`. Siguiente
+paso: el baseline de RL directo que pide la propuesta (Sección 18), comparado contra v1.
+Queda pendiente decidir si se cambia la semilla de SUMO en cada `reset` de entrenamiento
+y evaluación: sin eso, sumo-rl reutiliza la misma semilla y el PPO directo vería siempre
+el mismo tráfico.

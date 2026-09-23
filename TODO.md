@@ -38,16 +38,20 @@
       (cercana a "alternando", muy por debajo de las políticas constantes) —
       **debilita pero no descarta** la sospecha de explotación (no distingue de un
       patrón temporal más sutil). Ver PROJECT_STATUS.md para el detalle completo.
-- [x] Controlador PPO evaluado contra SUMO real y validado — bloque completo: puente
-      `EncodedTrafficEnvironment` (commit `915bd79`), diagnóstico de 4 episodios
-      catastróficos (3 de 4 por rachas de acción de 6-14 pasos no vistas en
-      entrenamiento; el cuarto, seed=3005, un pico puntual de `waiting_total`
-      documentado como limitación conocida sin resolver), fix
-      `ControllerConfig.dream_max_steps=20` (commit `8d84d52`), y verificación en dos
-      corridas con semillas distintas (3000 y 5000) confirmando que el arreglo
-      generaliza. 35/35 tests en verde. **Resultado final**: PPO v2 supera a tiempo
-      fijo en reward/espera/cola de forma consistente, pero nunca en throughput — ver
-      PROJECT_STATUS.md para el detalle numérico completo y la interpretación honesta.
+- [x] Controlador PPO evaluado contra SUMO real: bloque completo, **con una corrección
+      posterior que cambió la conclusión**. Puente `EncodedTrafficEnvironment` (commit
+      `915bd79`); diagnóstico de episodios catastróficos de v1 por rachas de acción y
+      fix `dream_max_steps=20` → v2 (commit `8d84d52`). Después se encontró que el
+      puente no normalizaba con `scaler.pkl` (fix en commit `990c6e5`), y al re-evaluar
+      todo con el puente corregido: v1 (`dream_max_steps=7`) no tiene ningún episodio
+      catastrófico y supera a v2 y a tiempo fijo en las 30 comparaciones. El
+      diagnóstico de rachas y el fix eran artefactos del bug; `dream_max_steps` se
+      revirtió a 7. **Resultado oficial: PPO v1, -287.76 ± 23.87 (`seed_base=3000`) /
+      -293.35 ± 41.28 (`seed_base=5000`)**, frente a tiempo fijo -570.27 / -605.27; nunca
+      mejor en throughput. Los números anteriores (-290.05/-316.76 de v2 con bug y
+      -421.69/-419.65 de v2 corregido) ya no son el resultado del método. Ver
+      PROJECT_STATUS.md, sección "Controlador PPO contra SUMO real: historia completa y
+      resultado oficial (v1)", incluida la lección metodológica.
 
 ## Siguiente paso recomendado — Baseline de RL directo (PPO sin Dream Environment)
 
@@ -56,10 +60,15 @@ pide explícitamente (Sección 18) para responder la pregunta de investigación 
 
 - [ ] Entrenar un PPO directamente contra `TrafficEnvironment` (SUMO real), sin pasar
       por el Dream Environment, como baseline de "RL directo".
-- [ ] Comparar ese baseline contra el PPO v2 (entrenado en el sueño) usando el mismo
-      protocolo de evaluación ya validado (scripts/evaluate_controller_sumo.py,
-      semillas de EVALUACIÓN 3000 y 5000) -- la semilla de entrenamiento del baseline
-      de RL directo es independiente y no necesita coincidir con nada ya usado.
+- [ ] Decidir antes de entrenar: cambiar la semilla de SUMO en cada `reset` de
+      entrenamiento y de `EvalCallback`. sumo-rl solo cambia la semilla si `reset()`
+      la recibe; si no, reutiliza la anterior, y el PPO directo entrenaría y se
+      evaluaría siempre sobre el mismo tráfico.
+- [ ] Comparar ese baseline contra el PPO v1 (resultado oficial del método,
+      `models/checkpoints/controller/best_model.zip`) usando el mismo protocolo de
+      evaluación ya validado (scripts/evaluate_controller_sumo.py, semillas de
+      EVALUACIÓN 3000 y 5000) -- la semilla de entrenamiento del baseline de RL directo
+      es independiente y no necesita coincidir con nada ya usado.
 - [ ] Con ese resultado, responder la pregunta de investigación del proyecto: ¿el
       World Model realmente redujo las interacciones necesarias con SUMO frente a
       entrenar RL directo, sin perder desempeño de control?
@@ -69,6 +78,11 @@ pide explícitamente (Sección 18) para responder la pregunta de investigación 
 - [ ] Actualizar `DOCUMENTACION_PROYECTO.md` con LSTM, bug de fase, Experimento 0,
       cierre del sobreajuste, y Dream Environment.
 - [ ] Investigar y resolver el tema del colaborador/app desconocido en GitHub.
+- [ ] Corregir la documentación de ProjectActionSpace y cualquier referencia a
+      'mantener/cambiar' -- la acción es en realidad el índice de fase verde destino
+      (confirmado en sumo_rl.TrafficSignal.set_next_phase). No es bloqueante porque el
+      pipeline completo usa la convención de forma consistente, pero la documentación es
+      engañosa para cualquiera que lea el código después.
 
 ## Después (orden según la propuesta del proyecto)
 
