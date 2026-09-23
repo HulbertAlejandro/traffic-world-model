@@ -63,6 +63,13 @@
 - [x] Evaluación final en SUMO real: tiempo fijo vs. RL directo vs. World Model (más la
       regla "fase contraria" como referencia). Tabla final en la misma sección de
       PROJECT_STATUS.md.
+- [x] Escenario de demanda asimétrica (500/150 veh/h; 700/150 descartado por saturar la
+      vía principal) con el pipeline completo re-ejecutado desde cero (commits `febef8e`,
+      `6c753d2`, `f58347e`; `REWARD_CLIP_MIN` recalculado a -266.13). **Resultado**: la
+      regla trivial pasa a ser la peor política y los dos PPO ya no la siguen; ambos
+      superan en promedio a tiempo fijo, pero con episodios catastróficos (7/30 y 5/30)
+      cuya causa no se identificó por completo. Ver PROJECT_STATUS.md, sección "Escenario
+      de demanda asimétrica".
 
 ## Pendiente, no bloqueante
 
@@ -77,12 +84,23 @@
 - [ ] Corregir `ProjectRewardFunction.phase_change`: hoy penaliza pedir la fase 1
       (`action == 1`), no cambiar efectivamente de fase. Misma raíz que el punto
       anterior; ver PROJECT_STATUS.md, sección del baseline de RL directo, punto 7.
+- [ ] Decidir si `scripts/collect_dataset.py` debe pasar una semilla distinta a
+      `env.reset()` en cada episodio: hoy los 40 episodios comparten la semilla de SUMO 42
+      y la variedad del dataset viene solo de las acciones aleatorias.
+- [ ] Entender por qué ambos PPO nunca sostienen el verde de la fase 1 más de 8 s (la
+      duración mínima posible de una fase); ver PROJECT_STATUS.md, sección del escenario
+      asimétrico, punto 5.
 
 ## Después (orden según la propuesta del proyecto)
 
-- [ ] Rediseñar el escenario de demanda (asimétrica o variable en el tiempo) para que el
-      control dependiente del estado aporte ventaja medible sobre una regla fija -- el
-      escenario actual no permite distinguir métodos por calidad de control.
+- [ ] **Prioridad 1**: normalizar recompensas o retornos (`VecNormalize` u otra) en los dos
+      entrenamientos de PPO (sueño y RL directo) y volver a evaluar con
+      `scripts/evaluate_final_comparison.py`. Comprobar si `explained_variance` sube y si
+      desaparecen los episodios catastróficos del escenario asimétrico.
+- [ ] Si lo anterior no lo explica todo: medir el momento de los cambios de fase respecto
+      a las colas de cada brazo, comparando episodios catastróficos con buenos.
+- [ ] Demanda variable en el tiempo (la asimetría ya está implementada; la variación
+      temporal no).
 - [ ] Extensiones opcionales (misma prioridad): sustituir el LSTM por Transformer, y
       por separado, por TSMixer — reutilizando el mismo protocolo de comparación que
       ya se usó en el Experimento 0 (mismos hiperparámetros, mismo criterio de

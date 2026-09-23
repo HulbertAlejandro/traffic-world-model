@@ -1,13 +1,263 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: bloque del baseline de RL directo cerrado (commits `6c648d4`,
-`1a2874c`), 39/39 tests en verde. **Hallazgo final: ni el PPO entrenado en el sueño
-(v1, resultado oficial del método World Model) ni el PPO de RL directo aprendieron
-control dependiente del estado.** Ambos convergen a la misma regla simple, "pedir siempre
-la fase contraria", que es la mejor política encontrada en este escenario de demanda baja
-y simétrica. **En este escenario no hay ahorro demostrable de interacciones reales con
-SUMO**: el pipeline World Model consumió 2,400 transiciones reales (dataset) y el RL
-directo llegó a la misma regla en ≤2,600. Ver la sección siguiente.
+Última verificación: escenario de demanda asimétrica (500/150 veh/h) con el pipeline
+completo re-ejecutado (commits `febef8e`, `6c753d2`, `f58347e`), 39/39 tests en verde.
+**Con demanda asimétrica la regla trivial "pedir siempre la fase contraria" deja de ser
+la mejor política y pasa a ser la peor**, y los dos PPO (sueño y RL directo) toman
+decisiones distintas de ella. Ambos superan en promedio a tiempo fijo, pero **con
+episodios catastróficos que tiempo fijo no tiene y cuya causa no se identificó por
+completo** (limitación abierta). Hallazgos de proceso anotados sin corregir:
+`collect_dataset.py` usa siempre la misma semilla de SUMO, y los dos PPO nunca
+sostienen la fase 1 más de 8 s. Ver la sección siguiente.
+
+## ✅ Escenario de demanda asimétrica: la regla trivial se rompe, aparecen episodios catastróficos sin explicar del todo
+
+> **Hallazgos de proceso anotados sin corregir** (ver también "🟡 Pendiente"):
+> 1. `scripts/collect_dataset.py` llama a `env.reset()` sin semilla, así que los 40
+>    episodios del dataset comparten la misma semilla de SUMO (42). La variedad del
+>    dataset viene solo de las acciones aleatorias, no de distintas realizaciones de
+>    tráfico. Pendiente decidir si esto limita al World Model.
+> 2. En los 60 episodios evaluados (punto 5), ninguno de los dos PPO sostiene el verde
+>    de la fase 1 (Este/Oeste) más de **8 s**.
+
+### 1. Motivación y diseño
+
+En el escenario simétrico (sección siguiente), los dos PPO convergieron a la misma regla
+trivial y el escenario no permitía comparar calidad de control. Se cambió la demanda a
+una vía principal Norte/Sur cargada y una secundaria Este/Oeste ligera, donde cambiar de
+fase lo antes posible ya no debería ser lo mejor. La demanda simétrica original se
+conserva en `single-intersection_symmetric_backup.rou.xml`.
+
+**Proceso de verificación de la demanda (Fase 0)**, con una primera propuesta descartada:
+
+- **Primera propuesta, 700/150 veh/h por brazo (descartada).** Los `vehicle_counts` en
+  carril daban una razón de 12.32:1, fuera del rango esperado de 3:1 a 6:1. El conteo de
+  vehículos insertados mostró la causa: la entrada real era 3.53:1, pero el carril Sur
+  solo aceptó 47 de los ~58 vehículos programados. La vía principal (un carril por
+  brazo) quedaba saturada y los vehículos esperaban **fuera de la red**, donde no
+  aparecen ni en el estado ni en la recompensa: una cola invisible que una política
+  podría explotar.
+- **Demanda elegida, 500/150 veh/h por brazo**: Norte/Sur 286 recto + 129 izquierda +
+  85 derecha; Este/Oeste 85 + 40 + 25. Razón configurada 3.33:1. Los criterios se
+  redefinieron según lo que se puede medir de verdad:
+  - Razón de entrada real **2.87:1** en episodios de 300 s. Es menor que la configurada
+    por el redondeo: cada flujo inserta su primer vehículo en t=0, lo que pesa más en
+    los flujos pequeños. Aceptado como límite estructural de episodios cortos.
+  - **Insertados = programados** en los 12 flujos, con la política de recolección
+    (acciones aleatorias) y con la regla "fase contraria": ningún vehículo queda fuera.
+    Pendientes de inserción: como máximo 2 vehículos durante ≤3 s. Se deben al arranque
+    en t=1–2 s, cuando los 3 flujos de cada brazo comparten un solo carril, y a
+    coincidencias puntuales entre flujos. **La demanda simétrica original tenía el mismo
+    patrón con más frecuencia** (11 y 14 segundos con pendientes, frente a 5 y 9 ahora).
+  - Solo la política de referencia deliberadamente mala "siempre fase 1" deja vehículos
+    fuera (hasta 36 pendientes). Esto confirma que la **fase 0 da verde a Norte/Sur** y
+    la **fase 1 a Este/Oeste**.
+
+### 2. Pipeline completo re-ejecutado (desde cero, sin commits intermedios)
+
+**Cambio de checkpoints, importante para leer las secciones anteriores.** Desde este
+bloque, `models/checkpoints/controller/best_model.zip` y
+`models/checkpoints/controller_direct/best_model.zip` contienen los modelos del
+**escenario asimétrico**. El v1 del escenario simétrico se conserva como
+`controller/best_model_v1_dream7.zip` (y v2 como `_v2_dream20_deprecated`). El
+checkpoint del RL directo simétrico se borró: sus números siguen documentados en la
+sección siguiente, y su `.json` queda en el historial de git. Las secciones anteriores
+que dicen "checkpoint oficial" se refieren al escenario simétrico.
+
+**Dataset** (40 episodios, 28/6/6 por episodio, 0 NaN/Inf, acciones balanceadas):
+
+| split | reward medio | std | min | max |
+|---|---|---|---|---|
+| train | -43.01 | 56.78 | -504.1 | 2.0 |
+| validation | -34.23 | 43.71 | -309.1 | 1.0 |
+| test | -66.74 | 102.87 | -765.1 | 2.0 |
+
+La asimetría llega a los datos: `vehicle_counts` medio de Sur 8.18, Norte 4.81, Oeste
+0.97 y Este 0.93. Sur carga casi el doble que Norte con la misma demanda (no
+investigado). El split de test tiene una cola más pesada que train: su mínimo, -765.1,
+queda fuera del rango de entrenamiento.
+
+**Autoencoder**: pérdida final de train 0.016387 y de validación 0.021138 (mejor
+0.021030). Comparable al escenario simétrico (MSE de 0.0186 sobre train).
+
+**Recorte de recompensa del Dream Environment, recalculado** (commit `6c753d2`): los
+percentiles 1 y 99 del nuevo `train_latent.npz` son **[-266.13, 1.00]**, frente a
+[-165.05, 1.00] antes. Con los límites viejos se habría recortado el 4.8% de los rewards
+reales de entrenamiento; con los nuevos, el 1.2%.
+
+**LSTM**: pérdida final de train 0.069640 y de validación 0.157874 (mejor ≈0.1565 en la
+época 90); razón validación/train ~2.3x. Evaluación en test frente al baseline
+persistente, con el escenario simétrico como referencia:
+
+```
+  h | latent (modelo) | latent (baseline) | reward (modelo) | reward (baseline) || simetrico: latent modelo | reward modelo | reward baseline
+  1 |      0.2486     |      0.9475       |      756.3      |      3233.8       ||      0.1943    |     41.9      |     716.6
+  2 |      0.3868     |      1.9580       |     1622.1      |      9817.6       ||      0.2625    |     67.5      |    1203.9
+  3 |      0.4874     |      2.5791       |     2535.9      |     16186.3       ||      0.3154    |     86.0      |    1359.3
+  4 |      0.5399     |      2.8341       |     2762.2      |     20843.4       ||      0.3724    |    111.7      |    1379.2
+  5 |      0.5646     |      2.9350       |     2493.4      |     24089.5       ||      0.4261    |    144.8      |    1279.8
+  6 |      0.6066     |      3.0184       |     2364.4      |     25927.3       ||      0.4553    |    187.3      |    1069.3
+  7 |      0.6469     |      3.1227       |     2518.6      |     27267.6       ||      0.4729    |    200.5      |    1065.5
+  8 |      0.6887     |      3.1174       |     2736.1      |     27475.3       ||      0.4715    |    198.3      |    1157.7
+  9 |      0.7221     |      3.0030       |     2866.6      |     26181.6       ||      0.4729    |    181.3      |    1300.9
+ 10 |      0.6966     |      2.9775       |     2885.7      |     24190.0       ||      0.4742    |    167.0      |    1303.2
+```
+
+El modelo supera al baseline en todos los horizontes. El error latente acumulado es algo
+mayor (crece 2.80x de h=1 a h=10, frente a 2.44x antes). **La predicción de reward a un
+paso es relativamente peor**: 23% del error del baseline, frente al 6% del escenario
+simétrico. En h=10 la proporción es similar (12% frente a 13%).
+
+**PPO del sueño** (`dream_max_steps=7`, 50,176 timesteps; reward imaginado, 20 episodios
+de validación por evaluación; `*` = `best_model.zip`):
+
+```
+ 1000 -265.93   2000 -156.18   3000 -162.73   4000 -155.14   5000 -143.39   6000 -153.34   7000 -137.99   8000 -132.61
+ 9000 -144.77  10000 -140.01  11000 -144.03  12000 -152.58  13000 -173.60  14000 -160.65  15000 -160.71  16000 -136.84
+17000 -122.21  18000 -162.12  19000 -149.10  20000 -136.24  21000 -149.57  22000 -119.28* 23000 -148.65  24000 -175.37
+25000 -158.04  26000 -132.42  27000 -142.79  28000 -150.63  29000 -137.49  30000 -160.72  31000 -139.37  32000 -136.61
+33000 -162.88  34000 -145.18  35000 -133.46  36000 -154.68  37000 -138.27  38000 -144.98  39000 -122.26  40000 -144.84
+41000 -119.51  42000 -125.91  43000 -144.58  44000 -131.89  45000 -135.31  46000 -148.30  47000 -148.61  48000 -141.42
+49000 -147.75  50000 -136.99
+```
+
+Curva ruidosa y no monótona, como en el escenario simétrico. `explained_variance` entre
+-0.0006 y 0.0017 durante todo el entrenamiento.
+
+**PPO de RL directo** (10,000 timesteps reales; semillas verificadas: 171 de
+entrenamiento únicas y 5 de evaluación que ciclan; `*` = `best_model.zip`):
+
+```
+ 1000 -23143.46 +/- 10925.07     6000 -284.00 +/-  75.62 *
+ 2000  -2105.66 +/-   603.68     7000 -301.76 +/-  52.45
+ 3000   -362.88 +/-    74.07     8000 -310.24 +/-  65.79
+ 4000   -311.30 +/-    50.81     9000 -309.84 +/- 115.45
+ 5000   -477.68 +/-   300.22    10000 -299.76 +/-  51.07
+```
+
+A diferencia del escenario simétrico, la curva no se congela: mejora hasta el timestep
+6000 y después fluctúa. **`explained_variance` se mantuvo entre -0.0016 y 0.00014 durante
+todo el entrenamiento**, igual que antes: la función de valor no aprende (ver punto 5).
+
+### 3. Resultado principal: la regla trivial se rompe
+
+`scripts/evaluate_final_comparison.py` (commit `f58347e`), 15 episodios por semilla base:
+
+```
+seed_base=3000                 |               reward |      espera_prom |      cola_prom |       throughput
+PPO (sueno)                    |   -357.89 +/-  202.71 |    4.87 +/-  2.81 |   1.26 +/- 0.58 |   11.73 +/-  1.73
+    [-180.6, -431.2, -918.8, -211.6, -241.6, -332.5, -316.5, -253.8, -272.8, -524.8, -171.5, -398.0, -221.7, -682.2, -210.8]
+PPO (RL directo)               |   -381.01 +/-  275.58 |    5.25 +/-  3.85 |   1.27 +/- 0.75 |   11.00 +/-  1.71
+    [-148.1, -928.0, -192.9, -396.2, -509.2, -872.0, -248.0, -195.0, -213.9, -801.9, -143.0, -573.1, -166.9, -188.0, -139.0]
+Tiempo fijo (ciclo=5)          |   -397.07 +/-   57.40 |    5.39 +/-  0.76 |   1.44 +/- 0.18 |   13.73 +/-  2.95
+    [-360.2, -383.2, -364.2, -369.2, -421.2, -592.2, -397.2, -427.2, -372.2, -343.2, -362.2, -404.2, -369.2, -374.2, -416.2]
+Regla: pedir fase contraria    |   -509.57 +/-  122.55 |    6.76 +/-  1.62 |   1.88 +/- 0.43 |   11.93 +/-  3.13
+    [-559.1, -416.1, -700.1, -563.1, -400.1, -418.1, -386.1, -435.1, -356.1, -675.1, -632.1, -332.1, -696.1, -536.1, -538.1]
+
+seed_base=5000                 |               reward |      espera_prom |      cola_prom |       throughput
+PPO (sueno)                    |   -411.83 +/-  214.76 |    5.58 +/-  2.94 |   1.46 +/- 0.66 |   12.60 +/-  2.36
+    [-632.2, -220.6, -378.9, -359.7, -823.0, -242.8, -676.1, -197.6, -269.0, -273.9, -164.6, -369.8, -700.1, -661.6, -207.6]
+PPO (RL directo)               |   -328.02 +/-  178.20 |    4.51 +/-  2.43 |   1.14 +/- 0.53 |   12.00 +/-  2.85
+    [-726.2, -707.0, -198.0, -343.9, -134.0, -222.0, -300.1, -225.0, -359.0, -313.0, -192.0, -205.0, -525.0, -289.0, -181.1]
+Tiempo fijo (ciclo=5)          |   -425.47 +/-   40.71 |    5.77 +/-  0.55 |   1.52 +/- 0.13 |   13.27 +/-  2.46
+    [-402.2, -425.2, -393.2, -446.2, -413.2, -537.2, -362.2, -458.2, -423.2, -456.2, -397.2, -458.2, -387.2, -426.2, -396.2]
+Regla: pedir fase contraria    |   -495.50 +/-  113.06 |    6.59 +/-  1.48 |   1.84 +/- 0.39 |   13.13 +/-  2.39
+    [-531.1, -660.1, -421.1, -327.1, -391.1, -608.1, -328.1, -580.1, -466.1, -703.1, -549.1, -463.1, -491.1, -357.1, -556.1]
+```
+
+- **La regla "pedir siempre la fase contraria" pasa de ser la mejor política (escenario
+  simétrico) a ser la PEOR** (-509.57 y -495.50), peor incluso que tiempo fijo.
+- **Tiempo fijo mejora frente a la regla**: su ciclo no es simétrico (63% del tiempo en
+  fase 0, la de Norte/Sur), lo que por casualidad favorece a la vía principal.
+- **Los PPO ya no siguen la regla.** Comparación contrafactual sobre los mismos estados
+  reales (el PPO del sueño conduce SUMO en las 30 semillas; 1800 pasos, 666 bloqueados
+  por `min_green`, 37.0%):
+
+  ```
+  Par                  | acuerdo total | desacuerdos | en pasos bloqueados | acuerdo en pasos NO bloqueados
+  sueno / directo      |     81.6%     |     332     |    182 (54.8%)      |   86.8%  (150 de 1134)
+  sueno / regla        |     61.1%     |     700     |    189 (27.0%)      |   54.9%  (511 de 1134)
+  directo / regla      |     47.7%     |     942     |    343 (36.4%)      |   47.2%  (599 de 1134)
+  ```
+
+  En el escenario simétrico el acuerdo con la regla en pasos no bloqueados era del 100% y
+  el 99.2%; ahora es del 54.9% y el 47.2%. Los dos PPO coinciden entre sí en el 86.8% de
+  esas decisiones: aprendieron comportamientos parecidos por caminos distintos.
+
+### 4. Hallazgo nuevo: mejores en promedio, pero con episodios catastróficos
+
+| | Episodios que ganan a tiempo fijo (misma semilla) | Episodios peores que -600 | Peor episodio |
+|---|---|---|---|
+| PPO sueño | 11/15 + 10/15 = **21/30** | **7/30** | -918.8 |
+| PPO directo | 9/15 + 12/15 = **21/30** | **5/30** | -928.0 |
+| Tiempo fijo | — | **0/30** | -592.2 |
+
+En sus buenos episodios, los PPO llegan a -130 / -250, muy por encima de tiempo fijo; en
+los malos caen a -680 / -930. Tiempo fijo es entre 4 y 5 veces más estable (desviación
+de 41–57 frente a 178–276). El throughput de los PPO es menor (11.0–12.6 frente a
+13.3–13.7), la misma salvedad que en el escenario simétrico. Los episodios catastróficos
+dependen de la política, no solo del tráfico: el PPO del sueño falla en 3002, 3013, 5000,
+5004, 5006, 5012 y 5013, y el directo en 3001, 3005, 3009, 5000 y 5001. Solo comparten la
+semilla 5000.
+
+### 5. Investigación de los episodios catastróficos
+
+Cada PPO conduce su propia trayectoria real, que reproduce exactamente la tabla del
+punto 3. Se compararon los 12 episodios catastróficos con los 5 mejores de cada semilla
+(10 por política), midiendo por segundo simulado.
+
+- **Cola invisible (vehículos pendientes de inserción): DESCARTADA.** El máximo es de 8
+  pendientes en los 60 episodios, catastróficos y buenos, en las dos políticas. Ese
+  máximo es el efecto de arranque en t=1 s. El total es de 14–24 vehículo·s por episodio
+  en ambos grupos, y su correlación con el reward en los 30 episodios es -0.09 (sueño) y
+  -0.13 (directo).
+- **Racha de fase 1 sostenida: DESCARTADA como causa.** Las dos políticas tienen una
+  racha máxima de verde en fase 1 de **exactamente 8 s en los 60 episodios**, así que no
+  distingue episodios catastróficos de buenos. Sobre el origen de esos 8 s: no es un
+  tope que imponga el entorno, porque la política "siempre fase 1" de la Fase 0 sostuvo
+  esa fase todo el episodio. Coincide con la duración mínima posible del verde tras un
+  cambio: 3 s de verde en el paso del cambio (5 s menos 2 de amarillo) más un paso
+  completo de 5 s bloqueado por `min_green`. Eso sugiere que **ambos PPO abandonan la
+  fase 1 en cuanto se lo permiten**. No se investigó a fondo.
+- **Fracción de tiempo en fase 1: señal PARCIAL, solo en el PPO del sueño.**
+  Catastróficos 29.9% frente a 25.8% en los buenos; correlación con el reward en los 30
+  episodios de -0.59. En el PPO directo no hay señal: 23.3% frente a 23.1%, correlación
+  -0.05.
+- **Escala de la función de valor (`explained_variance` ≈ 0 en AMBOS entrenamientos):
+  confirmada en magnitud, NO en causalidad.** Los retornos no están normalizados y son
+  de cientos a miles: en el dataset, el retorno por episodio tiene desviación estándar
+  1488.56 y el retorno descontado (γ=0.99) 1046.06. En los dos entrenamientos,
+  `value_loss` es del orden de la varianza real de los retornos:
+  - RL directo: `value_loss` ~1e4–4e4 al final, con varianza de sus retornos de 1.9e4
+    (desviación estándar 139.09).
+  - Sueño: `value_loss` entre 5,220 y 45,000 (mediana 10,100), con varianza de los
+    retornos imaginados de 5.2e3 (desviación estándar 72.27).
+
+  Esto es lo esperable si la red de valor predice aproximadamente la media. No se
+  implementó `VecNormalize` ni otra normalización para comprobar si eso arregla la
+  función de valor o elimina los episodios catastróficos.
+
+**Conclusión honesta: la causa completa de los episodios catastróficos NO se
+identificó.** Queda documentada como limitación abierta, no como resuelta.
+
+### 6. Trabajo futuro identificado, en orden de prioridad
+
+1. **Normalizar recompensas o retornos (por ejemplo `VecNormalize`) en los dos
+   entrenamientos de PPO**, y volver a evaluar si `explained_variance` sube y si
+   desaparecen los episodios catastróficos. Es el experimento más prometedor y mejor
+   fundamentado de los que quedaron pendientes.
+2. **Si (1) no lo explica todo: investigar el momento de los cambios de fase** respecto a
+   las colas de cada brazo (cola del brazo que pasa a verde frente a la del que pasa a
+   rojo en cada cambio), comparando episodios catastróficos con buenos.
+
+### 7. Nota sobre el costo de interacciones reales (sin conclusión firme)
+
+El RL directo llegó a su mejor evaluación (-284.00, semillas 20000–20004) en **6,000
+pasos reales de entrenamiento más 1,800 de evaluación**. El método World Model usó
+**2,400 transiciones reales** para el dataset. Es el mismo orden de magnitud que en el
+escenario simétrico. **Esta comparación es prematura mientras los episodios catastróficos
+no se entiendan**: podrían estar distorsionando cualquiera de los dos promedios, y
+ninguno de los dos métodos produce todavía una política estable.
 
 ## ✅ Baseline de RL directo y hallazgo final: ambos métodos convergen a la misma regla, sin ahorro de interacciones demostrable en este escenario
 
@@ -622,25 +872,36 @@ handoff anterior.
 4. `ProjectRewardFunction.phase_change` penaliza pedir la fase 1, no cambiar
    efectivamente de fase (misma raíz que el punto 3; ver la sección del baseline de RL
    directo, punto 7).
+5. `scripts/collect_dataset.py` no pasa semilla a `env.reset()`: los 40 episodios del
+   dataset comparten la semilla de SUMO 42, y la variedad viene solo de las acciones
+   aleatorias. Decidir si esto limita al World Model.
+6. Ambos PPO (escenario asimétrico) nunca sostienen el verde de la fase 1 más de 8 s,
+   que coincide con la duración mínima posible de una fase. No investigado a fondo (ver
+   la sección del escenario asimétrico, punto 5).
+7. **Episodios catastróficos de los PPO en el escenario asimétrico: causa no identificada
+   por completo** (limitación abierta; ver la misma sección, puntos 5 y 6).
 
 ## ⚪ No implementado todavía
 
-- **Escenario de demanda asimétrica o variable en el tiempo**, para que el control
-  dependiente del estado aporte ventaja sobre una regla fija y la comparación distinga
-  métodos por calidad de control (ver la sección del baseline de RL directo, punto 6).
-- Transformer y TSMixer como sustitutos del LSTM (extensiones opcionales). En el
-  escenario actual no podrían mostrar mejor control, porque la política ya converge a
-  una regla fija.
+- **Normalización de recompensas o retornos (`VecNormalize` u otra) en ambos
+  entrenamientos de PPO**, para comprobar si arregla la función de valor
+  (`explained_variance` ≈ 0) y elimina los episodios catastróficos. Prioridad 1 del
+  trabajo futuro del escenario asimétrico.
+- Análisis del momento de los cambios de fase respecto a las colas de cada brazo, si la
+  normalización no explica todo.
+- Demanda variable en el tiempo (el escenario asimétrico ya está implementado; la
+  variación temporal no).
+- Transformer y TSMixer como sustitutos del LSTM (extensiones opcionales).
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se cerró el bloque del baseline de RL directo (Sección 18): `ReseedingWrapper`,
-`train_controller_direct.py` y `evaluate_direct_vs_dream.py` (commits `6c648d4`,
-`1a2874c`), 39/39 tests en verde. El PPO directo dio un reward casi idéntico al de v1
-episodio por episodio, y la investigación mostró por qué: ambos convergen a la regla
-"pedir siempre la fase contraria" (100% y 99.2% de acuerdo con ella en los pasos donde la
-acción afecta al tráfico). Ninguno aprendió control dependiente del estado, y en este
-escenario no hay ahorro demostrable de interacciones reales (2,400 del World Model
-frente a ≤2,600 del RL directo). La limitación central del proyecto es el escenario de
-demanda, demasiado simple. Siguiente paso a decidir: rediseñar el escenario de demanda
-(asimétrica o variable) o documentar esta conclusión como resultado final del trabajo.
+Se cambió la demanda a un escenario asimétrico (500/150 veh/h; la propuesta de 700/150
+se descartó por saturar la vía principal) y se re-ejecutó el pipeline completo desde cero
+(commits `febef8e`, `6c753d2`, `f58347e`, 39/39 tests en verde). La regla trivial "pedir
+siempre la fase contraria" pasa a ser la peor política, y los dos PPO ya no la siguen
+(54.9% y 47.2% de acuerdo en pasos no bloqueados). Ambos superan en promedio a tiempo fijo
+(21/30 episodios cada uno), pero tienen episodios catastróficos (7/30 y 5/30 peores que
+-600) que tiempo fijo no tiene. Se descartaron la cola invisible y las rachas largas de
+fase 1 como causa; la escala sin normalizar de la función de valor se confirmó en
+magnitud pero no en causalidad. Siguiente paso recomendado: normalizar recompensas o
+retornos (`VecNormalize`) en los dos entrenamientos de PPO y volver a evaluar.
