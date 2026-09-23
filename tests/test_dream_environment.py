@@ -65,6 +65,19 @@ def test_reset_returns_valid_observation(tmp_path):
     assert info["seeded_from_real_data"] is True
 
 
+def test_eval_seed_makes_seed_windows_reproducible(tmp_path):
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10, 12, 15])
+
+    def first_observations(eval_seed):
+        env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=3, eval_seed=eval_seed)
+        return [env.reset()[0] for _ in range(5)]
+
+    same_a, same_b, other = first_observations(123), first_observations(123), first_observations(456)
+    assert all(np.array_equal(a, b) for a, b in zip(same_a, same_b))
+    assert not all(np.array_equal(a, c) for a, c in zip(same_a, other))
+
+
 def test_step_returns_valid_transition(tmp_path):
     checkpoint_path = _make_checkpoint(tmp_path)
     latent_path = _make_latent_episodes(tmp_path, episode_lengths=[10])

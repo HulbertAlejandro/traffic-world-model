@@ -104,6 +104,7 @@ class DreamEnvironment(gym.Env):
         latent_episodes_path: str | Path = DEFAULT_LATENT_EPISODES_PATH,
         max_dream_steps: int = 7,
         device: torch.device | None = None,
+        eval_seed: int | None = None,
     ) -> None:
         super().__init__()
 
@@ -146,7 +147,10 @@ class DreamEnvironment(gym.Env):
         self._steps_taken = 0
         self._last_action: int | None = None
         self._action_streak: int = 0
-        self._rng = np.random.default_rng()
+        # Unseeded by default (unchanged behavior). eval_seed makes the sequence
+        # of seed windows drawn by successive reset() calls reproducible -- e.g.
+        # for an EvalCallback, which never passes a seed to reset().
+        self._rng = np.random.default_rng(eval_seed)
 
     def reset(self, *, seed: int | None = None, options: dict | None = None):
         super().reset(seed=seed)
