@@ -69,7 +69,24 @@
       regla trivial pasa a ser la peor política y los dos PPO ya no la siguen; ambos
       superan en promedio a tiempo fijo, pero con episodios catastróficos (7/30 y 5/30)
       cuya causa no se identificó por completo. Ver PROJECT_STATUS.md, sección "Escenario
-      de demanda asimétrica".
+      asimétrico, primera ronda".
+- [x] Escenario asimétrico, segunda ronda (commits `2a63328` a `9b6a389`, 45/45 tests):
+      semilla de SUMO por episodio en `collect_dataset.py` y dataset de 80 episodios;
+      Experimento 0 repetido (Autoencoder gana 9/10); selección del checkpoint del sueño
+      en SUMO real (el reward imaginado no predecía el real, Pearson +0.08); `eval_seed`
+      en `DreamEnvironment`; `VecNormalize` de recompensa en ambos PPO y de observaciones
+      en el directo; verificación con 3 semillas por método. **Resultado: PPO del sueño
+      -326.79, PPO directo -453.74, tiempo fijo -411.27 (90/90/30 episodios)**; ventaja
+      clara a nivel de episodio, no significativa a nivel de semilla. Ver PROJECT_STATUS.md,
+      sección "Escenario asimétrico, segunda ronda".
+
+## Siguiente paso recomendado — a decidir con el autor
+
+- [ ] **(a)** Empezar la documentación final (`DOCUMENTACION_PROYECTO.md`,
+      `docs/PROPUESTA.md`) ahora que hay resultados sólidos, o
+- [ ] **(b)** seguir investigando antes alguna de las limitaciones abiertas (PROJECT_STATUS.md,
+      sección "Escenario asimétrico, segunda ronda", punto 9): episodios catastróficos,
+      función de valor del PPO directo, o más presupuesto y semillas para el RL directo.
 
 ## Pendiente, no bloqueante
 
@@ -84,21 +101,15 @@
 - [ ] Corregir `ProjectRewardFunction.phase_change`: hoy penaliza pedir la fase 1
       (`action == 1`), no cambiar efectivamente de fase. Misma raíz que el punto
       anterior; ver PROJECT_STATUS.md, sección del baseline de RL directo, punto 7.
-- [ ] Decidir si `scripts/collect_dataset.py` debe pasar una semilla distinta a
-      `env.reset()` en cada episodio: hoy los 40 episodios comparten la semilla de SUMO 42
-      y la variedad del dataset viene solo de las acciones aleatorias.
-- [ ] Entender por qué ambos PPO nunca sostienen el verde de la fase 1 más de 8 s (la
-      duración mínima posible de una fase); ver PROJECT_STATUS.md, sección del escenario
-      asimétrico, punto 5.
+- [ ] Entender por qué ambos PPO de la primera ronda asimétrica nunca sostenían el verde de
+      la fase 1 más de 8 s (la duración mínima posible de una fase); volver a medirlo con los
+      checkpoints actuales.
 
 ## Después (orden según la propuesta del proyecto)
 
-- [ ] **Prioridad 1**: normalizar recompensas o retornos (`VecNormalize` u otra) en los dos
-      entrenamientos de PPO (sueño y RL directo) y volver a evaluar con
-      `scripts/evaluate_final_comparison.py`. Comprobar si `explained_variance` sube y si
-      desaparecen los episodios catastróficos del escenario asimétrico.
-- [ ] Si lo anterior no lo explica todo: medir el momento de los cambios de fase respecto
-      a las colas de cada brazo, comparando episodios catastróficos con buenos.
+- [ ] Más presupuesto de entrenamiento real y más semillas para el RL directo.
+- [ ] Medir el momento de los cambios de fase respecto a las colas de cada brazo, comparando
+      episodios catastróficos con buenos (quedan 5/90 en el sueño y 23/90 en el directo).
 - [ ] Demanda variable en el tiempo (la asimetría ya está implementada; la variación
       temporal no).
 - [ ] Extensiones opcionales (misma prioridad): sustituir el LSTM por Transformer, y

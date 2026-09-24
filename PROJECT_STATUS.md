@@ -1,16 +1,335 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: escenario de demanda asimétrica (500/150 veh/h) con el pipeline
-completo re-ejecutado (commits `febef8e`, `6c753d2`, `f58347e`), 39/39 tests en verde.
-**Con demanda asimétrica la regla trivial "pedir siempre la fase contraria" deja de ser
-la mejor política y pasa a ser la peor**, y los dos PPO (sueño y RL directo) toman
-decisiones distintas de ella. Ambos superan en promedio a tiempo fijo, pero **con
-episodios catastróficos que tiempo fijo no tiene y cuya causa no se identificó por
-completo** (limitación abierta). Hallazgos de proceso anotados sin corregir:
-`collect_dataset.py` usa siempre la misma semilla de SUMO, y los dos PPO nunca
-sostienen la fase 1 más de 8 s. Ver la sección siguiente.
+Última verificación: commit `9b6a389`, 45/45 tests en verde. Escenario de demanda
+asimétrica con dataset de 80 episodios (semilla de SUMO por episodio), selección del
+checkpoint del sueño en SUMO real y `VecNormalize` en los dos PPO. **Resultado con 3
+semillas de entrenamiento por método (90 episodios cada uno): PPO del sueño -326.79,
+PPO directo -453.74, tiempo fijo -411.27.** El método World Model supera a tiempo fijo
+en las tres semillas y usa menos interacciones reales que el RL directo: 13,800 pasos de
+SUMO en total para sus 3 semillas (4,800 del dataset, recolectado una sola vez y
+compartido, más 3 × 3,000 de selección; ~4,600 por semilla), frente a 39,000 del RL
+directo (3 × 13,000). La ventaja sobre el RL directo es clara a nivel de
+episodio (4.56 errores estándar), pero **no concluyente a nivel de semilla** (p = 0.145
+con 3 semillas por método), porque el RL directo varía mucho entre semillas. Siguen
+abiertos los episodios catastróficos (menos, pero presentes) y la función de valor del
+PPO directo. Ver la sección siguiente.
 
-## ✅ Escenario de demanda asimétrica: la regla trivial se rompe, aparecen episodios catastróficos sin explicar del todo
+## ✅ Escenario asimétrico, segunda ronda: dataset de 80 episodios, selección por SUMO real y `VecNormalize` — resultado con 3 semillas por método
+
+### 1. Recapitulación
+
+La demanda asimétrica (500/150 veh/h) rompió la regla trivial "pedir siempre la fase
+contraria" y los dos PPO dejaron de seguirla, pero aparecieron episodios catastróficos
+que no se explicaron del todo (ver "Escenario asimétrico, primera ronda", más abajo).
+Esta sección documenta todo lo que se investigó y corrigió después, en orden.
+
+**Estado de los checkpoints** (los `.zip`/`.npz`/`.pkl` no se versionan; los `.json` sí):
+
+- `controller/best_model.zip`: PPO del sueño **oficial**, semilla de entrenamiento 1,
+  `VecNormalize` de recompensa. Archivados: `*_seed0_worse.*` (semilla 0), `*_seed2.*`
+  (semilla 2), `*_asym40.*` (dataset de 40 episodios), `*_v1_dream7.*` y
+  `*_v2_dream20_deprecated.*` (escenario simétrico).
+- `controller_direct/best_model.zip`: PPO directo **oficial**, semilla 0, `VecNormalize`
+  de recompensa y de observaciones, con sus estadísticas en `best_model_vecnormalize.pkl`.
+  Archivados: `*_seed1.*`, `*_seed2.*`, `*_no_obsnorm.*` (solo recompensa normalizada),
+  `*_asym40.*`.
+- **El resultado de cada método se reporta como la media de sus 3 semillas de
+  entrenamiento**, no con el checkpoint oficial solo (punto 7).
+
+### 2. Mejora del dataset
+
+- **Bug encontrado:** `scripts/collect_dataset.py` llamaba a `env.reset()` sin semilla, y
+  sumo-rl reutiliza la última semilla cuando no recibe una. Los 40 episodios compartían
+  la semilla de SUMO 42: la variedad venía solo de las acciones aleatorias. **Arreglado**
+  (commit `2a63328`): el episodio `i` reinicia con la semilla `seed_start + i`, el mismo
+  principio que `ReseedingWrapper`. Hay un test con un entorno sustituto que lo comprueba.
+  El estado inicial es idéntico con cualquier semilla (en t=0 no hay azar que la semilla
+  controle), pero las trayectorias difieren a partir del paso 10.
+- **De 40 a 80 episodios** (`DEFAULT_NUM_EPISODES`), divididos en 56/12/12 episodios
+  (3360/720/720 transiciones), 0 NaN/Inf.
+- **La cola fuera de rango del test desapareció.** Con 40 episodios, el mínimo del test
+  (-765.1) quedaba por debajo del de train (-504.1). Ahora train llega a -857.1 y ningún
+  reward de validación ni de test queda por debajo de ese mínimo.
+- **Recorte de recompensa del Dream Environment recalculado** (commit `6c753d2`):
+  **[-326.33, 1.00]** (antes [-266.13, 1.00]).
+
+| | 40 episodios, semilla fija | **80 episodios, semilla por episodio** |
+|---|---|---|
+| Autoencoder, validación (final / mejor) | 0.021138 / 0.021030 | **0.007646 / 0.007445** |
+| LSTM, validación (final / mejor) | 0.157874 / ≈0.1565 | **0.141777 / 0.140486** |
+| Error de reward a un paso (h=1), como % del baseline persistente | 23.4% | **2.7%** |
+| Ídem en h=10 | 11.9% | **9.2%** |
+| Error latente h=1 / h=10 | 0.2486 / 0.6966 | **0.1035 / 0.4954** |
+
+Evaluación del LSTM en test (80 episodios, 420 muestras por horizonte):
+
+```
+  h | latent (modelo) | latent (baseline) | reward (modelo) | reward (baseline) | modelo/baseline
+  1 |     0.1035      |     0.8797        |      57.05      |     2130.94       |      2.7%
+  2 |     0.1573      |     1.6391        |     127.29      |     5997.40       |      2.1%
+  3 |     0.1977      |     1.9122        |     204.49      |     8752.99       |      2.3%
+  4 |     0.2470      |     1.9055        |     279.21      |     9875.39       |      2.8%
+  5 |     0.2992      |     1.8538        |     349.54      |    10027.76       |      3.5%
+  6 |     0.3463      |     1.8216        |     409.32      |    10105.19       |      4.1%
+  7 |     0.3865      |     1.8547        |     494.95      |    10669.87       |      4.6%
+  8 |     0.4033      |     1.8787        |     591.84      |    10991.98       |      5.4%
+  9 |     0.4422      |     1.8852        |     757.97      |    10896.91       |      7.0%
+ 10 |     0.4954      |     1.7985        |     993.29      |    10817.11       |      9.2%
+```
+
+**Matiz honesto:** el 2.7% queda incluso por debajo del 5.8% del escenario simétrico,
+pero **parte de la mejora viene de un test set distinto**, no solo de un modelo mejor.
+Ahora son 12 episodios en vez de 6, con semillas variadas y sin la cola fuera de rango
+que penalizaba al modelo anterior. Por eso se comparan proporciones frente al baseline y
+no MSE absolutos. El error latente acumulado crece 4.79x de h=1 a h=10 (antes 2.80x),
+porque h=1 mejoró mucho más que h=10, no porque h=10 empeorara.
+
+### 3. Experimento 0 repetido con el dataset nuevo
+
+Mismos scripts, sin modificar. Además se corrió `scripts/evaluate_world_model_raw.py`,
+sin el cual `compare_experiment_0.py` habría comparado el `z` nuevo con el reporte crudo
+del escenario simétrico. LSTM sobre estado crudo: pérdida final de train 0.026895 y de
+validación 0.099583 (mejor 0.095438, época 68).
+
+```
+  h |  reward_mse (z) |  reward_mse (crudo) | gana
+  1 |          57.051 |              63.436 |  z
+  2 |         127.288 |             139.760 |  z
+  3 |         204.492 |             235.490 |  z
+  4 |         279.212 |             334.497 |  z
+  5 |         349.542 |             417.238 |  z
+  6 |         409.317 |             505.745 |  z
+  7 |         494.946 |             622.507 |  z
+  8 |         591.838 |             713.016 |  z
+  9 |         757.966 |             808.376 |  z
+ 10 |         993.291 |             937.508 |  crudo
+```
+
+**El Autoencoder sigue ganando, en 9/10 horizontes** (en el escenario simétrico original
+fueron 10/10). Su ventaja es mayor en horizontes cortos y medios, se estrecha en h=9 y
+**se invierte en h=10**, coherente con el mayor error acumulado del modelo en `z`. La
+decisión de mantener el Autoencoder se sostiene.
+
+### 4. Hallazgo crítico: el criterio de selección del PPO del sueño estaba roto
+
+- **Síntoma.** El primer PPO del sueño reentrenado con el Autoencoder y el LSTM nuevos
+  empeoró en SUMO real: su `best_model`, elegido por reward imaginado (t=26000), dio
+  **-536.06 / -547.37** (13/30 episodios catastróficos). El checkpoint final (t=50176) dio
+  -432.11 / -430.63. Al mismo tiempo, el reward imaginado *mejoraba* (-119.28 → -86.24).
+- **Investigación** (`CheckpointCallback` cada 2000 pasos, 25 checkpoints evaluados en SUMO
+  real, seed 3000). **Correlación de Pearson entre reward imaginado y real: +0.077**
+  (Spearman -0.062; +0.229 desde t=10000). Es esencialmente nula. El checkpoint con mejor
+  reward imaginado (t=38000, -91.67) fue **el peor en SUMO real (-684.91)**; el mejor en
+  real (t=6000, -398.10) tenía uno de los peores rewards imaginados. Además, el reward
+  real empeoraba con más entrenamiento en el sueño (-448.8 de media entre t=2000 y 12000,
+  -535.6 entre t=14000 y 50000) mientras el imaginado mejoraba (-140.4 → -122.3). Es lo
+  esperable si el PPO explota errores del World Model; es una tendencia de una sola
+  corrida, no una prueba.
+- **Fix** (commit `174a40a`): `EvalCallback` evalúa en **SUMO real** a través de
+  `EncodedTrafficEnvironment` (Encoder congelado), envuelto en `ReseedingWrapper` con las
+  semillas fijas 20000–20004, con `eval_freq=5000` y `n_eval_episodes=5`. El entrenamiento
+  sigue sin usar pasos reales, pero **la selección cuesta 3,000 pasos reales por corrida**.
+  Resultado, antes de normalizar recompensas: -421.60 / -468.25 (17/30 ganan a tiempo
+  fijo, 4/30 catastróficos).
+- **Efecto colateral corregido** (commit `7e4a2ae`): `DreamEnvironment` creaba su
+  generador aleatorio sin semilla, así que la evaluación imaginada elegía ventanas
+  distintas en cada corrida. El mismo modelo obtuvo -86.24 en una corrida y -104.41 en
+  otra; en toda la curva, la diferencia media entre corridas fue de 34 puntos (máximo
+  234), un ruido mayor que las diferencias entre checkpoints. Se añadió `eval_seed`
+  opcional (por defecto `None`, sin cambio de comportamiento), con su test.
+
+### 5. Hallazgo crítico: la función de valor de PPO no aprendía
+
+- **Diagnóstico.** `explained_variance` ≈ 0 en **todas** las corridas del proyecto hasta
+  este punto, en los dos PPO. Los retornos no estaban normalizados y eran de cientos a
+  miles (en el dataset, el retorno por episodio tiene desviación estándar 1488.56 y el
+  retorno descontado 1046.06), y `value_loss` era del orden de la varianza real de los
+  retornos: lo esperable si la red de valor predice aproximadamente la media.
+- **Fix** (commit `782e52c`): `VecNormalize(norm_obs=False, norm_reward=True,
+  clip_reward=10.0, gamma=config.gamma)` en los dos entrenamientos, con
+  `ControllerConfig.normalize_reward` y `reward_clip` registrados en el `.json` de cada
+  checkpoint. Detalles técnicos:
+  - `EvalCallback` llama a `sync_envs_normalization` antes de cada evaluación, y esa
+    función **lanza un `AssertionError` si el entorno de evaluación no está envuelto
+    igual** (también en `VecNormalize`). Por eso el entorno de evaluación usa
+    `VecNormalize(training=False, norm_reward=False)`: estadísticas congeladas y reward
+    real, comparable con todas las tablas anteriores.
+  - `Monitor` va **debajo** de `VecNormalize`, para que los registros de episodio guarden
+    el reward real. PPO solo lo añade por sí mismo cuando no recibe un `VecEnv`.
+  - Un test arma la pila completa con modelos sintéticos y cruza evaluaciones. Se
+    comprobó aparte que con el entorno de evaluación mal envuelto `learn()` falla.
+- **Resultado en el PPO del sueño:** `explained_variance` sube a **~0.95** (media por
+  cuartos 0.818 / 0.941 / 0.952 / 0.955). Con la semilla 0: -351.61 / -339.23, 25/30
+  episodios ganan a tiempo fijo, 3/30 catastróficos. **Es la primera vez con el dataset
+  de 80 episodios que supera a tiempo fijo en las dos semillas de evaluación**, y el
+  punto 7 confirma que lo hace en las tres semillas de entrenamiento.
+- **Resultado en el PPO directo (solo recompensa normalizada, semilla 0):** mejora
+  parcial y muy inestable de `explained_variance` (media por cuartos -0.978 / -0.050 /
+  0.046 / 0.151; máximo 0.584), y **empeoró en SUMO real**: -436.25 / -349.79, frente a
+  -381.01 / -328.02 sin normalizar, con 7/30 episodios catastróficos (el peor, -1184.9).
+  Eso llevó a la siguiente investigación.
+
+### 6. Hallazgo: el PPO directo necesitaba también normalizar observaciones
+
+- **Diagnóstico.** `TrafficEnvironment` le entrega al PPO directo el estado crudo de 26
+  dimensiones, sin `scaler.pkl` (confirmado en el código). La desviación estándar por
+  dimensión va de 0.021 (ocupaciones) a 37.88 (tiempo de espera del carril Sur): **un
+  rango de ~1764x**, frente a ~3x en `z` (0.65–2.12). Además, una política mala genera
+  estados muy fuera del rango del dataset. Tras 30 pasos pidiendo siempre la fase 1, los
+  tiempos de espera por carril llegan a **1508 y 1515**, frente a un máximo de **467** en
+  los datos de entrenamiento (~3.2 veces más).
+- **Fix** (commit `c074b9e`): `normalize_obs=True` **solo para el PPO directo**. El del
+  sueño sigue con `norm_obs=False`, porque `z` ya tiene escala unitaria. Detalles:
+  - Con `norm_obs=True`, la política depende de las estadísticas de normalización del
+    momento en que se guardó, y esas estadísticas siguen cambiando después.
+    **`SaveVecNormalizeOnBest`** (`callback_on_new_best`) guarda una copia
+    (`best_model_vecnormalize.pkl`) en el instante exacto en que se guarda el mejor
+    modelo: son las mismas que `EvalCallback` sincronizó para la evaluación que lo eligió.
+  - `load_obs_normalizer()` lee `normalize_obs` del `.json` del checkpoint. Si es falso,
+    devuelve la observación sin cambios (así funcionan todos los checkpoints anteriores);
+    si es verdadero, carga el `.pkl` con `VecNormalize.load(...)`, `training=False`, y
+    aplica `normalize_obs()` a cada observación antes de `model.predict()`. **Si falta el
+    `.pkl`, falla** en vez de evaluar sin normalizar.
+  - Se actualizaron `evaluate_final_comparison.py` (tabla y comparación contrafactual) y
+    `evaluate_direct_vs_dream.py`. `evaluate_controller_sumo.py` no evalúa el PPO directo.
+  - 2 tests nuevos.
+- **Resultado** (semilla 0 fija, única variable cambiada frente a la corrida anterior):
+  -351.68 / -349.26 (media de 30 episodios **-350.47**, antes -393.02), episodios
+  catastróficos **3/30** (antes 7/30), peor episodio -716.8 (antes -1184.9), desviación
+  reducida a menos de la mitad en seed 3000, y throughput 13.00 / 12.93 (antes 11.53 /
+  11.40, casi al nivel de tiempo fijo). La curva de `EvalCallback` se estabiliza en ~-360
+  a partir del timestep 6000. **`explained_variance` no mejoró** (media del último
+  cuarto 0.106, máximo 0.809). El punto 7 muestra además que **la semilla 0 fue la mejor
+  de las tres**.
+
+### 7. Verificación de robustez: 3 semillas de entrenamiento por método
+
+Una sola corrida no basta para confiar en una mejora. Cada PPO se reentrenó con las
+semillas de entrenamiento 0, 1 y 2, y cada checkpoint se evaluó en las dos semillas de
+evaluación (15 episodios cada una).
+
+**PPO del sueño (`VecNormalize` de recompensa):**
+
+```
+semilla | seed 3000          | seed 5000          | media 30 | mediana 30 | gana t.fijo | < -600 | peor   | best en t=
+      0 | -351.61 +/- 194.53 | -339.23 +/- 167.01 |  -345.42 |    -294.55 |    25/30    |  3/30  | -973.1 | 15000
+      1 | -291.26 +/-  56.86 | -364.99 +/- 189.84 |  -328.13 |    -302.60 |    25/30    |  1/30  | -998.7 | 45000
+      2 | -289.04 +/-  70.18 | -324.59 +/- 124.71 |  -306.82 |    -290.90 |    25/30    |  1/30  | -685.1 | 15000
+Media 90 episodios: -326.79 (std 147.42, mediana -293.00, error estándar 15.63)
+```
+
+Las tres semillas superan a tiempo fijo, con medias parecidas (dispersión entre semillas
+de 39 puntos) y `explained_variance` ~0.95 en las tres. **Sobre el checkpoint oficial:**
+la semilla 1 se adoptó mirando solo la seed 3000, donde parecía la mejor (-291.26). Con
+las dos semillas de evaluación, la mejor en promedio es la semilla 2 (-306.82), y la 1 es
+la peor en seed 5000 (-364.99, con un episodio en -998.7). Las diferencias entre semillas
+están dentro del ruido. Se decidió mantener la semilla 1 como checkpoint oficial y
+**reportar como resultado del método la media de las tres semillas en 90 episodios
+(-326.79)**; el desglose por semilla es la evidencia de consistencia, no el número
+principal.
+
+**PPO directo (`VecNormalize` de recompensa y observaciones):**
+
+```
+semilla | seed 3000          | seed 5000          | media 30 | mediana 30 | gana t.fijo | < -600 | peor    | best en t=
+      0 | -351.68 +/- 146.55 | -349.26 +/- 110.13 |  -350.47 |    -329.45 |    22/30    |  3/30  |  -716.8 | 9000
+      1 | -500.61 +/- 306.10 | -439.08 +/- 250.12 |  -469.85 |    -300.05 |    18/30    | 10/30  | -1023.7 | 6000
+      2 | -527.25 +/- 145.69 | -554.54 +/- 180.24 |  -540.89 |    -543.95 |     9/30    | 10/30  |  -918.5 | 3000
+Media 90 episodios: -453.74 (std 217.13, mediana -381.75, error estándar 23.02)
+```
+
+**El resultado del RL directo varía mucho entre semillas** (dispersión de 190 puntos):
+
+- **La semilla 2 colapsó a la regla trivial "pedir siempre la fase contraria"**, el mismo
+  patrón del escenario simétrico. Coincide con la regla a menos de 1 punto en 25 de 30
+  episodios (con diferencias de 0.1–0.4, la penalización de `phase_change`), y los otros
+  5 son peores que la regla. Su curva de evaluación se queda plana en -576 durante cinco
+  evaluaciones y termina en -832.
+- **La semilla 1 es bimodal:** tiene buenos episodios (~-200/-300) y 10 catastróficos,
+  incluido el peor episodio medido en el proyecto (-1023.7).
+- `explained_variance` sigue sin aprender en ninguna semilla (media del último cuarto:
+  0.106, -0.04 y 0.21; máximos puntuales 0.81–0.85).
+
+El checkpoint oficial del directo (semilla 0) es la mejor de sus tres semillas. Por eso,
+igual que con el sueño, el resultado del método es la media de las tres (-453.74), no la
+semilla 0 sola.
+
+### 8. Resultado final de la comparación
+
+SUMO real, `scripts/evaluate_final_comparison.py` y el mismo protocolo. Los PPO se
+promedian sobre 3 semillas × 2 semillas de evaluación × 15 episodios; tiempo fijo y la
+regla son deterministas: 2 semillas de evaluación × 15 episodios.
+
+| Política | Episodios | Media | Desv. estándar | Mediana | Espera media | Ganan a tiempo fijo | < -600 | Peor | Pasos reales de SUMO (3 semillas) |
+|---|---|---|---|---|---|---|---|---|---|
+| **PPO del sueño (World Model)** | 90 | **-326.79** | 147.42 | -293.00 | 4.43 | **75/90** | **5/90** | -998.7 | **13,800** en total: 4,800 de dataset (una vez) + 3 × 3,000 de selección → **~4,600 por semilla** |
+| PPO directo (RL directo) | 90 | -453.74 | 217.13 | -381.75 | 6.15 | 49/90 | 23/90 | -1023.7 | 39,000 en total: 3 × (10,000 de entrenamiento + 3,000 de evaluación) → 13,000 por semilla |
+| Tiempo fijo (ciclo=5) | 30 | -411.27 | 51.75 | -399.70 | 5.58 | — | 0/30 | -592.2 | — |
+| Regla "pedir fase contraria" | 30 | -502.53 | 118.11 | -511.10 | 6.68 | 9/30 | 7/30 | -703.1 | — |
+
+La espera media es el promedio de las 6 evaluaciones de cada PPO y de las 2 de tiempo
+fijo y la regla. **Contabilidad de interacciones:** el dataset del World Model (80
+episodios × 60 pasos = 4,800 transiciones) se recolecta una sola vez y lo reutilizan las
+3 semillas del sueño, así que se cuenta una vez; en el RL directo, cada semilla entrena
+desde cero en SUMO sin nada compartido, así que su costo se repite por semilla. Con una
+sola semilla, el World Model costaría 7,800 pasos (4,800 + 3,000) frente a 13,000: la
+ventaja en interacciones crece con el número de entrenamientos que reutilizan el mismo
+dataset.
+
+**Cuánta evidencia hay de que la ventaja del World Model es real:**
+
+- **A nivel de episodio** (90 frente a 90, tratados como independientes): la diferencia
+  de 126.95 puntos equivale a **4.56 errores estándar** (Welch t = 4.56, p ≈ 1e-5;
+  Mann-Whitney p ≈ 1.4e-5). No es azar entre episodios.
+- **A nivel de semilla de entrenamiento** (3 medias frente a 3 medias): **Welch t = 2.24,
+  gl ≈ 2.2, p = 0.145, no significativo.** Los 15 episodios de una semilla no son
+  independientes entre sí, y el RL directo varía mucho entre semillas (desviación de las
+  medias por semilla: 96.2, frente a 19.3 en el sueño). Toda semilla del sueño supera a
+  toda semilla del directo, pero por muy poco en el peor caso (la peor del sueño, -345.42,
+  frente a la mejor del directo, -350.47).
+- **Lectura honesta:** con el presupuesto usado, el método World Model obtiene mejor
+  control medio, es **mucho más consistente entre semillas** y tiene muchos menos
+  episodios catastróficos, con **~35% de las interacciones reales por semilla** (4,600
+  frente a 13,000, con el dataset compartido entre las 3 semillas). Con solo 3
+  semillas por método, la ventaja en la media no se puede afirmar con significancia
+  estadística a nivel de semilla. La diferencia más robusta es la **consistencia**: el
+  RL directo puede salir tan bien como el sueño (semilla 0) o colapsar a la regla trivial
+  (semilla 2).
+- **Throughput:** el PPO del sueño sigue algo por debajo de tiempo fijo (12.20–12.33
+  frente a 13.27–13.73 con el checkpoint oficial), la misma salvedad de todo el proyecto.
+
+### 9. Limitaciones que quedan abiertas
+
+- **Los episodios catastróficos se redujeron, pero no desaparecieron** en ninguno de los
+  dos métodos (5/90 en el sueño, 23/90 en el directo). Su causa completa sigue sin
+  identificarse; ver la primera ronda para lo que ya se descartó.
+- **La función de valor del PPO directo sigue sin aprender** incluso con las dos
+  normalizaciones: la media del último cuarto de `explained_variance` está entre -0.04 y
+  0.21 según la semilla, con máximos puntuales de 0.81–0.85. Causa no identificada;
+  hipótesis sin confirmar: muchas menos actualizaciones de gradiente que el PPO del sueño
+  (39 frente a 195), y más variabilidad de escenarios en SUMO real que en el sueño.
+- **Presupuesto del RL directo:** con solo 10,000 pasos reales de entrenamiento no se
+  puede descartar que más presupuesto hubiera cerrado la brecha o estabilizado sus
+  semillas. La comparación vale **para el presupuesto usado**; no es una afirmación
+  general de que el RL directo sea inferior en cualquier condición.
+- **Solo 3 semillas por método:** suficiente para ver la diferencia de consistencia, no
+  para afirmar significancia a nivel de semilla (punto 8).
+- **Límite de 8 s en la fase 1:** medido con los PPO de la primera ronda; no se volvió a
+  medir con los checkpoints actuales.
+
+**Notas técnicas menores:** la nota al pie de `compare_experiment_0.py` dice "8 vs. 26
+dimensiones", pero el espacio latente tiene 16 (no se corrigió el script). La primera
+propuesta de conteos de tests para los 8 commits de este bloque tenía un error (commit 2
+= 40, no 41); cada commit se verificó sobre su propio árbol en un `git worktree`.
+
+## 🗄️ Escenario asimétrico, primera ronda (40 episodios, semilla de SUMO fija): la regla trivial se rompe, aparecen episodios catastróficos
+
+> **Registro histórico, superado por la sección anterior.** Los checkpoints, el dataset y
+> los números de esta primera ronda fueron reemplazados. Se conserva porque documenta
+> decisiones que siguen vigentes (la elección de la demanda 500/150, descartando
+> 700/150; la verificación de inserción de vehículos) y la investigación de los
+> episodios catastróficos (cola invisible y rachas de fase 1 descartadas). Sus
+> conclusiones sobre la función de valor y el trabajo futuro se resolvieron después.
 
 > **Hallazgos de proceso anotados sin corregir** (ver también "🟡 Pendiente"):
 > 1. `scripts/collect_dataset.py` llama a `env.reset()` sin semilla, así que los 40
@@ -872,36 +1191,37 @@ handoff anterior.
 4. `ProjectRewardFunction.phase_change` penaliza pedir la fase 1, no cambiar
    efectivamente de fase (misma raíz que el punto 3; ver la sección del baseline de RL
    directo, punto 7).
-5. `scripts/collect_dataset.py` no pasa semilla a `env.reset()`: los 40 episodios del
-   dataset comparten la semilla de SUMO 42, y la variedad viene solo de las acciones
-   aleatorias. Decidir si esto limita al World Model.
-6. Ambos PPO (escenario asimétrico) nunca sostienen el verde de la fase 1 más de 8 s,
-   que coincide con la duración mínima posible de una fase. No investigado a fondo (ver
-   la sección del escenario asimétrico, punto 5).
-7. **Episodios catastróficos de los PPO en el escenario asimétrico: causa no identificada
-   por completo** (limitación abierta; ver la misma sección, puntos 5 y 6).
+5. Ambos PPO de la primera ronda asimétrica nunca sostenían el verde de la fase 1 más
+   de 8 s (la duración mínima posible). No se volvió a medir con los checkpoints
+   actuales; no investigado a fondo.
+6. **Episodios catastróficos: reducidos pero no eliminados** (5/90 en el PPO del sueño,
+   23/90 en el directo); causa no identificada por completo.
+7. **Función de valor del PPO directo:** `explained_variance` sigue bajo e inestable
+   incluso con `VecNormalize` de recompensa y observaciones; causa no identificada.
 
 ## ⚪ No implementado todavía
 
-- **Normalización de recompensas o retornos (`VecNormalize` u otra) en ambos
-  entrenamientos de PPO**, para comprobar si arregla la función de valor
-  (`explained_variance` ≈ 0) y elimina los episodios catastróficos. Prioridad 1 del
-  trabajo futuro del escenario asimétrico.
-- Análisis del momento de los cambios de fase respecto a las colas de cada brazo, si la
-  normalización no explica todo.
+- Más presupuesto de entrenamiento real y más semillas para el RL directo, para saber
+  si la brecha de consistencia con el método World Model se mantiene.
+- Análisis del momento de los cambios de fase respecto a las colas de cada brazo, para
+  los episodios catastróficos que quedan.
 - Demanda variable en el tiempo (el escenario asimétrico ya está implementado; la
   variación temporal no).
 - Transformer y TSMixer como sustitutos del LSTM (extensiones opcionales).
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se cambió la demanda a un escenario asimétrico (500/150 veh/h; la propuesta de 700/150
-se descartó por saturar la vía principal) y se re-ejecutó el pipeline completo desde cero
-(commits `febef8e`, `6c753d2`, `f58347e`, 39/39 tests en verde). La regla trivial "pedir
-siempre la fase contraria" pasa a ser la peor política, y los dos PPO ya no la siguen
-(54.9% y 47.2% de acuerdo en pasos no bloqueados). Ambos superan en promedio a tiempo fijo
-(21/30 episodios cada uno), pero tienen episodios catastróficos (7/30 y 5/30 peores que
--600) que tiempo fijo no tiene. Se descartaron la cola invisible y las rachas largas de
-fase 1 como causa; la escala sin normalizar de la función de valor se confirmó en
-magnitud pero no en causalidad. Siguiente paso recomendado: normalizar recompensas o
-retornos (`VecNormalize`) en los dos entrenamientos de PPO y volver a evaluar.
+Se cerró la segunda ronda del escenario asimétrico (commits `2a63328` a `9b6a389`,
+45/45 tests). Se corrigió la semilla fija de `collect_dataset.py` y el dataset pasó a 80
+episodios; el LSTM predice el reward a un paso con el 2.7% del error del baseline (parte
+de la mejora viene de un test set sin la cola anterior). El Autoencoder sigue ganando en
+el Experimento 0 (9/10). Se descubrió que el reward imaginado no predice el real
+(Pearson +0.08), y la selección del checkpoint del sueño pasó a hacerse en SUMO real. Con
+`VecNormalize`, la función de valor del PPO del sueño aprende (`explained_variance`
+~0.95); el PPO directo necesitó además normalizar observaciones, y su función de valor
+sigue sin aprender. Con 3 semillas por método: sueño -326.79, directo -453.74, tiempo
+fijo -411.27. Ventaja clara a nivel de episodio, no significativa a nivel de semilla,
+con el World Model mucho más consistente y usando menos interacciones reales (13,800 en
+total para 3 semillas, con el dataset de 4,800 compartido, frente a 39,000 del RL
+directo). Siguiente paso a decidir con el autor: empezar la documentación final o seguir
+investigando alguna de las limitaciones abiertas.
