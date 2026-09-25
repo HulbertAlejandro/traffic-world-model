@@ -106,11 +106,13 @@
 - [x] Actualizar `DOCUMENTACION_PROYECTO.md` con LSTM, bug de fase, Experimento 0,
       cierre del sobreajuste, y Dream Environment (resuelto en el commit `9ca20ac`).
 - [ ] Investigar y resolver el tema del colaborador/app desconocido en GitHub.
-- [ ] Corregir la documentación de ProjectActionSpace y cualquier referencia a
+- [x] Corregir la documentación de ProjectActionSpace y cualquier referencia a
       'mantener/cambiar' -- la acción es en realidad el índice de fase verde destino
       (confirmado en sumo_rl.TrafficSignal.set_next_phase). No es bloqueante porque el
       pipeline completo usa la convención de forma consistente, pero la documentación es
-      engañosa para cualquiera que lea el código después.
+      engañosa para cualquiera que lea el código después. Resuelto en `c253d88`
+      (docstrings y comentarios, sin cambio de comportamiento) y en `30c3fae` (Sección 12
+      de `docs/PROPUESTA.md`).
 - [ ] Corregir `ProjectRewardFunction.phase_change`: hoy penaliza pedir la fase 1
       (`action == 1`), no cambiar efectivamente de fase. Misma raíz que el punto
       anterior; ver PROJECT_STATUS.md, sección del baseline de RL directo, punto 7.
