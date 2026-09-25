@@ -2,7 +2,7 @@
 
 Control inteligente de semáforos mediante World Models en una intersección simulada de SUMO.
 
-> Este documento describe **todo** el proyecto tal como existe hoy en el repositorio (`https://github.com/HulbertAlejandro/traffic-world-model`, commit `87ffb8f`) — archivo por archivo, concepto por concepto, con las cifras finales verificadas contra `PROJECT_STATUS.md`. Está pensado para leerse de principio a fin sin necesitar ningún documento anterior como referencia. No incluye nada que no esté implementado, y marca claramente lo que aún falta.
+> Este documento describe **todo** el proyecto tal como existe hoy en el repositorio (`https://github.com/HulbertAlejandro/traffic-world-model`, estado hasta el commit `dd0e547`) — archivo por archivo, concepto por concepto, con las cifras finales verificadas contra `PROJECT_STATUS.md`. Está pensado para leerse de principio a fin sin necesitar ningún documento anterior como referencia. No incluye nada que no esté implementado, y marca claramente lo que aún falta.
 
 ---
 
@@ -59,10 +59,12 @@ SUMO → Estado del tráfico (26 dims) → Autoencoder → z (16 dims)
 - Un baseline de RL directo (PPO entrenado sin pasar por el World Model), también con 3 semillas.
 - Un escenario de demanda de tráfico asimétrica, diseñado específicamente para que la solución trivial del problema deje de ser óptima y así poder comparar los métodos por calidad de control real.
 - La comparación final entre los dos métodos y dos baselines clásicos (tiempo fijo, regla trivial), en SUMO real.
+- Transformer y TSMixer como alternativas al LSTM (Experimento 3): implementados, entrenados con el mismo protocolo y evaluados; ninguno mejora al LSTM, que se mantiene.
+- Una verificación del RL directo con el triple de presupuesto de entrenamiento: alcanza un desempeño comparable al del World Model, pero con ~8.5 veces más interacciones reales.
 
 **Qué falta, de forma deliberada (no por descuido):**
-- Transformer y TSMixer como arquitecturas alternativas al LSTM — extensiones opcionales de igual prioridad entre sí según la propuesta (Sección 24), pospuestas para priorizar la investigación de varios bugs críticos que aparecieron en el camino (ver Sección 20).
-- Un presupuesto de entrenamiento más grande para el RL directo, y más semillas, para confirmar si la brecha de consistencia frente al World Model se sostiene.
+- Más semillas por método (siguen siendo 3), para poder afirmar o descartar diferencias a nivel de semilla.
+- Una curva de desempeño frente a interacciones reales del RL directo: hoy solo hay dos puntos (13,000 y 39,000 interacciones por semilla).
 - La causa completa de un número reducido de episodios catastróficos que persisten en ambos métodos.
 - Una demanda de tráfico que varíe en el tiempo (hoy es asimétrica pero constante dentro de cada episodio).
 
@@ -76,18 +78,19 @@ SUMO → Estado del tráfico (26 dims) → Autoencoder → z (16 dims)
 | Pipeline de dataset (recolección con semilla por episodio, split, normalización) | ✅ Completo | 3 |
 | Autoencoder | ✅ Completo | 2 |
 | Modelo temporal LSTM (`LatentDynamicsLSTM`) | ✅ Completo | 10 |
-| Experimento 1 (LSTM vs. baseline persistente, horizontes 1-10) | ✅ Completo | 6 |
+| Experimento 1 (LSTM vs. baseline persistente, horizontes 1-10) | ✅ Completo | 9 (incluye 3 del selector `build_world_model`) |
 | Experimento 0 (Autoencoder vs. estado crudo) | ✅ Completo | — |
 | Dream Environment | ✅ Completo | 9 |
 | Controlador PPO entrenado en el sueño | ✅ Completo, 3 semillas | 9 (compartidos) |
 | Baseline de RL directo | ✅ Completo, 3 semillas | 3 (compartidos) |
 | Evaluación final comparativa (SUMO real) | ✅ Completo | — |
-| Transformer / TSMixer | ⚪ No implementado (extensión opcional) | 0 |
+| Transformer / TSMixer (Experimento 3) | ✅ Completo; se mantiene la LSTM | 14 |
+| Verificación del RL directo con 3x presupuesto (30,000 pasos) | ✅ Completo (checkpoints archivados, no oficiales) | — |
 | Demanda de tráfico variable en el tiempo | ⚪ No implementado | 0 |
 
-**45 tests automatizados, todos pasando**, distribuidos en 10 archivos dentro de `tests/`.
+**62 tests automatizados, todos pasando**, distribuidos en 12 archivos dentro de `tests/`.
 
-No existen `utils/`, `notebooks/`, ni ninguna carpeta `data/` como parte versionada del repositorio (se eliminaron o nunca se llegaron a versionar).
+No existen `utils/`, `notebooks/`, `experiments/`, `papers/` ni ninguna carpeta `data/`: nunca se versionaron, y las carpetas vacías que quedaban en disco se eliminaron.
 
 ---
 
@@ -137,8 +140,14 @@ traffic-world-model/
 │   ├── world_model/
 │   │   ├── __init__.py
 │   │   ├── base.py                 # Protocol TemporalModel
-│   │   └── lstm.py                 # LatentDynamicsLSTM
+│   │   ├── lstm.py                 # LatentDynamicsLSTM (el modelo del sistema final)
+│   │   ├── transformer.py          # LatentDynamicsTransformer (Experimento 3)
+│   │   └── tsmixer.py              # LatentDynamicsTSMixer (Experimento 3)
 │   └── checkpoints/                 # .pt/.zip/.pkl generados, no versionados; los .json sí
+│       ├── controller/              # PPO del sueño (oficial: best_model, semilla 1)
+│       ├── controller_direct/       # PPO directo, 10,000 pasos (oficial: best_model, semilla 0)
+│       ├── controller_direct_30k/   # PPO directo, 30,000 pasos (verificación, no oficial)
+│       └── raw_state/               # LSTM sobre estado crudo (Experimento 0)
 │
 ├── training/                        # Los bucles de entrenamiento
 │   ├── __init__.py
@@ -146,7 +155,9 @@ traffic-world-model/
 │   ├── train_controller.py             # PPO en el Dream Environment
 │   ├── train_controller_direct.py      # PPO directo contra SUMO real
 │   ├── train_world_model.py            # LSTM sobre z
-│   └── train_world_model_raw.py        # LSTM sobre estado crudo (Experimento 0)
+│   ├── train_world_model_raw.py        # LSTM sobre estado crudo (Experimento 0)
+│   ├── train_world_model_transformer.py  # Transformer sobre z (Experimento 3)
+│   └── train_world_model_tsmixer.py      # TSMixer sobre z (Experimento 3)
 │
 ├── evaluation/                      # Cómo se mide qué tan bien aprendió un modelo
 │   ├── __init__.py
@@ -158,6 +169,7 @@ traffic-world-model/
 │   ├── analyze_controller_actions.py
 │   ├── collect_dataset.py
 │   ├── compare_experiment_0.py
+│   ├── compare_experiment_3.py
 │   ├── encode_latent_dataset.py
 │   ├── evaluate_controller.py            # autoevaluación dentro del sueño
 │   ├── evaluate_controller_sumo.py       # evaluación del PPO del sueño en SUMO real
@@ -165,6 +177,8 @@ traffic-world-model/
 │   ├── evaluate_final_comparison.py      # comparación final consolidada
 │   ├── evaluate_world_model.py
 │   ├── evaluate_world_model_raw.py
+│   ├── evaluate_world_model_transformer.py
+│   ├── evaluate_world_model_tsmixer.py
 │   ├── merge_dataset.py
 │   ├── normalize_dataset.py
 │   ├── prepare_raw_sequence_dataset.py
@@ -172,7 +186,7 @@ traffic-world-model/
 │   ├── test_environment.py               # prueba de humo manual
 │   └── visualize_dataset.py
 │
-├── tests/                           # Pruebas automatizadas (pytest) — 10 archivos, 45 funciones
+├── tests/                           # Pruebas automatizadas (pytest) — 12 archivos, 62 funciones
 │   ├── test_autoencoder.py
 │   ├── test_controller.py
 │   ├── test_dataset_pipeline.py
@@ -182,12 +196,15 @@ traffic-world-model/
 │   ├── test_reseeding_wrapper.py
 │   ├── test_traffic_environment.py
 │   ├── test_world_model.py
-│   └── test_world_model_evaluation.py
+│   ├── test_world_model_evaluation.py
+│   ├── test_world_model_transformer.py
+│   └── test_world_model_tsmixer.py
 │
 ├── docs/
 │   ├── PROPUESTA.md
 │   └── DOCUMENTACION_PROYECTO.md    # este documento
 │
+├── ver_controlador.py               # visualiza el PPO del sueño en la GUI de SUMO
 ├── pytest.ini
 ├── requirements.txt
 ├── .gitignore
@@ -255,12 +272,13 @@ traffic-world-model/
 ### `environments/project_action_space.py`
 **Responsabilidad:** definir qué acciones puede tomar el controlador de semáforo.
 **Clase principal:** `ProjectActionSpace` — dos acciones posibles. Sabe generar una acción aleatoria (`sample()`) y validar si una acción es válida (`contains()`).
-**Nota importante (ver también Sección 19):** el docstring de esta clase dice "0 = mantener la fase actual, 1 = cambiar a la siguiente fase", pero eso **no es exactamente lo que ocurre**: `sumo_rl` trata el número recibido como el índice de la fase verde de destino, no como un interruptor mantener/cambiar. Con solo 2 fases posibles, el efecto práctico coincide casi siempre con esa descripción, pero conceptualmente son cosas distintas.
+**Nota importante (ver también Sección 19):** la acción **no** es un interruptor mantener/cambiar, como decía la especificación original: `sumo_rl` (`TrafficSignal.set_next_phase`) trata el número recibido como el **índice de la fase verde de destino**. Con 2 fases, la acción 1 equivale a "cambiar" solo cuando la fase actual es la 0; cuando es la 1, la acción 1 mantiene y la acción 0 cambia. Como cada fase ocupa ~50% del tiempo, la coincidencia con la descripción original se da en aproximadamente la mitad de los pasos. El docstring de la clase ya lo explica (commit `c253d88`); el comportamiento no se cambió, porque todo el pipeline usa esta convención de forma consistente.
 
 ### `environments/project_reward_function.py`
 **Responsabilidad:** calcular qué tan "buena" fue una transición.
 **Clase principal:** `ProjectRewardFunction` — implementa `R = -α·espera - β·cola + γ·flujo - δ·cambio_de_fase`, usando los coeficientes de `RewardConfig`.
 **Dato importante:** el "flujo" (`throughput`) se calcula como vehículos que **terminaron** su recorrido en ese paso (dato real de SUMO), no como vehículos presentes — si se contaran los presentes, se estaría premiando la congestión en vez de penalizarla.
+**Otro dato importante:** el término `cambio_de_fase` lee `info["phase_change"]`, que pese a su nombre vale 1 cuando se **pidió la fase 1** (`action == 1`), no cuando el semáforo cambió de fase de verdad. Se mantiene así a propósito, porque todos los datos y modelos entrenados usan esa definición; está documentado en el código y sigue abierto en `TODO.md`.
 
 ### `environments/dream_environment.py`
 **Responsabilidad:** el corazón de la idea de "World Model" — un entorno compatible con Gymnasium que imagina transiciones usando el `LatentDynamicsLSTM` ya entrenado, **sin ejecutar SUMO ni una sola vez**.
@@ -301,9 +319,17 @@ traffic-world-model/
 **Cómo está implementado:** con `torch.nn.LSTM` estándar de PyTorch — no con las ecuaciones de compuertas (olvido, entrada, salida) escritas a mano, que era la implementación que sugería la propuesta original (ver Sección 19 para el detalle de esta diferencia).
 **`action_dim=2`:** la acción se codifica como one-hot, no como un número crudo, para no sugerir un orden entre las dos opciones que no existe.
 
+### `models/world_model/transformer.py`
+**Responsabilidad:** alternativa al LSTM evaluada en el Experimento 3.
+**Clase principal:** `LatentDynamicsTransformer` — proyecta cada par `(z, acción)` a 128 dimensiones, suma una codificación posicional sinusoidal y lo pasa por 2 capas de encoder Transformer estándar de PyTorch (4 cabezas de atención). Como el LSTM, usa la salida del último paso y tiene las mismas dos cabezas de salida `(ẑ, r̂)`. No usa máscara causal: el valor a predecir está fuera de la ventana, así que no hay fuga de información futura.
+
+### `models/world_model/tsmixer.py`
+**Responsabilidad:** segunda alternativa al LSTM evaluada en el Experimento 3, sin recurrencia ni atención.
+**Clase principal:** `LatentDynamicsTSMixer` — 2 bloques que alternan una mezcla temporal (una capa densa que opera sobre el eje del tiempo) y una mezcla de variables (un MLP), cada una con normalización y conexión residual. Exige una longitud de secuencia fija (16), porque sus capas temporales operan directamente sobre esa dimensión.
+
 ### `models/world_model/base.py`
 **Responsabilidad:** define `TemporalModel`, un contrato (`Protocol` de Python) con la interfaz común (`forward(latent_sequence, action_sequence) -> (z_hat, r_hat)`) que cualquier arquitectura temporal alternativa (Transformer, TSMixer) debería implementar para ser intercambiable con el LSTM sin tocar el resto del sistema.
-**Estado actual:** `LatentDynamicsLSTM` es la única clase que lo implementa hoy — el contrato existe, preparado, pero las alternativas todavía no se construyeron (ver Sección 16).
+**Estado actual:** lo implementan las tres arquitecturas, `LatentDynamicsLSTM`, `LatentDynamicsTransformer` y `LatentDynamicsTSMixer`. El sistema final usa el LSTM (ver el Experimento 3 en la Sección 11).
 
 ### `training/train_autoencoder.py`
 **Responsabilidad:** el bucle completo de entrenamiento del Autoencoder — ver Sección 10 para el detalle paso a paso.
@@ -314,6 +340,9 @@ traffic-world-model/
 ### `training/train_world_model_raw.py`
 **Responsabilidad:** el mismo entrenamiento, pero sobre el estado crudo normalizado en vez de `z` — es la mitad del Experimento 0 (la comparación que decide si el Autoencoder realmente vale la pena).
 
+### `training/train_world_model_transformer.py`, `training/train_world_model_tsmixer.py`
+**Responsabilidad:** entrenan el Transformer y el TSMixer del Experimento 3. Importan el protocolo de entrenamiento de `train_world_model.py` (semilla, optimizador, épocas, early stopping, pérdida) en vez de copiarlo, y **leen** el `reward_scaler.json` que generó el entrenamiento del LSTM en vez de recalcularlo. Así las tres arquitecturas se entrenan en condiciones idénticas, por construcción.
+
 ### `training/train_controller.py`
 **Responsabilidad:** entrena PPO (Stable-Baselines3) dentro de `DreamEnvironment`.
 **Detalle importante:** la selección del mejor checkpoint **no se hace mirando la recompensa imaginada** — se investigó y se encontró que no tiene ninguna relación con el desempeño real (correlación de Pearson ≈ 0.08) — sino evaluando periódicamente contra SUMO real, a través de `EncodedTrafficEnvironment`. Usa `VecNormalize` para normalizar la recompensa, corrigiendo un problema donde la red de valor de PPO no aprendía nada (`explained_variance` ≈ 0).
@@ -321,6 +350,7 @@ traffic-world-model/
 ### `training/train_controller_direct.py`
 **Responsabilidad:** entrena PPO directamente contra `TrafficEnvironment` (SUMO real), sin Autoencoder ni Dream Environment — el baseline de RL directo que pide la Sección 18 de la propuesta.
 **Detalle importante:** usa `VecNormalize` para la recompensa **y** para las observaciones — el estado crudo de 26 dimensiones tiene una escala muy desigual entre variables (hasta ~1764 veces de diferencia entre la dimensión más y menos variable), algo que `z` no tiene porque ya viene normalizado por el Autoencoder.
+**Presupuesto:** 10,000 pasos reales de entrenamiento (`DIRECT_TOTAL_TIMESTEPS`). Una verificación con 30,000 pasos, hecha sin modificar el script, está archivada en `models/checkpoints/controller_direct_30k/` (ver Sección 11).
 
 ### `evaluation/autoencoder_evaluation.py`
 **Responsabilidad:** funciones reutilizables para medir y visualizar un Autoencoder ya entrenado.
@@ -329,7 +359,7 @@ traffic-world-model/
 **Responsabilidad:** el script que realmente se ejecuta: carga el mejor checkpoint del Autoencoder, evalúa contra el conjunto de prueba, e imprime/guarda los resultados.
 
 ### `evaluation/world_model_evaluation.py`
-**Responsabilidad:** funciones reutilizables para evaluar el LSTM: `rollout_episode` (predicción autorregresiva a varios horizontes), `predict_next_step` (un solo paso, reutilizado también por `DreamEnvironment`), y utilidades para cargar checkpoints y su escalador de recompensa.
+**Responsabilidad:** funciones reutilizables para evaluar el modelo temporal: `rollout_episode` (predicción autorregresiva a varios horizontes), `predict_next_step` (un solo paso, reutilizado también por `DreamEnvironment`), y utilidades para cargar checkpoints y su escalador de recompensa. `build_world_model` construye la arquitectura correcta (LSTM, Transformer o TSMixer) a partir de la clave `architecture` del `.json` de cada checkpoint; los checkpoints sin esa clave son LSTM.
 
 ### `scripts/collect_dataset.py`
 **Responsabilidad:** generar episodios reales usando `TrafficEnvironment` y guardarlos, uno por archivo, en `datasets/raw/`. Genera 80 episodios de 60 pasos cada uno, con acciones aleatorias y **una semilla de SUMO distinta por episodio** (`seed_start + episode_idx`) — corrigiendo un bug donde los 40 episodios originales compartían la misma semilla y toda la variedad venía solo de las acciones, no del tráfico.
@@ -358,6 +388,9 @@ traffic-world-model/
 ### `scripts/prepare_raw_sequence_dataset.py`, `scripts/evaluate_world_model_raw.py`, `scripts/compare_experiment_0.py`
 **Responsabilidad conjunta:** el Experimento 0 completo. El primero prepara secuencias sobre el estado crudo (en vez de `z`); el segundo evalúa el LSTM entrenado sobre ese estado crudo; el tercero compara ambos resultados y decide si el Autoencoder se queda en el sistema.
 
+### `scripts/evaluate_world_model_transformer.py`, `scripts/evaluate_world_model_tsmixer.py`, `scripts/compare_experiment_3.py`
+**Responsabilidad conjunta:** el Experimento 3 completo. Los dos primeros evalúan cada alternativa con exactamente el mismo protocolo que `evaluate_world_model.py` (mismo conjunto de prueba, horizontes y baseline). El tercero compara las tres arquitecturas por `reward_mse` en cada horizonte, reporta el número de parámetros de cada una y aplica un criterio de decisión fijado antes de ver los resultados.
+
 ### `scripts/evaluate_controller.py`
 **Responsabilidad:** autoevaluación del PPO del sueño **dentro** del propio `DreamEnvironment` — útil como diagnóstico rápido, pero su propio docstring aclara que no es una medición de desempeño real contra SUMO.
 
@@ -372,6 +405,9 @@ traffic-world-model/
 
 ### `scripts/analyze_controller_actions.py`
 **Responsabilidad:** herramienta de diagnóstico usada durante la investigación de una anomalía en el recorte de recompensa del `DreamEnvironment` — mide si el PPO está "explotando" ese recorte en vez de aprender control genuino.
+
+### `ver_controlador.py`
+**Responsabilidad:** script de demostración: abre la GUI de SUMO y muestra en vivo al PPO del sueño controlando el semáforo. No forma parte del pipeline ni de los tests.
 
 ### `pytest.ini`
 **Responsabilidad:** le dice a `pytest` que solo busque pruebas dentro de `tests/`, y agrega la raíz del proyecto a la ruta de Python automáticamente.
@@ -415,6 +451,9 @@ evaluate_world_model.py (Experimento 1: supera al baseline persistente, 10/10 ho
     ↓
 train_world_model_raw.py + compare_experiment_0.py (Experimento 0: z sigue ganando, 9/10)
     ↓
+train_world_model_{transformer,tsmixer}.py + compare_experiment_3.py
+    (Experimento 3: el LSTM gana en los 10 horizontes; se mantiene)
+    ↓
 DreamEnvironment (usa el LSTM congelado para imaginar transiciones, sin SUMO)
     ↓
 train_controller.py (PPO entrenado SIN tocar SUMO durante el aprendizaje,
@@ -436,7 +475,7 @@ evaluate_final_comparison.py (comparación final: PPO del sueño vs. PPO directo
 | `EnvironmentConfig` | Ruta de la red SUMO, uso de GUI, duración, `single_agent`, semilla | `TrafficEnvironment` |
 | `RewardConfig` | Coeficientes α, β, γ, δ de la recompensa | `ProjectRewardFunction` |
 | `RepresentationConfig` | Dimensiones y entrenamiento del Autoencoder | `train_autoencoder.py`, `autoencoder_evaluation.py` |
-| `WorldModelConfig` | `latent_dim` (derivado de `RepresentationConfig`), `action_dim`, `sequence_length`, `hidden_dim` | `train_world_model.py` |
+| `WorldModelConfig` | `latent_dim` (derivado de `RepresentationConfig`), `action_dim`, `sequence_length`, `hidden_dim` | `train_world_model.py`, `train_world_model_transformer.py`, `train_world_model_tsmixer.py` |
 | `ControllerConfig` | Hiperparámetros de PPO, `seed` (default 1 para el sueño), `normalize_reward`, `reward_clip` | `train_controller.py`, `train_controller_direct.py` |
 
 ---
@@ -460,7 +499,8 @@ evaluate_final_comparison.py (comparación final: PPO del sueño vs. PPO directo
 ## 9. Modelos
 
 - **`Encoder`/`Decoder`/`Autoencoder`**: comprimen el estado de 26 a 16 dimensiones. Determinista, no un VAE.
-- **`LatentDynamicsLSTM`**: recibe una ventana de 16 pasos de `(z, acción)` y predice `(ẑ_{t+1}, r̂_{t+1})`. Implementado con `torch.nn.LSTM` estándar.
+- **`LatentDynamicsLSTM`**: recibe una ventana de 16 pasos de `(z, acción)` y predice `(ẑ_{t+1}, r̂_{t+1})`. Implementado con `torch.nn.LSTM` estándar. Es el modelo temporal del sistema final.
+- **`LatentDynamicsTransformer`** y **`LatentDynamicsTSMixer`**: alternativas con la misma entrada y la misma salida (interfaz `TemporalModel`), evaluadas en el Experimento 3. Ninguna mejora al LSTM.
 
 Ambos se entrenan por separado, en ese orden — el Autoencoder primero, congelado después, y el LSTM se entrena sobre los `z` que produce.
 
@@ -475,13 +515,15 @@ Bucle de entrenamiento del Autoencoder (`train_autoencoder.py`), paso a paso:
 4. Entrena minimizando el error de reconstrucción (MSE) entre el estado original y el reconstruido.
 5. Guarda el mejor checkpoint según la pérdida de validación, junto con sus hiperparámetros en un `.json`.
 
-Los demás bucles (`train_world_model.py`, `train_controller.py`, `train_controller_direct.py`) siguen el mismo patrón: semillas fijas, guardado del mejor checkpoint según una métrica de validación, e hiperparámetros persistidos.
+Los demás bucles (`train_world_model.py` y sus variantes de Transformer y TSMixer, `train_controller.py`, `train_controller_direct.py`) siguen el mismo patrón: semillas fijas, guardado del mejor checkpoint según una métrica de validación, e hiperparámetros persistidos.
 
 ---
 
 ## 11. Evaluación
 
-### Resultado final (commit `87ffb8f`, `PROJECT_STATUS.md`)
+### Resultado oficial (segunda ronda del escenario asimétrico, `PROJECT_STATUS.md`)
+
+Con el presupuesto original del RL directo (10,000 pasos de entrenamiento; 13,000 interacciones reales por semilla):
 
 | Política | Episodios | Media | Desv. estándar | Gana a tiempo fijo | Episodios < -600 | Interacciones reales de SUMO |
 |---|---|---|---|---|---|---|
@@ -493,7 +535,19 @@ Los demás bucles (`train_world_model.py`, `train_controller.py`, `train_control
 **Significancia estadística:**
 - A nivel de episodio (90 vs. 90): la diferencia equivale a 4.56 errores estándar (p ≈ 1e-5).
 - A nivel de semilla de entrenamiento (3 vs. 3): **no alcanza significancia estadística** (p = 0.145).
-- La diferencia más robusta es la **consistencia**: las tres semillas del sueño superan a las tres del directo, y el directo varía mucho más entre semillas (una de sus tres colapsó de vuelta a la regla trivial).
+- Con este presupuesto, la diferencia más robusta es la **consistencia**: las tres semillas del sueño superan a las tres del directo, y el directo varía mucho más entre semillas (una de sus tres colapsó de vuelta a la regla trivial).
+
+### Verificación: RL directo con 3x presupuesto (30,000 pasos)
+
+Para saber si la desventaja del RL directo se debía a su presupuesto, sus 3 semillas se reentrenaron con 30,000 pasos (sin modificar el script ni reemplazar los checkpoints oficiales) y se evaluaron con el mismo protocolo:
+
+| Política | Media (90 episodios) | Mediana | Desv. de las medias por semilla | Episodios < -600 | Interacciones reales por semilla |
+|---|---|---|---|---|---|
+| PPO directo, 10,000 pasos | -453.74 | -381.75 | 96.2 | 23/90 | 13,000 |
+| PPO directo, 30,000 pasos | -335.24 | -271.60 | 30.6 | 11/90 | 39,000 |
+| PPO del sueño (World Model) | -326.79 | -293.00 | 19.3 | 5/90 | ~4,600 |
+
+Con 30,000 pasos, la semilla que colapsaba a la regla trivial deja de hacerlo, y el RL directo **alcanza un desempeño comparable** al del World Model: la diferencia de medias baja a 8.46 puntos y deja de ser significativa (p = 0.74 a nivel de episodio, 0.71 a nivel de semilla). El directo gana además la mayoría de las comparaciones episodio a episodio (159 de 270). Pero cada una de sus semillas consume 39,000 interacciones reales, **~8.5 veces las del World Model**. Conclusión precisa: la ventaja demostrada del World Model es de **eficiencia en interacciones reales**; no es mejor control cuando el RL directo dispone de presupuesto de sobra. Salvedad: con más presupuesto, el directo también elige su mejor checkpoint entre más evaluaciones (30 en vez de 10), y esta verificación no separa ese efecto del de entrenar más.
 
 ### Resultado del Experimento 1 (LSTM vs. baseline persistente)
 
@@ -503,11 +557,15 @@ El LSTM supera al baseline "nada cambia" en los 10 horizontes evaluados. El erro
 
 El Autoencoder gana en 9 de 10 horizontes; su ventaja se invierte solo en el horizonte más largo (10).
 
+### Resultado del Experimento 3 (LSTM vs. Transformer vs. TSMixer)
+
+El LSTM tiene el menor error de predicción de recompensa (`reward_mse`) en los **10 horizontes**, con una reducción mediana de 38.1% frente al Transformer y de 56.1% frente a TSMixer; se mantiene. TSMixer sigue perdiendo en los 10 horizontes incluso entrenado 300 épocas sin early stopping. **Hallazgo:** el Transformer predice mejor el estado latente que el LSTM y tiene menor pérdida de validación, pero predice peor la recompensa — el mismo patrón que el reward imaginado del PPO (correlación ≈ 0.08 con el real): una métrica de entrenamiento que no predice la que realmente importa.
+
 ---
 
 ## 12. Tests
 
-**45 funciones de test, en 10 archivos, todas pasando.** Cubren desde el entorno de SUMO hasta la pila completa de `VecNormalize` sincronizada entre entrenamiento y evaluación.
+**62 funciones de test, en 12 archivos, todas pasando.** Cubren desde el entorno de SUMO hasta la pila completa de `VecNormalize` sincronizada entre entrenamiento y evaluación.
 
 ```powershell
 pytest -v
@@ -540,6 +598,13 @@ python training\train_world_model_raw.py
 python scripts\evaluate_world_model_raw.py
 python scripts\compare_experiment_0.py
 
+# Experimento 3 (requiere el reward_scaler.json del entrenamiento del LSTM)
+python training\train_world_model_transformer.py
+python training\train_world_model_tsmixer.py
+python scripts\evaluate_world_model_transformer.py
+python scripts\evaluate_world_model_tsmixer.py
+python scripts\compare_experiment_3.py
+
 # Controladores
 python training\train_controller.py
 python training\train_controller_direct.py
@@ -556,9 +621,9 @@ pytest -v
 ## 14. Qué mostrar en la sustentación
 
 1. **La pregunta de investigación y la arquitectura completa** (diagrama de la Sección 5).
-2. **La tabla final de la Sección 11** — es el resultado central del proyecto.
+2. **Las tablas de la Sección 11** — el resultado oficial y su verificación con 3x presupuesto: el World Model alcanza el mismo nivel de control con ~8.5 veces menos interacciones reales.
 3. **La historia de cómo se llegó ahí, no solo el número final** (Sección 20) — al menos tres bugs reales encontrados y corregidos con evidencia demuestran rigor metodológico, no solo un resultado.
-4. **La honestidad sobre las limitaciones**: episodios catastróficos que persisten, falta de significancia estadística a nivel de semilla, y por qué Transformer/TSMixer quedaron fuera del núcleo.
+4. **La honestidad sobre las limitaciones**: episodios catastróficos que persisten, falta de significancia estadística a nivel de semilla, que con suficiente presupuesto el RL directo alcanza al World Model, y por qué se mantuvo el LSTM frente a Transformer y TSMixer.
 
 ---
 
@@ -587,13 +652,13 @@ pytest -v
  Con solo 3 semillas de entrenamiento por método, la prueba a ese nivel no tiene suficiente potencia — la diferencia es clara y consistente, pero afirmar significancia formal exigiría más corridas.
 
 7. **¿Por qué el PPO directo tuvo tanta variación entre semillas?**
- Una de sus tres semillas colapsó a la regla trivial, el mismo patrón visto en el escenario simétrico anterior — sugiere sensibilidad a la inicialización con solo 10,000 pasos reales.
+ Con 10,000 pasos, una de sus tres semillas colapsó a la regla trivial: su mejor checkpoint se quedó en esa meseta temprana. Con 30,000 pasos esa semilla deja de colapsar y la variación entre semillas baja de 96.2 a 30.6 — era un síntoma de presupuesto insuficiente, no una propiedad del método.
 
 8. **¿Cuántas interacciones reales con SUMO usó cada método?**
- El World Model usa 13,800 en total para 3 semillas (el dataset se recolecta una sola vez y se comparte), frente a 39,000 del RL directo.
+ El World Model usa 13,800 en total para 3 semillas (~4,600 por semilla; el dataset se recolecta una sola vez y se comparte). El RL directo usa 13,000 por semilla con 10,000 pasos de entrenamiento, y 39,000 por semilla con 30,000 pasos, que es lo que necesita para alcanzar al World Model.
 
-9. **¿Por qué no se implementaron Transformer y TSMixer?**
- Son extensiones opcionales de igual prioridad, no núcleo obligatorio. Aparecieron varios bugs críticos que resolver primero (Sección 20). El código ya está preparado (`TemporalModel`) para agregarlos sin rediseñar el sistema.
+9. **¿Por qué se mantuvo el LSTM y no Transformer o TSMixer?**
+ Porque se probaron (Experimento 3) y el LSTM predice mejor la recompensa en los 10 horizontes. Se pospusieron hasta estabilizar el núcleo, y se ejecutaron después sobre la misma interfaz (`TemporalModel`), sin rediseñar el sistema.
 
 10. **¿Qué son los "episodios catastróficos" y por qué siguen ahí?**
  Un número pequeño de episodios donde el controlador se comporta mucho peor que el promedio; se investigaron varias hipótesis, algunas se descartaron con evidencia, pero la causa completa no se identificó — limitación abierta, documentada.
@@ -605,14 +670,17 @@ pytest -v
  Comparando, con el mismo modelo temporal, el error de predicción usando `z` contra el estado crudo — el Experimento 0.
 
 13. **¿Qué garantiza que el proyecto sea reproducible?**
- Semillas fijas, hiperparámetros junto a cada checkpoint, y 45 tests automatizados.
+ Semillas fijas, hiperparámetros junto a cada checkpoint, y 62 tests automatizados.
+
+14. **Entonces, ¿el World Model controla mejor que el RL directo?**
+ Con el mismo presupuesto original, sí; pero con el triple de presupuesto el RL directo lo alcanza. Lo que el World Model demuestra es eficiencia: llega al mismo nivel de control con ~8.5 veces menos interacciones reales, que es justo lo que pregunta la pregunta de investigación.
 
 ---
 
 ## 16. Qué falta por desarrollar
 
-- **Transformer y TSMixer** como sustitutos del LSTM — extensiones opcionales, con la interfaz ya preparada.
-- **Más presupuesto y más semillas para el RL directo**, para confirmar si la brecha de consistencia se sostiene.
+- **Más semillas por método** (siguen siendo 3), para afirmar o descartar diferencias a nivel de semilla.
+- **Una curva de desempeño frente a interacciones reales del RL directo** (hoy solo dos puntos: 13,000 y 39,000 por semilla).
 - **Investigar la causa completa de los episodios catastróficos** que persisten en ambos métodos.
 - **Demanda de tráfico variable en el tiempo** (hoy es asimétrica pero constante).
 
@@ -637,6 +705,8 @@ pytest -v
 - **`VecNormalize`:** utilidad de Stable-Baselines3 que normaliza recompensas y/u observaciones durante el entrenamiento de RL.
 - **`explained_variance`:** qué tan bien la red de valor de PPO predice los retornos reales; cerca de 0 = no aprendió nada útil.
 - **PPO (Proximal Policy Optimization):** algoritmo de Reinforcement Learning usado para entrenar el controlador.
+- **Transformer:** arquitectura basada en atención, que relaciona todos los pasos de una secuencia entre sí en vez de recorrerlos uno a uno.
+- **TSMixer:** arquitectura para series de tiempo hecha solo con capas densas, que alterna mezclas sobre el eje del tiempo y sobre las variables.
 
 ---
 
@@ -644,17 +714,18 @@ pytest -v
 
 Este proyecto construyó, de punta a punta, un sistema de World Models para control de semáforos: un Autoencoder que comprime el estado del tráfico, un LSTM que aprende a predecir cómo evoluciona ese estado comprimido, un entorno imaginado (Dream Environment) que permite entrenar un controlador PPO sin tocar el simulador, y un baseline de RL directo para comparar. En el camino se encontraron y corrigieron varios bugs reales — una lectura incorrecta de la fase del semáforo, un puente entre SUMO y PPO que no normalizaba los datos correctamente, y un criterio de selección de "mejor modelo" que no tenía relación con el desempeño real — cada uno diagnosticado con evidencia antes de aplicar el arreglo.
 
-El resultado final, verificado con 3 semillas de entrenamiento por método y evaluado en SUMO real: el controlador entrenado en el sueño supera de forma clara y consistente al entrenado directamente contra SUMO, usando aproximadamente un tercio de las interacciones reales — aunque la diferencia no alcanza significancia estadística formal con solo 3 semillas, y quedan episodios catastróficos sin explicar del todo en ambos métodos. Es un resultado honesto: no perfecto, pero real, medido con rigor, y con sus límites declarados explícitamente.
+El resultado final, verificado con 3 semillas de entrenamiento por método y evaluado en SUMO real: con el presupuesto original del RL directo, el controlador entrenado en el sueño lo supera de forma clara y consistente usando aproximadamente un tercio de las interacciones reales, aunque la diferencia no alcanza significancia estadística formal con solo 3 semillas. Al triplicar el presupuesto del RL directo, este alcanza un desempeño comparable, pero consumiendo ~8.5 veces más interacciones reales que el World Model: la ventaja del World Model es de eficiencia. Además, el Experimento 3 confirmó que el LSTM predice mejor que un Transformer y que un TSMixer, y quedan episodios catastróficos sin explicar del todo en ambos métodos. Es un resultado honesto: no perfecto, pero real, medido con rigor, y con sus límites declarados explícitamente.
 
 ---
 
 ## 19. Observaciones técnicas y deuda conocida
 
-- **La semántica de la acción no es "mantener/cambiar"**, como dice el docstring de `ProjectActionSpace` — `sumo_rl` la trata como el índice de fase verde destino. No se corrigió porque el pipeline completo usa la convención de forma consistente.
+- **La semántica de la acción no es "mantener/cambiar"**: `sumo_rl` la trata como el índice de fase verde destino. La documentación ya lo dice (docstring de `ProjectActionSpace`, commit `c253d88`; Sección 12 de la propuesta, `30c3fae`); el comportamiento no se cambió porque el pipeline completo usa la convención de forma consistente.
+- **`info["phase_change"]` mide si se pidió la fase 1, no si el semáforo cambió de fase de verdad**, y la recompensa penaliza eso. Documentado en el código; corregir el cálculo sigue pendiente en `TODO.md`, porque invalidaría todos los resultados entrenados con la definición actual.
 - **El LSTM se implementó con `torch.nn.LSTM` estándar**, no replicando manualmente las ecuaciones de compuertas como sugería la propuesta original — una simplificación de implementación razonable que no cambia el comportamiento del modelo.
 - **El Autoencoder es determinista, no un VAE** — la propuesta original mencionaba VAE con reparametrización; se implementó la versión más simple, suficiente para el Experimento 0.
 - **`compare_experiment_0.py` tiene una nota interna desactualizada** ("8 vs. 26 dimensiones" cuando el espacio latente real es 16) — no afecta el resultado.
-- **`README.md` y `CLAUDE.md` tienen referencias colgantes** a archivos ya eliminados y a bloques marcados como "pendientes" que ya están completos.
+- **`CLAUDE.md` tiene partes desactualizadas**: marca como pendientes bloques que ya están completos. `README.md` se reescribió en el commit `dd0e547` y ya refleja el estado real.
 - La demanda de tráfico actual es **constante en el tiempo** dentro de cada episodio — no varía por hora pico.
 - El Dream Environment no implementa un "búfer de planificación de acciones candidatas" como describía conceptualmente la propuesta original (Sección 16) — en su lugar, se usa como entorno de entrenamiento completo para PPO, un diseño distinto pero que cumple el mismo propósito de fondo (aprender sin tocar SUMO).
 
@@ -677,5 +748,7 @@ Un resumen cronológico de los hitos más importantes, útil para entender *por 
 11. **Bug crítico #4 — la función de valor de PPO no aprendía**: `explained_variance` ≈ 0 en ambos controladores; se corrigió con `VecNormalize`, primero solo la recompensa, y para el RL directo también las observaciones.
 12. **Escenario de demanda asimétrica**: diseñado y calibrado para que la solución trivial del problema dejara de ser óptima, permitiendo una comparación real de calidad de control entre métodos.
 13. **Verificación de robustez con 3 semillas por método**, en dos rondas de evaluación en SUMO real, llegando al resultado final documentado en la Sección 11.
+14. **Experimento 3**: Transformer y TSMixer implementados sobre la interfaz `TemporalModel`, entrenados con el mismo protocolo que el LSTM y evaluados en el mismo conjunto de prueba. El LSTM gana en los 10 horizontes y se mantiene; el Transformer dejó el hallazgo de que una mejor pérdida de validación no garantiza una mejor predicción de la recompensa.
+15. **Verificación del presupuesto del RL directo**: con el triple de pasos de entrenamiento, el RL directo alcanza al World Model, pero con ~8.5 veces sus interacciones reales. Esto precisó la conclusión del proyecto: la ventaja del World Model es de eficiencia en interacciones.
 
 Cada uno de estos hitos se investigó con evidencia real (no se aceptó ningún resultado "porque parecía razonable"), y cada corrección se verificó comparando antes/después — es la razón por la que el resultado final, aunque no perfecto, es defendible con confianza.

@@ -129,12 +129,14 @@
 - [ ] Entender por qué ambos PPO de la primera ronda asimétrica nunca sostenían el verde de
       la fase 1 más de 8 s (la duración mínima posible de una fase); volver a medirlo con los
       checkpoints actuales.
-- [ ] docs/DOCUMENTACION_PROYECTO.md desactualizado: cita el commit 87ffb8f y 45 tests
+- [x] docs/DOCUMENTACION_PROYECTO.md desactualizado: cita el commit 87ffb8f y 45 tests
       (deberían ser 62), describe Transformer y TSMixer como 'no implementados' (ya se
       ejecutaron, Experimento 3, se mantiene la LSTM), y no incluye la verificación de
       presupuesto del RL directo (30k). README.md ya lo enlaza como el documento de estudio
       completo -- actualizarlo es la siguiente tarea de documentación pendiente, con la
       misma prioridad que tuvo la actualización anterior de este mismo archivo.
+      **Resuelto**: actualizado con el Experimento 3, la verificación de presupuesto del
+      RL directo, los 62 tests y la semántica de la acción.
 
 ## Después (orden según la propuesta del proyecto)
 
