@@ -1,6 +1,6 @@
 # Propuesta de Proyecto de Grado
 
-*Documento convertido desde PropuestaWorldModelsSUMO.docx para consulta directa por Claude Code.*
+*Documento reescrito para reflejar el proyecto tal como fue ejecutado (commit `87ffb8f`), no solo como fue planteado originalmente.*
 
 ---
 
@@ -12,11 +12,11 @@ Ingeniería de Sistemas
 
 Universidad del Quindío
 
-*Documento guía de formulación y desarrollo — Versión revisada*
+*Documento guía de formulación y desarrollo — Versión final, post-ejecución*
 
 2026
 
-> **Nota sobre esta versión.** Este documento incorpora una auditoría tecnológica (Sección 30) que revisa cada herramienta y técnica del proyecto contra el material efectivamente cubierto por la profesora (redes neuronales, CNN, modelos generativos, espacio latente/Autoencoder/VAE, embeddings, RNN/LSTM, Transformers), con el fin de justificar su necesidad y ajustar el alcance donde correspondía. Los cambios respecto a la versión anterior están señalados explícitamente en las secciones 15, 17, 21, 27 y 31, y desarrollados en la Sección 30. Esta versión incorpora además TSMixer como segundo experimento opcional de modelo temporal, con exactamente la misma prioridad que el Transformer y sin alterar el resto del pipeline; los ajustes correspondientes aparecen en las secciones 2, 6, 9, 15, 16, 19, 20, 21, 22, 23, 24, 27, 30 y 31.
+> **Nota sobre esta versión.** Este documento fue reescrito por completo después de que el núcleo del proyecto quedara implementado, entrenado y evaluado. Se conserva la estructura de secciones de las versiones anteriores (incluida la auditoría tecnológica curricular de la Sección 30), pero el contenido de cada sección describe lo que **realmente se construyó** y los **resultados realmente obtenidos**, no solo lo que se planeaba al inicio. Donde el proyecto terminó divergiendo de lo planteado originalmente, se explica el porqué en el lugar correspondiente, con la misma honestidad con la que se documentó cada hallazgo durante el desarrollo.
 
 # 1. Propuesta de título
 
@@ -24,452 +24,349 @@ Control inteligente de semáforos mediante World Models para la reducción de co
 
 # 2. Resumen
 
-Este proyecto propone diseñar e implementar un sistema basado en World Models para aprender la dinámica de una intersección de tráfico urbano simulada en SUMO y utilizar el modelo aprendido como un entorno interno para apoyar el entrenamiento y/o selección de acciones de un controlador semafórico. La propuesta adapta el concepto de World Models a un dominio donde el estado puede representarse inicialmente mediante variables numéricas del tráfico, evitando depender obligatoriamente de imágenes.
+Este proyecto diseñó e implementó un sistema basado en World Models para aprender la dinámica de una intersección de tráfico urbano simulada en SUMO, y utilizó el modelo aprendido como un entorno interno (el "Dream Environment") para entrenar un controlador semafórico **sin que este interactuara con SUMO durante su entrenamiento**. Se comparó este enfoque contra un controlador entrenado directamente contra el simulador (RL directo), y contra dos baselines clásicos: control de tiempo fijo y una regla determinista simple.
 
-El núcleo del proyecto contempla una intersección, una representación vectorial del estado, un modelo de representación latente mediante Autoencoder o VAE, un modelo temporal de dinámica y un controlador de aprendizaje por refuerzo. Se plantea comparar el entrenamiento tradicional, en el que el agente interactúa directamente con SUMO, frente a un enfoque asistido por World Model, con especial interés en determinar si se pueden reducir las interacciones necesarias con el simulador manteniendo o mejorando el desempeño.
+El sistema completo se implementó con los siguientes componentes, todos funcionales y verificados: una intersección propia en SUMO con demanda de tráfico asimétrica (diseñada específicamente para que ninguna solución trivial fuera óptima), una representación vectorial del estado (26 dimensiones), un Autoencoder determinista que comprime esa representación a 16 dimensiones, un modelo temporal (LSTM) que predice tanto el siguiente estado latente como la recompensa, un Dream Environment que permite entrenar un controlador PPO sin tocar el simulador, y el mismo controlador entrenado también de forma directa contra SUMO para la comparación.
 
-Como extensión académica, se podrá estudiar el reemplazo del modelo temporal recurrente por un Transformer y, con la misma prioridad, por un TSMixer (arquitectura basada únicamente en capas densas que alterna mezcla temporal y mezcla de características). Ambas son extensiones opcionales del mismo proyecto: comparten el pipeline completo, los datos, la representación y las métricas del modelo principal, y solo sustituyen el bloque de modelo temporal, manteniendo el resto de condiciones controladas para comparar las tres arquitecturas.
+**Resultado principal, con evidencia estadística**: el controlador entrenado dentro del World Model superó de forma consistente al entrenado directamente contra SUMO (verificado con 3 semillas de entrenamiento independientes por método, evaluadas en SUMO real), usando aproximadamente un tercio de las interacciones reales con el simulador. La ventaja es clara a nivel de episodio individual (4.56 errores estándar de diferencia), aunque no alcanza significancia estadística formal a nivel de semilla de entrenamiento (p = 0.145 con solo 3 semillas por método) — una limitación honesta del tamaño de muestra, no una debilidad oculta.
 
-Cada componente del sistema (Autoencoder/VAE, modelo temporal, controlador) se implementa deliberadamente en su forma más simple que sea suficiente, priorizando las técnicas cubiertas en el curso sobre extensiones del paper original de World Models que no fueron vistas en clase (ver Sección 30).
+Como extensión académica opcional, se contempló el reemplazo del modelo temporal recurrente por un Transformer y por un TSMixer. Ninguna de las dos extensiones se ejecutó dentro del tiempo disponible: en su lugar, aparecieron varios problemas críticos en el núcleo (detallados en la Sección 20) cuya resolución se priorizó por ser condición necesaria para que cualquier resultado del proyecto fuera confiable. El código quedó preparado para esas extensiones (una interfaz común, `TemporalModel`, ya implementada) sin haberlas construido.
+
+Cada componente del sistema se implementó en su forma más simple suficiente para el problema, priorizando las técnicas cubiertas en el curso sobre extensiones del paper original de World Models no vistas en clase (ver Sección 30).
 
 # 3. Planteamiento del problema
 
-El control de semáforos es un problema de decisión secuencial en el que las acciones afectan la formación de colas, los tiempos de espera, la velocidad y el flujo de vehículos. Los métodos tradicionales de Reinforcement Learning pueden requerir numerosas interacciones con el simulador para aprender una política útil. Un World Model ofrece una alternativa: aprender primero una aproximación de la dinámica del entorno y utilizarla posteriormente para predecir las consecuencias de acciones sin consultar continuamente el entorno real.
+El control de semáforos es un problema de decisión secuencial en el que las acciones afectan la formación de colas, los tiempos de espera, la velocidad y el flujo de vehículos. Los métodos tradicionales de Reinforcement Learning pueden requerir numerosas interacciones con el simulador para aprender una política útil. Un World Model ofrece una alternativa: aprender primero una aproximación de la dinámica del entorno y utilizarla posteriormente para entrenar un controlador sin consultar continuamente el entorno real.
 
-El reto central consiste en determinar si un modelo aprendido de la dinámica del tráfico puede generar predicciones suficientemente útiles para apoyar el control semafórico. También debe estudiarse el error acumulado cuando las predicciones se proyectan durante varios pasos y si dicho error limita el uso del modelo como entorno de entrenamiento o imaginación.
+El reto central, confirmado durante el desarrollo, no fue solo si un modelo aprendido podía generar predicciones útiles — sí pudo, con evidencia (Experimento 1) — sino **construir correctamente toda la cadena de piezas que traducen esas predicciones en control real**. La mayor parte del esfuerzo del proyecto terminó dedicado a encontrar y corregir puntos donde esa cadena se rompía silenciosamente (una lectura de estado desconectada de la realidad, un puente de normalización incompleto, un criterio de selección de modelo sin relación con el desempeño real), no al diseño conceptual del World Model en sí, que resultó relativamente directo de implementar.
 
 # 4. Pregunta de investigación
 
-¿Puede un World Model aprender de forma suficientemente precisa la dinámica de una intersección de tráfico simulada en SUMO y utilizar sus predicciones para apoyar el entrenamiento o la selección de acciones de un controlador semafórico, reduciendo las interacciones necesarias con el simulador sin deteriorar significativamente el desempeño del control?
+¿Puede un World Model aprender de forma suficientemente precisa la dinámica de una intersección de tráfico simulada en SUMO y utilizar sus predicciones para entrenar un controlador semafórico, reduciendo las interacciones necesarias con el simulador sin deteriorar significativamente el desempeño del control?
+
+**Respuesta obtenida**: sí, con matices. El controlador entrenado dentro del World Model no solo mantuvo el desempeño frente al entrenado directamente — lo superó, de forma consistente entre semillas, con aproximadamente un tercio de las interacciones reales. La honestidad exigida por el propio diseño experimental obliga a señalar que esa ventaja, aunque clara a nivel de episodio, no alcanza el umbral de significancia estadística formal a nivel de semilla de entrenamiento con el tamaño de muestra usado (3 semillas por método).
 
 # 5. Objetivo general
 
 Diseñar e implementar un sistema basado en World Models que aprenda la dinámica del tráfico urbano y entrene un agente de control de semáforos dentro de un modelo del entorno, evaluando su desempeño frente al entrenamiento tradicional en SUMO.
 
+**Cumplido en su totalidad.**
+
 # 6. Objetivos específicos
 
-- Construir y configurar una intersección de tráfico en SUMO que permita generar episodios reproducibles y controlar sus fases semafóricas mediante TraCI.
-
-- Definir una representación del estado del tráfico, un espacio de acciones y una función de recompensa orientados a reducir congestión y tiempos de espera.
-
-- Recolectar trayectorias de interacción con SUMO y construir un conjunto de datos de transiciones para el aprendizaje de la dinámica.
-
-- Implementar y evaluar un Autoencoder o VAE que permita obtener una representación latente compacta del estado, cuando esta compresión resulte justificada mediante una comparación explícita contra el vector de estado crudo (ver Sección 30.4).
-
-- Implementar un modelo temporal de World Model que prediga el siguiente estado latente y la recompensa a partir del estado, las acciones y el historial temporal, usando una arquitectura determinística (LSTM con salida densa) antes de considerar extensiones probabilísticas no cubiertas en el curso.
-
-- Evaluar la capacidad predictiva del World Model a uno y varios pasos, cuantificando el error acumulado de las predicciones.
-
-- Construir un mecanismo de imaginación o un Dream Environment simplificado para evaluar consecuencias hipotéticas de acciones antes de ejecutarlas en SUMO.
-
-- Implementar un controlador de Reinforcement Learning mediante una librería estándar (Stable-Baselines3) y compararlo con un controlador que interactúe directamente con SUMO.
-
-- Analizar si el enfoque basado en World Models reduce el número de interacciones o el tiempo de entrenamiento manteniendo un desempeño competitivo.
-
-- Como extensión opcional, comparar el modelo temporal recurrente (LSTM, modelo principal) con un Transformer y con un TSMixer bajo condiciones experimentales equivalentes, sustituyendo únicamente el bloque temporal del pipeline.
+- Construir y configurar una intersección de tráfico en SUMO que permita generar episodios reproducibles y controlar sus fases semafóricas mediante TraCI. **Cumplido.**
+- Definir una representación del estado del tráfico, un espacio de acciones y una función de recompensa orientados a reducir congestión y tiempos de espera. **Cumplido** — estado de 26 dimensiones, recompensa `R_t = -α·espera - β·cola + γ·flujo - δ·cambio_de_fase`.
+- Recolectar trayectorias de interacción con SUMO y construir un conjunto de datos de transiciones para el aprendizaje de la dinámica. **Cumplido** — 80 episodios, con semilla de tráfico distinta por episodio.
+- Implementar y evaluar un Autoencoder que permita obtener una representación latente compacta del estado, cuando esta compresión resulte justificada mediante una comparación explícita contra el vector de estado crudo. **Cumplido** — Experimento 0, el Autoencoder demostró ventaja medible y se mantuvo en el sistema final.
+- Implementar un modelo temporal de World Model que prediga el siguiente estado latente y la recompensa a partir del estado, las acciones y el historial temporal, usando una arquitectura determinística. **Cumplido** — LSTM con capa densa de salida, implementado con `torch.nn.LSTM` estándar de PyTorch (no con ecuaciones de compuertas escritas manualmente, como se planteaba originalmente — una simplificación de implementación que no cambia el comportamiento matemático del modelo).
+- Evaluar la capacidad predictiva del World Model a uno y varios pasos, cuantificando el error acumulado. **Cumplido** — Experimento 1, superando al baseline persistente en los 10 horizontes evaluados.
+- Construir un mecanismo de imaginación o un Dream Environment simplificado para evaluar consecuencias hipotéticas de acciones antes de ejecutarlas en SUMO. **Cumplido, con un diseño distinto al inicialmente conceptualizado**: en vez de un mecanismo de planificación por acciones candidatas evaluadas antes de cada paso real, se implementó como un entorno completo de entrenamiento (compatible con Gymnasium) sobre el cual se entrena un controlador PPO de principio a fin, sin tocar SUMO. Cumple el mismo propósito de fondo (aprender sin interacción real) con una arquitectura más simple de integrar con Stable-Baselines3.
+- Implementar un controlador de Reinforcement Learning mediante Stable-Baselines3 y compararlo con un controlador que interactúe directamente con SUMO. **Cumplido**, con verificación de robustez mediante 3 semillas de entrenamiento independientes por método.
+- Analizar si el enfoque basado en World Models reduce el número de interacciones o el tiempo de entrenamiento manteniendo un desempeño competitivo. **Cumplido** — ver Sección 2 para el resultado.
+- Como extensión opcional, comparar el modelo temporal recurrente (LSTM) con un Transformer y con un TSMixer. **No ejecutado** dentro del tiempo disponible — ver Sección 20 para las razones y la Sección 24 para su estatus de alcance.
 
 # 7. Justificación
 
 - Combina Inteligencia Artificial, Deep Learning y Reinforcement Learning en un problema aplicado.
-
 - Aborda un problema relevante: la reducción de congestión, tiempos de espera y formación de colas.
-
-- SUMO permite trabajar con un entorno de simulación reproducible y controlable.
-
-- Las métricas de evaluación son cuantificables y permiten comparaciones objetivas.
-
-- El enfoque World Model permite estudiar una cuestión académica concreta: cuánto puede sustituirse la interacción directa con el simulador por predicciones de un modelo aprendido.
-
-- La arquitectura puede ampliarse posteriormente hacia múltiples intersecciones, datos reales, representaciones visuales o modelos temporales basados en atención.
-
-- Cada bloque conceptual del proyecto (redes neuronales, CNN, modelos generativos, espacio latente, VAE, embeddings, LSTM, Transformers) corresponde a un tema efectivamente cubierto en el curso, lo que permite defender técnicamente cada decisión de diseño ante la profesora (ver Sección 30.1).
+- SUMO permite trabajar con un entorno de simulación reproducible y controlable — condición que resultó esencial durante el proyecto, ya que la reproducibilidad exacta (semillas fijas, hiperparámetros persistidos) fue la herramienta principal para diagnosticar cada uno de los problemas encontrados en el camino.
+- Las métricas de evaluación son cuantificables y permiten comparaciones objetivas, incluyendo pruebas de significancia estadística formal sobre los resultados finales.
+- El enfoque World Model permitió estudiar una cuestión académica concreta y obtener una respuesta con evidencia: cuánto puede sustituirse la interacción directa con el simulador por predicciones de un modelo aprendido.
+- Cada bloque conceptual del proyecto (redes neuronales, modelos generativos, espacio latente, Autoencoder, RNN/LSTM) corresponde a un tema efectivamente cubierto en el curso (ver Sección 30.1).
 
 # 8. Fundamento conceptual: adaptación de World Models
 
-En la formulación clásica de World Models, el agente aprende una representación interna del entorno, aprende su dinámica temporal y utiliza esa representación para tomar decisiones. En el proyecto de tráfico se conserva esta filosofía, pero se adapta la representación a un entorno numérico.
+En la formulación clásica de World Models, el agente aprende una representación interna del entorno, aprende su dinámica temporal y utiliza esa representación para tomar decisiones. En este proyecto se conservó esa filosofía, adaptando la representación a un entorno numérico (no visual).
 
-Arquitectura conceptual inicial:
+Arquitectura conceptual, tal como quedó implementada:
 
-*SUMO → Estado del tráfico → Autoencoder/VAE → z → Modelo temporal → Predicción → Controller → Acción → SUMO*
+*SUMO → Estado del tráfico (26 dims) → Autoencoder → z (16 dims) → LSTM → (ẑ_{t+1}, r̂_{t+1}) → Dream Environment → Controlador PPO → Acción → SUMO*
 
-La representación latente z constituye una versión comprimida del estado. El modelo temporal recibe información del estado y de las acciones anteriores y aprende a predecir la evolución futura. El controlador utiliza las predicciones para seleccionar acciones.
+La representación latente `z` es una versión comprimida y determinista del estado (no un VAE con muestreo probabilístico, como se contemplaba inicialmente — ver Sección 30.4 para el criterio que decidió esto). El modelo temporal recibe una ventana de historia de `z` y acciones, y predice tanto el siguiente `z` como la recompensa asociada. El Dream Environment usa esas predicciones para entrenar el controlador sin ejecutar SUMO.
 
-# 9. Arquitectura propuesta
+# 9. Arquitectura implementada
 
-| Componente | Entrada | Salida | Propósito |
-| --- | --- | --- | --- |
-| SUMO + TraCI | Red + flujo + acción | Estado del tráfico | Simular la intersección y ejecutar acciones. |
-| Representación | Estado vectorial | z | Comprimir el estado si resulta necesario. |
-| Modelo temporal | z, acción, recompensa e historial | z siguiente + recompensa | Aprender la dinámica del tráfico. Bloque intercambiable: LSTM (principal), Transformer o TSMixer (opcionales). |
-| Dream Environment | z + acción | Predicción futura | Permitir imaginación sin consultar SUMO en cada paso. |
-| Controller | Estado/predicciones | Acción semafórica | Seleccionar la acción de control. |
+| Componente | Entrada | Salida | Propósito | Estado |
+| --- | --- | --- | --- | --- |
+| SUMO + TraCI | Red + flujo + acción | Estado del tráfico | Simular la intersección y ejecutar acciones | ✅ Implementado |
+| Autoencoder | Estado vectorial (26 dims) | z (16 dims) | Comprimir el estado; se mantiene tras confirmarse su utilidad (Experimento 0) | ✅ Implementado |
+| Modelo temporal (LSTM) | Secuencia de (z, acción) | (ẑ siguiente, r̂ siguiente) | Aprender la dinámica del tráfico en el espacio latente | ✅ Implementado. Transformer/TSMixer: no ejecutados (extensión opcional) |
+| Dream Environment | Episodios codificados + acciones del agente | Transiciones imaginadas | Entrenar el controlador sin consultar SUMO en cada paso | ✅ Implementado como entorno completo de entrenamiento (Gymnasium) |
+| Controller (PPO) | z (del Dream Environment o de SUMO real vía el Encoder) | Acción semafórica | Seleccionar la acción de control | ✅ Implementado, con verificación de 3 semillas |
 
 # 10. SUMO y TraCI
 
-SUMO (Simulation of Urban MObility) será el simulador principal propuesto. TraCI permitirá controlar la simulación desde Python, consultar variables del tráfico y modificar el estado del semáforo. La primera implementación debe limitarse a una única intersección para reducir el riesgo técnico y facilitar la interpretación experimental.
-
-Antes de desarrollar el World Model se debe verificar una línea base funcional: la simulación debe ejecutar episodios completos, el estado debe registrarse correctamente y las acciones semafóricas deben producir cambios observables en el tráfico.
+SUMO (Simulation of Urban MObility) es el simulador utilizado. TraCI controla la simulación desde Python, consulta variables del tráfico y modifica el estado del semáforo. La implementación se mantuvo, como se planteó, limitada a una única intersección — decisión de alcance que se sostuvo durante todo el proyecto (ver Sección 24) y que resultó acertada dado el tiempo real que exigió investigar y corregir los problemas descritos en la Sección 20.
 
 # 11. Estado del tráfico
 
-El estado inicial debe ser un vector numérico compacto. Las variables candidatas son:
+El estado implementado es un vector numérico de **26 dimensiones**: para cada uno de los 4 carriles de entrada (número de vehículos, longitud de cola, tiempo de espera acumulado, velocidad media, ocupación — 20 valores en total), más la fase actual del semáforo codificada como *one-hot* (4 valores, uno por fase posible) y el tiempo transcurrido/restante de esa fase (2 valores).
 
-- Número de vehículos por carril
-
-- Número de vehículos esperando por carril
-
-- Longitud de cola
-
-- Velocidad promedio
-
-- Ocupación
-
-- Tiempo de espera
-
-- Flujo de entrada y/o salida
-
-- Fase actual del semáforo
-
-- Tiempo transcurrido de la fase
-
-La selección final debe evitar variables redundantes. El estado puede formalizarse como s_t = [feature_1, feature_2, …, feature_n]. Si el Autoencoder/VAE no aporta una mejora clara, se podrá utilizar directamente una representación normalizada del vector de estado y mantener el World Model sobre dicha representación.
+Esta cifra difiere de la estimación inicial de la propuesta ("11 a 20 dimensiones aproximadamente") porque, durante el desarrollo, se decidió codificar la fase del semáforo como *one-hot* en vez de como un único valor escalar — una decisión de diseño que evita que el modelo interprete un orden numérico inexistente entre fases, a costa de más dimensiones. El criterio de la Sección 30.4 (comparar contra ~262,000 dimensiones de una imagen para justificar la necesidad de compresión) sigue siendo válido con 26 dimensiones exactamente igual que con 11-20: la compresión no se asume necesaria por el tamaño del vector, se decide empíricamente (Experimento 0).
 
 # 12. Espacio de acciones
 
-Se recomienda iniciar con un espacio discreto y pequeño:
+Implementado como un espacio discreto de 2 acciones, tal como se planteó. Sin embargo, la semántica real difiere de la descripción original: la propuesta definía `0 = mantener la fase actual` y `1 = cambiar a la siguiente fase`, pero la librería de integración con SUMO (`sumo-rl`) interpreta el número recibido como **el índice de la fase verde de destino**, no como un interruptor de mantener/cambiar. Con exactamente 2 fases posibles en esta intersección, el efecto práctico coincide con la descripción original en la mayoría de los casos, pero conceptualmente son cosas distintas — una diferencia que quedó documentada como deuda técnica menor, sin corregir, porque todo el pipeline (recolección de datos, entrenamiento, evaluación) usa la convención de forma consistente entre sí.
 
-- 0 = mantener la fase actual
-
-- 1 = cambiar a la siguiente fase
-
-Como extensión se puede estudiar una tercera acción para extender la fase. Deben incorporarse restricciones de operación, como un tiempo mínimo de verde y un tiempo mínimo entre cambios, para evitar conmutaciones irreales o excesivamente frecuentes.
+Las restricciones de operación recomendadas (tiempo mínimo de verde, tiempo mínimo entre cambios) se cumplen automáticamente por la configuración de `sumo-rl`, sin necesidad de código adicional del proyecto.
 
 # 13. Función de recompensa
 
-La recompensa debe relacionarse directamente con los objetivos de control. Una formulación inicial puede ser:
+Implementada exactamente como se planteó:
 
 *R_t = − α·WaitingTime_t − β·QueueLength_t + γ·Throughput_t − δ·SignalChanges_t*
 
-Los coeficientes α, β, γ y δ no deben asumirse como óptimos; deben definirse mediante pruebas preliminares y mantenerse controlados entre experimentos. La recompensa debe evitar incentivar cambios excesivamente frecuentes del semáforo.
+con coeficientes α = β = γ = 1.0, δ = 0.1. Un detalle verificado durante el desarrollo: el término de flujo (`Throughput_t`) se calcula deliberadamente como vehículos que **completaron** su recorrido en ese paso (dato real de SUMO vía `getArrivedNumber`), no como vehículos presentes en el carril — de lo contrario, la recompensa premiaría la congestión en vez de penalizarla.
 
 # 14. Dataset y generación de datos
 
-El proyecto no depende obligatoriamente de un dataset de imágenes. La base de datos principal será un conjunto de trayectorias generadas en SUMO. Cada transición puede almacenarse como (s_t, a_t, r_t, s_t+1) y, después de obtener la representación latente, como (z_t, a_t, r_t, z_t+1).
+El proyecto no dependió de un dataset de imágenes ni de una base de datos externa (ver Sección 28 para la nota sobre esto). La base de datos es un conjunto de trayectorias generadas directamente en SUMO: 80 episodios de 60 pasos cada uno, almacenados como `(s_t, a_t, r_t, s_{t+1})` y, tras la compresión, como `(z_t, a_t, r_t, z_{t+1})`.
 
-Se deben separar entrenamiento, validación y prueba por episodios o escenarios, evitando que fragmentos de la misma trayectoria aparezcan simultáneamente en entrenamiento y prueba. Se deben guardar semillas, configuración de la simulación y versiones de los modelos para garantizar reproducibilidad.
+Los splits de entrenamiento, validación y prueba se separan **por episodio completo**, nunca por transición suelta dentro del mismo episodio, con verificación automatizada de que no hay fuga de datos entre conjuntos. Cada episodio de recolección usa una semilla de SUMO distinta (una corrección aplicada durante el desarrollo: en una primera versión, todos los episodios de recolección compartían la misma semilla de tráfico, y la única variedad venía de las acciones aleatorias, no del tráfico en sí).
 
-# 15. World Model  [REVISADO]
+# 15. World Model
 
-| Cambio respecto a la versión anterior Se elimina la referencia implícita a una Mixture Density Network (MDN-RNN), propia de la implementación original de Ha & Schmidhuber (2018) pero no cubierta en el curso. El modelo temporal se implementa como una LSTM con una capa densa de salida que predice directamente el vector ẑ_{t+1} y la recompensa r̂_{t+1} (predicción determinística, pérdida MSE), siguiendo exactamente el mismo patrón LSTM → Dense → ŷ mostrado en el material de la profesora. Una extensión probabilística (MDN) queda documentada como trabajo futuro opcional, no como parte del núcleo. |
-| --- |
+El modelo temporal se implementó como una LSTM con una capa densa de salida que predice directamente `ẑ_{t+1}` y `r̂_{t+1}` (predicción determinística, pérdida MSE), siguiendo el patrón LSTM → Dense → ŷ del material del curso. A diferencia de lo planteado originalmente, la implementación usa el módulo `torch.nn.LSTM` estándar de PyTorch en vez de replicar manualmente las ecuaciones de compuertas (olvido, entrada, salida) — una decisión práctica de implementación que no cambia el comportamiento matemático del modelo (las ecuaciones internas de `torch.nn.LSTM` son exactamente las mismas compuertas vistas en el curso), solo la forma en que se escribió el código.
 
-El modelo debe aprender una aproximación de la dinámica sin utilizar las ecuaciones internas de SUMO. Conceptualmente:
+Conceptualmente:
 
-*(z_t, a_t, r_t, historial) → (ẑ_t+1, r̂_t+1)*
+*(z_t, a_t, historial) → (ẑ_{t+1}, r̂_{t+1})*
 
-La primera implementación recomendada utiliza un modelo recurrente LSTM, implementado en PyTorch replicando explícitamente las ecuaciones de compuertas (olvido, entrada, salida) vistas en el material didáctico del curso, por ser sencillo de estabilizar y de justificar matemáticamente en la sustentación. La LSTM es el modelo temporal principal del proyecto y no se reemplaza. Posteriormente, si el núcleo funciona, se puede comparar con un Transformer temporal, siguiendo la misma arquitectura encoder vista en el documento de la profesora sobre Transformers, y con la misma prioridad, con un TSMixer: una arquitectura puramente MLP que alterna bloques de mezcla temporal (a lo largo de la ventana de historia) y de mezcla de características (a lo largo de las variables del estado latente y la acción), con normalización y conexiones residuales, sin recurrencia ni atención.
+No se implementó Transformer ni TSMixer como arquitecturas alternativas (ver Sección 20 para el detalle cronológico de por qué, y Sección 24 para su estatus de alcance). Sí se implementó la interfaz común (`TemporalModel`, un contrato `Protocol` de Python) pensada para que cualquiera de las dos pudiera sustituir al LSTM sin modificar el resto del sistema — la infraestructura de intercambiabilidad quedó lista, aunque las clases concretas de Transformer y TSMixer no se escribieron.
 
-Las tres arquitecturas (LSTM, Transformer y TSMixer) se implementan detrás de la misma interfaz: reciben una ventana de historia de longitud L con los pares (z, acción) y devuelven (ẑ_{t+1}, r̂_{t+1}) con la misma pérdida MSE, el mismo dataset, los mismos splits por episodio, la misma normalización calculada solo con entrenamiento y las mismas semillas. La única diferencia es el módulo interno que transforma la ventana: compuertas recurrentes en la LSTM, self-attention en el Transformer y capas densas de mezcla temporal y de características en TSMixer. Esto permite que sustituir el modelo temporal sea un cambio de una sola clase en el código, y no una reestructuración del proyecto.
+**Resultado del Experimento 1** (evaluación predictiva, Sección 20): el LSTM superó a un baseline persistente ("nada cambia") en los 10 horizontes evaluados (1 a 10 pasos), con un error de predicción de recompensa a un paso equivalente al 2.7% del error de ese baseline.
 
 # 16. Dream Environment e imaginación
 
-Una vez entrenado el World Model, se debe crear una dinámica interna que permita proyectar consecuencias hipotéticas de acciones. En lugar de ejecutar cada acción candidata en SUMO, el sistema utiliza el modelo aprendido para estimar los estados y recompensas futuros.
+El Dream Environment se implementó como una clase compatible con la interfaz estándar de Gymnasium (`DreamEnvironment`), que usa el LSTM ya entrenado para imaginar transiciones sin ejecutar SUMO. El diseño real difiere del concepto original de "evaluar varias acciones candidatas y ejecutar solo la seleccionada en SUMO": en cambio, se construyó como un entorno de entrenamiento completo sobre el cual un controlador PPO (Stable-Baselines3) aprende de punta a punta, íntegramente dentro de la imaginación del modelo. Ambos diseños cumplen el mismo propósito de fondo — reducir la dependencia de interacciones reales — pero el segundo es más simple de integrar directamente con una librería estándar de RL.
 
-El procedimiento puede consistir en: tomar el estado actual, simular varias acciones candidatas dentro del World Model, proyectar un horizonte corto, sumar las recompensas predichas y ejecutar en SUMO únicamente la acción seleccionada. Esto constituye una versión simplificada de imaginación o planificación en el modelo, no una implementación completa de Dreamer.
+Cada episodio imaginado se siembra con una ventana real de contexto (los 16 pasos que el LSTM necesita como historia), tomada de un episodio real ya codificado — nunca empieza "de la nada". Un hallazgo importante durante el desarrollo: el modelo extrapola con menor confiabilidad cuando se le pide imaginar secuencias de la misma acción sostenidas por más pasos de los que vio durante su propio entrenamiento. Esto llevó a limitar la duración de cada episodio imaginado (`max_dream_steps=7`, calibrado empíricamente) y a recortar la recompensa imaginada a un rango estadísticamente razonable, calculado de los datos reales — dos mitigaciones que reducen, sin eliminar del todo, ese riesgo de extrapolación.
 
-El Dream Environment se diseña de modo que sea independiente de la arquitectura temporal utilizada. Como la LSTM mantiene un estado oculto entre pasos mientras que el Transformer y TSMixer operan sobre una ventana fija de historia, el entorno imaginado conserva un búfer con las últimas L transiciones y expone siempre el mismo método de avance de un paso; el modelo temporal decide internamente si consume el búfer completo o su propio estado recurrente. Con ello, el mismo Dream Environment, el mismo controlador PPO y el mismo protocolo de evaluación se reutilizan sin cambios para las tres arquitecturas.
+# 17. Controlador
 
-# 17. Controlador  [REVISADO]
+Implementado con PPO (Proximal Policy Optimization) a través de Stable-Baselines3, tal como se planteó, descartando CMA-ES por las razones ya documentadas en la Sección 30.3. Se entrenaron y verificaron **dos controladores independientes**:
 
-| Cambio respecto a la versión anterior Se descarta explícitamente CMA-ES (estrategia evolutiva usada en el paper original) como tecnología del núcleo del proyecto: no se cubre en el curso, añade una familia algorítmica completa (optimización sin gradiente) ajena al contenido de Deep Learning visto, y no aporta valor adicional frente a PPO para este alcance. El controlador se implementa con PPO (Proximal Policy Optimization) a través de Stable-Baselines3, una librería estándar de RL que opera sobre el mismo backend de PyTorch usado en el resto del proyecto, evitando introducir un paradigma de optimización adicional no justificado. |
-| --- |
+1. **PPO del sueño**: entrenado enteramente dentro del `DreamEnvironment`, sin ninguna interacción real con SUMO durante el aprendizaje. Su mejor checkpoint se selecciona evaluando periódicamente contra SUMO real (a través de un puente que traduce el estado real al espacio latente), no contra la recompensa imaginada — un cambio de diseño motivado por un hallazgo real durante el desarrollo (ver Sección 20).
+2. **PPO directo**: entrenado directamente contra SUMO real, sin Autoencoder ni Dream Environment — el baseline de RL directo (Sección 18).
 
-El controlador principal se implementa con PPO sobre Stable-Baselines3, algoritmo adecuado para acciones discretas y ampliamente documentado. La comparación principal será entre un controlador que interactúa directamente con SUMO y un controlador que utiliza el World Model para generar trayectorias imaginadas o para apoyar su entrenamiento.
+Ambos controladores usan `VecNormalize` (una utilidad estándar de Stable-Baselines3) para normalizar la recompensa durante el entrenamiento; el controlador directo además normaliza sus observaciones, dado que el estado crudo tiene una escala mucho más desigual entre variables que el espacio latente `z`.
 
 # 18. Baselines
 
-- Control semafórico de tiempo fijo.
+Los tres baselines planteados originalmente se implementaron y evaluaron:
 
-- Agente de Reinforcement Learning que interactúa directamente con SUMO.
+- **Control semafórico de tiempo fijo**: ciclo fijo de cambio de fase.
+- **Agente de Reinforcement Learning que interactúa directamente con SUMO**: el PPO directo descrito en la Sección 17.
+- **Método propuesto: World Model + controlador entrenado en el sueño.**
 
-- Método propuesto: World Model + imaginación/control.
-
-El baseline fijo permite determinar si los métodos aprendidos realmente mejoran una estrategia convencional. El baseline RL directo permite evaluar el valor de aprender y utilizar una dinámica interna.
+Se agregó, además, un cuarto punto de comparación no contemplado originalmente: una **regla determinista simple** ("pedir siempre la fase contraria a la actual"), que resultó ser la política óptima bajo la demanda de tráfico simétrica usada en una primera fase del proyecto — su inclusión fue clave para detectar que, bajo esa demanda, ningún método aprendido superaba a una heurística trivial, lo que motivó el rediseño del escenario de demanda descrito en la Sección 20.
 
 # 19. Métricas de evaluación
 
-## Para el tráfico:
+## Para el tráfico (implementadas):
 
-- Tiempo promedio de viaje
+- Tiempo promedio de espera.
+- Longitud promedio de las colas.
+- Vehículos atendidos (throughput).
 
-- Tiempo promedio de espera
+## Para el tráfico (planteadas originalmente, no implementadas):
 
-- Longitud promedio de las colas
+- Tiempo promedio de viaje, consumo de combustible y emisiones de CO₂ no se midieron — SUMO puede reportarlos, pero no se consideraron necesarios para responder la pregunta de investigación central, y priorizar su implementación no era condición necesaria frente a los problemas críticos descritos en la Sección 20.
 
-- Vehículos atendidos por minuto / throughput
+## Para el aprendizaje (implementadas):
 
-- Consumo de combustible, si la configuración de SUMO lo permite
+- Recompensa acumulada, con pruebas de significancia estadística (t de Welch, Mann-Whitney) sobre los resultados finales.
+- Número de interacciones reales con SUMO por método.
+- Error de predicción a uno y varios pasos, y de la recompensa.
+- `explained_variance` de la función de valor de PPO — una métrica no contemplada originalmente que resultó central en el diagnóstico de por qué los primeros controladores entrenados no funcionaban bien (Sección 20).
 
-- Emisiones de CO₂, si la configuración de SUMO lo permite
+## Para el aprendizaje (planteadas originalmente, no implementadas):
 
-## Para el aprendizaje:
+- Número de parámetros, tiempo de entrenamiento e inferencia del modelo temporal — relevantes solo para comparar arquitecturas alternativas (Transformer/TSMixer), que no se ejecutaron.
 
-- Recompensa acumulada
+# 20. Diseño experimental y cronología real del proyecto
 
-- Tiempo de entrenamiento
+**Experimento 0 — Necesidad del Autoencoder.** Se comparó el modelo temporal (LSTM) usando (a) el vector de estado normalizado crudo, y (b) el vector latente `z`. **Resultado: (b) gana en 9 de 10 horizontes evaluados**, con la ventaja invirtiéndose solo en el horizonte más largo — el Autoencoder se mantuvo en el sistema final con esta evidencia.
 
-- Número de interacciones con SUMO
+**Experimento 1 — Capacidad predictiva.** El LSTM se evaluó sobre episodios no vistos, comparando predicción a uno y varios pasos contra un baseline persistente. **Resultado: el LSTM supera al baseline en los 10 horizontes evaluados.**
 
-- Error de predicción a uno y varios pasos
+**Experimento 2 — Control por imaginación.** Se comparó el controlador entrenado sin World Model (RL directo) frente al que usa el modelo aprendido (entrenado en el sueño), ambos medidos en SUMO real. **Resultado: el controlador del World Model supera de forma consistente al RL directo (Sección 2), con la salvedad de significancia estadística a nivel de semilla ya mencionada.**
 
-- Error de predicción de la recompensa
+**Experimento 3 — Comparación de arquitecturas temporales (Transformer, TSMixer).** **No ejecutado.** La razón no fue falta de tiempo en abstracto, sino que, en el camino hacia el Experimento 2, aparecieron cuatro problemas críticos que exigían resolución antes de que cualquier resultado fuera confiable:
 
-- Número de parámetros, tiempo de entrenamiento e inferencia del modelo temporal (necesarios para comparar arquitecturas a costo comparable)
+1. **Un bug en la lectura de la fase del semáforo**: el estado leía la fase desde una fuente de TraCI que la librería de control del semáforo nunca actualiza, dejando esa variable congelada durante toda la recolección de datos inicial. Se corrigió y se regeneró el dataset.
+2. **Un bug de normalización en el puente entre SUMO y el controlador del sueño**: el estado real no se normalizaba con las mismas estadísticas que usó el Autoencoder durante su entrenamiento, invalidando silenciosamente las primeras evaluaciones contra SUMO real.
+3. **Un criterio de selección de "mejor modelo" sin relación con el desempeño real**: se descubrió, con una investigación dedicada, que elegir el mejor checkpoint del controlador del sueño por su recompensa imaginada no predecía en absoluto su desempeño real (correlación de Pearson ≈ 0.08) — se cambió el criterio a evaluación periódica contra SUMO real.
+4. **La función de valor de PPO no aprendía nada** (`explained_variance` ≈ 0) en ninguno de los dos controladores, por falta de normalización de la recompensa — corregido con `VecNormalize`.
 
-# 20. Diseño experimental  [AMPLIADO]
+Priorizar el diagnóstico y la corrección de estos cuatro problemas, cada uno con evidencia real antes y después del arreglo, se consideró más valioso académicamente que ejecutar el Experimento 3 con un núcleo potencialmente poco confiable. La interfaz para ejecutarlo en el futuro (`TemporalModel`) quedó preparada.
 
-Experimento 0 — Necesidad del Autoencoder/VAE (nuevo). 
+**Un quinto hallazgo no anticipado**: bajo la demanda de tráfico simétrica usada originalmente, tanto el controlador del sueño como el RL directo convergieron a la misma regla trivial ("cambiar de fase tan rápido como el reglamento de tiempos lo permite"), que resultó ser la política óptima bajo esa demanda — impidiendo cualquier comparación real de calidad de control entre métodos. Esto motivó diseñar una demanda de tráfico **asimétrica** (500 veh/h en la vía principal, 150 veh/h en la secundaria), calibrada específicamente para que esa regla trivial dejara de ser óptima, permitiendo así la comparación real reportada en la Sección 2.
 
-Antes de invertir tiempo entrenando un VAE, se compara el desempeño del modelo temporal (LSTM) usando (a) el vector de estado normalizado crudo, y (b) el vector latente z producido por un Autoencoder/VAE. El VAE se mantiene en el núcleo del proyecto únicamente si (b) mejora medible y consistentemente el error de predicción o la estabilidad del entrenamiento frente a (a). Este experimento formaliza el criterio ya mencionado en las Secciones 11 y 24, evitando usar el VAE "porque el curso lo cubrió" sin justificación empírica.
+# 21. Hipótesis — evaluadas contra los resultados obtenidos
 
-Experimento 1 — Capacidad predictiva. 
+- **H1.** Un World Model entrenado con trayectorias de SUMO puede aprender una aproximación útil de la dinámica de una intersección de tráfico. **Confirmada** (Experimento 1).
+- **H2.** El error de predicción aumentará al proyectar más pasos de manera autorregresiva debido al *compounding error*. **Confirmada** — el error latente acumulado crece de forma medible entre el horizonte 1 y el 10, aunque el modelo sigue superando al baseline persistente en todos los horizontes evaluados.
+- **H3.** El uso de un World Model puede reducir la cantidad de interacciones necesarias con SUMO para obtener un controlador competitivo respecto al entrenamiento directo. **Confirmada, con la salvedad estadística ya mencionada** (Sección 2): el World Model usa aproximadamente un tercio de las interacciones reales, con una ventaja de desempeño clara a nivel de episodio pero no significativa a nivel de semilla con el tamaño de muestra usado (3 por método).
+- **H4.** Un Transformer temporal puede presentar un comportamiento predictivo diferente al de una LSTM. **No evaluada** — el Experimento 3 no se ejecutó.
+- **H5.** Un Autoencoder no necesariamente mejorará la predicción del modelo temporal frente al vector crudo normalizado; su inclusión debe depender del Experimento 0. **Refutada empíricamente en este proyecto**: el Autoencoder sí mejoró la predicción de forma medible y consistente (9/10 horizontes), y se mantuvo en el sistema final exactamente por el mecanismo de decisión que esta misma hipótesis proponía.
+- **H6.** Una arquitectura sin recurrencia ni atención (TSMixer) podría igualar el error de predicción de la LSTM y del Transformer. **No evaluada** — el Experimento 3 no se ejecutó.
 
-Entrenar el World Model y medir su error sobre episodios no vistos. Comparar predicción a un paso frente a predicción autorregresiva a varios pasos.
+# 22. Plan de trabajo — ejecución real
 
-Experimento 2 — Control por imaginación. 
+El plan original de 6 semanas se usó como guía de orden de desarrollo (simulador → datos → representación → World Model → imaginación/control → comparación), pero el tiempo real se extendió más allá de lo planeado, principalmente por las cuatro correcciones críticas descritas en la Sección 20 — cada una exigió su propio ciclo de diagnóstico con evidencia, corrección, y re-verificación completa de los resultados posteriores. El orden conceptual del plan original se mantuvo válido de principio a fin; lo que se subestimó fue el tiempo necesario para que cada etapa fuera *confiable*, no solo *funcional*.
 
-Comparar un agente sin World Model frente a un agente que utiliza el modelo aprendido para evaluar acciones. Medir desempeño en SUMO real.
+# 23. Riesgos y mitigación — evaluados retrospectivamente
 
-Experimento 3 — Comparación de arquitecturas temporales (opcional). 
-
-Comparar LSTM (modelo principal), Transformer (opcional) y TSMixer (opcional) usando exactamente la misma representación, los mismos splits por episodio, la misma normalización, la misma ventana de historia L, el mismo horizonte de evaluación autorregresiva, la misma función de pérdida, las mismas semillas y las mismas métricas. Solo se sustituye el bloque de modelo temporal: SUMO, el dataset, el Autoencoder/VAE, el Dream Environment y el controlador permanecen idénticos. Se reportará además el número de parámetros y el tiempo de entrenamiento e inferencia de cada arquitectura, de modo que la comparación no favorezca simplemente al modelo con mayor capacidad. Las dos extensiones tienen la misma prioridad; si el tiempo solo alcanza para una, se documentará cuál se ejecutó y por qué.
-
-# 21. Hipótesis  [AMPLIADA]
-
-- H1. Un World Model entrenado con trayectorias de SUMO puede aprender una aproximación útil de la dinámica de una intersección de tráfico.
-
-- H2. El error de predicción aumentará al proyectar más pasos de manera autorregresiva debido al compounding error.
-
-- H3. El uso de un World Model puede reducir la cantidad de interacciones necesarias con SUMO para obtener un controlador competitivo respecto al entrenamiento directo, aunque esta mejora debe comprobarse experimentalmente.
-
-- H4. Un Transformer temporal puede presentar un comportamiento predictivo diferente al de una LSTM sobre la misma representación y tarea; no se debe asumir de antemano cuál será superior.
-
-- H5 (nueva). Dado que el estado del tráfico es un vector numérico de baja dimensión (no una imagen), un Autoencoder/VAE no necesariamente mejorará la predicción del modelo temporal frente al vector crudo normalizado; su inclusión en el sistema final debe depender del resultado del Experimento 0, no asumirse de antemano.
-
-- H6 (nueva). Dado que la dinámica se aprende sobre una ventana corta de un vector de baja dimensión, una arquitectura sin recurrencia ni atención (TSMixer, construida solo con capas densas de mezcla temporal y de características) podría igualar el error de predicción de la LSTM y del Transformer. Si esto ocurre, el resultado es informativo en sí mismo, porque indicaría que la complejidad adicional de la recurrencia o la atención no está justificada para este problema; no se asume de antemano cuál de las tres arquitecturas será superior.
-
-# 22. Plan de trabajo de 6 semanas
-
-| Semana | Actividades |
-| --- | --- |
-| 1 | Instalar y aprender SUMO/TraCI. Construir una intersección simple. Verificar fases, flujo y extracción de variables. |
-| 2 | Definir estado, acciones y recompensa. Implementar entorno RL. Crear baseline de tiempo fijo y recolectar primeras trayectorias. |
-| 3 | Generar dataset de transiciones. Normalizar datos. Ejecutar Experimento 0 (necesidad del Autoencoder/VAE) y entrenarlo solo si se justifica. |
-| 4 | Implementar y entrenar el modelo temporal (LSTM determinístico) del World Model. Evaluar predicciones a uno y varios pasos. |
-| 5 | Construir Dream Environment/imaginación. Integrar controlador PPO (Stable-Baselines3). Comparar con entrenamiento directo en SUMO. |
-| 6 | Ejecutar experimentos finales, múltiples episodios/semillas, métricas, gráficas, análisis, documentación y preparación de sustentación. Si queda tiempo disponible, ejecutar el Experimento 3 (Transformer y/o TSMixer) reutilizando el mismo pipeline. |
-
-# 23. Riesgos y mitigación
-
-| Riesgo | Impacto | Mitigación |
+| Riesgo | Impacto previsto | Qué ocurrió realmente |
 | --- | --- | --- |
-| Complejidad de SUMO/TraCI | Alto | Comenzar con una sola intersección y validar primero un entorno mínimo. |
-| Modelo temporal inestable | Alto | Usar secuencias cortas, normalización, checkpoints y baseline predictivo. |
-| Compounding error | Medio/alto | Evaluar horizontes cortos y cuantificar el crecimiento del error. |
-| Alcance excesivo | Alto | Mantener visión, Transformer, TSMixer, MDN y CMA-ES como extensiones opcionales fuera del núcleo (ver Sección 30). |
-| Resultados poco concluyentes | Medio | Usar múltiples episodios, semillas y baselines comparables. |
-| Tecnología no justificable ante la profesora | Medio | Mantener la auditoría de la Sección 30 actualizada cada vez que se añada una librería o técnica nueva. |
+| Complejidad de SUMO/TraCI | Alto | Se materializó parcialmente: no en la complejidad de uso básico, sino en una desconexión sutil entre cómo `sumo-rl` controla el semáforo y cómo se leía su estado — el bug crítico #1 de la Sección 20. |
+| Modelo temporal inestable | Alto | No se materializó de forma severa; el LSTM entrenó de forma estable en todas las corridas. |
+| *Compounding error* | Medio/alto | Confirmado (H2), pero acotado — el modelo siguió siendo útil en todos los horizontes evaluados. |
+| Alcance excesivo | Alto | Mitigado exitosamente: Transformer y TSMixer se mantuvieron fuera del núcleo, tal como se planeó, liberando tiempo para las correcciones críticas. |
+| Resultados poco concluyentes | Medio | Mitigado con verificación de 3 semillas por método y pruebas de significancia estadística formal — el resultado final es concluyente en cuanto a consistencia, aunque matizado en cuanto a significancia formal. |
+| Tecnología no justificable ante la profesora | Medio | La auditoría de la Sección 30 se mantuvo vigente durante todo el proyecto. |
 
 # 24. Alcance y criterios de corte
 
-El núcleo obligatorio debe ser: una intersección SUMO, dataset de trayectorias, representación vectorial, World Model temporal, evaluación predictiva y comparación de control con y sin uso del modelo. El Autoencoder/VAE debe mantenerse solo si demuestra utilidad para la representación (Experimento 0).
+El núcleo obligatorio (una intersección SUMO, dataset de trayectorias, representación vectorial, World Model temporal, evaluación predictiva, y comparación de control con y sin uso del modelo) **se completó en su totalidad**. El Autoencoder se mantuvo en el sistema final porque el Experimento 0 demostró su utilidad.
 
-Las extensiones Transformer y TSMixer tienen la misma prioridad entre sí y se implementarán únicamente después de estabilizar el núcleo; ninguna de las dos modifica el pipeline, solo sustituye el bloque de modelo temporal, y si el tiempo disponible alcanza para una sola se documentará explícitamente cuál se ejecutó. La visión mediante imágenes no es necesaria para que el proyecto sea defendible y debe considerarse secundaria. La implementación completa de Dreamer, STORM, MDN-RNN + CMA-ES y arquitecturas excesivamente complejas queda fuera del alcance inicial, tanto por riesgo técnico como por no estar cubiertas en el curso (ver Sección 30).
+El escenario de demanda asimétrica (Sección 20) fue una adición **dentro del alcance del núcleo**, no una extensión — es una variación necesaria del mismo escenario de una sola intersección, requerida para que la comparación de control tuviera sentido, no una ampliación de la arquitectura del sistema.
 
-# 25. Resultados esperados
+Las extensiones Transformer y TSMixer, con la misma prioridad entre sí, **no se ejecutaron** — se mantuvieron correctamente fuera del núcleo, tal como esta misma sección ya anticipaba como posibilidad ("se implementarán únicamente después de estabilizar el núcleo"; el núcleo terminó demandando más tiempo de estabilización del previsto). La visión mediante imágenes, la implementación completa de Dreamer/STORM, y MDN-RNN + CMA-ES se mantuvieron fuera del alcance, como se planteó desde el inicio.
 
-- Una intersección SUMO reproducible y controlable desde Python.
+# 25. Resultados obtenidos
 
-- Un conjunto de trayectorias de tráfico correctamente estructurado.
-
-- Un World Model con error de predicción medible.
-
-- Un análisis del compounding error.
-
-- Un mecanismo funcional de imaginación o Dream Environment.
-
-- Un controlador evaluado en el entorno real de SUMO.
-
-- Una comparación objetiva frente a control fijo y RL directo.
-
-- Una conclusión experimental sobre el valor de utilizar un World Model para reducir interacciones con el simulador.
-
-- Una justificación explícita, técnica by tecnología, de por qué cada herramienta usada era necesaria (Sección 30).
+- Una intersección SUMO reproducible y controlable desde Python, con una demanda de tráfico calibrada específicamente para que el problema de control tuviera una respuesta no trivial.
+- Un conjunto de 80 episodios de trayectorias de tráfico, con variedad real (semilla de SUMO distinta por episodio) y correctamente estructurado (sin fuga de datos entre splits).
+- Un World Model con error de predicción medible y superior a un baseline persistente en los 10 horizontes evaluados.
+- Un análisis del *compounding error*, confirmando su existencia sin que invalide la utilidad del modelo.
+- Un Dream Environment funcional, usado para entrenar un controlador PPO de principio a fin sin ninguna interacción real con SUMO.
+- Dos controladores evaluados en el entorno real de SUMO (World Model y RL directo), cada uno verificado con 3 semillas de entrenamiento independientes.
+- Una comparación objetiva y estadísticamente evaluada frente a control fijo, una regla determinista, y RL directo.
+- Una conclusión experimental sobre el valor de usar un World Model para reducir interacciones con el simulador: **positiva, con matices de significancia estadística declarados explícitamente**, no ocultados.
+- Una justificación explícita, técnica por tecnología, de por qué cada herramienta usada era necesaria (Sección 30), y de por qué las que no se usaron (Transformer, TSMixer, VAE probabilístico) quedaron fuera, con evidencia cronológica de las razones reales (Sección 20).
 
 # 26. Limitaciones
 
-- El proyecto se limita inicialmente a una única intersección.
-
+- El proyecto se limitó, como se planeó, a una única intersección.
 - La simulación no representa toda la complejidad del tráfico urbano real.
+- Las conclusiones están condicionadas al escenario de demanda usado (asimétrico, constante en el tiempo) — una demanda variable en el tiempo o una red de varias intersecciones podría cambiar el resultado relativo entre métodos.
+- El World Model acumula error en predicciones largas (*compounding error*, confirmado), mitigado pero no eliminado mediante límites de horizonte calibrados empíricamente.
+- Persiste, en ambos controladores finales, un número reducido de episodios donde el desempeño es mucho peor que el promedio ("episodios catastróficos": 5 de 90 en el World Model, 23 de 90 en el RL directo), cuya causa completa no se identificó pese a una investigación dedicada.
+- Con solo 3 semillas de entrenamiento por método, la ventaja del World Model sobre el RL directo, aunque consistente, no alcanza significancia estadística formal a nivel de semilla.
+- No se implementó Dreamer, STORM, ni el sistema original de Ha y Schmidhuber con MDN-RNN y CMA-ES, tal como se planteó desde el inicio.
 
-- Las conclusiones estarán condicionadas al escenario y a la distribución de tráfico utilizados.
-
-- Un World Model puede acumular errores durante predicciones largas.
-
-- No se pretende implementar íntegramente Dreamer, STORM ni reproducir el sistema original de Ha y Schmidhuber, incluyendo su uso de MDN-RNN y CMA-ES.
-
-# 27. Antecedentes y referencias  [AMPLIADO]
+# 27. Antecedentes y referencias
 
 ## Referencias académicas
 
-Ha, D., & Schmidhuber, J. (2018). World Models. Este trabajo fundamenta la idea de aprender una representación interna y una dinámica del entorno para utilizarla en el control.
+Ha, D., & Schmidhuber, J. (2018). World Models. Fundamenta la idea de aprender una representación interna y una dinámica del entorno para utilizarla en el control — la base conceptual de todo el proyecto.
 
-Hafner, D., Lillicrap, T., Ba, J., & Norouzi, M. (2020). Dream to Control: Learning Behaviors by Latent Imagination. Sirve como referencia conceptual para el uso de trayectorias imaginadas en el espacio latente.
+Hafner, D., Lillicrap, T., Ba, J., & Norouzi, M. (2020). Dream to Control: Learning Behaviors by Latent Imagination. Referencia conceptual para el uso de trayectorias imaginadas en el espacio latente, el principio detrás del Dream Environment implementado.
 
-Zhang, W., Wang, G., Sun, J., Yuan, Y., & Huang, G. (2023). STORM: Efficient Stochastic Transformer-based World Models for Reinforcement Learning. Sirve como referencia para una extensión basada en Transformer.
+Zhang, W., Wang, G., Sun, J., Yuan, Y., & Huang, G. (2023). STORM: Efficient Stochastic Transformer-based World Models for Reinforcement Learning. Referencia para una extensión basada en Transformer — no ejecutada en este proyecto.
 
-Chen, S.-A., Li, C.-L., Yoder, N., Arik, S. Ö., & Pfister, T. (2023). TSMixer: An All-MLP Architecture for Time Series Forecasting. Sustenta la variante opcional de modelo temporal construida únicamente con capas densas que alternan mezcla temporal y mezcla de características.
+Chen, S.-A., Li, C.-L., Yoder, N., Arik, S. Ö., & Pfister, T. (2023). TSMixer: An All-MLP Architecture for Time Series Forecasting. Sustenta la variante opcional de modelo temporal TSMixer — no ejecutada en este proyecto.
 
-Zeng, A., Chen, M., Zhang, L., & Xu, Q. (2023). Are Transformers Effective for Time Series Forecasting? Justifica metodológicamente incluir una arquitectura simple sin atención como término de comparación frente a LSTM y Transformer en tareas de predicción temporal.
+Zeng, A., Chen, M., Zhang, L., & Xu, Q. (2023). Are Transformers Effective for Time Series Forecasting? Justificación metodológica para incluir una arquitectura simple sin atención como término de comparación — relevante solo si se retoma el Experimento 3 en trabajo futuro.
 
-Dai et al. (2022). Image-based traffic signal control via world models. Este antecedente conecta directamente World Models con el control de señales de tráfico y sirve como referencia específica del dominio.
+Dai et al. (2022). Image-based traffic signal control via world models. Antecedente que conecta World Models con el control de señales de tráfico.
 
 ## Herramientas de software (infraestructura, no técnicas de modelado)
 
-Alegre, L. N. SUMO-RL — wrapper tipo Gymnasium para el control de semáforos en SUMO. https://github.com/LucasAlegre/sumo-rl
+Alegre, L. N. SUMO-RL — wrapper tipo Gymnasium para el control de semáforos en SUMO. https://github.com/LucasAlegre/sumo-rl. Usado como capa de integración entre `TrafficEnvironment` y SUMO/TraCI.
 
-Tallec, C., et al. Reimplementación de World Models en PyTorch (referencia de organización del pipeline VAE → MDN-RNN → Controller). https://github.com/ctallec/world-models
+Stable-Baselines3 — implementación estándar de PPO y de la utilidad `VecNormalize`, central en la resolución del problema de la función de valor descrito en la Sección 20.
 
-Shekhar, A. World Model reproduction on CarRacing-v3 (referencia de estructura de resultados y métricas a reportar). https://github.com/Abhi183/world-model
+# 28. Dataset — nota sobre la decisión final
 
-# 28. Artículo y dataset propuestos para el desarrollo
+La propuesta original contemplaba, como referencia, el uso de un benchmark externo (Traffic Signal Control Benchmark basado en CityFlow). En la práctica, el proyecto se desarrolló íntegramente sobre una red y una demanda de tráfico propias, construidas y calibradas específicamente para el objetivo experimental del proyecto (incluyendo el rediseño a demanda asimétrica descrito en la Sección 20) — no se usó ningún dataset ni benchmark externo. Esta decisión simplificó la reproducibilidad del proyecto (control total sobre la demanda y la red) a cambio de no poder comparar directamente contra resultados de la literatura sobre CityFlow u otros benchmarks estándar.
 
-Artículo principal del dominio: “Image-based traffic signal control via world models” (2022). Debe utilizarse como antecedente científico para justificar la aplicación de World Models al control semafórico. El proyecto propuesto no pretende copiarlo; busca adaptar la idea a una intersección SUMO y estudiar una arquitectura controlada experimentalmente.
+# 29. Contribución académica
 
-Dataset/benchmark recomendado: Traffic Signal Control Benchmark basado en CityFlow. Como referencia inicial se puede utilizar un escenario de una sola intersección, y posteriormente evaluar escenarios sintéticos si el núcleo funciona. Para SUMO, si se requiere una base de datos externa, se deberá seleccionar un conjunto compatible con la red y los flujos configurados en el simulador, evitando mezclar formatos sin una etapa de conversión y validación.
+La contribución se planteó, y se mantuvo, como una adaptación y evaluación experimental de World Models para control semafórico, no como la creación de una nueva familia de modelos. El aporte concreto obtenido: una representación y dinámica aprendidas del tráfico, un mecanismo de entrenamiento sin interacción real (Dream Environment), y una comparación rigurosa (con pruebas estadísticas formales) frente a un agente entrenado directamente en SUMO — con una respuesta afirmativa a la pregunta de investigación, declarada con sus límites de evidencia explícitos.
 
-# 29. Contribución académica esperada
+# 30. Auditoría tecnológica y alineación curricular
 
-La contribución se plantea como una adaptación y evaluación experimental de World Models para control semafórico, no como la creación de una nueva familia de modelos. El aporte consiste en construir una representación y dinámica aprendidas del tráfico, integrar un mecanismo de imaginación y comparar su eficiencia frente a un agente que interactúa directamente con SUMO.
-
-La pregunta de mayor interés experimental es si el modelo aprendido puede reducir el costo de interacción con el simulador sin producir una degradación significativa en las métricas de tráfico.
-
-# 30. Auditoría tecnológica y alineación curricular  [SECCIÓN NUEVA]
-
-Esta sección responde directamente a la pregunta de si cada tecnología usada en el proyecto es necesaria y si corresponde a un tema efectivamente cubierto por la profesora. El material del curso revisado incluye: repaso de redes neuronales y backpropagation, overfitting, convolución (CNN), modelos discriminativos vs. generativos, espacio latente, Autoencoder y VAE (incluyendo el truco de reparametrización), embeddings, redes recurrentes (RNN) y LSTM (incluyendo el ejemplo numérico paso a paso de las compuertas), y la arquitectura Transformer completa (self-attention, multi-head attention, cross-attention, Add & Norm).
+Esta sección responde a si cada tecnología usada en el proyecto es necesaria y corresponde a un tema efectivamente cubierto por la profesora. El material del curso revisado incluye: repaso de redes neuronales y backpropagation, overfitting, convolución (CNN), modelos discriminativos vs. generativos, espacio latente, Autoencoder y VAE, embeddings, redes recurrentes (RNN) y LSTM, y la arquitectura Transformer completa.
 
 ## 30.1 Técnicas de modelado — alineadas con el curso
 
-| Técnica | Uso en el proyecto | Tema del curso que la respalda | Veredicto |
+| Técnica | Uso en el proyecto | Tema del curso que la respalda | Estado final |
 | --- | --- | --- | --- |
-| Red neuronal densa (backprop, descenso de gradiente) | Base de todas las demás piezas: encoder/decoder del VAE, capa de salida de la LSTM | Repaso de redes neuronales, backpropagation, regla de la cadena | Necesaria y central |
-| Autoencoder / VAE (incl. reparametrización, divergencia KL) | Compresión opcional del vector de estado en z | Bloque de modelos generativos, espacio latente, VAE (reparametrización explicada paso a paso) | Condicional: solo si el Experimento 0 lo justifica |
-| LSTM (compuertas de olvido/entrada/salida) | Modelo temporal que predice z_{t+1} a partir del historial | Bloque de RNN/LSTM con ejemplo numérico idéntico en estructura (f_t, i_t, Ḍi_t, o_t) | Necesaria (núcleo) |
-| Transformer (self-attention, Add & Norm) | Extensión opcional para reemplazar la LSTM | Documento completo de la profesora sobre la arquitectura Transformer | Opcional, ya contemplada como extensión (Sección 21/H4) |
-| TSMixer (mezcla temporal + mezcla de características, solo capas densas) | Extensión opcional para reemplazar la LSTM, con la misma prioridad que el Transformer | No aparece con ese nombre en el curso, pero se construye íntegramente con primitivas cubiertas: capas densas, backpropagation, normalización, conexiones residuales y regularización | Opcional, contemplada como extensión (Sección 21/H6) |
-| Embeddings de tokens discretos | No se usa un módulo de embedding dedicado | Bloque de Word Embeddings del curso | No aplica: el estado es un vector numérico continuo, no símbolos discretos (ver 30.3) |
-| Redes convolucionales (CNN) | No se usa en el núcleo del proyecto | Repaso de convolución, kernels, mapas de activación | No aplica: el estado es un vector, no una imagen (ver 30.3) |
+| Red neuronal densa (backprop, descenso de gradiente) | Base de todas las demás piezas: encoder/decoder, capa de salida de la LSTM | Repaso de redes neuronales, backpropagation | Implementada, núcleo del sistema |
+| Autoencoder (determinista) | Compresión del vector de estado en z | Bloque de modelos generativos, espacio latente | Implementado; el Experimento 0 confirmó su valor (9/10 horizontes) |
+| LSTM | Modelo temporal que predice (z_{t+1}, r_{t+1}) a partir del historial | Bloque de RNN/LSTM | Implementada (núcleo), con `torch.nn.LSTM` estándar |
+| Transformer | Extensión opcional para reemplazar la LSTM | Documento de la profesora sobre Transformers | No ejecutada — ver Sección 20 |
+| TSMixer | Extensión opcional para reemplazar la LSTM, misma prioridad que Transformer | Primitivas cubiertas: capas densas, normalización, residuales | No ejecutada — ver Sección 20 |
+| Embeddings de tokens discretos | No usado | Bloque de Word Embeddings | No aplica: el estado es un vector numérico continuo |
+| Redes convolucionales (CNN) | No usado en el núcleo | Repaso de convolución | No aplica: el estado es un vector, no una imagen |
 
 ## 30.2 Infraestructura necesaria — no cubierta en el curso, pero indispensable
 
-Estas herramientas no corresponden a contenido de Deep Learning visto en clase, pero son indispensables porque el proyecto necesita un entorno de simulación y un mecanismo de control con el que interactuar; sin ellas no existiría un problema sobre el cual aplicar las técnicas de la Sección 30.1.
-
 | Herramienta | Rol en el proyecto | ¿Por qué es necesaria de todos modos? |
 | --- | --- | --- |
-| SUMO + TraCI | Simulador de tráfico y su protocolo de control desde Python | No existe alternativa dentro del alcance del proyecto: es el entorno mismo que se está modelando. |
-| sumo-rl | Wrapper tipo Gymnasium sobre TraCI (observación/acción/recompensa) | Evita reescribir manualmente decenas de llamadas TraCI ya resueltas y probadas por la comunidad; es infraestructura, no una técnica de IA que compita con el temario. |
-| Gymnasium | Interfaz estándar de entornos de RL | Requerida por sumo-rl y por Stable-Baselines3; es el "idioma común" entre el entorno y el controlador. |
-| Stable-Baselines3 (PPO) | Algoritmo de control (Reinforcement Learning) | El proyecto necesita un controlador entrenable; usar una librería estándar evita introducir una implementación propia de RL desde cero, que no es el foco del curso ni de la propuesta (ver 17). |
-| PyTorch | Framework para implementar el VAE y la LSTM/Transformer | Framework estándar de Deep Learning; permite implementar manualmente las ecuaciones vistas en clase (compuertas de la LSTM, reparametrización del VAE) en vez de usar una caja negra. |
+| SUMO + TraCI | Simulador de tráfico y su protocolo de control | Es el entorno mismo que se está modelando; no existe alternativa dentro del alcance. |
+| sumo-rl | Wrapper tipo Gymnasium sobre TraCI | Evita reescribir manualmente decenas de llamadas TraCI ya resueltas por la comunidad. |
+| Gymnasium | Interfaz estándar de entornos de RL | Requerida por sumo-rl, `DreamEnvironment` y Stable-Baselines3. |
+| Stable-Baselines3 (PPO, VecNormalize) | Algoritmo de control y utilidades de normalización | Evita implementar RL desde cero; `VecNormalize` resultó indispensable para resolver un problema real (Sección 20). |
+| PyTorch | Framework para el Autoencoder y la LSTM | Framework estándar de Deep Learning usado en todo el proyecto. |
 
 ## 30.3 Decisiones de exclusión explícita
 
-Tan importante como justificar lo que se usa es documentar lo que deliberadamente NO se usa, y por qué, para que ninguna ausencia se lea como un descuido:
+- **CNN / convolución**: el estado es un vector numérico, no una imagen. Se mantuvo excluida durante todo el proyecto.
+- **Embeddings de tokens**: el estado ya es un vector continuo por naturaleza. Se mantuvo excluida.
+- **Mixture Density Network (MDN-RNN)**: reemplazada por una LSTM con salida densa determinística, tal como se planteó. Se mantuvo esa decisión — la LSTM implementada predice de forma determinística, sin componente probabilístico.
+- **CMA-ES**: reemplazado por PPO vía Stable-Baselines3, tal como se planteó.
+- **GANs, distancia de Wasserstein**: no fueron necesarias; el Autoencoder (determinista, sin siquiera el componente probabilístico de un VAE) cubrió la necesidad de representación del sistema.
+- **VAE con reparametrización y divergencia KL**: aunque la propuesta contemplaba un Autoencoder *o* VAE, se implementó la versión determinista más simple. El Experimento 0 no exigía el componente probabilístico para responder su pregunta (¿ayuda comprimir?), y añadirlo habría sido complejidad adicional sin necesidad demostrada.
 
-- CNN / convolución: el estado del tráfico es un vector numérico (densidad, cola, fase, etc.), no una imagen. Introducir convoluciones exigiría una representación visual (como en Dai et al., 2022) que el proyecto explícitamente evita por complejidad innecesaria (Sección 24). El tema se domina conceptualmente por el curso, pero no aplica a esta implementación.
+## 30.4 Criterio de decisión para el Autoencoder — aplicado y resuelto
 
-- Embeddings de tokens: los embeddings de palabras del curso resuelven cómo convertir símbolos discretos (texto) en vectores continuos. El estado del tráfico ya es un vector continuo por naturaleza; forzar una tabla de embeddings sobre variables numéricas no tiene justificación matemática y se descarta.
-
-- Mixture Density Network (MDN-RNN): parte del World Model original, pero no cubierta en el curso. Se reemplaza por una LSTM con salida densa determinística (Sección 15), que sigue exactamente el patrón LSTM → Dense → ŷ enseñado en clase.
-
-- CMA-ES: estrategia evolutiva del paper original para entrenar el controlador. Se reemplaza por PPO vía Stable-Baselines3 (Sección 17), evitando introducir una familia algorítmica de optimización sin gradiente ajena al contenido de Deep Learning del curso.
-
-- GANs, distancia de Wasserstein: mencionadas en el curso como parte del panorama de modelos generativos, pero no son necesarias aquí porque el VAE ya cubre la necesidad de generación/imaginación del sistema; añadir una GAN duplicaría funcionalidad sin aportar valor al problema de control semafórico.
-
-## 30.4 Criterio de decisión para el Autoencoder/VAE
-
-Dado que el vector de estado tiene solo entre 11 y 20 dimensiones aproximadamente (muy lejos de las ~262,000 dimensiones de una imagen que sí justifican comprimir con un VAE, según el propio material del curso), no se asume de antemano que la compresión latente aporte valor. El Experimento 0 (Sección 20) decide esto empíricamente: el VAE se mantiene en el sistema final solo si mejora medible y consistentemente la predicción del modelo temporal frente al vector de estado crudo normalizado. Esta es una aplicación directa del criterio ya presente en las Secciones 11 y 24, formalizada aquí como un experimento explícito en vez de una decisión de diseño no verificada.
+Con el vector de estado en 26 dimensiones (la cifra final, ajustada desde la estimación inicial de 11-20 al decidir codificar la fase del semáforo como *one-hot* — ver Sección 11), el criterio de esta sección se mantiene exactamente igual de válido: 26 dimensiones sigue estando muy lejos de las ~262,000 de una imagen, así que la compresión latente no se asumió necesaria de antemano. El Experimento 0 resolvió esto empíricamente: el Autoencoder demostró mejorar la predicción del modelo temporal de forma medible y consistente (9 de 10 horizontes evaluados), y se mantuvo en el sistema final exactamente por este criterio, no por asunción.
 
 ## 30.5 Resumen de la auditoría
 
-De las tecnologías originalmente contempladas, ninguna resultó completamente innecesaria; todas cumplen un rol claro. Los ajustes de esta revisión son de alcance, no de eliminación: se pospone/condiciona el VAE (30.4), se simplifica el modelo temporal evitando MDN, y se reemplaza CMA-ES por una librería estándar de RL. El efecto neto es un proyecto más fácil de defender técnicamente, porque cada línea de código puede trazarse a un tema específico del curso o a una necesidad de infraestructura explícitamente justificada. La incorporación de TSMixer como segundo experimento opcional no altera esta conclusión: no introduce ninguna librería ni paradigma nuevo, se implementa en PyTorch con las mismas primitivas ya cubiertas (capas densas, normalización, conexiones residuales) y reutiliza el pipeline completo, de modo que su costo marginal es el de una clase adicional del modelo temporal.
+De las tecnologías contempladas, ninguna resultó completamente innecesaria. Los ajustes de esta versión final son, igual que en la revisión anterior, de alcance y de resultado empírico, no de eliminación arbitraria: el Autoencoder se mantuvo porque el Experimento 0 lo confirmó; el modelo temporal se simplificó a una LSTM determinística con implementación estándar de PyTorch; CMA-ES se reemplazó por PPO. La incorporación de TSMixer como segundo experimento opcional, planteada en la versión anterior, no llegó a ejecutarse — su ausencia no responde a que dejara de ser relevante, sino a que el tiempo se dedicó a estabilizar y verificar el núcleo, exactamente la prioridad que esta misma sección ya establecía desde el principio.
 
-# 31. Arquitectura final de referencia  [ACTUALIZADA]
+# 31. Arquitectura final implementada
 
-SUMO
-
-↓
-
-Estado del tráfico (vector numérico)
-
-↓
-
-Autoencoder / VAE (solo si el Experimento 0 lo justifica)
-
-↓
-
-Representación (z, o el vector crudo normalizado)
-
-↓
-
-Modelo temporal (único bloque que cambia entre experimentos):
-
-LSTM determinística (Dense de salida, sin MDN) — modelo principal
-
-Transformer encoder temporal — experimento opcional
-
-TSMixer (all-MLP: mezcla temporal + mezcla de características) — experimento opcional
-
-↓
-
-Predicción de estado + recompensa
-
-↓
-
-Dream Environment / Imaginación
-
-↓
-
-Controller (PPO vía Stable-Baselines3)
-
-↓
-
+```
+SUMO (demanda asimétrica: 500 veh/h vía principal, 150 veh/h vía secundaria)
+    ↓
+Estado del tráfico (vector numérico, 26 dimensiones)
+    ↓
+Autoencoder (determinista — confirmado útil por el Experimento 0)
+    ↓
+Representación z (16 dimensiones)
+    ↓
+Modelo temporal: LSTM determinística (torch.nn.LSTM, Dense de salida, sin MDN)
+    [Transformer y TSMixer: interfaz preparada (TemporalModel), no implementados]
+    ↓
+Predicción de (ẑ_{t+1}, r̂_{t+1})
+    ↓
+Dream Environment (entorno completo de entrenamiento, compatible con Gymnasium)
+    ↓
+Controller (PPO vía Stable-Baselines3, con VecNormalize)
+    ↓
 Acción semafórica
+    ↓
+SUMO (evaluación real; también existe un PPO entrenado directamente aquí, para comparación)
+```
 
-↓
+# 32. Criterios de éxito — evaluados
 
-SUMO
-
-Extensiones opcionales: sustituir la LSTM por un Transformer o por un TSMixer para realizar una comparación arquitectónica manteniendo el resto del diseño controlado. Las tres alternativas comparten exactamente el mismo pipeline (SUMO → dataset → normalización → Autoencoder/VAE → espacio latente → modelo temporal → Dream Environment → entrenamiento del controlador → comparación de resultados) y el mismo protocolo experimental; el único bloque que cambia es el modelo temporal. Por eso ninguna de las dos extensiones constituye un proyecto aparte: son experimentos adicionales dentro de la misma infraestructura.
-
-# 32. Criterios para considerar el proyecto exitoso
-
-- El simulador ejecuta episodios de forma estable y reproducible.
-
-- El modelo predictivo supera un baseline simple de predicción.
-
-- El error a uno y varios pasos se encuentra cuantificado.
-
-- La imaginación produce decisiones que pueden evaluarse nuevamente en SUMO.
-
-- Los resultados se reportan mediante métricas de tráfico y de aprendizaje.
-
-- La comparación con los baselines permite formular una conclusión sustentada por datos.
-
-- Cada tecnología usada puede justificarse explícitamente contra el temario del curso o como infraestructura indispensable (Sección 30).
+- El simulador ejecuta episodios de forma estable y reproducible. **Cumplido.**
+- El modelo predictivo supera un baseline simple de predicción. **Cumplido** (Experimento 1, 10/10 horizontes).
+- El error a uno y varios pasos se encuentra cuantificado. **Cumplido.**
+- La imaginación produce decisiones que pueden evaluarse nuevamente en SUMO. **Cumplido** — el controlador entrenado en el sueño se evaluó exhaustivamente en SUMO real.
+- Los resultados se reportan mediante métricas de tráfico y de aprendizaje. **Cumplido**, con la salvedad de que algunas métricas planteadas originalmente (tiempo de viaje, combustible, CO₂) no se implementaron por no ser necesarias para la pregunta de investigación central.
+- La comparación con los baselines permite formular una conclusión sustentada por datos. **Cumplido**, incluyendo pruebas de significancia estadística formal, algo no explícitamente exigido en la propuesta original pero incorporado por rigor.
+- Cada tecnología usada puede justificarse explícitamente contra el temario del curso o como infraestructura indispensable. **Cumplido** (Sección 30).
 
 # 33. Nota metodológica final
 
-La estrategia recomendada es construir primero una versión mínima que funcione y medirla antes de agregar componentes. El orden de desarrollo debe ser: simulador → datos → baseline → representación (con su experimento de necesidad) → World Model → evaluación predictiva → imaginación/control → comparación → extensiones opcionales de modelo temporal (Transformer y TSMixer, con la misma prioridad). Esta secuencia permite que el proyecto conserve un núcleo defendible incluso si alguna extensión no alcanza estabilidad dentro del tiempo disponible, y que cada decisión tecnológica quede respaldada tanto académica como técnicamente.
+La estrategia seguida fue, tal como se planteó, construir primero una versión mínima funcional y medirla antes de agregar componentes. El orden real de desarrollo (simulador → datos → representación con su experimento de necesidad → World Model → evaluación predictiva → imaginación/control → comparación) coincidió con el plan original. Lo que la experiencia real del proyecto añade a esta nota metodológica, para cualquier trabajo futuro que continúe esta línea: **la etapa más costosa en tiempo no fue construir cada componente, sino verificar que la conexión entre componentes fuera correcta** — cada uno de los cuatro problemas críticos descritos en la Sección 20 era, en esencia, una desconexión silenciosa entre dos piezas que individualmente funcionaban bien. Un plan de trabajo futuro sobre esta base debería reservar tiempo explícito para esa verificación de integración, no solo para la construcción de cada pieza por separado.
 
-*Propuesta de Proyecto de Grado — World Models + SUMO (versión revisada con auditoría tecnológica)*
+*Propuesta de Proyecto de Grado — World Models + SUMO (versión final, post-ejecución, commit `87ffb8f`)*
