@@ -38,19 +38,62 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from models.world_model import LatentDynamicsLSTM
+from torch import nn
+
+from models.world_model import LatentDynamicsLSTM, LatentDynamicsTransformer, LatentDynamicsTSMixer
+
+
+def build_world_model(hparams: dict) -> nn.Module:
+    """Instantiate an untrained temporal model from its hyperparameter dict.
+
+    ``hparams["architecture"]`` selects the class (``"lstm"``, ``"transformer"``
+    or ``"tsmixer"``, Experimento 3). Checkpoints written before Experimento 3
+    have no ``architecture`` key and are always LSTMs, so that is the default.
+    """
+    architecture = hparams.get("architecture", "lstm")
+    if architecture == "lstm":
+        return LatentDynamicsLSTM(
+            latent_dim=hparams["latent_dim"],
+            action_dim=hparams["action_dim"],
+            hidden_dim=hparams["hidden_dim"],
+            sequence_length=hparams["sequence_length"],
+        )
+    if architecture == "transformer":
+        return LatentDynamicsTransformer(
+            latent_dim=hparams["latent_dim"],
+            action_dim=hparams["action_dim"],
+            d_model=hparams["d_model"],
+            nhead=hparams["nhead"],
+            num_layers=hparams["num_layers"],
+            dim_feedforward=hparams["dim_feedforward"],
+            sequence_length=hparams["sequence_length"],
+            dropout=hparams["dropout"],
+        )
+    if architecture == "tsmixer":
+        return LatentDynamicsTSMixer(
+            latent_dim=hparams["latent_dim"],
+            action_dim=hparams["action_dim"],
+            hidden_dim=hparams["hidden_dim"],
+            num_blocks=hparams["num_blocks"],
+            sequence_length=hparams["sequence_length"],
+            dropout=hparams["dropout"],
+        )
+    raise ValueError(
+        f"Unknown world model architecture {architecture!r}; "
+        "expected 'lstm', 'transformer' or 'tsmixer'."
+    )
 
 
 def load_world_model(
     checkpoint_path: str | Path,
     device: torch.device,
-) -> tuple[LatentDynamicsLSTM, dict]:
-    """Load a trained ``LatentDynamicsLSTM`` from its checkpoint + hyperparameters.
+) -> tuple[nn.Module, dict]:
+    """Load a trained temporal model from its checkpoint + hyperparameters.
 
     Mirrors ``evaluation.autoencoder_evaluation.load_autoencoder``: the
-    ``.json`` file saved alongside the checkpoint by
-    ``training/train_world_model.py`` is the source of truth for the model's
-    shape, so the caller never has to hardcode ``latent_dim``/``action_dim``.
+    ``.json`` file saved alongside the checkpoint by the training script is
+    the source of truth for the model's architecture and shape, so the caller
+    never has to hardcode ``latent_dim``/``action_dim``.
     """
     checkpoint_path = Path(checkpoint_path)
     hparams_path = checkpoint_path.with_suffix(".json")
@@ -60,12 +103,7 @@ def load_world_model(
         )
     hparams = json.loads(hparams_path.read_text(encoding="utf-8"))
 
-    model = LatentDynamicsLSTM(
-        latent_dim=hparams["latent_dim"],
-        action_dim=hparams["action_dim"],
-        hidden_dim=hparams["hidden_dim"],
-        sequence_length=hparams["sequence_length"],
-    ).to(device)
+    model = build_world_model(hparams).to(device)
 
     state_dict = torch.load(checkpoint_path, map_location=device, weights_only=True)
     model.load_state_dict(state_dict)
@@ -273,7 +311,11 @@ def save_metrics_report(summary: dict[int, dict[str, float]], output_path: str |
     output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def plot_compounding_error(summary: dict[int, dict[str, float]], output_path: str | Path) -> None:
+def plot_compounding_error(
+    summary: dict[int, dict[str, float]],
+    output_path: str | Path,
+    model_label: str = "World Model (LSTM)",
+) -> None:
     """Plot latent and reward MSE vs. horizon for the model and the baseline."""
     horizons = sorted(summary)
     model_latent = [summary[h]["model_latent_mse"] for h in horizons]
@@ -283,7 +325,7 @@ def plot_compounding_error(summary: dict[int, dict[str, float]], output_path: st
 
     figure, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    axes[0].plot(horizons, model_latent, marker="o", label="World Model (LSTM)")
+    axes[0].plot(horizons, model_latent, marker="o", label=model_label)
     axes[0].plot(horizons, baseline_latent, marker="x", linestyle="--", label="Baseline persistente")
     axes[0].set_xlabel("Horizonte (pasos)")
     axes[0].set_ylabel("MSE latente (por dimensión)")
@@ -291,7 +333,7 @@ def plot_compounding_error(summary: dict[int, dict[str, float]], output_path: st
     axes[0].legend()
     axes[0].grid(alpha=0.25)
 
-    axes[1].plot(horizons, model_reward, marker="o", label="World Model (LSTM)")
+    axes[1].plot(horizons, model_reward, marker="o", label=model_label)
     axes[1].plot(horizons, baseline_reward, marker="x", linestyle="--", label="Baseline persistente")
     axes[1].set_xlabel("Horizonte (pasos)")
     axes[1].set_ylabel("MSE de recompensa")

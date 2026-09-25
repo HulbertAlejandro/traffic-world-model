@@ -1,14 +1,16 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 import torch
 
 from evaluation.world_model_evaluation import (
     aggregate_by_horizon,
+    build_world_model,
     load_episodes,
     rollout_episode,
 )
-from models.world_model import LatentDynamicsLSTM
+from models.world_model import LatentDynamicsLSTM, LatentDynamicsTransformer, LatentDynamicsTSMixer
 
 
 def _save_latent_dataset(path, episode_lengths, latent_dim=4, seed=0):
@@ -187,3 +189,27 @@ def test_aggregate_by_horizon_computes_per_dimension_mse():
     assert summary[1]["model_reward_mse"] == pytest_approx(2.0)
     assert summary[1]["baseline_latent_mse"] == pytest_approx(1.5)
     assert summary[2]["n_samples"] == 1
+
+
+def test_build_world_model_defaults_to_lstm_for_legacy_checkpoints() -> None:
+    # Checkpoints written before Experimento 3 have no "architecture" key.
+    hparams = {"latent_dim": 4, "action_dim": 2, "sequence_length": 3, "hidden_dim": 8}
+    assert isinstance(build_world_model(hparams), LatentDynamicsLSTM)
+
+
+def test_build_world_model_dispatches_on_architecture() -> None:
+    common = {"latent_dim": 4, "action_dim": 2, "sequence_length": 3, "dropout": 0.0}
+    transformer = build_world_model(
+        {**common, "architecture": "transformer", "d_model": 8, "nhead": 2,
+         "num_layers": 1, "dim_feedforward": 16}
+    )
+    tsmixer = build_world_model(
+        {**common, "architecture": "tsmixer", "hidden_dim": 8, "num_blocks": 1}
+    )
+    assert isinstance(transformer, LatentDynamicsTransformer)
+    assert isinstance(tsmixer, LatentDynamicsTSMixer)
+
+
+def test_build_world_model_rejects_unknown_architecture() -> None:
+    with pytest.raises(ValueError, match="Unknown world model architecture"):
+        build_world_model({"architecture": "gru", "latent_dim": 4, "action_dim": 2})
