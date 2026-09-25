@@ -8,9 +8,14 @@ from configs.reward import RewardConfig
 class ProjectRewardFunction:
     """Custom reward aligned with the project's traffic-control objective.
 
-    The reward combines congestion penalties, throughput gains, and phase-change penalties:
+    The reward combines congestion penalties, throughput gains, and a penalty
+    on requests for phase 1:
 
-        R_t = -alpha * waiting - beta * queue + gamma * throughput - delta * changes
+        R_t = -alpha * waiting - beta * queue + gamma * throughput - delta * phase_change
+
+    The last term reads ``info["phase_change"]``, which despite its name is 1.0
+    when phase 1 was REQUESTED (action == 1), not when the signal actually
+    changed phase -- see the comment where TrafficEnvironment.step() sets it.
 
     The throughput term is intentionally based on arrivals completed in the last
     control interval, not on the instantaneous number of vehicles present in the

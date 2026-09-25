@@ -80,6 +80,16 @@ class TrafficEnvironment(gym.Env):
         next_state = next_state_obj.to_vector()
 
         info["raw_reward"] = float(simulator_reward)
+        # Despite its name, "phase_change" records whether phase 1 was REQUESTED
+        # (the action is the target green phase index, see ProjectActionSpace),
+        # not whether the signal actually changed phase. Measuring a real change
+        # would require comparing the traffic signal's green_phase before and
+        # after this step, which this field does not do. It is kept as is on
+        # purpose: all collected data and every model trained so far
+        # (Autoencoder, LSTM, Transformer, TSMixer, both PPO controllers) use
+        # this exact definition, so changing it would invalidate all of those
+        # results with no real need. See PROJECT_STATUS.md, "Baseline de RL
+        # directo", point 7 ("Nota tecnica adicional").
         info["phase_change"] = float(int(action == 1))
 
         # Throughput = vehicles that actually left the network in this control
