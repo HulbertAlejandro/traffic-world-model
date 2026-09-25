@@ -4,7 +4,7 @@ Decision criterion (agreed before implementation): reward_mse is the only metric
 directly comparable in absolute magnitude between the two experiments, since the
 reward is the same physical quantity regardless of which representation feeds the
 LSTM -- the latent/state error, by contrast, lives in two different spaces
-(8-dim learned latent vs. 26-dim normalized raw state) with different natural
+(16-dim learned latent vs. 26-dim normalized raw state) with different natural
 scales, so comparing their raw magnitude is not apples-to-apples. Latent/state
 error is still reported for context, never as the deciding number.
 
@@ -63,7 +63,7 @@ def main() -> None:
 
     print()
     print("* state_mse/latent_mse NO son directamente comparables entre sí (espacios")
-    print("  distintos, 8 vs. 26 dimensiones) -- se muestran solo como contexto.")
+    print("  distintos, 16 vs. 26 dimensiones) -- se muestran solo como contexto.")
     print()
     print(f"El Autoencoder (z) tuvo menor reward_mse en {z_wins_reward}/{len(horizons)} horizontes.")
 

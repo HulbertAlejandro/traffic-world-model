@@ -589,7 +589,8 @@ de 10,000 pasos del RL directo):**
   medir con los checkpoints actuales.
 
 **Notas técnicas menores:** la nota al pie de `compare_experiment_0.py` dice "8 vs. 26
-dimensiones", pero el espacio latente tiene 16 (no se corrigió el script). La primera
+dimensiones", pero el espacio latente tiene 16 (corregido después: la nota y el docstring
+del script ya dicen 16). La primera
 propuesta de conteos de tests para los 8 commits de este bloque tenía un error (commit 2
 = 40, no 41); cada commit se verificó sobre su propio árbol en un `git worktree`.
 

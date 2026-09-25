@@ -724,7 +724,7 @@ El resultado final, verificado con 3 semillas de entrenamiento por método y eva
 - **`info["phase_change"]` mide si se pidió la fase 1, no si el semáforo cambió de fase de verdad**, y la recompensa penaliza eso. Documentado en el código; corregir el cálculo sigue pendiente en `TODO.md`, porque invalidaría todos los resultados entrenados con la definición actual.
 - **El LSTM se implementó con `torch.nn.LSTM` estándar**, no replicando manualmente las ecuaciones de compuertas como sugería la propuesta original — una simplificación de implementación razonable que no cambia el comportamiento del modelo.
 - **El Autoencoder es determinista, no un VAE** — la propuesta original mencionaba VAE con reparametrización; se implementó la versión más simple, suficiente para el Experimento 0.
-- **`compare_experiment_0.py` tiene una nota interna desactualizada** ("8 vs. 26 dimensiones" cuando el espacio latente real es 16) — no afecta el resultado.
+- **`compare_experiment_0.py` tenía una nota interna desactualizada** ("8 vs. 26 dimensiones" cuando el espacio latente real es 16) — ya corregida; nunca afectó el resultado.
 - **`CLAUDE.md` tiene partes desactualizadas**: marca como pendientes bloques que ya están completos. `README.md` se reescribió en el commit `dd0e547` y ya refleja el estado real.
 - La demanda de tráfico actual es **constante en el tiempo** dentro de cada episodio — no varía por hora pico.
 - El Dream Environment no implementa un "búfer de planificación de acciones candidatas" como describía conceptualmente la propuesta original (Sección 16) — en su lugar, se usa como entorno de entrenamiento completo para PPO, un diseño distinto pero que cumple el mismo propósito de fondo (aprender sin tocar SUMO).
