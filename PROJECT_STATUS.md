@@ -1453,7 +1453,9 @@ handoff anterior.
 
 ## 🟡 Pendiente
 
-1. Cuenta o app desconocida en GitHub — sigue sin resolver.
+1. ~~Cuenta o app desconocida en GitHub~~ — **resuelto**: era Codex Connector; su
+   acceso se revocó en ambas capas, y los colaboradores humanos se confirmaron como
+   legítimos.
 2. ~~`DOCUMENTACION_PROYECTO.md` sigue desactualizado~~ — **resuelto** en el commit
    `9ca20ac` (documentación final subida).
 3. ~~Documentación de `ProjectActionSpace` engañosa~~ — **resuelto** en el commit

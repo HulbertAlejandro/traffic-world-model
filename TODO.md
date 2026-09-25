@@ -115,7 +115,9 @@
 
 - [x] Actualizar `DOCUMENTACION_PROYECTO.md` con LSTM, bug de fase, Experimento 0,
       cierre del sobreajuste, y Dream Environment (resuelto en el commit `9ca20ac`).
-- [ ] Investigar y resolver el tema del colaborador/app desconocido en GitHub.
+- [x] Investigar y resolver el tema del colaborador/app desconocido en GitHub.
+      **Resuelto**: era Codex Connector; su acceso se revocó en ambas capas, y los
+      colaboradores humanos se confirmaron como legítimos.
 - [x] Corregir la documentación de ProjectActionSpace y cualquier referencia a
       'mantener/cambiar' -- la acción es en realidad el índice de fase verde destino
       (confirmado en sumo_rl.TrafficSignal.set_next_phase). No es bloqueante porque el
