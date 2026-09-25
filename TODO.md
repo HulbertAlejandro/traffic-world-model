@@ -80,18 +80,23 @@
       clara a nivel de episodio, no significativa a nivel de semilla. Ver PROJECT_STATUS.md,
       sección "Escenario asimétrico, segunda ronda".
 
-## Siguiente paso recomendado — a decidir con el autor
+## Siguiente paso recomendado
 
-- [ ] **(a)** Empezar la documentación final (`DOCUMENTACION_PROYECTO.md`,
-      `docs/PROPUESTA.md`) ahora que hay resultados sólidos, o
-- [ ] **(b)** seguir investigando antes alguna de las limitaciones abiertas (PROJECT_STATUS.md,
+- [x] **(a)** Documentación final (`docs/DOCUMENTACION_PROYECTO.md`, `docs/PROPUESTA.md`),
+      subida en el commit `9ca20ac`.
+- [ ] **(b)** Seguir investigando alguna de las limitaciones abiertas (PROJECT_STATUS.md,
       sección "Escenario asimétrico, segunda ronda", punto 9): episodios catastróficos,
       función de valor del PPO directo, o más presupuesto y semillas para el RL directo.
+- [ ] **Experimento 3 (en curso):** Transformer y TSMixer como alternativas a la LSTM,
+      implementando `TemporalModel` (`models/world_model/base.py`), con el mismo
+      protocolo del Experimento 0 (mismo dataset, semillas, normalización de recompensa,
+      split de test y criterio de `reward_mse` por horizonte). Si el resultado es mixto
+      o las diferencias son marginales, se mantiene la LSTM por parsimonia.
 
 ## Pendiente, no bloqueante
 
-- [ ] Actualizar `DOCUMENTACION_PROYECTO.md` con LSTM, bug de fase, Experimento 0,
-      cierre del sobreajuste, y Dream Environment.
+- [x] Actualizar `DOCUMENTACION_PROYECTO.md` con LSTM, bug de fase, Experimento 0,
+      cierre del sobreajuste, y Dream Environment (resuelto en el commit `9ca20ac`).
 - [ ] Investigar y resolver el tema del colaborador/app desconocido en GitHub.
 - [ ] Corregir la documentación de ProjectActionSpace y cualquier referencia a
       'mantener/cambiar' -- la acción es en realidad el índice de fase verde destino
