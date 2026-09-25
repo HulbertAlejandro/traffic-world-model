@@ -1,151 +1,129 @@
 # Traffic World Model
 
-Proyecto de investigación y desarrollo para controlar semáforos inteligentes mediante World Models en una intersección simulada de SUMO.
+Control de un semáforo en una intersección simulada con SUMO mediante un *World Model*
+(Ha & Schmidhuber, 2018): el controlador se entrena dentro de un modelo aprendido de la
+dinámica del tráfico, sin interactuar con el simulador, y se compara contra un controlador
+entrenado directamente en SUMO. Trabajo de grado de Ingeniería de Sistemas, Universidad
+del Quindío.
 
-## Objetivo
+## Estado actual
 
-Diseñar un pipeline para aprender la dinámica del tráfico de una intersección con una representación compacta del estado y luego usar esa aproximación para apoyar la toma de decisiones del controlador semafórico.
-
-La idea central es:
-
-```text
-SUMO -> Estado del tráfico -> Autoencoder/VAE -> representación latente z_t
--> Modelo temporal (LSTM/Transformer) recibe (z_t, a_t) y predice z_{t+1}
--> Dream Environment -> Controlador -> Acción -> SUMO
-```
-
-La implementación actual ya estableció la capa de infraestructura y la integración con SUMO, y en este punto el proyecto está avanzando en la definición del estado del tráfico usando TraCI.
-
-## Estado actual del proyecto
-
-### ✅ Completado
-
-- Entorno reproducible en Python 3.11 con dependencias definidas en `requirements.txt`.
-- Integración con SUMO + TraCI + `sumo-rl`.
-- Red propia de una intersección construida y versionada bajo `environments/single-intersection/`.
-- Wrapper de entorno centralizado en `environments/traffic_environment.py`.
-- Arquitectura modular separada en:
-  - `configs/` para configuración del entorno
-  - `environments/` para builder/reward y lógica del entorno
-  - `scripts/` para pruebas y ejecuciones por etapa
-  - `training/`, `evaluation/` y `models/` para la fase de aprendizaje
-- Estado personalizado construido desde TraCI mediante `environments/custom_state_builder.py`.
-- Smoke test funcional del entorno.
-
-### ✅ Completado
-
-- Entrenamiento y evaluación del autoencoder de representación del estado.
-- Generación y validación de splits normalizados para representación.
-- Persistencia del config de entrenamiento junto con cada checkpoint.
-- Regresión mínima automatizada para la capa de representación.
-
-### 🔄 En desarrollo
-
-- Modelo temporal para dinámica latente.
-- Dream Environment y planificación latente.
-- Controlador semafórico y comparación con baselines.
-
-## Estructura del repositorio
+El sistema está completo, entrenado y evaluado en SUMO real:
 
 ```text
-traffic-world-model/
-├── configs/                      # configuración del entorno, entrenamiento y modelos
-│   ├── environment.py
-│   ├── reward.py
-│   ├── world_model.py
-│   ├── raw/
-│   └── processed/
-├── data/                         # datos de tráfico y datasets
-│   ├── raw/
-│   └── processed/
-├── docs/                         # documentación y material auxiliar
-├── environments/                 # entorno SUMO y definiciones del estado/recompensa
-│   ├── __init__.py
-│   ├── custom_state_builder.py
-│   ├── single-intersection/
-│   ├── traffic_environment.py
-│   └── __pycache__/
-├── evaluation/                   # scripts y resultados de evaluación
-├── experiments/                  # experimentos y registros
-├── external_sumo_rl/             # referencia del proyecto original sumo-rl
-├── models/                       # módulos de encoder, dynamics y controller
-├── notebooks/                    # exploración y visualización
-├── scripts/                      # entrypoints del proyecto
-│   ├── collect_dataset.py
-│   ├── evaluate_world_model.py
-│   ├── test_environment.py
-│   ├── train_representation.py
-│   └── visualize_dataset.py
-├── tests/                        # pruebas del proyecto
-├── training/                     # pipeline de entrenamiento
-├── utils/                        # utilidades varias
-├── external_sumo_rl/             # copia de referencia de sumo-rl
-├── LICENSE
-├── README.md
-├── requirements.txt
-└── .gitignore
+SUMO → estado (26 dims) → Autoencoder → z (16 dims) → LSTM → (ẑ_{t+1}, r̂_{t+1})
+     → Dream Environment → PPO (entrenado sin tocar SUMO) → evaluación en SUMO real
 ```
 
-## Red de simulación
+| Experimento | Pregunta | Resultado |
+|---|---|---|
+| 0 | ¿Ayuda comprimir el estado con un Autoencoder? | Sí: gana en 9 de 10 horizontes; se mantiene |
+| 1 | ¿El LSTM predice mejor que un baseline persistente? | Sí, en los 10 horizontes |
+| 2 | ¿Un PPO entrenado en el sueño controla bien en SUMO real? | Sí; ver el resultado principal |
+| 3 | ¿Transformer o TSMixer mejoran al LSTM? | No: el LSTM gana en los 10 horizontes; se mantiene |
 
-La red base del proyecto está en:
+**Resultado principal:** el World Model alcanza un control comparable al del RL directo
+con muchas menos interacciones reales con SUMO. Con el presupuesto original del RL
+directo (13,000 interacciones por semilla), el World Model controla mejor (-326.79 frente
+a -453.74, 3 semillas por método). Al triplicarle el presupuesto, el RL directo lo alcanza
+(-335.24), pero consume **~8.5 veces más interacciones reales** (39,000 frente a ~4,600
+por semilla).
 
-- `environments/single-intersection/single-intersection.net.xml`
-- `environments/single-intersection/single-intersection.rou.xml`
-- `environments/single-intersection/single-intersection.sumocfg`
+## Instalación
 
-Se trata de una intersección de 4 brazos con un único semáforo controlando los cruces principales. La topología está diseñada para ser una base reproducible para la investigación del problema de tráfico inteligente.
-
-## Arquitectura actual del entorno
-
-El punto de entrada principal del proyecto es `TrafficEnvironment`, ubicado en `environments/traffic_environment.py`.
-
-Este wrapper:
-
-- encapsula la creación del simulador `sumo_rl.SumoEnvironment`
-- centraliza el ciclo de `reset()` y `step()`
-- recibe solo un `EnvironmentConfig` opcional y usa internamente `CustomStateBuilder` y `ProjectRewardFunction` (sin mecanismo de inyección)
-- mantiene la lógica del proyecto separada de las API internas de SUMO
-
-La implementación actual del estado usa TraCI y no depende directamente de la observación nativa de `sumo-rl`.
-
-## Cómo reproducir el entorno
-
-### 1) Crear entorno virtual
+Requiere Python 3.11 y [SUMO](https://eclipse.dev/sumo/) instalado, con la variable de
+entorno `SUMO_HOME` apuntando a su carpeta de instalación.
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
-```
-
-### 2) Verificar que SUMO esté disponible
-
-```powershell
 sumo --version
+python scripts\test_environment.py   # prueba de humo del entorno
 ```
 
-### 3) Ejecutar la prueba de humo del entorno
+## Estructura
+
+```text
+traffic-world-model/
+├── configs/            # Dataclasses de configuración: entorno, recompensa, Autoencoder, modelo temporal, PPO
+├── datasets/           # Datasets de PyTorch; raw/ y processed/ se generan con los scripts (no versionados)
+├── docs/               # PROPUESTA.md y DOCUMENTACION_PROYECTO.md
+├── environments/       # TrafficEnvironment (SUMO), estado, acción, recompensa, DreamEnvironment,
+│   └── single-intersection/   # red SUMO propia (demanda asimétrica)
+├── evaluation/         # Utilidades de evaluación del Autoencoder y del modelo temporal
+├── models/
+│   ├── representation/ # Encoder, Decoder, Autoencoder
+│   ├── world_model/    # TemporalModel, LSTM, Transformer, TSMixer
+│   └── checkpoints/    # Pesos generados (no versionados); sí se versionan sus .json de hiperparámetros
+├── scripts/            # Puntos de entrada: datos, evaluación, comparaciones
+├── tests/              # Pruebas automatizadas (pytest)
+├── training/           # Bucles de entrenamiento
+├── ver_controlador.py  # Visualiza el PPO del sueño en la GUI de SUMO
+├── CLAUDE.md, PROJECT_STATUS.md, TODO.md
+├── pytest.ini
+└── requirements.txt
+```
+
+## Pipeline completo
+
+Cada script usa sus valores por defecto; no requieren argumentos. Orden de ejecución:
 
 ```powershell
-python scripts\test_environment.py
+# 1. Datos: 80 episodios con semilla de SUMO distinta, split por episodio, normalización
+python scripts\collect_dataset.py
+python scripts\split_dataset.py
+python scripts\normalize_dataset.py
+
+# 2. Representación y dinámica (Experimento 1)
+python training\train_autoencoder.py
+python scripts\encode_latent_dataset.py
+python training\train_world_model.py
+python scripts\evaluate_world_model.py
+
+# 3. Experimento 0: modelo temporal sobre el estado crudo, comparado contra z
+python scripts\prepare_raw_sequence_dataset.py
+python training\train_world_model_raw.py
+python scripts\evaluate_world_model_raw.py
+python scripts\compare_experiment_0.py
+
+# 4. Experimento 3: Transformer y TSMixer (requieren el reward_scaler.json del paso 2)
+python training\train_world_model_transformer.py
+python training\train_world_model_tsmixer.py
+python scripts\evaluate_world_model_transformer.py
+python scripts\evaluate_world_model_tsmixer.py
+python scripts\compare_experiment_3.py
+
+# 5. Controladores: PPO en el sueño y PPO directo contra SUMO
+python training\train_controller.py
+python training\train_controller_direct.py
+
+# 6. Comparación final en SUMO real (sueño, directo, tiempo fijo, regla trivial)
+python scripts\evaluate_final_comparison.py
 ```
 
-## Convenciones de desarrollo
+Los pasos 3 y 4 son experimentos de validación y no los necesitan los pasos 5 y 6.
 
-- La lógica del proyecto no debe depender directamente de la implementación interna del simulador cuando exista una abstracción estable.
-- La interfaz del entorno se mantiene en `TrafficEnvironment` como punto de integración.
-- El estado y la recompensa se construyen mediante componentes dedicados, con posibilidad de reemplazo por versiones más complejas sin romper el resto del sistema.
-- El trabajo actual sigue priorizando la infraestructura y el estado del tráfico antes de entrar en la fase de VAE, dynamics y controlador.
+## Tests
+
+```powershell
+pytest -v
+```
+
+62 tests en 12 archivos.
+
+## Documentación
+
+- [`docs/DOCUMENTACION_PROYECTO.md`](docs/DOCUMENTACION_PROYECTO.md): el proyecto
+  explicado archivo por archivo, para estudiarlo a fondo.
+- [`docs/PROPUESTA.md`](docs/PROPUESTA.md): la propuesta académica, con el diseño
+  experimental, las hipótesis evaluadas y la justificación de cada tecnología.
+- [`PROJECT_STATUS.md`](PROJECT_STATUS.md): registro detallado de resultados y hallazgos,
+  con todas las cifras.
 
 ## Referencias
 
-- Ha, D., & Schmidhuber, J. (2018). World Models.
-- Hafner, D., et al. (2020). Dream to Control: Learning Behaviors by Latent Imagination.
-- Alegre, L. N. (2019). SUMO-RL.
-- LucasAlegre/sumo-rl (repositorio de referencia).
-
-## Nota final
-
-El README se actualizó para reflejar el estado real del proyecto en este momento: infraestructura funcional, entorno centralizado, estado personalizado con TraCI y preparación de la etapa de aprendizaje del World Model.
+- Ha, D., & Schmidhuber, J. (2018). *World Models*.
+- Hafner, D., et al. (2020). *Dream to Control: Learning Behaviors by Latent Imagination*.
+- Alegre, L. N. *SUMO-RL* — https://github.com/LucasAlegre/sumo-rl
