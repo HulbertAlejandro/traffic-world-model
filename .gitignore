@@ -30,6 +30,10 @@ models/checkpoints/controller_direct/*.zip
 models/checkpoints/controller_direct/*.npz
 models/checkpoints/controller/*.pkl
 models/checkpoints/controller_direct/*.pkl
+# Verificación de 3x presupuesto del RL directo (30,000 pasos): archivada, no oficial
+models/checkpoints/controller_direct_30k/*.zip
+models/checkpoints/controller_direct_30k/*.npz
+models/checkpoints/controller_direct_30k/*.pkl
 
 # Logs
 logs/
