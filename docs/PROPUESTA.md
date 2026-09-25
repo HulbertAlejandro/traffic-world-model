@@ -1,6 +1,6 @@
 # Propuesta de Proyecto de Grado
 
-*Documento reescrito para reflejar el proyecto tal como fue ejecutado (commit `87ffb8f`), no solo como fue planteado originalmente.*
+*Documento reescrito para reflejar el proyecto tal como fue ejecutado (estado del repositorio hasta el commit `ef21b9b`), no solo como fue planteado originalmente.*
 
 ---
 
@@ -30,7 +30,7 @@ El sistema completo se implementó con los siguientes componentes, todos funcion
 
 **Resultado principal, con evidencia estadística**: el controlador entrenado dentro del World Model superó de forma consistente al entrenado directamente contra SUMO (verificado con 3 semillas de entrenamiento independientes por método, evaluadas en SUMO real), usando aproximadamente un tercio de las interacciones reales con el simulador. La ventaja es clara a nivel de episodio individual (4.56 errores estándar de diferencia), aunque no alcanza significancia estadística formal a nivel de semilla de entrenamiento (p = 0.145 con solo 3 semillas por método) — una limitación honesta del tamaño de muestra, no una debilidad oculta.
 
-Como extensión académica opcional, se contempló el reemplazo del modelo temporal recurrente por un Transformer y por un TSMixer. Ninguna de las dos extensiones se ejecutó dentro del tiempo disponible: en su lugar, aparecieron varios problemas críticos en el núcleo (detallados en la Sección 20) cuya resolución se priorizó por ser condición necesaria para que cualquier resultado del proyecto fuera confiable. El código quedó preparado para esas extensiones (una interfaz común, `TemporalModel`, ya implementada) sin haberlas construido.
+Como extensión académica opcional, se contempló el reemplazo del modelo temporal recurrente por un Transformer y por un TSMixer. Ambas extensiones se pospusieron mientras se resolvían varios problemas críticos del núcleo (detallados en la Sección 20), cuya resolución era condición necesaria para que cualquier resultado del proyecto fuera confiable, y se ejecutaron después, una vez estabilizado el núcleo (Experimento 3, Sección 20.1). **Resultado: se mantiene la LSTM**, que predice la recompensa mejor que ambas alternativas en los 10 horizontes evaluados.
 
 Cada componente del sistema se implementó en su forma más simple suficiente para el problema, priorizando las técnicas cubiertas en el curso sobre extensiones del paper original de World Models no vistas en clase (ver Sección 30).
 
@@ -63,7 +63,7 @@ Diseñar e implementar un sistema basado en World Models que aprenda la dinámic
 - Construir un mecanismo de imaginación o un Dream Environment simplificado para evaluar consecuencias hipotéticas de acciones antes de ejecutarlas en SUMO. **Cumplido, con un diseño distinto al inicialmente conceptualizado**: en vez de un mecanismo de planificación por acciones candidatas evaluadas antes de cada paso real, se implementó como un entorno completo de entrenamiento (compatible con Gymnasium) sobre el cual se entrena un controlador PPO de principio a fin, sin tocar SUMO. Cumple el mismo propósito de fondo (aprender sin interacción real) con una arquitectura más simple de integrar con Stable-Baselines3.
 - Implementar un controlador de Reinforcement Learning mediante Stable-Baselines3 y compararlo con un controlador que interactúe directamente con SUMO. **Cumplido**, con verificación de robustez mediante 3 semillas de entrenamiento independientes por método.
 - Analizar si el enfoque basado en World Models reduce el número de interacciones o el tiempo de entrenamiento manteniendo un desempeño competitivo. **Cumplido** — ver Sección 2 para el resultado.
-- Como extensión opcional, comparar el modelo temporal recurrente (LSTM) con un Transformer y con un TSMixer. **No ejecutado** dentro del tiempo disponible — ver Sección 20 para las razones y la Sección 24 para su estatus de alcance.
+- Como extensión opcional, comparar el modelo temporal recurrente (LSTM) con un Transformer y con un TSMixer. **Cumplido** — Experimento 3, ejecutado después de estabilizar el núcleo: la LSTM se mantiene, porque gana en `reward_mse` en los 10 horizontes evaluados frente a ambas alternativas, con una reducción mediana de 38.1% frente al Transformer y de 56.1% frente a TSMixer (ver Sección 20.1 y PROJECT_STATUS.md, sección "Experimento 3").
 
 # 7. Justificación
 
@@ -90,7 +90,7 @@ La representación latente `z` es una versión comprimida y determinista del est
 | --- | --- | --- | --- | --- |
 | SUMO + TraCI | Red + flujo + acción | Estado del tráfico | Simular la intersección y ejecutar acciones | ✅ Implementado |
 | Autoencoder | Estado vectorial (26 dims) | z (16 dims) | Comprimir el estado; se mantiene tras confirmarse su utilidad (Experimento 0) | ✅ Implementado |
-| Modelo temporal (LSTM) | Secuencia de (z, acción) | (ẑ siguiente, r̂ siguiente) | Aprender la dinámica del tráfico en el espacio latente | ✅ Implementado. Transformer/TSMixer: no ejecutados (extensión opcional) |
+| Modelo temporal (LSTM) | Secuencia de (z, acción) | (ẑ siguiente, r̂ siguiente) | Aprender la dinámica del tráfico en el espacio latente | ✅ Implementado. Transformer/TSMixer: implementados y evaluados, no reemplazan a la LSTM (Experimento 3) |
 | Dream Environment | Episodios codificados + acciones del agente | Transiciones imaginadas | Entrenar el controlador sin consultar SUMO en cada paso | ✅ Implementado como entorno completo de entrenamiento (Gymnasium) |
 | Controller (PPO) | z (del Dream Environment o de SUMO real vía el Encoder) | Acción semafórica | Seleccionar la acción de control | ✅ Implementado, con verificación de 3 semillas |
 
@@ -132,7 +132,7 @@ Conceptualmente:
 
 *(z_t, a_t, historial) → (ẑ_{t+1}, r̂_{t+1})*
 
-No se implementó Transformer ni TSMixer como arquitecturas alternativas (ver Sección 20 para el detalle cronológico de por qué, y Sección 24 para su estatus de alcance). Sí se implementó la interfaz común (`TemporalModel`, un contrato `Protocol` de Python) pensada para que cualquiera de las dos pudiera sustituir al LSTM sin modificar el resto del sistema — la infraestructura de intercambiabilidad quedó lista, aunque las clases concretas de Transformer y TSMixer no se escribieron.
+Como alternativas al LSTM se implementaron y evaluaron un Transformer y un TSMixer (Experimento 3, Sección 20.1), ambos detrás de la misma interfaz común (`TemporalModel`, un contrato `Protocol` de Python), de modo que cualquiera de los dos podía sustituir al LSTM sin modificar el resto del sistema. **El LSTM se mantuvo**: tuvo menor error de predicción de recompensa (`reward_mse`) que ambas alternativas en los 10 horizontes evaluados. El Transformer dejó además un hallazgo: predice mejor el estado latente que el LSTM en los 10 horizontes (menor `latent_mse`), pero peor la recompensa, que es lo que el Dream Environment entrega al controlador. Una métrica mejor en entrenamiento no se tradujo en una mejor predicción de lo que realmente importa (ver PROJECT_STATUS.md, sección "Experimento 3").
 
 **Resultado del Experimento 1** (evaluación predictiva, Sección 20): el LSTM superó a un baseline persistente ("nada cambia") en los 10 horizontes evaluados (1 a 10 pasos), con un error de predicción de recompensa a un paso equivalente al 2.7% del error de ese baseline.
 
@@ -179,10 +179,11 @@ Se agregó, además, un cuarto punto de comparación no contemplado originalment
 - Número de interacciones reales con SUMO por método.
 - Error de predicción a uno y varios pasos, y de la recompensa.
 - `explained_variance` de la función de valor de PPO — una métrica no contemplada originalmente que resultó central en el diagnóstico de por qué los primeros controladores entrenados no funcionaban bien (Sección 20).
+- Número de parámetros del modelo temporal, reportado para las tres arquitecturas comparadas en el Experimento 3 (LSTM 77,969; Transformer 269,585; TSMixer 10,519).
 
 ## Para el aprendizaje (planteadas originalmente, no implementadas):
 
-- Número de parámetros, tiempo de entrenamiento e inferencia del modelo temporal — relevantes solo para comparar arquitecturas alternativas (Transformer/TSMixer), que no se ejecutaron.
+- Tiempo de entrenamiento e inferencia del modelo temporal. En el Experimento 3 no se reportaron como métrica: la decisión entre arquitecturas se tomó solo por la predicción de recompensa, y ninguna alternativa la mejoró, así que su costo computacional no llegó a ser un factor de decisión.
 
 # 20. Diseño experimental y cronología real del proyecto
 
@@ -192,25 +193,44 @@ Se agregó, además, un cuarto punto de comparación no contemplado originalment
 
 **Experimento 2 — Control por imaginación.** Se comparó el controlador entrenado sin World Model (RL directo) frente al que usa el modelo aprendido (entrenado en el sueño), ambos medidos en SUMO real. **Resultado: el controlador del World Model supera de forma consistente al RL directo (Sección 2), con la salvedad de significancia estadística a nivel de semilla ya mencionada.**
 
-**Experimento 3 — Comparación de arquitecturas temporales (Transformer, TSMixer).** **No ejecutado.** La razón no fue falta de tiempo en abstracto, sino que, en el camino hacia el Experimento 2, aparecieron cuatro problemas críticos que exigían resolución antes de que cualquier resultado fuera confiable:
+**Experimento 3 — Comparación de arquitecturas temporales (Transformer, TSMixer).** **Pospuesto, y ejecutado después de estabilizar el núcleo (Sección 20.1).** No se ejecutó en su momento. La razón no fue falta de tiempo en abstracto, sino que, en el camino hacia el Experimento 2, aparecieron cuatro problemas críticos que exigían resolución antes de que cualquier resultado fuera confiable:
 
 1. **Un bug en la lectura de la fase del semáforo**: el estado leía la fase desde una fuente de TraCI que la librería de control del semáforo nunca actualiza, dejando esa variable congelada durante toda la recolección de datos inicial. Se corrigió y se regeneró el dataset.
 2. **Un bug de normalización en el puente entre SUMO y el controlador del sueño**: el estado real no se normalizaba con las mismas estadísticas que usó el Autoencoder durante su entrenamiento, invalidando silenciosamente las primeras evaluaciones contra SUMO real.
 3. **Un criterio de selección de "mejor modelo" sin relación con el desempeño real**: se descubrió, con una investigación dedicada, que elegir el mejor checkpoint del controlador del sueño por su recompensa imaginada no predecía en absoluto su desempeño real (correlación de Pearson ≈ 0.08) — se cambió el criterio a evaluación periódica contra SUMO real.
 4. **La función de valor de PPO no aprendía nada** (`explained_variance` ≈ 0) en ninguno de los dos controladores, por falta de normalización de la recompensa — corregido con `VecNormalize`.
 
-Priorizar el diagnóstico y la corrección de estos cuatro problemas, cada uno con evidencia real antes y después del arreglo, se consideró más valioso académicamente que ejecutar el Experimento 3 con un núcleo potencialmente poco confiable. La interfaz para ejecutarlo en el futuro (`TemporalModel`) quedó preparada.
+Priorizar el diagnóstico y la corrección de estos cuatro problemas, cada uno con evidencia real antes y después del arreglo, se consideró más valioso académicamente que ejecutar el Experimento 3 con un núcleo potencialmente poco confiable. La interfaz para ejecutarlo más adelante (`TemporalModel`) quedó preparada, y es la que se usó cuando el experimento se retomó (Sección 20.1).
 
 **Un quinto hallazgo no anticipado**: bajo la demanda de tráfico simétrica usada originalmente, tanto el controlador del sueño como el RL directo convergieron a la misma regla trivial ("cambiar de fase tan rápido como el reglamento de tiempos lo permite"), que resultó ser la política óptima bajo esa demanda — impidiendo cualquier comparación real de calidad de control entre métodos. Esto motivó diseñar una demanda de tráfico **asimétrica** (500 veh/h en la vía principal, 150 veh/h en la secundaria), calibrada específicamente para que esa regla trivial dejara de ser óptima, permitiendo así la comparación real reportada en la Sección 2.
+
+## 20.1 Experimento 3, retomado y cerrado
+
+Una vez estabilizado el núcleo (los cuatro problemas anteriores corregidos y el resultado del Experimento 2 verificado con 3 semillas por método), se retomó el Experimento 3.
+
+**Qué se implementó.** Dos clases nuevas que implementan la interfaz `TemporalModel` y predicen las mismas dos salidas que la LSTM, `(ẑ_{t+1}, r̂_{t+1})`:
+
+- `LatentDynamicsTransformer`: proyección lineal de `(z, a)`, codificación posicional sinusoidal y 2 capas de encoder Transformer estándar de PyTorch (269,585 parámetros).
+- `LatentDynamicsTSMixer`: 2 bloques que alternan mezcla temporal y mezcla de variables, solo con capas densas, normalización y conexiones residuales, sin recurrencia ni atención (10,519 parámetros).
+
+Un selector (`build_world_model`) construye la arquitectura correcta a partir de los hiperparámetros guardados junto a cada checkpoint, así que la evaluación y el Dream Environment no dependen de qué arquitectura se entrenó. Las dos alternativas se entrenaron con exactamente el mismo protocolo que la LSTM (mismo dataset latente, semilla, optimizador, épocas, early stopping y normalización de recompensa) y se evaluaron sobre el mismo conjunto de prueba y los mismos 10 horizontes. **La LSTM (77,969 parámetros) no se reentrenó**: se usó el checkpoint existente, el mismo que usa el controlador del sueño, verificado sin cambios antes y después.
+
+**Criterio de decisión, fijado antes de ver resultados.** Un candidato reemplaza a la LSTM solo si (a) tiene el menor `reward_mse` en la mayoría de los horizontes, y (b) su reducción mediana de `reward_mse` frente a la LSTM es de al menos 7.3%, la mitad del 14.7% de reducción mediana que justificó mantener el Autoencoder en el Experimento 0. Se usa `reward_mse` porque la recompensa es lo que el Dream Environment entrega al controlador.
+
+**Resultado.** La LSTM tiene el menor `reward_mse` en **los 10 horizontes**, con una reducción mediana de **38.1% frente al Transformer** y de **56.1% frente a TSMixer**. Ninguna alternativa se acerca al criterio: **se mantiene la LSTM**, porque predice mejor, y además porque ya está integrada y validada en todo el pipeline (Dream Environment, selección de checkpoint en SUMO real, controlador verificado con 3 semillas).
+
+**Verificación de convergencia de TSMixer.** Con el protocolo compartido, la mejor época de TSMixer fue la penúltima de 100, lo que hacía sospechar que estaba subentrenado. Se repitió su entrenamiento con 300 épocas completas, sin early stopping: su pérdida de validación se estanca desde la época ~100 mientras la de entrenamiento sigue bajando (empieza a sobreajustar). Su mejor checkpoint de esa corrida mejora algo, pero la LSTM sigue ganando en los 10 horizontes (reducción mediana de 44.5%). **El resultado se mantiene.**
+
+**Hallazgo: una métrica de entrenamiento que no predice la que importa.** Frente a la LSTM, el Transformer tiene **menor error de predicción del estado latente (`latent_mse`) en los 10 horizontes** y **menor pérdida de validación**, que es la métrica con la que se elige el mejor checkpoint. Sin embargo, su **`reward_mse` es peor en los 10 horizontes**: casi empata a un paso (+4%), la diferencia crece hasta duplicar el error de la LSTM en el horizonte 6, y luego se estrecha sin llegar a invertirse. Es el mismo patrón de fondo que el problema crítico 3 de esta sección, donde la recompensa imaginada del controlador del sueño tenía una correlación de apenas 0.08 con su recompensa real en SUMO. En los dos casos, **la métrica que se optimiza o con la que se selecciona durante el entrenamiento no predice la métrica que realmente importa**. Consecuencia práctica: si las arquitecturas se hubieran comparado por pérdida de validación, se habría elegido al Transformer, la opción equivocada. La comparación tiene que hacerse sobre la predicción de recompensa en rollouts de varios pasos, como se hizo.
 
 # 21. Hipótesis — evaluadas contra los resultados obtenidos
 
 - **H1.** Un World Model entrenado con trayectorias de SUMO puede aprender una aproximación útil de la dinámica de una intersección de tráfico. **Confirmada** (Experimento 1).
 - **H2.** El error de predicción aumentará al proyectar más pasos de manera autorregresiva debido al *compounding error*. **Confirmada** — el error latente acumulado crece de forma medible entre el horizonte 1 y el 10, aunque el modelo sigue superando al baseline persistente en todos los horizontes evaluados.
 - **H3.** El uso de un World Model puede reducir la cantidad de interacciones necesarias con SUMO para obtener un controlador competitivo respecto al entrenamiento directo. **Confirmada, con la salvedad estadística ya mencionada** (Sección 2): el World Model usa aproximadamente un tercio de las interacciones reales, con una ventaja de desempeño clara a nivel de episodio pero no significativa a nivel de semilla con el tamaño de muestra usado (3 por método).
-- **H4.** Un Transformer temporal puede presentar un comportamiento predictivo diferente al de una LSTM. **No evaluada** — el Experimento 3 no se ejecutó.
+- **H4.** Un Transformer temporal puede presentar un comportamiento predictivo diferente al de una LSTM. **Confirmada parcialmente**: el Transformer sí se comporta de forma distinta a la LSTM, pero en la dirección contraria a una mejora. Predice mejor el estado latente, pero peor la recompensa, y pierde en la métrica de decisión (`reward_mse`) en los 10 horizontes evaluados (Experimento 3, Sección 20.1).
 - **H5.** Un Autoencoder no necesariamente mejorará la predicción del modelo temporal frente al vector crudo normalizado; su inclusión debe depender del Experimento 0. **Refutada empíricamente en este proyecto**: el Autoencoder sí mejoró la predicción de forma medible y consistente (9/10 horizontes), y se mantuvo en el sistema final exactamente por el mecanismo de decisión que esta misma hipótesis proponía.
-- **H6.** Una arquitectura sin recurrencia ni atención (TSMixer) podría igualar el error de predicción de la LSTM y del Transformer. **No evaluada** — el Experimento 3 no se ejecutó.
+- **H6.** Una arquitectura sin recurrencia ni atención (TSMixer) podría igualar el error de predicción de la LSTM y del Transformer. **Rechazada**: TSMixer fue la peor de las tres arquitecturas en todos los horizontes evaluados, incluso después de verificar que no le faltaba convergencia (300 épocas sin early stopping, mismo resultado; Sección 20.1).
 
 # 22. Plan de trabajo — ejecución real
 
@@ -223,7 +243,7 @@ El plan original de 6 semanas se usó como guía de orden de desarrollo (simulad
 | Complejidad de SUMO/TraCI | Alto | Se materializó parcialmente: no en la complejidad de uso básico, sino en una desconexión sutil entre cómo `sumo-rl` controla el semáforo y cómo se leía su estado — el bug crítico #1 de la Sección 20. |
 | Modelo temporal inestable | Alto | No se materializó de forma severa; el LSTM entrenó de forma estable en todas las corridas. |
 | *Compounding error* | Medio/alto | Confirmado (H2), pero acotado — el modelo siguió siendo útil en todos los horizontes evaluados. |
-| Alcance excesivo | Alto | Mitigado exitosamente: Transformer y TSMixer se mantuvieron fuera del núcleo, tal como se planeó, liberando tiempo para las correcciones críticas. |
+| Alcance excesivo | Alto | Mitigado exitosamente: Transformer y TSMixer se mantuvieron fuera del núcleo mientras se hacían las correcciones críticas, tal como se planeó, y se ejecutaron después, una vez estabilizado el núcleo (Experimento 3). |
 | Resultados poco concluyentes | Medio | Mitigado con verificación de 3 semillas por método y pruebas de significancia estadística formal — el resultado final es concluyente en cuanto a consistencia, aunque matizado en cuanto a significancia formal. |
 | Tecnología no justificable ante la profesora | Medio | La auditoría de la Sección 30 se mantuvo vigente durante todo el proyecto. |
 
@@ -233,7 +253,7 @@ El núcleo obligatorio (una intersección SUMO, dataset de trayectorias, represe
 
 El escenario de demanda asimétrica (Sección 20) fue una adición **dentro del alcance del núcleo**, no una extensión — es una variación necesaria del mismo escenario de una sola intersección, requerida para que la comparación de control tuviera sentido, no una ampliación de la arquitectura del sistema.
 
-Las extensiones Transformer y TSMixer, con la misma prioridad entre sí, **no se ejecutaron** — se mantuvieron correctamente fuera del núcleo, tal como esta misma sección ya anticipaba como posibilidad ("se implementarán únicamente después de estabilizar el núcleo"; el núcleo terminó demandando más tiempo de estabilización del previsto). La visión mediante imágenes, la implementación completa de Dreamer/STORM, y MDN-RNN + CMA-ES se mantuvieron fuera del alcance, como se planteó desde el inicio.
+Las extensiones Transformer y TSMixer, con la misma prioridad entre sí, **se ejecutaron en una fase posterior del proyecto, una vez estabilizado el núcleo**: exactamente en el orden que esta misma sección anticipaba ("se implementarán únicamente después de estabilizar el núcleo"). Se mantuvieron fuera del núcleo mientras este demandó más tiempo de estabilización del previsto, y se retomaron cuando dejó de demandarlo. Es una confirmación de que el orden de prioridades funcionó, no una corrección. Resultado: ninguna de las dos reemplaza a la LSTM (Sección 20.1). La visión mediante imágenes, la implementación completa de Dreamer/STORM, y MDN-RNN + CMA-ES se mantuvieron fuera del alcance, como se planteó desde el inicio.
 
 # 25. Resultados obtenidos
 
@@ -245,7 +265,8 @@ Las extensiones Transformer y TSMixer, con la misma prioridad entre sí, **no se
 - Dos controladores evaluados en el entorno real de SUMO (World Model y RL directo), cada uno verificado con 3 semillas de entrenamiento independientes.
 - Una comparación objetiva y estadísticamente evaluada frente a control fijo, una regla determinista, y RL directo.
 - Una conclusión experimental sobre el valor de usar un World Model para reducir interacciones con el simulador: **positiva, con matices de significancia estadística declarados explícitamente**, no ocultados.
-- Una justificación explícita, técnica por tecnología, de por qué cada herramienta usada era necesaria (Sección 30), y de por qué las que no se usaron (Transformer, TSMixer, VAE probabilístico) quedaron fuera, con evidencia cronológica de las razones reales (Sección 20).
+- Una comparación de tres arquitecturas temporales (LSTM, Transformer, TSMixer) bajo el mismo protocolo, con un criterio de decisión fijado antes de ver los resultados: la LSTM se mantiene (Experimento 3).
+- Una justificación explícita, técnica por tecnología, de por qué cada herramienta usada era necesaria (Sección 30), y de por qué las que no quedaron en el sistema final se descartaron: el VAE probabilístico por no ser necesario, y el Transformer y TSMixer porque, una vez evaluados, no mejoraron a la LSTM (Sección 20).
 
 # 26. Limitaciones
 
@@ -265,11 +286,11 @@ Ha, D., & Schmidhuber, J. (2018). World Models. Fundamenta la idea de aprender u
 
 Hafner, D., Lillicrap, T., Ba, J., & Norouzi, M. (2020). Dream to Control: Learning Behaviors by Latent Imagination. Referencia conceptual para el uso de trayectorias imaginadas en el espacio latente, el principio detrás del Dream Environment implementado.
 
-Zhang, W., Wang, G., Sun, J., Yuan, Y., & Huang, G. (2023). STORM: Efficient Stochastic Transformer-based World Models for Reinforcement Learning. Referencia para una extensión basada en Transformer — no ejecutada en este proyecto.
+Zhang, W., Wang, G., Sun, J., Yuan, Y., & Huang, G. (2023). STORM: Efficient Stochastic Transformer-based World Models for Reinforcement Learning. Referencia para la variante del modelo temporal basada en Transformer, evaluada en el Experimento 3 (no reemplazó a la LSTM).
 
-Chen, S.-A., Li, C.-L., Yoder, N., Arik, S. Ö., & Pfister, T. (2023). TSMixer: An All-MLP Architecture for Time Series Forecasting. Sustenta la variante opcional de modelo temporal TSMixer — no ejecutada en este proyecto.
+Chen, S.-A., Li, C.-L., Yoder, N., Arik, S. Ö., & Pfister, T. (2023). TSMixer: An All-MLP Architecture for Time Series Forecasting. Sustenta la variante del modelo temporal TSMixer, evaluada en el Experimento 3 (no reemplazó a la LSTM).
 
-Zeng, A., Chen, M., Zhang, L., & Xu, Q. (2023). Are Transformers Effective for Time Series Forecasting? Justificación metodológica para incluir una arquitectura simple sin atención como término de comparación — relevante solo si se retoma el Experimento 3 en trabajo futuro.
+Zeng, A., Chen, M., Zhang, L., & Xu, Q. (2023). Are Transformers Effective for Time Series Forecasting? Justificación metodológica para incluir una arquitectura simple sin atención (TSMixer) como término de comparación en el Experimento 3.
 
 Dai et al. (2022). Image-based traffic signal control via world models. Antecedente que conecta World Models con el control de señales de tráfico.
 
@@ -298,8 +319,8 @@ Esta sección responde a si cada tecnología usada en el proyecto es necesaria y
 | Red neuronal densa (backprop, descenso de gradiente) | Base de todas las demás piezas: encoder/decoder, capa de salida de la LSTM | Repaso de redes neuronales, backpropagation | Implementada, núcleo del sistema |
 | Autoencoder (determinista) | Compresión del vector de estado en z | Bloque de modelos generativos, espacio latente | Implementado; el Experimento 0 confirmó su valor (9/10 horizontes) |
 | LSTM | Modelo temporal que predice (z_{t+1}, r_{t+1}) a partir del historial | Bloque de RNN/LSTM | Implementada (núcleo), con `torch.nn.LSTM` estándar |
-| Transformer | Extensión opcional para reemplazar la LSTM | Documento de la profesora sobre Transformers | No ejecutada — ver Sección 20 |
-| TSMixer | Extensión opcional para reemplazar la LSTM, misma prioridad que Transformer | Primitivas cubiertas: capas densas, normalización, residuales | No ejecutada — ver Sección 20 |
+| Transformer | Extensión opcional para reemplazar la LSTM | Documento de la profesora sobre Transformers | Ejecutada, no reemplaza a la LSTM (ver Sección 20) |
+| TSMixer | Extensión opcional para reemplazar la LSTM, misma prioridad que Transformer | Primitivas cubiertas: capas densas, normalización, residuales | Ejecutada, no reemplaza a la LSTM (ver Sección 20) |
 | Embeddings de tokens discretos | No usado | Bloque de Word Embeddings | No aplica: el estado es un vector numérico continuo |
 | Redes convolucionales (CNN) | No usado en el núcleo | Repaso de convolución | No aplica: el estado es un vector, no una imagen |
 
@@ -328,7 +349,7 @@ Con el vector de estado en 26 dimensiones (la cifra final, ajustada desde la est
 
 ## 30.5 Resumen de la auditoría
 
-De las tecnologías contempladas, ninguna resultó completamente innecesaria. Los ajustes de esta versión final son, igual que en la revisión anterior, de alcance y de resultado empírico, no de eliminación arbitraria: el Autoencoder se mantuvo porque el Experimento 0 lo confirmó; el modelo temporal se simplificó a una LSTM determinística con implementación estándar de PyTorch; CMA-ES se reemplazó por PPO. La incorporación de TSMixer como segundo experimento opcional, planteada en la versión anterior, no llegó a ejecutarse — su ausencia no responde a que dejara de ser relevante, sino a que el tiempo se dedicó a estabilizar y verificar el núcleo, exactamente la prioridad que esta misma sección ya establecía desde el principio.
+De las tecnologías contempladas, ninguna resultó completamente innecesaria. Los ajustes de esta versión final son, igual que en la revisión anterior, de alcance y de resultado empírico, no de eliminación arbitraria: el Autoencoder se mantuvo porque el Experimento 0 lo confirmó; el modelo temporal se simplificó a una LSTM determinística con implementación estándar de PyTorch; CMA-ES se reemplazó por PPO. Las dos extensiones opcionales del modelo temporal (Transformer y TSMixer) se ejecutaron finalmente, una vez estabilizado y verificado el núcleo, que era la prioridad que esta misma sección establecía desde el principio. Resultado: se mantiene la LSTM (Sección 20.1). Esto confirma en la práctica el principio de parsimonia que esta sección defendía: la LSTM, la opción ya integrada y validada en todo el sistema, se mantuvo no por defecto sino con evidencia, y la alternativa más compleja (el Transformer, con 3.5 veces sus parámetros) no aportó ninguna mejora en la predicción de recompensa.
 
 # 31. Arquitectura final implementada
 
@@ -342,7 +363,7 @@ Autoencoder (determinista — confirmado útil por el Experimento 0)
 Representación z (16 dimensiones)
     ↓
 Modelo temporal: LSTM determinística (torch.nn.LSTM, Dense de salida, sin MDN)
-    [Transformer y TSMixer: interfaz preparada (TemporalModel), no implementados]
+    [Transformer y TSMixer: implementados con la misma interfaz (TemporalModel) y evaluados; no reemplazan a la LSTM]
     ↓
 Predicción de (ẑ_{t+1}, r̂_{t+1})
     ↓
@@ -369,4 +390,4 @@ SUMO (evaluación real; también existe un PPO entrenado directamente aquí, par
 
 La estrategia seguida fue, tal como se planteó, construir primero una versión mínima funcional y medirla antes de agregar componentes. El orden real de desarrollo (simulador → datos → representación con su experimento de necesidad → World Model → evaluación predictiva → imaginación/control → comparación) coincidió con el plan original. Lo que la experiencia real del proyecto añade a esta nota metodológica, para cualquier trabajo futuro que continúe esta línea: **la etapa más costosa en tiempo no fue construir cada componente, sino verificar que la conexión entre componentes fuera correcta** — cada uno de los cuatro problemas críticos descritos en la Sección 20 era, en esencia, una desconexión silenciosa entre dos piezas que individualmente funcionaban bien. Un plan de trabajo futuro sobre esta base debería reservar tiempo explícito para esa verificación de integración, no solo para la construcción de cada pieza por separado.
 
-*Propuesta de Proyecto de Grado — World Models + SUMO (versión final, post-ejecución, commit `87ffb8f`)*
+*Propuesta de Proyecto de Grado — World Models + SUMO (versión final, post-ejecución, estado del repositorio hasta el commit `ef21b9b`)*
