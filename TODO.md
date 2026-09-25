@@ -87,11 +87,19 @@
 - [ ] **(b)** Seguir investigando alguna de las limitaciones abiertas (PROJECT_STATUS.md,
       sección "Escenario asimétrico, segunda ronda", punto 9): episodios catastróficos,
       función de valor del PPO directo, o más presupuesto y semillas para el RL directo.
-- [ ] **Experimento 3 (en curso):** Transformer y TSMixer como alternativas a la LSTM,
-      implementando `TemporalModel` (`models/world_model/base.py`), con el mismo
-      protocolo del Experimento 0 (mismo dataset, semillas, normalización de recompensa,
-      split de test y criterio de `reward_mse` por horizonte). Si el resultado es mixto
-      o las diferencias son marginales, se mantiene la LSTM por parsimonia.
+- [x] **Experimento 3:** Transformer y TSMixer como alternativas a la LSTM (commits
+      `90d7641` a `f49cf09`, 62/62 tests). **Resultado: se mantiene la LSTM**, que gana en
+      `reward_mse` en los 10 horizontes frente a ambas (reducción mediana de 38.1% frente
+      al Transformer y de 56.1% frente a TSMixer; umbral para reemplazarla: 7.3%).
+      Convergencia de TSMixer verificada con 300 épocas sin early stopping: sigue perdiendo
+      10/10. Hipótesis de la propuesta, ahora evaluadas: **H4 confirmada** (el Transformer
+      se comporta distinto, en contra suya en la recompensa); **H6 rechazada** (TSMixer es
+      el peor de los tres en todos los horizontes). Hallazgo: el Transformer tiene mejor
+      `latent_mse` y mejor pérdida de validación, pero peor `reward_mse`, el mismo
+      desacople que el reward imaginado del PPO (Pearson +0.08). Ver PROJECT_STATUS.md,
+      sección "Experimento 3".
+- [ ] Reflejar el Experimento 3 en `docs/PROPUESTA.md` (H4, H6, Secciones 20, 24 y 30).
+      Lo revisa el autor por separado.
 
 ## Pendiente, no bloqueante
 
@@ -117,7 +125,3 @@
       episodios catastróficos con buenos (quedan 5/90 en el sueño y 23/90 en el directo).
 - [ ] Demanda variable en el tiempo (la asimetría ya está implementada; la variación
       temporal no).
-- [ ] Extensiones opcionales (misma prioridad): sustituir el LSTM por Transformer, y
-      por separado, por TSMixer — reutilizando el mismo protocolo de comparación que
-      ya se usó en el Experimento 0 (mismos hiperparámetros, mismo criterio de
-      `reward_mse`, mismo split de test).

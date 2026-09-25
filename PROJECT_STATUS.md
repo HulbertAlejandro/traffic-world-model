@@ -1,7 +1,10 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `9b6a389`, 45/45 tests en verde. Escenario de demanda
-asimétrica con dataset de 80 episodios (semilla de SUMO por episodio), selección del
+Última verificación: commit `f49cf09`, 62/62 tests en verde. **Experimento 3 cerrado:
+la LSTM se mantiene como modelo temporal**, porque gana en `reward_mse` en los 10
+horizontes frente a Transformer y TSMixer (ver la sección siguiente). El resultado del
+método World Model no cambia y sigue siendo el de la segunda ronda del escenario
+asimétrico: dataset de 80 episodios (semilla de SUMO por episodio), selección del
 checkpoint del sueño en SUMO real y `VecNormalize` en los dos PPO. **Resultado con 3
 semillas de entrenamiento por método (90 episodios cada uno): PPO del sueño -326.79,
 PPO directo -453.74, tiempo fijo -411.27.** El método World Model supera a tiempo fijo
@@ -12,7 +15,128 @@ directo (3 × 13,000). La ventaja sobre el RL directo es clara a nivel de
 episodio (4.56 errores estándar), pero **no concluyente a nivel de semilla** (p = 0.145
 con 3 semillas por método), porque el RL directo varía mucho entre semillas. Siguen
 abiertos los episodios catastróficos (menos, pero presentes) y la función de valor del
-PPO directo. Ver la sección siguiente.
+PPO directo. Ver la sección "Escenario asimétrico, segunda ronda".
+
+## ✅ Experimento 3: Transformer y TSMixer como alternativas a la LSTM — se mantiene la LSTM
+
+### 1. Qué se construyó
+
+Commits `90d7641` a `f49cf09` (62/62 tests):
+
+- `LatentDynamicsTransformer` (`models/world_model/transformer.py`): proyección lineal de
+  `(z, a)` a `d_model=128`, codificación posicional sinusoidal, 2 capas
+  `TransformerEncoderLayer` (4 cabezas, `dim_feedforward=256`), salida del último paso,
+  sin máscara causal (el objetivo está fuera de la ventana, no hay fuga de futuro).
+- `LatentDynamicsTSMixer` (`models/world_model/tsmixer.py`): 2 bloques de mezcla temporal
+  (`LayerNorm` + `Linear(16, 16)` + ReLU sobre la secuencia transpuesta, residual) y de
+  mezcla de variables (`LayerNorm` + MLP `18 → 128 → 18`, residual), salida del último
+  paso. Exige `sequence_length` fijo. La dimensión de variables se queda en
+  `latent_dim + action_dim = 18`, como en el TSMixer original.
+- Ambas implementan `TemporalModel`, con las mismas dos cabezas (`ẑ`, `r̂`) y las mismas
+  validaciones de forma que la LSTM.
+- `build_world_model` en `evaluation/world_model_evaluation.py` elige la clase según la
+  clave `"architecture"` del `.json` del checkpoint (sin clave → `"lstm"`, así que los
+  checkpoints anteriores y el Dream Environment no cambian).
+- `training/train_world_model_{transformer,tsmixer}.py` **importan** el protocolo de
+  `train_world_model.py` (semilla, Adam con `weight_decay=1e-4`, lr, batch, 100 épocas,
+  early stopping con paciencia 15, pérdida) y **leen** el `reward_scaler.json` existente
+  en vez de recalcularlo. La LSTM **no se reentrenó**: se usó `world_model_best.pt` tal
+  cual (md5 verificado igual antes y después; su reporte de evaluación regenerado es
+  idéntico byte a byte al anterior).
+- `scripts/evaluate_world_model_{transformer,tsmixer}.py` (espejo de
+  `evaluate_world_model.py`: mismo test split, mismos horizontes, mismo baseline) y
+  `scripts/compare_experiment_3.py`.
+
+**Criterio de decisión, fijado antes de ver resultados**: un candidato reemplaza a la
+LSTM solo si gana la mayoría estricta de los horizontes en `reward_mse` **y** su
+reducción mediana frente a la LSTM es ≥ 7.3% (la mitad del 14.7%, la reducción mediana
+que justificó mantener el Autoencoder en el Experimento 0, segunda ronda). Si la LSTM
+gana la mayoría, se mantiene por predecir mejor. Si el resultado está dividido, se
+mantiene por estar ya integrada y validada en todo el pipeline.
+
+### 2. Entrenamiento
+
+| | Parámetros | Épocas | Mejor validación (época) | Train en esa época |
+|---|---|---|---|---|
+| LSTM (existente) | 77,969 | 100 | 0.140486 | — |
+| Transformer | 269,585 | 74 (early stopping) | **0.120795** (59) | 0.052817 |
+| TSMixer | 10,519 | 100 (tope) | 0.188491 (99) | 0.151450 |
+
+El Transformer tuvo un pico de inestabilidad entre las épocas 40 y 45, del que se
+recuperó. TSMixer tiene una curva suave, casi sin brecha entre train y validación, pero su
+mejor época fue la 99 de 100: había que verificar si estaba subentrenado (punto 4).
+
+### 3. Resultado (`reward_mse` en test, 12 episodios, 420 ventanas por horizonte)
+
+```
+  h |     LSTM | Transformer |  TSMixer | gana
+  1 |   57.051 |      59.311 |   79.075 | LSTM
+  2 |  127.288 |     167.358 |  217.487 | LSTM
+  3 |  204.492 |     309.029 |  445.732 | LSTM
+  4 |  279.212 |     489.156 |  564.000 | LSTM
+  5 |  349.542 |     673.581 |  728.701 | LSTM
+  6 |  409.317 |     819.326 |  976.982 | LSTM
+  7 |  494.946 |     895.629 | 1369.184 | LSTM
+  8 |  591.838 |    1026.694 | 1740.368 | LSTM
+  9 |  757.966 |    1089.673 | 2123.745 | LSTM
+ 10 |  993.291 |    1155.337 | 2530.505 | LSTM
+```
+
+**La LSTM gana en 10/10 horizontes frente a ambas alternativas**, con una reducción
+mediana de `reward_mse` de 38.1% frente al Transformer y de 56.1% frente a TSMixer
+(medida relativa a cada candidato). Ninguno de los dos se acerca al umbral. **Decisión:
+se mantiene la LSTM porque predice mejor**, con el argumento adicional de que ya está
+integrada y validada en todo el pipeline. Reemplazarla exigiría repetir la cadena
+completa (Dream Environment, selección por SUMO real, PPO con 3 semillas).
+
+Hipótesis de la propuesta, evaluadas en este escenario: **H4** (el Transformer tiene un
+comportamiento predictivo distinto al de la LSTM) se confirma, y la diferencia va en
+contra del Transformer en la recompensa. **H6** (TSMixer iguala el error de la LSTM y del
+Transformer) se rechaza: es el peor de los tres en todos los horizontes.
+
+### 4. Verificación de convergencia de TSMixer
+
+- **Con el protocolo compartido y `EPOCHS=300`** (override solo para esa corrida; el
+  default del script sigue en 100): el early stopping cortó en la época 114. Las primeras
+  100 épocas fueron idénticas a la corrida original (misma semilla) y la mejor siguió
+  siendo la 99, así que el checkpoint oficial y su reporte no cambiaron (verificado byte
+  a byte). Esto no probaba 300 épocas de entrenamiento.
+- **Corrida complementaria de 300 épocas completas, sin early stopping**, escrita fuera
+  de `models/checkpoints/` y `results/` (el checkpoint oficial no se tocó, md5
+  verificado). La validación se estanca desde la época ~100 (media 0.194 entre 101 y 150,
+  0.192 entre 151 y 200, 0.194 entre 201 y 250, 0.198 entre 251 y 300; mejor 0.184008 en
+  la época 188) mientras train sigue bajando (0.138 → 0.096): el modelo ya había
+  convergido y al final empieza a sobreajustar. En test, ese mejor checkpoint mejora algo
+  a TSMixer (h=1: 79.1 → 70.9; h=10: 2530.5 → 1710.8), pero **la LSTM sigue ganando en
+  los 10 horizontes**, con una reducción mediana de 44.5% frente a él. **La conclusión se
+  mantiene.** El checkpoint oficial de TSMixer sigue siendo el del protocolo compartido,
+  el mismo de la tabla del punto 3.
+
+### 5. Hallazgo: el Transformer predice mejor el estado latente, pero peor la recompensa
+
+Frente a la LSTM, el Transformer tiene **menor `latent_mse` en los 10 horizontes**
+(h=1: 0.0894 frente a 0.1035; h=10: 0.4089 frente a 0.4954) y también **menor pérdida de
+validación combinada** (0.1208 frente a 0.1405). Esa pérdida es la suma del MSE latente y
+del MSE de recompensa normalizada, y es la métrica con la que se elige el mejor
+checkpoint. Sin embargo, su **`reward_mse` es peor en los 10 horizontes**: casi empata a
+un paso (59.3 frente a 57.1, +4%), la diferencia crece hasta h=6 (+100%, 819 frente a
+409) y h=8 (mayor diferencia absoluta, 435), y después se estrecha (+44% en h=9, +16% en
+h=10) sin llegar a invertirse.
+
+Es **el mismo patrón de fondo que el precedente del PPO del sueño** (sección "Escenario
+asimétrico, segunda ronda", punto 4): allí el reward imaginado del Dream Environment tenía
+una correlación de Pearson de +0.08 con el reward real en SUMO, y el checkpoint con mejor
+reward imaginado fue el peor en SUMO real. En los dos casos, **la métrica que se optimiza
+o con la que se selecciona durante el entrenamiento no predice la métrica que realmente
+importa**. Aquí, una mejor pérdida de validación no se tradujo en una mejor predicción de
+la recompensa, que es lo que el Dream Environment entrega al controlador. Consecuencia
+práctica: comparar arquitecturas del modelo temporal por pérdida de validación habría
+elegido al Transformer, la opción equivocada. La comparación tiene que hacerse sobre
+`reward_mse` en rollouts autorregresivos, como se hizo.
+
+No verificado: la pérdida de validación no se descompuso en sus dos términos, así que la
+lectura de que el término latente explica la ventaja del Transformer en validación se
+apoya en el `latent_mse` de test, no en una medición directa sobre validación.
 
 ## ✅ Escenario asimétrico, segunda ronda: dataset de 80 episodios, selección por SUMO real y `VecNormalize` — resultado con 3 semillas por método
 
@@ -1207,21 +1331,17 @@ handoff anterior.
   los episodios catastróficos que quedan.
 - Demanda variable en el tiempo (el escenario asimétrico ya está implementado; la
   variación temporal no).
-- Transformer y TSMixer como sustitutos del LSTM (extensiones opcionales).
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se cerró la segunda ronda del escenario asimétrico (commits `2a63328` a `9b6a389`,
-45/45 tests). Se corrigió la semilla fija de `collect_dataset.py` y el dataset pasó a 80
-episodios; el LSTM predice el reward a un paso con el 2.7% del error del baseline (parte
-de la mejora viene de un test set sin la cola anterior). El Autoencoder sigue ganando en
-el Experimento 0 (9/10). Se descubrió que el reward imaginado no predice el real
-(Pearson +0.08), y la selección del checkpoint del sueño pasó a hacerse en SUMO real. Con
-`VecNormalize`, la función de valor del PPO del sueño aprende (`explained_variance`
-~0.95); el PPO directo necesitó además normalizar observaciones, y su función de valor
-sigue sin aprender. Con 3 semillas por método: sueño -326.79, directo -453.74, tiempo
-fijo -411.27. Ventaja clara a nivel de episodio, no significativa a nivel de semilla,
-con el World Model mucho más consistente y usando menos interacciones reales (13,800 en
-total para 3 semillas, con el dataset de 4,800 compartido, frente a 39,000 del RL
-directo). Siguiente paso a decidir con el autor: empezar la documentación final o seguir
-investigando alguna de las limitaciones abiertas.
+Se ejecutó el Experimento 3 (commits `90d7641` a `f49cf09`, 62/62 tests). Transformer y
+TSMixer implementan `TemporalModel` y se entrenaron con el mismo protocolo y el mismo
+`reward_scaler.json` que la LSTM, que no se reentrenó. Las tres se compararon en el mismo
+test set. La LSTM gana en `reward_mse` en los 10 horizontes frente a ambas (reducción
+mediana de 38.1% frente al Transformer y de 56.1% frente a TSMixer) y se mantiene. Se
+verificó que TSMixer había convergido: con 300 épocas sin early stopping, la LSTM sigue
+ganando 10/10. Se documentó como hallazgo que el Transformer tiene mejor `latent_mse` y
+mejor pérdida de validación, pero peor `reward_mse`: el mismo desacople entre métrica de
+entrenamiento y métrica que importa que ya se había visto con el reward imaginado del PPO.
+Pendiente: reflejar el Experimento 3 en `docs/PROPUESTA.md` (H4, H6, Secciones 20 y 24),
+a revisar por el autor por separado.
