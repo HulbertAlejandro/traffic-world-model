@@ -79,10 +79,12 @@ presupuesto. Detalle completo en PROJECT_STATUS.md.
   pasos. Documentado en el código (commit `c253d88`), **sin cambio de comportamiento**:
   todo el pipeline usa esta convención de forma consistente.
 - `info["phase_change"]` mide si se **pidió la fase 1** (`action == 1`), no si el
-  semáforo cambió de fase de verdad, y la recompensa penaliza eso. Documentado en el
-  código, **sin cambio de comportamiento**. Cambiar el cálculo sigue en TODO.md como
-  pendiente real, a decidir explícitamente, porque invalidaría todos los datos y modelos
-  entrenados.
+  semáforo cambió de fase de verdad; `info["phase_switched"]` mide el cambio real. La
+  recompensa penaliza una u otra según `RewardConfig.phase_penalty`: el valor por
+  defecto, `"requested_phase_1"`, es la definición de todos los datos y modelos
+  entrenados, y **no debe cambiarse sin decidirlo explícitamente** (invalidaría todo lo
+  entrenado). `"actual_switch"` existe como opción; pasar a ella por defecto es la
+  opción B pendiente en TODO.md.
 - El "throughput" en la recompensa se mide como vehículos que **llegaron a destino**
   (`traci.simulation.getArrivedNumber()`, delta entre pasos) — nunca vehículos
   presentes en el carril.

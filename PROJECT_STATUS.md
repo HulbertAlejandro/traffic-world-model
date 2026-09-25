@@ -1465,7 +1465,11 @@ handoff anterior.
    comportamiento). La Sección 12 de la propuesta se corrigió en `30c3fae`.
 4. `ProjectRewardFunction.phase_change` penaliza pedir la fase 1, no cambiar
    efectivamente de fase (misma raíz que el punto 3; ver la sección del baseline de RL
-   directo, punto 7).
+   directo, punto 7). **Mecanismo corregido, valor por defecto sin cambiar:**
+   `info["phase_switched"]` registra el cambio real, y `RewardConfig.phase_penalty=
+   "actual_switch"` lo penaliza. El valor por defecto sigue siendo
+   `"requested_phase_1"`, así que todos los resultados siguen siendo válidos. Cambiarlo
+   (y rehacer el pipeline) sigue pendiente.
 5. Ambos PPO de la primera ronda asimétrica nunca sostenían el verde de la fase 1 más
    de 8 s (la duración mínima posible). No se volvió a medir con los checkpoints
    actuales; no investigado a fondo.

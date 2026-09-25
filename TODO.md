@@ -128,6 +128,12 @@
 - [ ] Corregir `ProjectRewardFunction.phase_change`: hoy penaliza pedir la fase 1
       (`action == 1`), no cambiar efectivamente de fase. Misma raíz que el punto
       anterior; ver PROJECT_STATUS.md, sección del baseline de RL directo, punto 7.
+      **Mecanismo implementado (opción A):** `RewardConfig.phase_penalty` elige entre
+      `"requested_phase_1"` (por defecto, la definición de todo lo entrenado) y
+      `"actual_switch"`, que lee `info["phase_switched"]`, el cambio real de fase, ya
+      registrado en cada paso. **Queda abierta la opción B**: cambiar el valor por
+      defecto y rehacer el pipeline. Antes, medir en las políticas oficiales si la
+      definición nueva cambia alguna conclusión.
 - [ ] Entender por qué ambos PPO de la primera ronda asimétrica nunca sostenían el verde de
       la fase 1 más de 8 s (la duración mínima posible de una fase); volver a medirlo con los
       checkpoints actuales.

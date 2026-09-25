@@ -2,11 +2,13 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
+from configs.reward import RewardConfig
 from environments import TrafficEnvironment
 from environments.traffic_state import TrafficState
 
@@ -52,3 +54,45 @@ def test_traffic_state_round_trip():
     assert float(vector[0]) == 1.0
     assert float(vector[-2]) == 8.0
     assert float(vector[-1]) == 12.5
+
+
+# Phase timing depends only on the actions (delta_time=5, yellow_time=2,
+# min_green=5) and every reset starts at green_phase=0 with 0 s elapsed, so this
+# sequence is deterministic regardless of the traffic seed: blocked request for
+# phase 1, still blocked, request of the current phase, switch 0 -> 1, blocked
+# right after a switch, switch 1 -> 0.
+PHASE_ACTIONS = [1, 1, 0, 1, 0, 0]
+EXPECTED_PHASE_CHANGE = [1.0, 1.0, 0.0, 1.0, 0.0, 0.0]
+EXPECTED_PHASE_SWITCHED = [0.0, 0.0, 0.0, 1.0, 0.0, 1.0]
+
+
+def _run_phase_sequence(env):
+    env.reset(seed=0)
+    return [env.step(action) for action in PHASE_ACTIONS]
+
+
+def test_phase_switched_measures_actual_changes():
+    env = TrafficEnvironment()
+    try:
+        steps = _run_phase_sequence(env)
+    finally:
+        env.close()
+
+    assert [info["phase_change"] for *_, info in steps] == EXPECTED_PHASE_CHANGE
+    assert [info["phase_switched"] for *_, info in steps] == EXPECTED_PHASE_SWITCHED
+
+
+def test_reward_config_selects_the_phase_penalty():
+    default_env = TrafficEnvironment()
+    switch_env = TrafficEnvironment(reward_config=RewardConfig(phase_penalty="actual_switch"))
+    try:
+        default_steps = _run_phase_sequence(default_env)
+        switch_steps = _run_phase_sequence(switch_env)
+    finally:
+        default_env.close()
+        switch_env.close()
+
+    delta = RewardConfig().delta
+    for (_, default_reward, *_, info), (_, switch_reward, *_) in zip(default_steps, switch_steps):
+        expected_gap = delta * (info["phase_change"] - info["phase_switched"])
+        assert switch_reward - default_reward == pytest.approx(expected_gap)

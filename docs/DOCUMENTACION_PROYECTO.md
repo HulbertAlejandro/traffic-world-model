@@ -278,7 +278,7 @@ traffic-world-model/
 **Responsabilidad:** calcular qué tan "buena" fue una transición.
 **Clase principal:** `ProjectRewardFunction` — implementa `R = -α·espera - β·cola + γ·flujo - δ·cambio_de_fase`, usando los coeficientes de `RewardConfig`.
 **Dato importante:** el "flujo" (`throughput`) se calcula como vehículos que **terminaron** su recorrido en ese paso (dato real de SUMO), no como vehículos presentes — si se contaran los presentes, se estaría premiando la congestión en vez de penalizarla.
-**Otro dato importante:** el término `cambio_de_fase` lee `info["phase_change"]`, que pese a su nombre vale 1 cuando se **pidió la fase 1** (`action == 1`), no cuando el semáforo cambió de fase de verdad. Se mantiene así a propósito, porque todos los datos y modelos entrenados usan esa definición; está documentado en el código y sigue abierto en `TODO.md`.
+**Otro dato importante:** el término `cambio_de_fase` lee `info["phase_change"]`, que pese a su nombre vale 1 cuando se **pidió la fase 1** (`action == 1`), no cuando el semáforo cambió de fase de verdad. Es el valor por defecto de `RewardConfig.phase_penalty` (`"requested_phase_1"`), porque todos los datos y modelos entrenados usan esa definición. Con `phase_penalty="actual_switch"`, el término lee en cambio `info["phase_switched"]`, que vale 1 solo cuando el semáforo cambió de fase de verdad.
 
 ### `environments/dream_environment.py`
 **Responsabilidad:** el corazón de la idea de "World Model" — un entorno compatible con Gymnasium que imagina transiciones usando el `LatentDynamicsLSTM` ya entrenado, **sin ejecutar SUMO ni una sola vez**.
@@ -721,7 +721,7 @@ El resultado final, verificado con 3 semillas de entrenamiento por método y eva
 ## 19. Observaciones técnicas y deuda conocida
 
 - **La semántica de la acción no es "mantener/cambiar"**: `sumo_rl` la trata como el índice de fase verde destino. La documentación ya lo dice (docstring de `ProjectActionSpace`, commit `c253d88`; Sección 12 de la propuesta, `30c3fae`); el comportamiento no se cambió porque el pipeline completo usa la convención de forma consistente.
-- **`info["phase_change"]` mide si se pidió la fase 1, no si el semáforo cambió de fase de verdad**, y la recompensa penaliza eso. Documentado en el código; corregir el cálculo sigue pendiente en `TODO.md`, porque invalidaría todos los resultados entrenados con la definición actual.
+- **`info["phase_change"]` mide si se pidió la fase 1, no si el semáforo cambió de fase de verdad**, y es lo que la recompensa penaliza por defecto. Ya existe la definición correcta: `info["phase_switched"]` registra el cambio real en cada paso, y `RewardConfig.phase_penalty="actual_switch"` hace que la recompensa lo use. El valor por defecto no se cambió, porque invalidaría todos los resultados entrenados; hacerlo y rehacer el pipeline sigue pendiente en `TODO.md`.
 - **El LSTM se implementó con `torch.nn.LSTM` estándar**, no replicando manualmente las ecuaciones de compuertas como sugería la propuesta original — una simplificación de implementación razonable que no cambia el comportamiento del modelo.
 - **El Autoencoder es determinista, no un VAE** — la propuesta original mencionaba VAE con reparametrización; se implementó la versión más simple, suficiente para el Experimento 0.
 - **`compare_experiment_0.py` tenía una nota interna desactualizada** ("8 vs. 26 dimensiones" cuando el espacio latente real es 16) — ya corregida; nunca afectó el resultado.

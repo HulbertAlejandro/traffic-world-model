@@ -12,6 +12,7 @@ import numpy as np
 import sumo_rl
 
 from configs.environment import EnvironmentConfig
+from configs.reward import RewardConfig
 from environments.custom_state_builder import CustomStateBuilder
 from environments.project_action_space import ProjectActionSpace
 from environments.project_reward_function import ProjectRewardFunction
@@ -22,12 +23,13 @@ class TrafficEnvironment(gym.Env):
     """Project wrapper around SUMO-RL. The rest of the project should
     interact only with this class."""
 
-    def __init__(self, config: EnvironmentConfig | None = None):
+    def __init__(self, config: EnvironmentConfig | None = None,
+                 reward_config: RewardConfig | None = None):
         self.config = config or EnvironmentConfig()
 
         self.state_builder = CustomStateBuilder()
         self._action_space = ProjectActionSpace()
-        self.reward_function = ProjectRewardFunction()
+        self.reward_function = ProjectRewardFunction(reward_config)
 
         self._env = sumo_rl.SumoEnvironment(
             net_file=str(self.config.net_file),
@@ -69,6 +71,8 @@ class TrafficEnvironment(gym.Env):
         if action not in self.action_space:
             raise ValueError(f"Invalid action: {action!r}")
 
+        traffic_signal = self._env.traffic_signals[self._env.ts_ids[0]]
+        green_before = traffic_signal.green_phase
         _, simulator_reward, terminated, truncated, info = self._env.step(action)
         info = dict(info)
 
@@ -80,17 +84,21 @@ class TrafficEnvironment(gym.Env):
         next_state = next_state_obj.to_vector()
 
         info["raw_reward"] = float(simulator_reward)
-        # Despite its name, "phase_change" records whether phase 1 was REQUESTED
-        # (the action is the target green phase index, see ProjectActionSpace),
-        # not whether the signal actually changed phase. Measuring a real change
-        # would require comparing the traffic signal's green_phase before and
-        # after this step, which this field does not do. It is kept as is on
-        # purpose: all collected data and every model trained so far
-        # (Autoencoder, LSTM, Transformer, TSMixer, both PPO controllers) use
-        # this exact definition, so changing it would invalidate all of those
-        # results with no real need. See PROJECT_STATUS.md, "Baseline de RL
-        # directo", point 7 ("Nota tecnica adicional").
+        # Two phase measures, both always recorded; RewardConfig.phase_penalty
+        # picks which one the reward penalizes:
+        # - "phase_change": whether phase 1 was REQUESTED (action == 1; the action
+        #   is the target green phase index, see ProjectActionSpace). Despite its
+        #   name, it is NOT an actual change. Kept unchanged, and still the default
+        #   penalty, because all collected data and every model trained so far
+        #   (Autoencoder, LSTM, Transformer, TSMixer, both PPO controllers) use it.
+        # - "phase_switched": whether the green phase ACTUALLY changed during this
+        #   step, in either direction. sumo_rl applies the action once, through
+        #   TrafficSignal.set_next_phase, which updates green_phase immediately when
+        #   the switch is allowed (different phase and yellow_time + min_green
+        #   elapsed), so comparing green_phase before and after the step is exact.
+        # See PROJECT_STATUS.md, "Baseline de RL directo", point 7.
         info["phase_change"] = float(int(action == 1))
+        info["phase_switched"] = float(traffic_signal.green_phase != green_before)
 
         # Throughput = vehicles that actually left the network in this control
         # interval (arrivals), not vehicles currently sitting in a lane. The
