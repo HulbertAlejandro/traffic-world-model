@@ -79,6 +79,15 @@
       -326.79, PPO directo -453.74, tiempo fijo -411.27 (90/90/30 episodios)**; ventaja
       clara a nivel de episodio, no significativa a nivel de semilla. Ver PROJECT_STATUS.md,
       sección "Escenario asimétrico, segunda ronda".
+- [x] Más presupuesto de entrenamiento real para el RL directo: verificado con 30,000
+      pasos (3x) en las 3 semillas, fuera del repositorio y sin tocar los checkpoints
+      oficiales. **Resultado:** el RL directo alcanza un desempeño comparable al World
+      Model (-335.24 frente a -326.79; p = 0.71 a nivel de semilla), la desviación de sus
+      medias por semilla baja de 96.2 a 30.6, la semilla 2 deja de colapsar y los
+      episodios catastróficos bajan de 23/90 a 11/90, pero consume ~8.5 veces más
+      interacciones reales (39,000 frente a ~4,600 por semilla). La ventaja del World
+      Model es de eficiencia en interacciones. Ver PROJECT_STATUS.md, sección
+      "Verificación: RL directo con 3x presupuesto".
 
 ## Siguiente paso recomendado
 
@@ -86,7 +95,8 @@
       subida en el commit `9ca20ac`.
 - [ ] **(b)** Seguir investigando alguna de las limitaciones abiertas (PROJECT_STATUS.md,
       sección "Escenario asimétrico, segunda ronda", punto 9): episodios catastróficos,
-      función de valor del PPO directo, o más presupuesto y semillas para el RL directo.
+      función de valor del PPO directo, o más semillas por método (el presupuesto del
+      RL directo ya se verificó).
 - [x] **Experimento 3:** Transformer y TSMixer como alternativas a la LSTM (commits
       `90d7641` a `f49cf09`, 62/62 tests). **Resultado: se mantiene la LSTM**, que gana en
       `reward_mse` en los 10 horizontes frente a ambas (reducción mediana de 38.1% frente
@@ -122,7 +132,10 @@
 
 ## Después (orden según la propuesta del proyecto)
 
-- [ ] Más presupuesto de entrenamiento real y más semillas para el RL directo.
+- [ ] Más semillas por método (siguen siendo 3; el presupuesto ya se verificó, ver
+      "Ya resuelto").
+- [ ] Curva de desempeño frente a interacciones reales del RL directo (hoy solo dos
+      puntos: 13,000 y 39,000 por semilla).
 - [ ] Medir el momento de los cambios de fase respecto a las colas de cada brazo, comparando
       episodios catastróficos con buenos (quedan 5/90 en el sueño y 23/90 en el directo).
 - [ ] Demanda variable en el tiempo (la asimetría ya está implementada; la variación
