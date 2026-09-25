@@ -16,7 +16,10 @@ Decision criterion (fixed before seeing any result):
     2. its median relative reduction of reward_mse vs. the LSTM is of a
        magnitude similar to the one that justified keeping the Autoencoder in
        Experimento 0 (at least SIMILAR_MAGNITUDE_FRACTION of it).
-- Otherwise (mixed result, or marginal differences) the recommendation is to
+- If instead the LSTM itself wins a strict majority of the horizons against
+  both candidates, it is kept because it predicts better; its integration in
+  the pipeline is reported as an additional argument, not the main one.
+- Otherwise (genuinely split result, no clear winner) the recommendation is to
   keep the LSTM, because it is already integrated and validated across the
   whole pipeline (Dream Environment, checkpoint selection in real SUMO, PPO
   verified with 3 seeds): replacing it means repeating that whole verification
@@ -112,12 +115,16 @@ def main() -> None:
 
     wins = {name: 0 for name in names}
     reductions = {name: [] for name in names if name != INCUMBENT}
+    # The reverse view, used only when the LSTM wins: how much lower the LSTM's
+    # reward_mse is, relative to each candidate's (bounded by 100%).
+    incumbent_reductions = {name: [] for name in reductions}
     for h in horizons:
         row = {name: reports[name][str(h)]["model_reward_mse"] for name in names}
         winner = min(names, key=lambda name: row[name])
         wins[winner] += 1
         for name in reductions:
             reductions[name].append((row[INCUMBENT] - row[name]) / row[INCUMBENT])
+            incumbent_reductions[name].append((row[name] - row[INCUMBENT]) / row[name])
 
         print(f"{h:3d} | " + " | ".join(f"{row[n]:24.3f}" for n in names) + f" | {winner:>11}")
 
@@ -157,6 +164,20 @@ def main() -> None:
             f"DECISION: {chosen} gana {wins[chosen]}/{len(horizons)} horizontes con una "
             f"reduccion mediana de reward_mse de {median_reduction[chosen] * 100:.1f}% frente a "
             f"la LSTM -- SE RECOMIENDA como reemplazo de la LSTM."
+        )
+    elif wins[INCUMBENT] >= majority:
+        incumbent_median = {
+            name: statistics.median(values) for name, values in incumbent_reductions.items()
+        }
+        versus = " y ".join(
+            f"{incumbent_median[name] * 100:.1f}% frente a {name}" for name in incumbent_median
+        )
+        print(
+            f"DECISION: LSTM gana en {wins[INCUMBENT]}/{len(horizons)} horizontes frente a ambas "
+            f"alternativas, con reduccion mediana de reward_mse de {versus} -- SE MANTIENE "
+            "porque predice mejor, con el argumento adicional de que ya esta integrada y "
+            "validada en todo el pipeline (Dream Environment, seleccion de checkpoint por "
+            "SUMO real, y PPO verificado con 3 semillas)."
         )
     else:
         for name in reductions:
