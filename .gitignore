@@ -57,3 +57,4 @@ models/checkpoints/exp0_multiseed/**/*.png
 # Console logs of the pre-fix official PPO runs (2026-09-23): kept locally as evidence, not versioned
 logs_directo.txt
 logs_sueno.txt
+models/checkpoints/exp0_multiseed_300ep/**/*.png
