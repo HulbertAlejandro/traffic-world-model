@@ -16,10 +16,19 @@ added to the z branch.
 The reward scaler is fitted on this branch's own training split (same rewards
 as the z branch) and saved under models/checkpoints/raw_state/, so that
 evaluation.world_model_evaluation.load_reward_scaler() never mixes the two.
+
+Usage (defaults: seed 0, models/checkpoints/raw_state/):
+    python training/train_world_model_raw.py --seed 3 --output-dir models/checkpoints/exp0_multiseed/raw/seed3
+
+The run refuses to write into raw_state_old_protocol/ (the archived model trained
+with the old protocol) without --overwrite-official, and into any folder that
+already holds one of its output files without --overwrite
+(training/output_guard.py).
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -52,31 +61,52 @@ from training.train_world_model import (
     train_one_epoch,
     validate,
 )
+from training.output_guard import add_output_arguments, check_output_dir
 
 # Separate subfolder from the z-based experiment's checkpoints: it keeps this
 # experiment's reward_scaler.json from being picked up by
 # evaluation.world_model_evaluation.load_reward_scaler(), which looks for a
 # fixed filename next to the checkpoint it is given.
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints" / "raw_state"
-CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
+# Archived results: never written without --overwrite-official.
+PROTECTED_DIRS = (ROOT_DIR / "models" / "checkpoints" / "raw_state_old_protocol",)
+# Every file this script writes into its output folder.
+OUTPUT_FILES = (
+    "world_model_raw_best.pt",
+    "world_model_raw_best.json",
+    "world_model_raw_last.pt",
+    "world_model_raw_last.json",
+    "reward_scaler.json",
+)
 
 SEQUENCE_LENGTH = 16
 ACTION_DIM = 2
 
 
-def save_checkpoint(model, config: WorldModelConfig, path: Path) -> None:
+def save_checkpoint(model, config: WorldModelConfig, path: Path, seed: int = SEED) -> None:
     torch.save(model.state_dict(), path)
     hyperparams = {
         "latent_dim": config.latent_dim,
         "action_dim": config.action_dim,
         "sequence_length": config.sequence_length,
         "hidden_dim": config.hidden_dim,
+        "seed": seed,
     }
     path.with_suffix(".json").write_text(json.dumps(hyperparams, indent=2), encoding="utf-8")
 
 
-def main() -> None:
-    _set_seeds(SEED)
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Train the LatentDynamicsLSTM on the raw normalized state (Experimento 0).")
+    parser.add_argument("--seed", type=int, default=SEED, help=f"training seed (default: {SEED})")
+    add_output_arguments(parser, CHECKPOINT_DIR, "models/checkpoints/raw_state_old_protocol/ (archived)")
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+    output_dir = check_output_dir(args.output_dir, PROTECTED_DIRS, OUTPUT_FILES, args.overwrite, args.overwrite_official)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _set_seeds(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_path = PROCESSED_DIR / "train_raw_seq.npz"
@@ -96,7 +126,7 @@ def main() -> None:
     config = WorldModelConfig(latent_dim=raw_state_dim, action_dim=ACTION_DIM, sequence_length=SEQUENCE_LENGTH)
 
     reward_scaler = compute_reward_scaler(train_path)
-    save_reward_scaler(reward_scaler, CHECKPOINT_DIR / "reward_scaler.json")
+    save_reward_scaler(reward_scaler, output_dir / "reward_scaler.json")
     reward_mean = torch.tensor(reward_scaler["reward_mean"], device=device)
     reward_std = torch.tensor(reward_scaler["reward_std"], device=device)
 
@@ -130,10 +160,10 @@ def main() -> None:
         train_losses.append(train_loss)
         validation_losses.append(validation_loss)
 
-        save_checkpoint(model, config, CHECKPOINT_DIR / "world_model_raw_last.pt")
+        save_checkpoint(model, config, output_dir / "world_model_raw_last.pt", args.seed)
         if validation_loss < best_validation_loss:
             best_validation_loss = validation_loss
-            save_checkpoint(model, config, CHECKPOINT_DIR / "world_model_raw_best.pt")
+            save_checkpoint(model, config, output_dir / "world_model_raw_best.pt", args.seed)
             epochs_without_improvement = 0
         else:
             epochs_without_improvement += 1
@@ -155,7 +185,9 @@ def main() -> None:
     plt.title("World model (LSTM on raw state) training loss -- Experimento 0")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(RESULTS_DIR / "world_model_raw_loss.png")
+    # The default run keeps its curve in results/; any other run next to its checkpoints.
+    loss_curve_dir = RESULTS_DIR if output_dir == CHECKPOINT_DIR.resolve() else output_dir
+    plt.savefig(loss_curve_dir / "world_model_raw_loss.png")
     plt.close()
 
 

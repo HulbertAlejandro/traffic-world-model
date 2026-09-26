@@ -4,10 +4,20 @@ Mirrors train_autoencoder.py: fixed seeds, checkpoint + hyperparameter
 persistence, and a loss curve. The encoder used to produce the latent
 dataset is NOT touched here -- it was already frozen when
 scripts/encode_latent_dataset.py ran.
+
+Usage (defaults reproduce the official run: seed 0, models/checkpoints/):
+    python training/train_world_model.py --seed 3 --output-dir models/checkpoints/exp0_multiseed/z/seed3
+
+models/checkpoints/ holds the official LSTM (world_model_best.pt) that the Dream
+Environment and both PPO controllers depend on, so the run refuses to write
+there without --overwrite-official, and refuses any folder that already holds
+one of its output files without --overwrite (training/output_guard.py). Running
+it with no arguments therefore stops instead of replacing the official model.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import random
 import sys
@@ -26,6 +36,7 @@ if str(ROOT_DIR) not in sys.path:
 from configs import RepresentationConfig, WorldModelConfig
 from datasets.latent_sequence_dataset import LatentSequenceDataset
 from models.world_model import LatentDynamicsLSTM
+from training.output_guard import add_output_arguments, check_output_dir
 
 PROCESSED_DIR = ROOT_DIR / "datasets" / "processed"
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints"
@@ -40,6 +51,15 @@ EPOCHS = 100
 EARLY_STOPPING_PATIENCE = 15
 REWARD_LOSS_WEIGHT = 1.0
 WEIGHT_DECAY = 1e-4
+
+# Every file this script writes into its output folder.
+OUTPUT_FILES = (
+    "world_model_best.pt",
+    "world_model_best.json",
+    "world_model_last.pt",
+    "world_model_last.json",
+    "reward_scaler.json",
+)
 
 
 def _set_seeds(seed: int) -> None:
@@ -108,19 +128,30 @@ def validate(model, loader, device, reward_mean, reward_std) -> float:
     return total_loss / len(loader.dataset)
 
 
-def save_checkpoint(model, config: WorldModelConfig, path: Path) -> None:
+def save_checkpoint(model, config: WorldModelConfig, path: Path, seed: int = SEED) -> None:
     torch.save(model.state_dict(), path)
     hyperparams = {
         "latent_dim": config.latent_dim,
         "action_dim": config.action_dim,
         "sequence_length": config.sequence_length,
         "hidden_dim": config.hidden_dim,
+        "seed": seed,
     }
     path.with_suffix(".json").write_text(json.dumps(hyperparams, indent=2), encoding="utf-8")
 
 
-def main() -> None:
-    _set_seeds(SEED)
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Train the LatentDynamicsLSTM on the latent dataset.")
+    parser.add_argument("--seed", type=int, default=SEED, help=f"training seed (default: {SEED}, the official run)")
+    add_output_arguments(parser, CHECKPOINT_DIR, "models/checkpoints/ (the official LSTM)")
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+    output_dir = check_output_dir(args.output_dir, (CHECKPOINT_DIR,), OUTPUT_FILES, args.overwrite, args.overwrite_official)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    _set_seeds(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     train_latent_path = PROCESSED_DIR / "train_latent.npz"
@@ -138,7 +169,7 @@ def main() -> None:
     config = WorldModelConfig(representation=representation, sequence_length=16)
 
     reward_scaler = compute_reward_scaler(train_latent_path)
-    save_reward_scaler(reward_scaler, CHECKPOINT_DIR / "reward_scaler.json")
+    save_reward_scaler(reward_scaler, output_dir / "reward_scaler.json")
     reward_mean = torch.tensor(reward_scaler["reward_mean"], device=device)
     reward_std = torch.tensor(reward_scaler["reward_std"], device=device)
 
@@ -172,10 +203,10 @@ def main() -> None:
         train_losses.append(train_loss)
         validation_losses.append(validation_loss)
 
-        save_checkpoint(model, config, CHECKPOINT_DIR / "world_model_last.pt")
+        save_checkpoint(model, config, output_dir / "world_model_last.pt", args.seed)
         if validation_loss < best_validation_loss:
             best_validation_loss = validation_loss
-            save_checkpoint(model, config, CHECKPOINT_DIR / "world_model_best.pt")
+            save_checkpoint(model, config, output_dir / "world_model_best.pt", args.seed)
             epochs_without_improvement = 0
         else:
             epochs_without_improvement += 1
@@ -197,7 +228,9 @@ def main() -> None:
     plt.title("World model (LSTM) training loss")
     plt.legend()
     plt.tight_layout()
-    plt.savefig(RESULTS_DIR / "world_model_loss.png")
+    # The official run keeps its curve in results/; any other run next to its checkpoints.
+    loss_curve_dir = RESULTS_DIR if output_dir == CHECKPOINT_DIR.resolve() else output_dir
+    plt.savefig(loss_curve_dir / "world_model_loss.png")
     plt.close()
 
 
