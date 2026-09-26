@@ -42,3 +42,10 @@ logs/
 results/
 
 external_sumo_rl/
+# Direct-RL retraining after the TraCI connection fix (verification runs, not official yet)
+models/checkpoints/controller_direct_fixed/**/*.zip
+models/checkpoints/controller_direct_fixed/**/*.npz
+models/checkpoints/controller_direct_fixed/**/*.pkl
+models/checkpoints/controller_direct_30k_fixed/**/*.zip
+models/checkpoints/controller_direct_30k_fixed/**/*.npz
+models/checkpoints/controller_direct_30k_fixed/**/*.pkl
