@@ -507,7 +507,7 @@ evaluate_multiseed_statistical.py (comparación final: PPO del sueño vs. PPO di
 - Split: 56 episodios de entrenamiento, 12 de validación, 12 de prueba (3360/720/720 transiciones), sin NaN ni Inf.
 - Normalización ajustada solo con el split de entrenamiento (`scaler.pkl`), reutilizado también por `EncodedTrafficEnvironment`.
 - Cada registro de una transición: `states`, `actions`, `rewards`, `next_states`, `terminated`, `truncated`, `episode_id`, `time_step`.
-- Vector de estado: 26 dimensiones (4 carriles × 5 variables + 4 de fase one-hot + 2 de tiempo de fase).
+- Vector de estado: 26 dimensiones (4 carriles × 5 variables + 4 de fase one-hot + 2 de tiempo de fase). De las 4 de fase solo se activan 2 (sumo-rl define 2 fases verdes y 2 amarillas, y se registra la verde), y el tiempo restante vale 0 salvo al inicio del episodio: 3 dimensiones prácticamente constantes.
 
 ---
 
@@ -659,7 +659,7 @@ pytest -v
  El estado es un vector de números, no una imagen; las convoluciones sirven para datos con estructura espacial.
 
 3. **¿Qué contiene exactamente un estado?**
- 26 números: por cada uno de los 4 carriles, número de vehículos, cola, espera, velocidad y ocupación (20 valores); 4 números de fase (one-hot); 2 de tiempo de fase.
+ 26 números: por cada uno de los 4 carriles, número de vehículos, cola, espera, velocidad y ocupación (20 valores); 4 números de fase (one-hot); 2 de tiempo de fase. Si preguntan por qué 4 fases cuando el semáforo tiene 2: el programa de sumo-rl tiene 2 verdes y 2 amarillas, y el estado solo registra la verde, así que 2 de esas 4 posiciones siempre valen 0 (igual que el tiempo restante, salvo al inicio). No se cambió para no invalidar lo entrenado.
 
 4. **¿Por qué separar entrenamiento, validación y prueba por episodios completos?**
  Para no filtrar información entre conjuntos — se verifica con un test automatizado dedicado.

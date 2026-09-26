@@ -89,7 +89,11 @@ correcciones").
 
 - El estado (`TrafficState`) tiene **26 dimensiones**: 4 carriles × 5 variables
   (vehicle_counts, queue_lengths, waiting_times, mean_speeds, occupancies) + 4 de
-  one-hot de fase del semáforo + 2 (elapsed/remaining phase time).
+  one-hot de fase del semáforo + 2 (elapsed/remaining phase time). De las 4 posiciones
+  de fase solo se activan 2: la lógica que construye sumo-rl tiene 2 fases verdes y 2
+  amarillas, y el estado registra siempre la verde. `remaining_phase_time` vale
+  `min_green − elapsed`, así que es 0 en todos los pasos salvo al inicio del episodio (5).
+  No se cambia: todo lo entrenado usa este vector.
 - La fase del semáforo y la acción del controlador se codifican **one-hot**
   (`action_dim = 2`).
 - La acción es el **índice de la fase verde de destino**, no un interruptor
@@ -122,7 +126,10 @@ correcciones").
   de recompensa es parte del núcleo según la Sección 15 de la propuesta.
 - Cada checkpoint entrenado (`.pt`) guarda junto a sí un `.json` con los hiperparámetros
   exactos usados.
-- Semillas fijas (`torch`, `numpy`, `cuda`) en todo entrenamiento.
+- Semillas fijas (`torch`, `numpy`, `cuda`) en todo entrenamiento. La recolección del
+  dataset fija la semilla de SUMO de cada episodio, pero **no** la de las acciones
+  aleatorias (`np.random` global): una recolección nueva da otro dataset. El oficial está
+  respaldado y no se regenera.
 - La evaluación del World Model (Experimento 1) compara siempre contra un **baseline
   persistente** ("nada cambia respecto al último valor real observado"), usando las
   **acciones reales** del episodio, no acciones imaginadas — evaluar con acciones

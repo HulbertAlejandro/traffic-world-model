@@ -762,7 +762,9 @@ decisión de mantener el Autoencoder se sostiene.
   -351.68 / -349.26 (media de 30 episodios **-350.47**, antes -393.02), episodios
   catastróficos **3/30** (antes 7/30), peor episodio -716.8 (antes -1184.9), desviación
   reducida a menos de la mitad en seed 3000, y throughput 13.00 / 12.93 (antes 11.53 /
-  11.40, casi al nivel de tiempo fijo). La curva de `EvalCallback` se estabiliza en ~-360
+  11.40, casi al nivel de tiempo fijo). *(Precisión 26-sep: esta cifra usa la métrica
+  heredada de "throughput", que no mide llegadas; ver "Auditoría técnica y correcciones",
+  punto 7.)* La curva de `EvalCallback` se estabiliza en ~-360
   a partir del timestep 6000. **`explained_variance` no mejoró** (media del último
   cuarto 0.106, máximo 0.809). El punto 7 muestra además que **la semilla 0 fue la mejor
   de las tres**.
@@ -785,7 +787,9 @@ Media 90 episodios: -326.79 (std 147.42, mediana -293.00, error estándar 15.63)
 
 Las tres semillas superan a tiempo fijo, con medias parecidas (dispersión entre semillas
 de 39 puntos) y `explained_variance` ~0.95 en las tres. **Sobre el checkpoint oficial:**
-la semilla 1 se adoptó mirando solo la seed 3000, donde parecía la mejor (-291.26). Con
+la semilla 1 se adoptó mirando solo la seed 3000 (-291.26), aunque ahí la semilla 2 ya era
+ligeramente mejor (-289.04); *precisión 26-sep: la justificación original, "donde parecía la
+mejor", no coincide con los datos de esta misma tabla*. Con
 las dos semillas de evaluación, la mejor en promedio es la semilla 2 (-306.82), y la 1 es
 la peor en seed 5000 (-364.99, con un episodio en -998.7). Las diferencias entre semillas
 están dentro del ruido. Se decidió mantener la semilla 1 como checkpoint oficial y
@@ -876,6 +880,9 @@ de 10,000 pasos del RL directo):**
   escenarios (ver "Auditoría técnica y correcciones").
 - **Throughput:** el PPO del sueño sigue algo por debajo de tiempo fijo (12.20–12.33
   frente a 13.27–13.73 con el checkpoint oficial), la misma salvedad de todo el proyecto.
+  *Precisión 26-sep: esa métrica no mide llegadas. Con la correcta (`arrivals_total`), en 5
+  episodios las llegadas del sueño y de tiempo fijo son iguales (98.4 y 98.4): la salvedad
+  no tiene respaldo (ver "Auditoría técnica y correcciones", punto 7).*
 
 ### 9. Limitaciones que quedan abiertas
 
@@ -1101,7 +1108,8 @@ Regla: pedir fase contraria    |   -495.50 +/-  113.06 |    6.59 +/-  1.48 |   1
 En sus buenos episodios, los PPO llegan a -130 / -250, muy por encima de tiempo fijo; en
 los malos caen a -680 / -930. Tiempo fijo es entre 4 y 5 veces más estable (desviación
 de 41–57 frente a 178–276). El throughput de los PPO es menor (11.0–12.6 frente a
-13.3–13.7), la misma salvedad que en el escenario simétrico. Los episodios catastróficos
+13.3–13.7), la misma salvedad que en el escenario simétrico. *(Precisión 26-sep: esta cifra usa la métrica heredada de "throughput", que
+no mide llegadas; ver "Auditoría técnica y correcciones", punto 7.)* Los episodios catastróficos
 dependen de la política, no solo del tráfico: el PPO del sueño falla en 3002, 3013, 5000,
 5004, 5006, 5012 y 5013, y el directo en 3001, 3005, 3009, 5000 y 5001. Solo comparten la
 semilla 5000.
@@ -1356,7 +1364,8 @@ válidos. El resultado oficial está en la tabla final de esta sección.
 Encoder congelado en vivo para traducir el estado crudo de 26 dimensiones a `z` antes de
 que la política PPO (entrenada enteramente en `z` dentro del Dream Environment) lo vea.
 Junto con él, `scripts/evaluate_controller_sumo.py` compara PPO contra tiempo fijo y
-acción aleatoria con métricas reales de tráfico (espera, cola, throughput) de
+acción aleatoria con métricas reales de tráfico (espera, cola, throughput; este último con
+la métrica heredada, que no mide llegadas, corregida el 26-sep) de
 `TrafficEnvironment`, no solo con el reward abstracto. Protocolo: 15 episodios por
 semilla base, semillas de evaluación `seed_base=3000` y `seed_base=5000`.
 
@@ -1510,7 +1519,8 @@ Aleatoria, seed_base=5000      | -1702.63 +/- 879.77 | 25.51 +/- 13.62 | 3.03 +/
 Frente a tiempo fijo: reward ~50% mejor (49.5% y 51.5%), **espera ~53-55% menor** (52.5%
 y 54.5%), **cola ~31-32% menor** (30.7% y 32.4%). **Throughput: PPO sigue sin ser mejor
 que tiempo fijo** (13.47 frente a 13.67; empate exacto en 13.87). Esta salvedad se ha
-mantenido en todas las corridas del proyecto, con y sin bug.
+mantenido en todas las corridas del proyecto, con y sin bug. *(Precisión 26-sep: esta cifra usa la métrica heredada de "throughput", que
+no mide llegadas; ver "Auditoría técnica y correcciones", punto 7.)*
 
 ### Lección metodológica
 

@@ -51,8 +51,9 @@
       diagnóstico de rachas y el fix eran artefactos del bug; `dream_max_steps` se
       revirtió a 7. **Resultado oficial: PPO v1, -287.76 ± 23.87 (`seed_base=3000`) /
       -293.35 ± 41.28 (`seed_base=5000`)**, frente a tiempo fijo -570.27 / -605.27; nunca
-      mejor en throughput. Los números anteriores (-290.05/-316.76 de v2 con bug y
-      -421.69/-419.65 de v2 corregido) ya no son el resultado del método. Ver
+      mejor en throughput (métrica heredada, que no mide llegadas; ver PROJECT_STATUS.md,
+      "Auditoría técnica y correcciones", punto 7). Los números anteriores (-290.05/-316.76
+      de v2 con bug y -421.69/-419.65 de v2 corregido) ya no son el resultado del método. Ver
       PROJECT_STATUS.md, sección "Controlador PPO contra SUMO real: historia completa y
       resultado oficial (v1)", incluida la lección metodológica.
 - [x] Baseline de RL directo (Sección 18): `ReseedingWrapper`, `train_controller_direct.py`
