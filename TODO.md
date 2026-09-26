@@ -132,8 +132,14 @@
       `"requested_phase_1"` (por defecto, la definición de todo lo entrenado) y
       `"actual_switch"`, que lee `info["phase_switched"]`, el cambio real de fase, ya
       registrado en cada paso. **Queda abierta la opción B**: cambiar el valor por
-      defecto y rehacer el pipeline. Antes, medir en las políticas oficiales si la
-      definición nueva cambia alguna conclusión.
+      defecto y rehacer el pipeline. **Impacto ya medido:** re-puntuando las mismas
+      trayectorias de las políticas oficiales con ambas definiciones, el reward cambia
+      menos de 1 punto (sueño -326.79 → -327.68, directo 10k -453.74 → -454.00, tiempo
+      fijo -411.27 → -412.27, regla -502.53 → -502.33) y no cambia ningún ranking ni
+      conclusión, incluido el ~8.5x. No mide qué aprenderían los PPO reentrenados con
+      `"actual_switch"`; con `delta = 0.1` es poco probable que cambie algo, así que la
+      opción B no es prioritaria. Ver PROJECT_STATUS.md, sección "Medición: impacto de
+      `phase_penalty="actual_switch"`".
 - [ ] Entender por qué ambos PPO de la primera ronda asimétrica nunca sostenían el verde de
       la fase 1 más de 8 s (la duración mínima posible de una fase); volver a medirlo con los
       checkpoints actuales.

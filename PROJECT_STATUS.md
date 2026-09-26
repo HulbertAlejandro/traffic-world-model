@@ -1,7 +1,12 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `a224812`, 62/62 tests en verde. **Lo más reciente:
-verificación del RL directo con 3x presupuesto** (30,000 pasos de entrenamiento; modelos
+Última verificación: commit `f3adde3`, 67/67 tests en verde. **Lo más reciente:
+medición del impacto de `phase_penalty="actual_switch"`** sobre las políticas oficiales,
+re-puntuando las mismas trayectorias con ambas definiciones: el reward de cada política
+cambia menos de 1 punto y **no cambia ningún ranking ni ninguna conclusión documentada**
+(ver la sección siguiente). El valor por defecto sigue siendo `"requested_phase_1"`.
+
+Antes de eso, **verificación del RL directo con 3x presupuesto** (30,000 pasos de entrenamiento; modelos
 fuera del repositorio, checkpoints oficiales intactos). Con ese presupuesto, el RL directo
 **alcanza un desempeño comparable** al del World Model (-335.24 frente a -326.79; p = 0.71
 a nivel de semilla), pero **consumiendo ~8.5 veces más interacciones reales** (39,000
@@ -9,7 +14,8 @@ frente a ~4,600 por semilla). Esto precisa el resultado de la segunda ronda, que
 vigente como comparación con el presupuesto original: con 13,000 interacciones por
 semilla (~2.8 veces las del World Model), el RL directo queda claramente por debajo en
 desempeño medio y en consistencia. La ventaja demostrada del World Model es de
-**eficiencia en interacciones reales** (ver la sección siguiente). Antes de esto se cerró
+**eficiencia en interacciones reales** (ver la sección "Verificación: RL directo con 3x
+presupuesto"). Antes de esto se cerró
 el Experimento 3: la LSTM se mantiene como modelo temporal.
 
 Resultado oficial de la segunda ronda del escenario asimétrico (sin cambios): dataset de
@@ -25,6 +31,64 @@ estándar), pero **no concluyente a nivel de semilla** (p = 0.145 con 3 semillas
 método), porque el RL directo varía mucho entre semillas. Siguen abiertos los episodios
 catastróficos (menos, pero presentes) y la función de valor del PPO directo. Ver la
 sección "Escenario asimétrico, segunda ronda".
+
+## ✅ Medición: impacto de `phase_penalty="actual_switch"` en las políticas oficiales — no cambia ninguna conclusión
+
+### 1. Motivación y protocolo
+
+El commit `d69d411` agregó `RewardConfig.phase_penalty` (opción A del punto 4 de
+"Pendiente"): `"requested_phase_1"` (por defecto, la definición de todo lo entrenado)
+penaliza `info["phase_change"]`, que vale 1 cuando se **pide** la fase 1;
+`"actual_switch"` penaliza `info["phase_switched"]`, que vale 1 cuando la fase verde
+**cambia de verdad**. Antes de decidir la opción B (cambiar el valor por defecto y rehacer
+el pipeline), se midió si la definición nueva altera alguna conclusión ya documentada.
+
+- Mismo bucle que `scripts/evaluate_final_comparison.py` y el protocolo de siempre (15
+  episodios, `seed_base` 3000 y 5000). En cada paso se calculan **las dos recompensas**
+  con `ProjectRewardFunction` sobre el mismo `info`, así que ambas definiciones puntúan
+  trayectorias idénticas.
+- Políticas: las 3 semillas del PPO del sueño, las 3 del PPO directo de 10,000 pasos,
+  tiempo fijo (ciclo=5), la regla "pedir fase contraria" y, como referencia (por el
+  ~8.5x), las 3 semillas del directo de 30,000 pasos.
+- Controles: con `"requested_phase_1"` se reproducen **exactamente** las 11 medias por
+  semilla documentadas; el md5 de los 92 archivos de `models/checkpoints/` es idéntico
+  antes y después. Script y resultados por episodio fuera del repositorio.
+
+### 2. Resultado
+
+| Política | Episodios | `requested_phase_1` (oficial) | `actual_switch` | Diferencia |
+|---|---|---|---|---|
+| PPO del sueño (3 semillas) | 90 | -326.79 | -327.68 | -0.90 |
+| PPO directo, 10,000 pasos (3 semillas) | 90 | -453.74 | -454.00 | -0.26 |
+| Tiempo fijo (ciclo=5) | 30 | -411.27 | -412.27 | -1.00 |
+| Regla "pedir fase contraria" | 30 | -502.53 | -502.33 | +0.20 |
+| *PPO directo, 30,000 pasos (referencia)* | 90 | -335.24 | -335.69 | -0.45 |
+
+La diferencia por episodio es exactamente 0.1 × (fase 1 pedida − cambios reales), y
+ningún episodio se mueve más de 1.1 puntos. Tiempo fijo pide la fase 1 ~12 veces por
+episodio pero cambia ~22 (la nueva definición lo penaliza algo más); la regla pide ~31 y
+cambia ~29; los PPO del sueño piden ~10 y cambian ~19–20.
+
+### 3. Qué conclusiones cambian: ninguna
+
+- **Ranking:** sueño > directo 30k > tiempo fijo > directo 10k > regla, igual con ambas.
+- **Ganan a tiempo fijo** (episodio a episodio, mismo escenario): idéntico con ambas
+  definiciones: sueño 75/90, directo 10k 49/90, directo 30k 73/90, regla 9/30.
+- **Episodios catastróficos (< -600):** 5, 23, 11 y 7, sin cambio.
+- **Sueño frente a directo 10k:** Welch a nivel de semilla, t = 2.24 con ambas.
+- **Sueño frente a directo 30k:** la diferencia de medias pasa de 8.46 a 8.01, Welch a
+  nivel de semilla de t = 0.41 a 0.38, y el sueño gana 110/270 comparaciones episodio a
+  episodio (antes 111/270). Sigue siendo "desempeño comparable", sin significancia.
+- **El ~8.5x de interacciones reales** es contabilidad de pasos de SUMO; no depende de la
+  recompensa.
+
+### 4. Alcance y limitación
+
+Esta medición **re-puntúa** trayectorias de políticas entrenadas con la definición vieja;
+no dice qué aprenderían los PPO reentrenados con `"actual_switch"` (eso es la opción B).
+Lo que sí muestra es que, con `delta = 0.1`, el término de fase pesa menos de 1 punto por
+episodio frente a recompensas de cientos, lo que hace poco probable (sin demostrarlo) que
+la opción B altere los resultados. El valor por defecto no se cambió.
 
 ## ✅ Verificación: RL directo con 3x presupuesto (30,000 pasos) — alcanza al World Model, con ~8.5 veces sus interacciones reales
 
@@ -1469,7 +1533,10 @@ handoff anterior.
    `info["phase_switched"]` registra el cambio real, y `RewardConfig.phase_penalty=
    "actual_switch"` lo penaliza. El valor por defecto sigue siendo
    `"requested_phase_1"`, así que todos los resultados siguen siendo válidos. Cambiarlo
-   (y rehacer el pipeline) sigue pendiente.
+   (y rehacer el pipeline) sigue pendiente. **Impacto medido:** re-puntuadas con
+   `"actual_switch"`, las políticas oficiales cambian menos de 1 punto y no cambia
+   ningún ranking ni conclusión (ver la sección "Medición: impacto de
+   `phase_penalty="actual_switch"`").
 5. Ambos PPO de la primera ronda asimétrica nunca sostenían el verde de la fase 1 más
    de 8 s (la duración mínima posible). No se volvió a medir con los checkpoints
    actuales; no investigado a fondo.
@@ -1492,7 +1559,14 @@ handoff anterior.
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se verificó si más presupuesto cierra la brecha del RL directo (limitación abierta de la
+Se midió el impacto de `phase_penalty="actual_switch"` (mecanismo de `d69d411`) sobre las
+políticas oficiales: re-puntuando las mismas trayectorias con ambas definiciones, el
+reward de cada política cambia menos de 1 punto y ningún ranking ni conclusión cambia.
+La opción B (cambiar el valor por defecto y rehacer el pipeline) queda abierta, pero
+esta medición no da motivo para priorizarla. Antes se corrigió el conteo de tests
+(62 → 67) en la documentación (`f3adde3`).
+
+Antes de eso, se verificó si más presupuesto cierra la brecha del RL directo (limitación abierta de la
 segunda ronda). Las 3 semillas del directo se reentrenaron con 30,000 pasos en vez de
 10,000, sin tocar los checkpoints oficiales, y se evaluaron con el protocolo de siempre
 (reproduciendo antes las medias documentadas del sueño y del directo de 10k). Resultado:
