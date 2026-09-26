@@ -51,3 +51,5 @@ models/checkpoints/controller_direct_prefix_bug/*.pkl
 models/checkpoints/controller_direct_30k_prefix_bug/*.zip
 models/checkpoints/controller_direct_30k_prefix_bug/*.npz
 models/checkpoints/controller_direct_30k_prefix_bug/*.pkl
+# Experimento 0 multi-seed runs: loss curves are generated artifacts
+models/checkpoints/exp0_multiseed/**/*.png
