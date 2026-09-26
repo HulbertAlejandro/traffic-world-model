@@ -175,3 +175,48 @@ def test_raw_predicted_reward_exposed_in_info(tmp_path):
         assert info["raw_predicted_reward"] != reward
     else:
         assert abs(info["raw_predicted_reward"] - reward) < 1e-5
+
+
+def test_dream_training_never_touches_sumo_or_traci(tmp_path, monkeypatch):
+    """A full imagined episode and a short PPO training run inside the Dream
+    Environment must not start, connect to, or step SUMO in any way."""
+    import subprocess
+
+    import sumo_rl
+    import traci
+    from stable_baselines3 import PPO
+
+    calls = []
+
+    def forbidden(name):
+        def _raise(*args, **kwargs):
+            calls.append(name)
+            raise AssertionError(f"{name} called during a Dream Environment episode")
+        return _raise
+
+    for name in ("start", "connect", "init", "switch", "getConnection", "simulationStep", "load"):
+        monkeypatch.setattr(traci, name, forbidden(f"traci.{name}"))
+    monkeypatch.setattr(sumo_rl.SumoEnvironment, "__init__", forbidden("sumo_rl.SumoEnvironment"))
+    real_popen = subprocess.Popen
+
+    class NoSumoPopen(real_popen):
+        def __init__(self, args, *a, **k):
+            if "sumo" in str(args).lower():
+                forbidden(f"subprocess.Popen({args!r})")()
+            super().__init__(args, *a, **k)
+
+    monkeypatch.setattr(subprocess, "Popen", NoSumoPopen)
+
+    checkpoint_path = _make_checkpoint(tmp_path)
+    latent_path = _make_latent_episodes(tmp_path, episode_lengths=[20, 20])
+    env = DreamEnvironment(checkpoint_path, latent_path, max_dream_steps=5)
+
+    env.reset(seed=0)
+    truncated = False
+    while not truncated:
+        _, _, _, truncated, info = env.step(1)
+        assert info["imagined"] is True
+
+    PPO("MlpPolicy", env, n_steps=16, batch_size=8, n_epochs=1, seed=0, verbose=0).learn(total_timesteps=48)
+
+    assert calls == []

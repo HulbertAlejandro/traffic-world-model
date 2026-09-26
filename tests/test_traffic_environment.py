@@ -96,3 +96,32 @@ def test_reward_config_selects_the_phase_penalty():
     for (_, default_reward, *_, info), (_, switch_reward, *_) in zip(default_steps, switch_steps):
         expected_gap = delta * (info["phase_change"] - info["phase_switched"])
         assert switch_reward - default_reward == pytest.approx(expected_gap)
+
+
+def test_arrivals_total_matches_an_independent_per_second_count():
+    """info["arrivals_total"] must equal the arrivals counted second by second
+    over the whole control interval (a step runs delta_time simulated seconds).
+    The legacy info["throughput"] only saw the last second of each interval."""
+    env = TrafficEnvironment()
+    try:
+        env.reset(seed=123)
+        sumo_env = env.env
+        per_second = {"arrived": 0}
+        original_step = sumo_env._sumo_step
+
+        def counting_step():
+            original_step()
+            per_second["arrived"] += sumo_env.sumo.simulation.getArrivedNumber()
+
+        sumo_env._sumo_step = counting_step
+        reported = []
+        for step in range(20):
+            before = per_second["arrived"]
+            *_, info = env.step(step % 2)
+            reported.append(info["arrivals_total"])
+            assert info["arrivals_total"] == per_second["arrived"] - before
+    finally:
+        env.close()
+
+    # Sanity check: the 20 steps (100 simulated seconds) really had arrivals to count.
+    assert sum(reported) > 0
