@@ -28,7 +28,7 @@ CKPT is a best_model.zip or a folder containing one; each CKPT is one training s
 
 Example (the protocol used throughout the project: seed bases 3000 and 5000, 15 episodes each):
     python scripts/evaluate_multiseed_statistical.py \\
-        --policy sueno=dream:models/checkpoints/controller/best_model_seed0_worse.zip,models/checkpoints/controller/best_model.zip,models/checkpoints/controller/best_model_seed2.zip \\
+        --policy sueno=dream:models/checkpoints/controller/best_model_seed0_worse.zip,models/checkpoints/controller/best_model_seed1.zip,models/checkpoints/controller/best_model.zip \\
         --policy directo_10k=direct:models/checkpoints/controller_direct_fixed/seed0,models/checkpoints/controller_direct_fixed/seed1,models/checkpoints/controller_direct_fixed/seed2 \\
         --policy tiempo_fijo=fixed --policy regla=rule \\
         --compare sueno:directo_10k --output docs/results/multiseed_official_scenarios

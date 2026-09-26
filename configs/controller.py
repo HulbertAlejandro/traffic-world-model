@@ -14,10 +14,15 @@ class ControllerConfig:
     total_timesteps can be generous without a real time cost.
     """
 
-    # 1, not 0: the Dream-trained PPO with reward normalization was verified with
-    # training seeds 0, 1 and 2 (seed_base=3000: -351.61, -291.26, -289.04);
-    # seed 1 was adopted as the official checkpoint, so re-training reproduces it.
-    seed: int = 1
+    # 2: the Dream-trained PPO with reward normalization was verified with training
+    # seeds 0, 1 and 2; mean over the 30 official evaluation episodes (seed_base
+    # 3000 and 5000): -345.42, -328.13, -306.82. Seed 2 is the official checkpoint
+    # (best on those scenarios, the criterion also applied to direct RL), so
+    # re-training with the default reproduces it. Seed 1 was official before this
+    # correction, chosen by looking at seed_base=3000 alone. Results are always
+    # reported as the mean of the three seeds; "official" only names the
+    # checkpoint that single-checkpoint scripts load.
+    seed: int = 2
     total_timesteps: int = 50_000
     learning_rate: float = 3e-4
     n_steps: int = 256
