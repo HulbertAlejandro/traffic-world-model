@@ -31,8 +31,11 @@ por semilla).
 
 ## Instalación
 
-Requiere Python 3.11 y [SUMO](https://eclipse.dev/sumo/) instalado, con la variable de
-entorno `SUMO_HOME` apuntando a su carpeta de instalación.
+Requiere Python 3.11 (los resultados se obtuvieron con 3.11.9) y
+[SUMO](https://eclipse.dev/sumo/) **1.27.1**, que se instala aparte con el instalador oficial
+de SUMO, no con pip. La variable de entorno `SUMO_HOME` debe apuntar a su carpeta de
+instalación. `requirements.txt` fija las versiones exactas de las librerías de Python; `traci`
+y `sumolib` deben coincidir con la versión de SUMO instalada.
 
 ```powershell
 python -m venv .venv
