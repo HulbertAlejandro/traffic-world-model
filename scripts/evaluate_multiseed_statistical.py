@@ -210,7 +210,7 @@ def build_action_functions(policy: Policy, encoded_env) -> list[tuple[str, calla
 
 def run_episode(raw_env, action_fn, scenario_seed: int) -> dict:
     state, _ = raw_env.reset(seed=scenario_seed)
-    total_reward = total_waiting = total_queue = 0.0
+    total_reward = total_waiting = total_queue = total_arrivals = 0.0
     switches = step = 0
     terminated = truncated = False
     while not (terminated or truncated):
@@ -218,12 +218,14 @@ def run_episode(raw_env, action_fn, scenario_seed: int) -> dict:
         total_reward += reward
         total_waiting += info["waiting_total"]
         total_queue += info["queue_total"]
+        total_arrivals += info["arrivals_total"]
         switches += int(info["phase_switched"])
         step += 1
     return {
         "reward": float(total_reward),
         "waiting_mean": total_waiting / step,
         "queue_mean": total_queue / step,
+        "arrivals": total_arrivals,
         "phase_switches": switches,
         "steps": step,
     }
@@ -254,6 +256,7 @@ def summarize(episodes: list[dict], policy_names: list[str], scenarios: list[int
             "worst": float(rewards.min()),
             "waiting_mean": float(np.mean([e["waiting_mean"] for e in rows])),
             "queue_mean": float(np.mean([e["queue_mean"] for e in rows])),
+            "arrivals_mean": float(np.mean([e["arrivals"] for e in rows])),
             "per_scenario_mean": [
                 float(np.mean([e["reward"] for e in rows if e["scenario_seed"] == sc])) for sc in scenarios
             ],
@@ -297,14 +300,16 @@ def print_report(summary: dict, comparisons: list[dict], scenarios: list[int]) -
     print()
     print(f"Escenarios: {len(scenarios)} semillas de SUMO ({scenarios[0]}..{scenarios[-1]})")
     header = (f"{'Politica':16s} | {'sem.':>4s} | {'ep.':>4s} | {'media':>9s} | {'mediana':>9s} | {'desv':>8s} | "
-              f"{'desv medias/sem.':>16s} | {'<-600':>5s} | {'peor':>9s} | {'espera':>6s} | {'cola':>5s} | medias por semilla")
+              f"{'desv medias/sem.':>16s} | {'<-600':>5s} | {'peor':>9s} | {'espera':>6s} | {'cola':>5s} | {'llegadas':>8s} | "
+              "medias por semilla")
     print(header)
     print("-" * len(header))
     for name, s in summary.items():
         std_seeds = f"{s['std_of_seed_means']:.1f}" if s["std_of_seed_means"] is not None else "-"
         print(f"{name:16s} | {s['n_seeds']:4d} | {s['n_episodes']:4d} | {s['mean']:9.2f} | {s['median']:9.2f} | "
               f"{s['std']:8.2f} | {std_seeds:>16s} | {s['catastrophic']:5d} | {s['worst']:9.1f} | "
-              f"{s['waiting_mean']:6.2f} | {s['queue_mean']:5.2f} | {[round(m, 2) for m in s['seed_means']]}")
+              f"{s['waiting_mean']:6.2f} | {s['queue_mean']:5.2f} | {s['arrivals_mean']:8.2f} | "
+              f"{[round(m, 2) for m in s['seed_means']]}")
     for c in comparisons:
         sa, sb = summary[c["a"]], summary[c["b"]]
         w = c["a_beats_b_same_scenario"]
@@ -326,7 +331,7 @@ def save_results(output: Path, args_record: dict, episodes, summary, comparisons
     payload = {"arguments": args_record, "summary": summary, "comparisons": comparisons, "episodes": episodes}
     output.with_suffix(".json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
     fields = ["policy", "kind", "seed_label", "scenario_seed", "reward", "waiting_mean", "queue_mean",
-              "phase_switches", "steps"]
+              "arrivals", "phase_switches", "steps"]
     with output.with_suffix(".csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()

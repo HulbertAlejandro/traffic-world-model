@@ -26,10 +26,13 @@ class ProjectRewardFunction:
     ``info["phase_switched"]``, 1.0 only when the green phase really changed.
     Both keys are set by TrafficEnvironment.step().
 
-    The throughput term is intentionally based on arrivals completed in the last
-    control interval, not on the instantaneous number of vehicles present in the
-    lanes. The latter is a congestion signal and would reward accumulation rather
-    than throughput.
+    The throughput term reads ``info["throughput"]``, which was meant to count the
+    arrivals of the control interval but, because of how it is measured (see
+    TrafficEnvironment.step), is only ~13% of them and behaves as noise of about
+    0.2 per step against rewards averaging about -43. It is kept unchanged because
+    every dataset and trained model used it; with gamma=1 its weight in the reward
+    is negligible. The correct arrivals count is ``info["arrivals_total"]``,
+    reported but not rewarded.
     """
 
     def __init__(self, config: RewardConfig | None = None) -> None:

@@ -45,6 +45,7 @@ class TrafficEnvironment(gym.Env):
         self._last_reward = 0.0
         self._last_info: dict = {}
         self._last_arrived_count = 0
+        self._ended_count = 0
         self._observation_space: gym.spaces.Box | None = None
 
     ####################################################################
@@ -58,6 +59,7 @@ class TrafficEnvironment(gym.Env):
 
         if self._env.sumo is not None:
             self._last_arrived_count = int(self._env.sumo.simulation.getArrivedNumber())
+            self._ended_count = self._ended_vehicles()
 
         state_obj = self.state_builder.build_state(sumo_rl_env=self._env)
         state = state_obj.to_vector()
@@ -100,15 +102,30 @@ class TrafficEnvironment(gym.Env):
         info["phase_change"] = float(int(action == 1))
         info["phase_switched"] = float(traffic_signal.green_phase != green_before)
 
-        # Throughput = vehicles that actually left the network in this control
-        # interval (arrivals), not vehicles currently sitting in a lane. The
-        # latter is a congestion signal and would reward accumulation.
+        # info["throughput"] -- LEGACY, kept unchanged because the reward's gamma term
+        # uses it and every dataset and trained model was produced with it. It was
+        # meant to be the arrivals of the control interval, but getArrivedNumber()
+        # returns only the arrivals of the LAST simulated second (a step runs
+        # delta_time=5 of them), so this is the difference between the arrivals of
+        # two single seconds, clipped at 0: ~13% of the real arrivals, not a flow
+        # measure. Do not report it as throughput.
+        #
+        # info["arrivals_total"] -- the correct measure: vehicles that reached their
+        # destination during the WHOLE control interval of this step. SUMO counts
+        # inserted and still-running vehicles cumulatively, so inserted - running is
+        # the number of vehicles that have ended their trip; teleports are disabled
+        # (sumo_rl's time_to_teleport=-1) and there are no collisions, so every
+        # ended vehicle arrived. Not used by the reward.
         if self._env.sumo is not None:
             arrived_now = int(self._env.sumo.simulation.getArrivedNumber())
             info["throughput"] = float(max(0, arrived_now - self._last_arrived_count))
             self._last_arrived_count = arrived_now
+            ended_now = self._ended_vehicles()
+            info["arrivals_total"] = float(ended_now - self._ended_count)
+            self._ended_count = ended_now
         else:
             info["throughput"] = 0.0
+            info["arrivals_total"] = 0.0
 
         # Read aggregate metrics from the structured state object instead of
         # slicing the flat vector by hardcoded index ranges. This keeps the
@@ -128,6 +145,13 @@ class TrafficEnvironment(gym.Env):
     ####################################################################
     # API del proyecto
     ####################################################################
+
+    def _ended_vehicles(self) -> int:
+        """Vehicles that have ended their trip since the simulation started."""
+        simulation = self._env.sumo.simulation
+        inserted = int(simulation.getParameter("", "stats.vehicles.inserted"))
+        running = int(simulation.getParameter("", "stats.vehicles.running"))
+        return inserted - running
 
     def get_state(self):
         """Devuelve el estado actual (vector) construido mediante TraCI."""

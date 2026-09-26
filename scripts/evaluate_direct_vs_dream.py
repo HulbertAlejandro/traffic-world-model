@@ -47,7 +47,7 @@ def run_policy(env, policy_fn, num_episodes, seed_base):
             total_reward += reward
             total_waiting += info.get("waiting_total", 0.0)
             total_queue += info.get("queue_total", 0.0)
-            total_throughput += info.get("throughput", 0.0)
+            total_throughput += info["arrivals_total"]  # vehicles that arrived; not the legacy info["throughput"]
             step += 1
         rewards.append(total_reward)
         waiting.append(total_waiting / max(step, 1))
@@ -88,7 +88,7 @@ def main() -> None:
 
     for seed_base in SEED_BASES:
         print(f"\n=== Evaluacion con seed_base={seed_base} ===")
-        print(f"{'Politica':35s} | {'reward':>18s} | {'espera_prom':>16s} | {'cola_prom':>14s} | {'throughput':>14s}")
+        print(f"{'Politica':35s} | {'reward':>18s} | {'espera_prom':>16s} | {'cola_prom':>14s} | {'llegadas':>14s}")
         print("-" * 110)
 
         for name, env, policy_fn in [

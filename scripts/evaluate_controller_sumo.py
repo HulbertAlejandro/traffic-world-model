@@ -1,7 +1,7 @@
 """Evaluate the Dream-trained PPO controller against SUMO real, comparing
 against a fixed-time baseline and a random baseline (Sección 18 of the
 proposal). Uses REAL traffic metrics from TrafficEnvironment (waiting time,
-queue length, throughput), not just abstract reward -- this is the
+queue length, arrivals), not just abstract reward -- this is the
 evaluation that actually validates (or invalidates) everything built so far.
 """
 
@@ -39,7 +39,7 @@ def run_policy(env, policy_fn, num_episodes, seed_base=3000):
             total_reward += reward
             total_waiting += info.get("waiting_total", 0.0)
             total_queue += info.get("queue_total", 0.0)
-            total_throughput += info.get("throughput", 0.0)
+            total_throughput += info["arrivals_total"]  # vehicles that arrived; not the legacy info["throughput"]
             step += 1
         rewards.append(total_reward)
         waiting.append(total_waiting / max(step, 1))
@@ -77,7 +77,7 @@ def main() -> None:
     }
 
     print("Evaluando contra SUMO REAL (no Dream Environment) -- esto es lo que realmente importa.")
-    print(f"{'Politica':30s} | {'reward':>16s} | {'espera_prom':>16s} | {'cola_prom':>14s} | {'throughput':>14s}")
+    print(f"{'Politica':30s} | {'reward':>16s} | {'espera_prom':>16s} | {'cola_prom':>14s} | {'llegadas':>14s}")
     print("-" * 105)
 
     per_policy_rewards = {}
