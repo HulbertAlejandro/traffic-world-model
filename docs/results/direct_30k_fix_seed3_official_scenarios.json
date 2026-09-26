@@ -1,0 +1,854 @@
+{
+  "arguments": {
+    "policies": [
+      {
+        "name": "directo_30k_fix_s3",
+        "kind": "direct",
+        "checkpoints": [
+          "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip"
+        ]
+      },
+      {
+        "name": "tiempo_fijo",
+        "kind": "fixed",
+        "checkpoints": []
+      }
+    ],
+    "seed_bases": [
+      3000,
+      5000
+    ],
+    "episodes_per_base": 15,
+    "scenarios": [
+      3000,
+      3001,
+      3002,
+      3003,
+      3004,
+      3005,
+      3006,
+      3007,
+      3008,
+      3009,
+      3010,
+      3011,
+      3012,
+      3013,
+      3014,
+      5000,
+      5001,
+      5002,
+      5003,
+      5004,
+      5005,
+      5006,
+      5007,
+      5008,
+      5009,
+      5010,
+      5011,
+      5012,
+      5013,
+      5014
+    ]
+  },
+  "summary": {
+    "directo_30k_fix_s3": {
+      "n_episodes": 30,
+      "n_seeds": 1,
+      "mean": -446.7433333333334,
+      "median": -273.5999999999999,
+      "std": 371.8201137956209,
+      "stderr": 67.88475455333312,
+      "seed_labels": [
+        "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip"
+      ],
+      "seed_means": [
+        -446.7433333333334
+      ],
+      "std_of_seed_means": null,
+      "catastrophic": 9,
+      "worst": -1695.099999999999,
+      "waiting_mean": 6.1772222222222215,
+      "queue_mean": 1.4388888888888889,
+      "per_scenario_mean": [
+        -131.2,
+        -609.2000000000002,
+        -736.3000000000004,
+        -255.39999999999998,
+        -829.6000000000003,
+        -490.9000000000003,
+        -183.29999999999998,
+        -165.59999999999994,
+        -215.59999999999994,
+        -766.1000000000004,
+        -143.19999999999996,
+        -275.5999999999999,
+        -177.29999999999995,
+        -271.59999999999997,
+        -147.09999999999997,
+        -1160.4,
+        -245.79999999999993,
+        -237.39999999999995,
+        -352.8,
+        -747.9000000000003,
+        -321.4,
+        -305.6,
+        -173.29999999999995,
+        -971.0000000000005,
+        -304.90000000000003,
+        -186.49999999999994,
+        -266.5999999999999,
+        -1695.099999999999,
+        -856.1000000000004,
+        -179.49999999999997
+      ]
+    },
+    "tiempo_fijo": {
+      "n_episodes": 30,
+      "n_seeds": 1,
+      "mean": -411.2666666666668,
+      "median": -399.70000000000005,
+      "std": 52.634021600909975,
+      "stderr": 9.609613641010856,
+      "seed_labels": [
+        "deterministic"
+      ],
+      "seed_means": [
+        -411.2666666666668
+      ],
+      "std_of_seed_means": null,
+      "catastrophic": 0,
+      "worst": -592.2,
+      "waiting_mean": 5.580555555555554,
+      "queue_mean": 1.478888888888889,
+      "per_scenario_mean": [
+        -360.20000000000005,
+        -383.20000000000005,
+        -364.20000000000005,
+        -369.20000000000005,
+        -421.20000000000005,
+        -592.2,
+        -397.20000000000005,
+        -427.2000000000001,
+        -372.20000000000005,
+        -343.20000000000005,
+        -362.20000000000005,
+        -404.20000000000005,
+        -369.20000000000005,
+        -374.20000000000005,
+        -416.20000000000005,
+        -402.20000000000005,
+        -425.20000000000005,
+        -393.20000000000005,
+        -446.20000000000005,
+        -413.20000000000005,
+        -537.2,
+        -362.20000000000005,
+        -458.20000000000005,
+        -423.2000000000001,
+        -456.20000000000005,
+        -397.20000000000005,
+        -458.2000000000001,
+        -387.20000000000005,
+        -426.20000000000005,
+        -396.20000000000005
+      ]
+    }
+  },
+  "comparisons": [
+    {
+      "a": "directo_30k_fix_s3",
+      "b": "tiempo_fijo",
+      "mean_diff": -35.476666666666574,
+      "episode_level_welch": {
+        "t": -0.5174426856730014,
+        "df": 30.161772225102947,
+        "p": 0.6086215782667252
+      },
+      "episode_level_mann_whitney": {
+        "U": 601.0,
+        "z": 2.2325412886224085,
+        "p": 0.025579209538452698
+      },
+      "seed_level_welch": {
+        "t": null,
+        "df": null,
+        "p": null,
+        "note": "needs >= 2 values per group"
+      },
+      "paired_by_scenario": {
+        "t": -0.5151852798900411,
+        "df": 29,
+        "p": 0.6103285886779848,
+        "mean_diff": -35.47666666666666
+      },
+      "a_beats_b_same_scenario": {
+        "wins": 21,
+        "comparisons": 30
+      }
+    }
+  ],
+  "episodes": [
+    {
+      "reward": -131.2,
+      "waiting_mean": 1.8333333333333333,
+      "queue_mean": 0.5666666666666667,
+      "phase_switches": 14,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3000
+    },
+    {
+      "reward": -609.2000000000002,
+      "waiting_mean": 8.4,
+      "queue_mean": 1.9833333333333334,
+      "phase_switches": 20,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3001
+    },
+    {
+      "reward": -736.3000000000004,
+      "waiting_mean": 10.216666666666667,
+      "queue_mean": 2.183333333333333,
+      "phase_switches": 20,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3002
+    },
+    {
+      "reward": -255.39999999999998,
+      "waiting_mean": 3.5833333333333335,
+      "queue_mean": 0.9333333333333333,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3003
+    },
+    {
+      "reward": -829.6000000000003,
+      "waiting_mean": 11.266666666666667,
+      "queue_mean": 2.7,
+      "phase_switches": 24,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3004
+    },
+    {
+      "reward": -490.9000000000003,
+      "waiting_mean": 6.766666666666667,
+      "queue_mean": 1.5833333333333333,
+      "phase_switches": 21,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3005
+    },
+    {
+      "reward": -183.29999999999998,
+      "waiting_mean": 2.5166666666666666,
+      "queue_mean": 0.7333333333333333,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3006
+    },
+    {
+      "reward": -165.59999999999994,
+      "waiting_mean": 2.216666666666667,
+      "queue_mean": 0.7166666666666667,
+      "phase_switches": 17,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3007
+    },
+    {
+      "reward": -215.59999999999994,
+      "waiting_mean": 2.9166666666666665,
+      "queue_mean": 0.8,
+      "phase_switches": 17,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3008
+    },
+    {
+      "reward": -766.1000000000004,
+      "waiting_mean": 10.583333333333334,
+      "queue_mean": 2.3,
+      "phase_switches": 20,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3009
+    },
+    {
+      "reward": -143.19999999999996,
+      "waiting_mean": 1.9166666666666667,
+      "queue_mean": 0.6166666666666667,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3010
+    },
+    {
+      "reward": -275.5999999999999,
+      "waiting_mean": 3.7333333333333334,
+      "queue_mean": 1.0166666666666666,
+      "phase_switches": 18,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3011
+    },
+    {
+      "reward": -177.29999999999995,
+      "waiting_mean": 2.45,
+      "queue_mean": 0.6833333333333333,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3012
+    },
+    {
+      "reward": -271.59999999999997,
+      "waiting_mean": 3.716666666666667,
+      "queue_mean": 0.95,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3013
+    },
+    {
+      "reward": -147.09999999999997,
+      "waiting_mean": 2.1333333333333333,
+      "queue_mean": 0.5333333333333333,
+      "phase_switches": 14,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 3014
+    },
+    {
+      "reward": -1160.4,
+      "waiting_mean": 16.25,
+      "queue_mean": 3.183333333333333,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5000
+    },
+    {
+      "reward": -245.79999999999993,
+      "waiting_mean": 3.3,
+      "queue_mean": 0.9833333333333333,
+      "phase_switches": 19,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5001
+    },
+    {
+      "reward": -237.39999999999995,
+      "waiting_mean": 3.25,
+      "queue_mean": 0.9166666666666666,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5002
+    },
+    {
+      "reward": -352.8,
+      "waiting_mean": 4.733333333333333,
+      "queue_mean": 1.3,
+      "phase_switches": 18,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5003
+    },
+    {
+      "reward": -747.9000000000003,
+      "waiting_mean": 10.3,
+      "queue_mean": 2.35,
+      "phase_switches": 20,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5004
+    },
+    {
+      "reward": -321.4,
+      "waiting_mean": 4.416666666666667,
+      "queue_mean": 1.0833333333333333,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5005
+    },
+    {
+      "reward": -305.6,
+      "waiting_mean": 4.2,
+      "queue_mean": 1.15,
+      "phase_switches": 18,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5006
+    },
+    {
+      "reward": -173.29999999999995,
+      "waiting_mean": 2.316666666666667,
+      "queue_mean": 0.7333333333333333,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5007
+    },
+    {
+      "reward": -971.0000000000005,
+      "waiting_mean": 13.75,
+      "queue_mean": 2.5166666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5008
+    },
+    {
+      "reward": -304.90000000000003,
+      "waiting_mean": 4.066666666666666,
+      "queue_mean": 1.2,
+      "phase_switches": 19,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5009
+    },
+    {
+      "reward": -186.49999999999994,
+      "waiting_mean": 2.5166666666666666,
+      "queue_mean": 0.75,
+      "phase_switches": 17,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5010
+    },
+    {
+      "reward": -266.5999999999999,
+      "waiting_mean": 3.6666666666666665,
+      "queue_mean": 0.9833333333333333,
+      "phase_switches": 16,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5011
+    },
+    {
+      "reward": -1695.099999999999,
+      "waiting_mean": 24.016666666666666,
+      "queue_mean": 4.3,
+      "phase_switches": 25,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5012
+    },
+    {
+      "reward": -856.1000000000004,
+      "waiting_mean": 11.816666666666666,
+      "queue_mean": 2.65,
+      "phase_switches": 21,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5013
+    },
+    {
+      "reward": -179.49999999999997,
+      "waiting_mean": 2.466666666666667,
+      "queue_mean": 0.7666666666666667,
+      "phase_switches": 17,
+      "steps": 60,
+      "policy": "directo_30k_fix_s3",
+      "kind": "direct",
+      "seed_label": "models/checkpoints/controller_direct_30k_fixed/seed3/best_model.zip",
+      "scenario_seed": 5014
+    },
+    {
+      "reward": -360.20000000000005,
+      "waiting_mean": 4.933333333333334,
+      "queue_mean": 1.35,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3000
+    },
+    {
+      "reward": -383.20000000000005,
+      "waiting_mean": 5.283333333333333,
+      "queue_mean": 1.3666666666666667,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3001
+    },
+    {
+      "reward": -364.20000000000005,
+      "waiting_mean": 4.966666666666667,
+      "queue_mean": 1.35,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3002
+    },
+    {
+      "reward": -369.20000000000005,
+      "waiting_mean": 4.983333333333333,
+      "queue_mean": 1.3833333333333333,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3003
+    },
+    {
+      "reward": -421.20000000000005,
+      "waiting_mean": 5.683333333333334,
+      "queue_mean": 1.5166666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3004
+    },
+    {
+      "reward": -592.2,
+      "waiting_mean": 8.0,
+      "queue_mean": 2.05,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3005
+    },
+    {
+      "reward": -397.20000000000005,
+      "waiting_mean": 5.266666666666667,
+      "queue_mean": 1.4666666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3006
+    },
+    {
+      "reward": -427.2000000000001,
+      "waiting_mean": 5.8,
+      "queue_mean": 1.5,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3007
+    },
+    {
+      "reward": -372.20000000000005,
+      "waiting_mean": 5.066666666666666,
+      "queue_mean": 1.3166666666666667,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3008
+    },
+    {
+      "reward": -343.20000000000005,
+      "waiting_mean": 4.733333333333333,
+      "queue_mean": 1.2666666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3009
+    },
+    {
+      "reward": -362.20000000000005,
+      "waiting_mean": 4.933333333333334,
+      "queue_mean": 1.3833333333333333,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3010
+    },
+    {
+      "reward": -404.20000000000005,
+      "waiting_mean": 5.533333333333333,
+      "queue_mean": 1.4166666666666667,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3011
+    },
+    {
+      "reward": -369.20000000000005,
+      "waiting_mean": 4.966666666666667,
+      "queue_mean": 1.35,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3012
+    },
+    {
+      "reward": -374.20000000000005,
+      "waiting_mean": 5.066666666666666,
+      "queue_mean": 1.3666666666666667,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3013
+    },
+    {
+      "reward": -416.20000000000005,
+      "waiting_mean": 5.633333333333334,
+      "queue_mean": 1.4666666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 3014
+    },
+    {
+      "reward": -402.20000000000005,
+      "waiting_mean": 5.4,
+      "queue_mean": 1.4833333333333334,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5000
+    },
+    {
+      "reward": -425.20000000000005,
+      "waiting_mean": 5.75,
+      "queue_mean": 1.5,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5001
+    },
+    {
+      "reward": -393.20000000000005,
+      "waiting_mean": 5.316666666666666,
+      "queue_mean": 1.45,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5002
+    },
+    {
+      "reward": -446.20000000000005,
+      "waiting_mean": 6.166666666666667,
+      "queue_mean": 1.5333333333333334,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5003
+    },
+    {
+      "reward": -413.20000000000005,
+      "waiting_mean": 5.65,
+      "queue_mean": 1.4666666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5004
+    },
+    {
+      "reward": -537.2,
+      "waiting_mean": 7.2,
+      "queue_mean": 1.8833333333333333,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5005
+    },
+    {
+      "reward": -362.20000000000005,
+      "waiting_mean": 4.95,
+      "queue_mean": 1.3,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5006
+    },
+    {
+      "reward": -458.20000000000005,
+      "waiting_mean": 6.166666666666667,
+      "queue_mean": 1.6333333333333333,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5007
+    },
+    {
+      "reward": -423.2000000000001,
+      "waiting_mean": 5.816666666666666,
+      "queue_mean": 1.4833333333333334,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5008
+    },
+    {
+      "reward": -456.20000000000005,
+      "waiting_mean": 6.283333333333333,
+      "queue_mean": 1.5666666666666667,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5009
+    },
+    {
+      "reward": -397.20000000000005,
+      "waiting_mean": 5.35,
+      "queue_mean": 1.4666666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5010
+    },
+    {
+      "reward": -458.2000000000001,
+      "waiting_mean": 6.25,
+      "queue_mean": 1.6333333333333333,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5011
+    },
+    {
+      "reward": -387.20000000000005,
+      "waiting_mean": 5.166666666666667,
+      "queue_mean": 1.4166666666666667,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5012
+    },
+    {
+      "reward": -426.20000000000005,
+      "waiting_mean": 5.75,
+      "queue_mean": 1.5333333333333334,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5013
+    },
+    {
+      "reward": -396.20000000000005,
+      "waiting_mean": 5.35,
+      "queue_mean": 1.4666666666666666,
+      "phase_switches": 22,
+      "steps": 60,
+      "policy": "tiempo_fijo",
+      "kind": "fixed",
+      "seed_label": "deterministic",
+      "scenario_seed": 5014
+    }
+  ]
+}
