@@ -88,7 +88,7 @@ SUMO → Estado del tráfico (26 dims) → Autoencoder → z (16 dims)
 | Verificación del RL directo con 3x presupuesto (30,000 pasos) | ✅ Completo (checkpoints archivados, no oficiales) | — |
 | Demanda de tráfico variable en el tiempo | ⚪ No implementado | 0 |
 
-**62 tests automatizados, todos pasando**, distribuidos en 12 archivos dentro de `tests/`.
+**67 tests automatizados, todos pasando**, distribuidos en 13 archivos dentro de `tests/`.
 
 No existen `utils/`, `notebooks/`, `experiments/`, `papers/` ni ninguna carpeta `data/`: nunca se versionaron, y las carpetas vacías que quedaban en disco se eliminaron.
 
@@ -186,7 +186,7 @@ traffic-world-model/
 │   ├── test_environment.py               # prueba de humo manual
 │   └── visualize_dataset.py
 │
-├── tests/                           # Pruebas automatizadas (pytest) — 12 archivos, 62 funciones
+├── tests/                           # Pruebas automatizadas (pytest) — 13 archivos, 67 funciones
 │   ├── test_autoencoder.py
 │   ├── test_controller.py
 │   ├── test_dataset_pipeline.py
@@ -194,6 +194,7 @@ traffic-world-model/
 │   ├── test_encoded_traffic_environment.py
 │   ├── test_latent_sequence_dataset.py
 │   ├── test_reseeding_wrapper.py
+│   ├── test_reward_function.py
 │   ├── test_traffic_environment.py
 │   ├── test_world_model.py
 │   ├── test_world_model_evaluation.py
@@ -565,7 +566,7 @@ El LSTM tiene el menor error de predicción de recompensa (`reward_mse`) en los 
 
 ## 12. Tests
 
-**62 funciones de test, en 12 archivos, todas pasando.** Cubren desde el entorno de SUMO hasta la pila completa de `VecNormalize` sincronizada entre entrenamiento y evaluación.
+**67 funciones de test, en 13 archivos, todas pasando.** Cubren desde el entorno de SUMO hasta la pila completa de `VecNormalize` sincronizada entre entrenamiento y evaluación.
 
 ```powershell
 pytest -v
@@ -670,7 +671,7 @@ pytest -v
  Comparando, con el mismo modelo temporal, el error de predicción usando `z` contra el estado crudo — el Experimento 0.
 
 13. **¿Qué garantiza que el proyecto sea reproducible?**
- Semillas fijas, hiperparámetros junto a cada checkpoint, y 62 tests automatizados.
+ Semillas fijas, hiperparámetros junto a cada checkpoint, y 67 tests automatizados.
 
 14. **Entonces, ¿el World Model controla mejor que el RL directo?**
  Con el mismo presupuesto original, sí; pero con el triple de presupuesto el RL directo lo alcanza. Lo que el World Model demuestra es eficiencia: llega al mismo nivel de control con ~8.5 veces menos interacciones reales, que es justo lo que pregunta la pregunta de investigación.

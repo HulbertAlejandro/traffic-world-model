@@ -111,7 +111,7 @@ Los pasos 3 y 4 son experimentos de validación y no los necesitan los pasos 5 y
 pytest -v
 ```
 
-62 tests en 12 archivos.
+67 tests en 13 archivos.
 
 ## Documentación
 

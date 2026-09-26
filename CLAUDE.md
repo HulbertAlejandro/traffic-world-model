@@ -171,7 +171,7 @@ scripts/        datos: collect_dataset.py, split_dataset.py, merge_dataset.py, n
                 control: evaluate_controller.py, evaluate_controller_sumo.py,
                   evaluate_direct_vs_dream.py, evaluate_final_comparison.py,
                   analyze_controller_actions.py
-tests/          12 archivos, 62 tests (pytest -v)
+tests/          13 archivos, 67 tests (pytest -v)
 ver_controlador.py (demo del PPO del sueño en la GUI de SUMO), CLAUDE.md, PROJECT_STATUS.md,
 TODO.md, README.md, pytest.ini, requirements.txt, .gitignore, LICENSE
 ```
