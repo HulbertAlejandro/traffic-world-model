@@ -21,7 +21,10 @@ def test_defaults_match_the_official_run():
     assert not args.overwrite and not args.overwrite_official
 
 
-@pytest.mark.parametrize("folder", ["controller_direct", "controller_direct_30k"])
+@pytest.mark.parametrize(
+    "folder",
+    ["controller_direct", "controller_direct_30k", "controller_direct_prefix_bug", "controller_direct_30k_prefix_bug"],
+)
 def test_official_folders_are_refused_even_with_overwrite(folder):
     with pytest.raises(SystemExit):
         check_output_dir(CHECKPOINT_DIR / folder, overwrite=True, overwrite_official=False)

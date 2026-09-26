@@ -19,7 +19,8 @@ Usage (defaults reproduce the official run: seed 0, 10,000 steps):
     python training/train_controller_direct.py --seed 1 --total-timesteps 30000 --output-dir <folder>
 
 The run refuses to write into a folder that already holds any file it would
-produce, and into the official folders (controller_direct/, controller_direct_30k/)
+produce, and into the official and archived folders (controller_direct/,
+controller_direct_30k/ and their *_prefix_bug/ archives)
 at all, unless the matching flag is passed explicitly (--overwrite,
 --overwrite-official). Running it with no arguments therefore stops instead of
 replacing the official checkpoint.
@@ -56,7 +57,12 @@ from training.train_controller import (
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints"
 CONTROLLER_DIRECT_DIR = CHECKPOINT_DIR / "controller_direct"
 # Official / archived result folders: never written without --overwrite-official.
-PROTECTED_DIRS = (CONTROLLER_DIRECT_DIR, CHECKPOINT_DIR / "controller_direct_30k")
+PROTECTED_DIRS = (
+    CONTROLLER_DIRECT_DIR,
+    CHECKPOINT_DIR / "controller_direct_30k",
+    CHECKPOINT_DIR / "controller_direct_prefix_bug",
+    CHECKPOINT_DIR / "controller_direct_30k_prefix_bug",
+)
 # Every file this script (and its EvalCallback) writes into the output folder.
 OUTPUT_FILES = (
     "best_model.zip",
@@ -100,7 +106,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--overwrite", action="store_true", help="allow replacing files already in --output-dir")
     parser.add_argument(
         "--overwrite-official", action="store_true",
-        help="allow writing into controller_direct/ or controller_direct_30k/",
+        help="allow writing into controller_direct/, controller_direct_30k/ or their *_prefix_bug/ archives",
     )
     return parser.parse_args(argv)
 
