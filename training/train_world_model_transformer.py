@@ -38,6 +38,7 @@ from training.train_world_model import (
     PROCESSED_DIR,
     RESULTS_DIR,
     SEED,
+    WEIGHT_DECAY,
     _set_seeds,
     train_one_epoch,
     validate,
@@ -118,7 +119,7 @@ def main() -> None:
         dropout=DROPOUT,
     ).to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
     train_losses, validation_losses = [], []
     best_validation_loss = float("inf")

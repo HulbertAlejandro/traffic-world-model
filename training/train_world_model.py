@@ -39,6 +39,7 @@ BATCH_SIZE = 32
 EPOCHS = 100
 EARLY_STOPPING_PATIENCE = 15
 REWARD_LOSS_WEIGHT = 1.0
+WEIGHT_DECAY = 1e-4
 
 
 def _set_seeds(seed: int) -> None:
@@ -158,7 +159,7 @@ def main() -> None:
         sequence_length=config.sequence_length,
     ).to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
     train_losses, validation_losses = [], []
     best_validation_loss = float("inf")

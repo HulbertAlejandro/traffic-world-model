@@ -1,27 +1,33 @@
 """Training loop for the latent dynamics model (LatentDynamicsLSTM) on raw state.
 
-Experimento 0: mirrors training/train_world_model.py exactly, except the
-input representation. Instead of the Autoencoder's learned z, the LSTM is
-fed the raw normalized state (26 dims) directly, via the *_raw_seq.npz
-files produced by scripts/prepare_raw_sequence_dataset.py. Seeds, epochs,
-batch size, learning rate and reward loss weight are identical to
-train_world_model.py so the only real difference between the two
-experiments is the input representation, not the model's capacity or
-training regime -- see PROJECT_STATUS.md / TODO.md for the comparison
-this feeds into.
+Experimento 0: same model and same training protocol as
+training/train_world_model.py, except the input representation. Instead of the
+Autoencoder's learned z, the LSTM is fed the raw normalized state (26 dims)
+directly, via the *_raw_seq.npz files produced by
+scripts/prepare_raw_sequence_dataset.py.
+
+The protocol (seed, learning rate, batch size, epochs, weight decay, early
+stopping, loss and reward normalization) is IMPORTED from train_world_model.py
+rather than copied, the same pattern the Transformer and TSMixer scripts use, so
+the two branches of the experiment cannot drift apart. An earlier version copied
+the loop and was left without weight_decay and early stopping when those were
+added to the z branch.
+
+The reward scaler is fitted on this branch's own training split (same rewards
+as the z branch) and saved under models/checkpoints/raw_state/, so that
+evaluation.world_model_evaluation.load_reward_scaler() never mixes the two.
 """
 
 from __future__ import annotations
 
 import json
-import random
 import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from torch import nn, optim
+from torch import optim
 from torch.utils.data import DataLoader
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -31,90 +37,31 @@ if str(ROOT_DIR) not in sys.path:
 from configs import WorldModelConfig
 from datasets.latent_sequence_dataset import LatentSequenceDataset
 from models.world_model import LatentDynamicsLSTM
+from training.train_world_model import (
+    BATCH_SIZE,
+    EARLY_STOPPING_PATIENCE,
+    EPOCHS,
+    LEARNING_RATE,
+    PROCESSED_DIR,
+    RESULTS_DIR,
+    SEED,
+    WEIGHT_DECAY,
+    _set_seeds,
+    compute_reward_scaler,
+    save_reward_scaler,
+    train_one_epoch,
+    validate,
+)
 
-PROCESSED_DIR = ROOT_DIR / "datasets" / "processed"
 # Separate subfolder from the z-based experiment's checkpoints: it keeps this
 # experiment's reward_scaler.json from being picked up by
 # evaluation.world_model_evaluation.load_reward_scaler(), which looks for a
 # fixed filename next to the checkpoint it is given.
 CHECKPOINT_DIR = ROOT_DIR / "models" / "checkpoints" / "raw_state"
-RESULTS_DIR = ROOT_DIR / "results"
 CHECKPOINT_DIR.mkdir(parents=True, exist_ok=True)
-RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
-SEED = 0
-LEARNING_RATE = 1e-3
-BATCH_SIZE = 32
-EPOCHS = 100
-REWARD_LOSS_WEIGHT = 1.0
 SEQUENCE_LENGTH = 16
 ACTION_DIM = 2
-
-
-def _set_seeds(seed: int) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
-
-
-def compute_reward_scaler(train_raw_seq_path: Path) -> dict[str, float]:
-    """Fit reward mean/std using ONLY the training split, same principle
-    already used for state normalization in scripts/normalize_dataset.py."""
-    with np.load(train_raw_seq_path) as data:
-        rewards = data["rewards"].astype(np.float32)
-    reward_mean = float(rewards.mean())
-    reward_std = float(rewards.std())
-    if reward_std < 1e-8:
-        reward_std = 1.0
-    return {"reward_mean": reward_mean, "reward_std": reward_std}
-
-
-def save_reward_scaler(scaler: dict[str, float], path: Path) -> None:
-    path.write_text(json.dumps(scaler, indent=2), encoding="utf-8")
-
-
-def train_one_epoch(model, loader, optimizer, device, reward_mean, reward_std) -> float:
-    model.train()
-    total_loss = 0.0
-    for latent_window, action_window, target_latent, target_reward, _, _ in loader:
-        latent_window = latent_window.to(device)
-        action_window = action_window.to(device)
-        target_latent = target_latent.to(device)
-        target_reward = target_reward.to(device)
-        target_reward_normalized = (target_reward - reward_mean) / reward_std
-
-        optimizer.zero_grad()
-        pred_latent, pred_reward = model(latent_window, action_window)
-        loss = nn.functional.mse_loss(pred_latent, target_latent) + REWARD_LOSS_WEIGHT * nn.functional.mse_loss(
-            pred_reward, target_reward_normalized
-        )
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item() * latent_window.size(0)
-
-    return total_loss / len(loader.dataset)
-
-
-@torch.no_grad()
-def validate(model, loader, device, reward_mean, reward_std) -> float:
-    model.eval()
-    total_loss = 0.0
-    for latent_window, action_window, target_latent, target_reward, _, _ in loader:
-        latent_window = latent_window.to(device)
-        action_window = action_window.to(device)
-        target_latent = target_latent.to(device)
-        target_reward = target_reward.to(device)
-        target_reward_normalized = (target_reward - reward_mean) / reward_std
-
-        pred_latent, pred_reward = model(latent_window, action_window)
-        loss = nn.functional.mse_loss(pred_latent, target_latent) + REWARD_LOSS_WEIGHT * nn.functional.mse_loss(
-            pred_reward, target_reward_normalized
-        )
-        total_loss += loss.item() * latent_window.size(0)
-
-    return total_loss / len(loader.dataset)
 
 
 def save_checkpoint(model, config: WorldModelConfig, path: Path) -> None:
@@ -170,10 +117,11 @@ def main() -> None:
         sequence_length=config.sequence_length,
     ).to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 
     train_losses, validation_losses = [], []
     best_validation_loss = float("inf")
+    epochs_without_improvement = 0
 
     for epoch in range(1, EPOCHS + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, device, reward_mean, reward_std)
@@ -186,8 +134,18 @@ def main() -> None:
         if validation_loss < best_validation_loss:
             best_validation_loss = validation_loss
             save_checkpoint(model, config, CHECKPOINT_DIR / "world_model_raw_best.pt")
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
 
         print(f"Epoch {epoch:03d} | train_loss={train_loss:.6f} | val_loss={validation_loss:.6f}")
+
+        if epochs_without_improvement >= EARLY_STOPPING_PATIENCE:
+            print(
+                f"Early stopping en época {epoch} (sin mejora en "
+                f"{EARLY_STOPPING_PATIENCE} épocas)."
+            )
+            break
 
     plt.figure(figsize=(6, 4))
     plt.plot(train_losses, label="Train Loss")
