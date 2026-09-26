@@ -1,4 +1,4 @@
-"""World-model configuration placeholders."""
+"""Configuration of the temporal model (LatentDynamicsLSTM and its Experimento 3 alternatives)."""
 
 from __future__ import annotations
 
@@ -9,12 +9,13 @@ from .representation import RepresentationConfig
 
 @dataclass(slots=True)
 class WorldModelConfig:
-    """Future world-model settings.
+    """Shape of the temporal model: latent_dim, action_dim, sequence_length, hidden_dim.
 
-    This class keeps the configuration structure ready for latent dynamics and
-    imagination-based planning without introducing any training logic yet.
-    The representation config remains the single source of truth for the latent
-    size used by the encoder.
+    Used by training/train_world_model.py (and by the Transformer, TSMixer and
+    raw-state trainings) to build the model; the values actually used are saved in
+    the .json next to each checkpoint. latent_dim is taken from the
+    RepresentationConfig when one is given, so the representation config remains
+    the single source of truth for the latent size produced by the encoder.
     """
 
     representation: RepresentationConfig | None = None

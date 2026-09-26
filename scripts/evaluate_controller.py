@@ -73,8 +73,8 @@ def main() -> None:
     policies = {
         "PPO (entrenado)": ppo_policy,
         "Accion aleatoria": lambda obs, step: int(np.random.randint(0, 2)),
-        "Siempre mantener (0)": lambda obs, step: 0,
-        "Siempre cambiar (1)": lambda obs, step: 1,
+        "Siempre pedir fase 0": lambda obs, step: 0,
+        "Siempre pedir fase 1": lambda obs, step: 1,
         "Alternando cada paso": lambda obs, step: step % 2,
     }
 
