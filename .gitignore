@@ -51,3 +51,10 @@ models/checkpoints/controller_direct_fixed/**/*.pkl
 models/checkpoints/controller_direct_30k_fixed/**/*.zip
 models/checkpoints/controller_direct_30k_fixed/**/*.npz
 models/checkpoints/controller_direct_30k_fixed/**/*.pkl
+# Direct-RL checkpoints trained BEFORE the TraCI connection fix (archived evidence)
+models/checkpoints/controller_direct_prefix_bug/*.zip
+models/checkpoints/controller_direct_prefix_bug/*.npz
+models/checkpoints/controller_direct_prefix_bug/*.pkl
+models/checkpoints/controller_direct_30k_prefix_bug/*.zip
+models/checkpoints/controller_direct_30k_prefix_bug/*.npz
+models/checkpoints/controller_direct_30k_prefix_bug/*.pkl
