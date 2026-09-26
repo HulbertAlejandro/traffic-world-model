@@ -1,0 +1,72 @@
+{
+  "1": {
+    "model_latent_mse": 0.0652437232694019,
+    "model_reward_mse": 63.43591195146049,
+    "baseline_latent_mse": 0.5570300186291719,
+    "baseline_reward_mse": 2130.944841542339,
+    "n_samples": 420
+  },
+  "2": {
+    "model_latent_mse": 0.09712168258843404,
+    "model_reward_mse": 139.75970337844254,
+    "baseline_latent_mse": 1.0575960908617292,
+    "baseline_reward_mse": 5997.400538348897,
+    "n_samples": 420
+  },
+  "3": {
+    "model_latent_mse": 0.11701441043953756,
+    "model_reward_mse": 235.49046845787186,
+    "baseline_latent_mse": 1.2990871022035786,
+    "baseline_reward_mse": 8752.993019326057,
+    "n_samples": 420
+  },
+  "4": {
+    "model_latent_mse": 0.13429268752753515,
+    "model_reward_mse": 334.4966180542024,
+    "baseline_latent_mse": 1.3156095577219686,
+    "baseline_reward_mse": 9875.394020342772,
+    "n_samples": 420
+  },
+  "5": {
+    "model_latent_mse": 0.15478694523537986,
+    "model_reward_mse": 417.2381215550195,
+    "baseline_latent_mse": 1.2448321642770326,
+    "baseline_reward_mse": 10027.762755188272,
+    "n_samples": 420
+  },
+  "6": {
+    "model_latent_mse": 0.1749219830506123,
+    "model_reward_mse": 505.7445365855656,
+    "baseline_latent_mse": 1.1875875768698614,
+    "baseline_reward_mse": 10105.194566787097,
+    "n_samples": 420
+  },
+  "7": {
+    "model_latent_mse": 0.1872157302831774,
+    "model_reward_mse": 622.5068108033632,
+    "baseline_latent_mse": 1.1919019342778803,
+    "baseline_reward_mse": 10669.869507430312,
+    "n_samples": 420
+  },
+  "8": {
+    "model_latent_mse": 0.19127317028249793,
+    "model_reward_mse": 713.0161546975529,
+    "baseline_latent_mse": 1.1633605233260564,
+    "baseline_reward_mse": 10991.979093303238,
+    "n_samples": 420
+  },
+  "9": {
+    "model_latent_mse": 0.20500505081626955,
+    "model_reward_mse": 808.3756576511075,
+    "baseline_latent_mse": 1.1875295440465101,
+    "baseline_reward_mse": 10896.905757170352,
+    "n_samples": 420
+  },
+  "10": {
+    "model_latent_mse": 0.22132007137432202,
+    "model_reward_mse": 937.5076716026308,
+    "baseline_latent_mse": 1.1854709512038981,
+    "baseline_reward_mse": 10817.108456787246,
+    "n_samples": 420
+  }
+}
