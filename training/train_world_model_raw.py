@@ -83,7 +83,7 @@ SEQUENCE_LENGTH = 16
 ACTION_DIM = 2
 
 
-def save_checkpoint(model, config: WorldModelConfig, path: Path, seed: int = SEED) -> None:
+def save_checkpoint(model, config: WorldModelConfig, path: Path, seed: int = SEED, max_epochs: int = EPOCHS) -> None:
     torch.save(model.state_dict(), path)
     hyperparams = {
         "latent_dim": config.latent_dim,
@@ -91,6 +91,7 @@ def save_checkpoint(model, config: WorldModelConfig, path: Path, seed: int = SEE
         "sequence_length": config.sequence_length,
         "hidden_dim": config.hidden_dim,
         "seed": seed,
+        "max_epochs": max_epochs,
     }
     path.with_suffix(".json").write_text(json.dumps(hyperparams, indent=2), encoding="utf-8")
 
@@ -98,6 +99,11 @@ def save_checkpoint(model, config: WorldModelConfig, path: Path, seed: int = SEE
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train the LatentDynamicsLSTM on the raw normalized state (Experimento 0).")
     parser.add_argument("--seed", type=int, default=SEED, help=f"training seed (default: {SEED})")
+    parser.add_argument(
+        "--epochs", type=int, default=EPOCHS,
+        help=f"maximum epochs; early stopping (patience {EARLY_STOPPING_PATIENCE}) may end the run earlier "
+             f"(default: {EPOCHS})",
+    )
     add_output_arguments(parser, CHECKPOINT_DIR, "models/checkpoints/raw_state_old_protocol/ (archived)")
     return parser.parse_args(argv)
 
@@ -153,17 +159,17 @@ def main(argv: list[str] | None = None) -> None:
     best_validation_loss = float("inf")
     epochs_without_improvement = 0
 
-    for epoch in range(1, EPOCHS + 1):
+    for epoch in range(1, args.epochs + 1):
         train_loss = train_one_epoch(model, train_loader, optimizer, device, reward_mean, reward_std)
         validation_loss = validate(model, validation_loader, device, reward_mean, reward_std)
 
         train_losses.append(train_loss)
         validation_losses.append(validation_loss)
 
-        save_checkpoint(model, config, output_dir / "world_model_raw_last.pt", args.seed)
+        save_checkpoint(model, config, output_dir / "world_model_raw_last.pt", args.seed, args.epochs)
         if validation_loss < best_validation_loss:
             best_validation_loss = validation_loss
-            save_checkpoint(model, config, output_dir / "world_model_raw_best.pt", args.seed)
+            save_checkpoint(model, config, output_dir / "world_model_raw_best.pt", args.seed, args.epochs)
             epochs_without_improvement = 0
         else:
             epochs_without_improvement += 1
