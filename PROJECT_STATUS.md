@@ -1,38 +1,247 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `f3adde3`, 67/67 tests en verde. **Lo más reciente:
-medición del impacto de `phase_penalty="actual_switch"`** sobre las políticas oficiales,
-re-puntuando las mismas trayectorias con ambas definiciones: el reward de cada política
-cambia menos de 1 punto y **no cambia ningún ranking ni ninguna conclusión documentada**
-(ver la sección siguiente). El valor por defecto sigue siendo `"requested_phase_1"`.
+Última verificación: commit `26465b4`, 81/81 tests en verde. **Lo más reciente: una auditoría
+técnica del repositorio (26 de septiembre), ejecutando el código, y las correcciones que
+salieron de ella** (sección siguiente). Varias cifras publicadas antes cambian:
 
-Antes de eso, **verificación del RL directo con 3x presupuesto** (30,000 pasos de entrenamiento; modelos
-fuera del repositorio, checkpoints oficiales intactos). Con ese presupuesto, el RL directo
-**alcanza un desempeño comparable** al del World Model (-335.24 frente a -326.79; p = 0.71
-a nivel de semilla), pero **consumiendo ~8.5 veces más interacciones reales** (39,000
-frente a ~4,600 por semilla). Esto precisa el resultado de la segunda ronda, que sigue
-vigente como comparación con el presupuesto original: con 13,000 interacciones por
-semilla (~2.8 veces las del World Model), el RL directo queda claramente por debajo en
-desempeño medio y en consistencia. La ventaja demostrada del World Model es de
-**eficiencia en interacciones reales** (ver la sección "Verificación: RL directo con 3x
-presupuesto"). Antes de esto se cerró
-el Experimento 3: la LSTM se mantiene como modelo temporal.
+- **Bug C1, corregido:** `CustomStateBuilder` leía los carriles con la conexión TraCI
+  *global*. El entrenamiento del RL directo, que abre dos simulaciones en el mismo proceso,
+  observaba y recibía como recompensa la simulación de evaluación después de cada evaluación
+  periódica. El RL directo se reentrenó con el fix y 4 semillas. Nada más estaba afectado.
+- **Resultado de control (media de las semillas de cada método), escenarios oficiales:**
+  PPO del sueño -326.79 (3 semillas), RL directo 10k -454.51 (4), RL directo 30k -402.13 (4),
+  tiempo fijo -411.27. **Escenarios nuevos (7000–7029):** -293.81, -439.73, -316.59 y -391.70.
+- **Con 30k pasos, no se detectó una diferencia consistente con el World Model:** brecha a su
+  favor en los escenarios oficiales (+75.34; semilla p = 0.029, pareado p = 0.020) y ninguna
+  detectable en los nuevos (pareado p = 0.54). Ya no vale "el RL directo alcanza al World
+  Model con 3x presupuesto" (-335.24 antes del fix).
+- **Eficiencia:** el World Model iguala o supera al RL directo con entre 2.9x y 8.5x menos
+  interacciones reales (entre 1.7x y 5.0x si el dataset no se amortiza entre semillas).
+- **Robustez:** en escenarios nuevos, el World Model tiene 1 episodio catastrófico de 90,
+  frente a 29/120 (10k) y 9/120 (30k).
+- **Checkpoint oficial del sueño: semilla 2** (antes 1), el mismo criterio que el RL directo.
+- **Experimento 0 rehecho:** con el mismo protocolo en las dos ramas, 5 semillas por rama y
+  convergencia igualada, el Autoencoder mejora la predicción de la recompensa de forma
+  **moderada y mayoritaria** (37/50 pares semilla × horizonte, reducción mediana +10.9%),
+  no en todas las semillas. La cifra publicada (9/10 horizontes, 14.7%) venía de una sola
+  semilla con un protocolo distinto entre ramas.
+- **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
+  `info["arrivals_total"]`, correcta; la recompensa no cambió.
 
-Resultado oficial de la segunda ronda del escenario asimétrico (sin cambios): dataset de
-80 episodios (semilla de SUMO por episodio), selección del checkpoint del sueño en SUMO
-real y `VecNormalize` en los dos PPO. **Con 3 semillas de entrenamiento por método (90
-episodios cada uno): PPO del sueño -326.79, PPO directo (10,000 pasos) -453.74, tiempo
-fijo -411.27.** El método World Model supera a tiempo fijo en las tres semillas y usa
-menos interacciones reales que el RL directo: 13,800 pasos de SUMO en total para sus 3
-semillas (4,800 del dataset, recolectado una sola vez y compartido, más 3 × 3,000 de
-selección; ~4,600 por semilla), frente a 39,000 del RL directo (3 × 13,000). Con ese
-presupuesto, la ventaja sobre el RL directo es clara a nivel de episodio (4.56 errores
-estándar), pero **no concluyente a nivel de semilla** (p = 0.145 con 3 semillas por
-método), porque el RL directo varía mucho entre semillas. Siguen abiertos los episodios
-catastróficos (menos, pero presentes) y la función de valor del PPO directo. Ver la
-sección "Escenario asimétrico, segunda ronda".
+## ✅ Auditoría técnica y correcciones (26 de septiembre)
+
+Auditoría del repositorio completo ejecutando el código (no solo leyéndolo), seguida de una
+corrección por fases, cada una verificada antes de pasar a la siguiente. Respaldo previo de
+`models/checkpoints/`, `datasets/raw/` y `datasets/processed/` fuera del repositorio
+(`traffic-world-model_backups/`, con md5 verificados).
+
+### 1. Bug C1: `CustomStateBuilder` usaba la conexión TraCI global
+
+- **Causa.** Las lecturas de carriles (`traci.lane.*`) usaban el módulo `traci` global, que
+  apunta a la **última simulación iniciada en el proceso**, no a la del entorno. sumo-rl
+  guarda la conexión propia de cada entorno en `SumoEnvironment.sumo` (la misma que usa su
+  `TrafficSignal`).
+- **Alcance.** Solo `training/train_controller_direct.py` abre dos simulaciones en un
+  proceso (entrenamiento + `EvalCallback`). Después de cada evaluación periódica, el entorno
+  de entrenamiento leía los carriles **y la recompensa** de la simulación de evaluación,
+  congelada, hasta su siguiente reset: 380 de 10,240 transiciones (3.7%) con 10k pasos y
+  1,200 de 30,208 (4.0%) con 30k. El dataset, el Autoencoder, el LSTM, el Dream Environment,
+  el PPO del sueño y todas las evaluaciones usan una sola simulación por proceso, o reinician
+  antes de cada episodio, y **no estaban afectados**.
+- **Fix** (commits `c79b081`, `38046ab`): todas las lecturas pasan por la conexión del propio
+  entorno.
+- **Verificación.** Con un entorno, el fix es **bit a bit idéntico**: reproduce exactamente
+  los episodios 0, 8, 41 y 79 de `datasets/raw/`. Con dos entornos, la contaminación pasa de
+  30/30 pasos a 0/30, y en el flujo real de PPO + `EvalCallback` de 220/640 a 0/640. Un test
+  permanente (`test_concurrent_environments.py`) falla sin el fix.
+- **La función de valor del RL directo sigue sin aprender** con el fix (`explained_variance`
+  entre -2.0 y 0.6 al final del entrenamiento): C1 no era su causa.
+
+### 2. RL directo reentrenado con el fix, 4 semillas por presupuesto
+
+`train_controller_direct.py` acepta ahora semilla, presupuesto y carpeta por argumento, y se
+niega a escribir en las carpetas oficiales o archivadas sin una bandera explícita. También se
+corrigió que `model.learn()` usara una constante en vez del presupuesto de la configuración.
+Semillas 0, 1 y 2, más una semilla 3 añadida para medir la variabilidad. El primer punto de
+evaluación periódica (t=1000) coincide exactamente antes y después del fix en cada semilla.
+
+Evaluación con `scripts/evaluate_multiseed_statistical.py` (nuevo, versionado): cada
+episodio queda en `docs/results/` (JSON y CSV). Reproduce exactamente las cifras publicadas
+antes del fix (p = 0.145, t = 4.56, 188/270, etc.).
+
+**Escenarios oficiales** (`seed_base` 3000 y 5000, 15 episodios cada una):
+
+| Política | Semillas | Media | Mediana | Desv. medias por semilla | < -600 | Peor | Medias por semilla |
+|---|---|---|---|---|---|---|---|
+| PPO del sueño | 3 | **-326.79** | -293.00 | 19.3 | 5/90 | -998.7 | -345.42 / -328.13 / -306.82 |
+| RL directo 10k (fix) | 4 | -454.51 | -401.40 | 39.7 | 25/120 | -970.7 | -398.10 / -456.84 / -475.00 / -488.11 |
+| RL directo 30k (fix) | 4 | -402.13 | -309.05 | 41.8 | 24/120 | -1,695.1 | -398.10 / -347.07 / -416.58 / -446.74 |
+| Tiempo fijo | — | -411.27 | -399.70 | — | 0/30 | -592.2 | — |
+| Regla "fase contraria" | — | -502.53 | -511.10 | — | 7/30 | -703.1 | — |
+| *Antes del fix: RL directo 10k* | 3 | -453.74 | -381.75 | 96.2 | 23/90 | -1,023.7 | -350.47 / -469.85 / -540.89 |
+| *Antes del fix: RL directo 30k* | 3 | -335.24 | -271.60 | 30.6 | 11/90 | -1,058.5 | -355.80 / -300.12 / -349.80 |
+
+**Escenarios nuevos** (7000–7029, nunca usados durante el desarrollo; ver punto 3):
+
+| Política | Semillas | Media | Mediana | Desv. medias por semilla | < -600 | Peor | Medias por semilla |
+|---|---|---|---|---|---|---|---|
+| PPO del sueño | 3 | **-293.81** | -273.05 | 7.1 | **1/90** | -656.3 | -300.56 / -294.45 / -286.41 |
+| RL directo 10k (fix) | 4 | -439.73 | -394.90 | 110.1 | 29/120 | -1,024.4 | -327.60 / -363.11 / -526.42 / -541.79 |
+| RL directo 30k (fix) | 4 | -316.59 | -255.70 | 11.0 | 9/120 | -1,861.1 | -327.60 / -314.69 / -322.01 / -302.06 |
+| Tiempo fijo | — | -391.70 | -391.20 | — | 0/30 | -470.2 | — |
+| Regla "fase contraria" | — | -558.83 | -510.60 | — | 12/30 | -846.1 | — |
+
+**Comparaciones** (Welch sobre las medias por semilla; pareado sobre los 30 escenarios, con
+la media de las semillas de cada método en cada escenario):
+
+| | Oficiales | Nuevos |
+|---|---|---|
+| Sueño vs 10k | +127.72; semilla p = 0.003; pareado p = 0.0002 | +145.92; semilla p = 0.077; pareado p = 4.5e-9 |
+| Sueño vs 30k | +75.34; semilla p = 0.029; pareado p = 0.020; sueño gana 206/360 | +22.78; semilla p = 0.021*; pareado **p = 0.54**; sueño gana 160/360 |
+| Sueño vs tiempo fijo | +84.48; pareado p = 0.001; gana 75/90 | +97.89; pareado p = 3e-7; gana 79/90 |
+| 10k vs tiempo fijo | -43.24; pareado p = 0.090; gana 58/120 | -48.03; pareado p = 0.015; gana 55/120 |
+| 30k vs tiempo fijo | +9.14; pareado p = 0.80; gana 82/120 | +75.11; pareado p = 0.062; gana 98/120 |
+
+\* No confiable: con dispersiones entre semillas de 7.1 y 11.0 y n = 3 y 4, el Welch por
+semilla declara significativa una diferencia de 22.78 puntos que el pareado no detecta.
+
+**Lectura.**
+
+- **RL directo 10k:** con 4 semillas, su media prácticamente no cambia con el fix (-454.51
+  frente a -453.74). La semilla 3 cae en el mismo modo de fallo que la semilla 2 antes y
+  después del fix: se queda cerca de la regla "pedir la fase contraria" (75.2% de acuerdo en
+  las decisiones libres; semilla 2 con fix 88.8%, sin fix 97.8%). El cambio que se vio con 3
+  semillas era varianza de entrenamiento, no un efecto sistemático del bug. El 10k no se
+  distingue de tiempo fijo en los escenarios oficiales y queda por debajo en los nuevos.
+- **RL directo 30k:** la cuarta semilla aumentó la dispersión en vez de reducirla. Que el
+  cambio respecto de antes del fix (-335.24 → -402.13 en los oficiales) sea varianza es una
+  inferencia, no algo demostrado como en 10k. Con 30k **no se detectó una diferencia
+  consistente** con el World Model: sí hay brecha en los escenarios oficiales, no en los
+  nuevos, donde el 30k tiene mejor mediana (-255.70 frente a -273.05) y peores colas.
+- **El World Model es el método con menos episodios catastróficos** en los dos conjuntos
+  (5/90 y 1/90, frente a 25/120 y 29/120 del 10k y 24/120 y 9/120 del 30k). En los
+  escenarios nuevos tiene además el mejor peor caso (-656.3; 30k: -1,861.1); en los
+  oficiales, su peor episodio (-998.7) queda entre el del 10k (-970.7) y el del 30k
+  (-1,695.1).
+- **Tres semillas no bastan para el RL directo.** Una semilla más movió la media del 10k de
+  -443.31 a -454.51, y reentrenar el 30k con el 4% de transiciones distintas la movió 52
+  puntos. Para comparar métodos con el RL directo harían falta al menos 5 semillas.
+
+**Interacciones reales por semilla:** World Model ~4,600 (dataset de 4,800 compartido por
+las 3 semillas + 3,000 de selección) o 7,800 sin amortizar; RL directo 10k 13,240 (10,240 de
+entrenamiento, porque SB3 completa el último rollout, + 3,000 de evaluación); 30k 39,208
+(30,208 + 9,000). Razones: 2.9x y 8.5x (1.7x y 5.0x sin amortizar).
+
+### 3. Evaluación en escenarios nuevos (7000–7029)
+
+Las semillas 3000–3014 y 5000–5014 se usaron durante el desarrollo para decisiones de diseño
+(`dream_max_steps`, `VecNormalize`, semilla oficial), así que no son un conjunto de prueba
+virgen. Se confirmó en todo el historial de git y en la documentación que 7000–7029 nunca se
+usaron como semilla (solo aparecen como *timesteps*). Es la validación más confiable del
+proyecto y complementa la de los escenarios oficiales, sin reemplazarla. Salvedad: la
+auditoría evaluó en esas semillas los checkpoints anteriores al fix, sin tomar ninguna
+decisión con ello.
+
+### 4. Checkpoints oficiales: mismo criterio para los tres
+
+El oficial de cada carpeta es la semilla con mejor media en los 30 escenarios oficiales. Es
+una etiqueta descriptiva: solo decide qué cargan los scripts que evalúan un único checkpoint
+(`evaluate_final_comparison.py`, `ver_controlador.py`). Todo resultado se reporta como media
+de todas las semillas.
+
+- **PPO del sueño: semilla 2** (-306.82; antes la 1, -328.13, elegida mirando solo
+  `seed_base=3000`). `ControllerConfig.seed` pasó a 2 (commit `150e10b`).
+- **RL directo 10k: semilla 0** (-398.10), en `controller_direct/`.
+- **RL directo 30k: semilla 1** (-347.07), en `controller_direct_30k/`.
+- Los checkpoints anteriores al fix están archivados con sus nombres originales en
+  `controller_direct_prefix_bug/` y `controller_direct_30k_prefix_bug/`. El script de
+  entrenamiento se niega a escribir en ellos.
+- Cada movimiento se verificó por md5 y funcionalmente: `evaluate_final_comparison.py` da
+  -289.04 / -324.59 (sueño) y -396.31 / -399.89 (RL directo). `docs/results/README.md`
+  relaciona las rutas registradas en los resultados con las actuales.
+
+### 5. Experimento 0 rehecho: el protocolo no era el mismo en las dos ramas
+
+- **Problema.** `train_world_model_raw.py` copiaba el bucle de entrenamiento y se quedó sin
+  `weight_decay` ni early stopping cuando se agregaron a la rama z. Ahora importa el
+  protocolo compartido, igual que Transformer y TSMixer (commit `b7eeeed`), y un test
+  (`test_experiment_0_protocol.py`) lo garantiza.
+- **Con el protocolo compartido y 1 semilla** (la semilla 0, la publicada), la conclusión se
+  invirtió: el estado crudo ganó los 10 horizontes.
+- **Con 5 semillas por rama y 100 épocas**: sin diferencia consistente (z gana 28/50 pares,
+  +1.5%). La semilla 0 resultó ser la más extrema de las cinco a favor del crudo.
+- **Con convergencia igualada** (tope de 300 épocas; el early stopping cortó las 10 corridas,
+  entre las épocas 105 y 167): con el tope de 100, la rama z no había convergido en 3 de 5
+  semillas y la cruda sí. Resultado final:
+
+| | z gana | Reducción mediana (crudo − z)/crudo |
+|---|---|---|
+| Por par semilla × horizonte | **37/50** | +10.9% (mediana de las medianas por horizonte) |
+| Por semilla (0 a 4) | 4, 6, 8, 9 y 10 de 10 horizontes | -3.4%, +7.4%, +10.0%, +29.4%, +26.5% |
+| Horizonte 1 | 3 de 5 | +2.9% |
+| Horizontes 2 a 7 | 3 a 5 de 5 | +10.8% a +20.8% |
+| Horizontes 8 a 10 | 3 de 5 | +3.7% a +5.5% |
+
+- **Conclusión:** el Autoencoder mejora la predicción de la recompensa de forma moderada y
+  mayoritaria (4 de 5 semillas), no universal. La dirección de la conclusión original se
+  mantiene, pero con otra evidencia y otra magnitud.
+- **En horizontes largos el error lo dominan pocos episodios de test:** en las corridas de
+  100 épocas, en h=10, 2 de los 12 episodios concentraban entre el 39% y el 62% del error,
+  casi siempre los mismos (el episodio 12 fue el mayor en 7 de 10 corridas). Por eso la
+  comparación reporta también la mediana por episodio y el pareado por episodio.
+- Resultados: `docs/results/experiment_0_multiseed.json` (100 épocas) y
+  `experiment_0_multiseed_300ep.json` (final). Modelos: `exp0_multiseed/` y
+  `exp0_multiseed_300ep/`; el modelo crudo del protocolo viejo, con su reporte, en
+  `raw_state_old_protocol/`.
+- **Experimento 3:** su umbral (7.3%) era la mitad del 14.7% publicado, que ya no se
+  sostiene. Su conclusión no cambia: el LSTM gana en los 10 horizontes con reducciones del
+  38–56%, muy por encima de la mitad del nuevo 10.9%.
+
+### 6. El LSTM oficial se entrenó hasta el tope de 100 épocas, no hasta converger
+
+Con la misma semilla y tope de 300, la mejor época habría sido la 152 (validación 0.1332,
+frente a 0.1405 en la época 93) y el early stopping habría cortado en la 167. Las épocas
+1–100 son idénticas, así que el modelo oficial es un punto intermedio de ese entrenamiento. El Dream Environment,
+los PPO del sueño y todos los resultados en SUMO dependen de él, así que **no se reentrenó**.
+
+### 7. Throughput: la métrica heredada no medía llegadas
+
+`traci.simulation.getArrivedNumber()` devuelve las llegadas del **último segundo simulado**,
+y un paso de control simula 5. El `info["throughput"]` heredado era la diferencia entre las
+llegadas de dos segundos sueltos: ~13% de las reales (86 frente a 10 y 93 frente a 16 en
+episodios completos). Como pesa ~0.2 por paso frente a una recompensa media de -43, **no
+cambia ninguna comparación de recompensa**, pero las columnas de "throughput" de las tablas
+de este documento no miden flujo. Se agregó `info["arrivals_total"]` (llegadas del
+intervalo completo), verificada contra un conteo independiente segundo a segundo; la
+recompensa no cambió (commit `626562b`). En 5 episodios (semillas 3000–3004), las llegadas
+reales son 98.4 para el PPO del sueño y 98.4 para tiempo fijo: la afirmación anterior de que
+el sueño "queda por debajo de tiempo fijo en throughput" no tiene respaldo.
+
+### 8. Tests y reproducibilidad
+
+- **81 tests** (antes 67). Los nuevos cubren justo las fronteras que fallaron: dos
+  simulaciones concurrentes, el Dream Environment sin SUMO, `arrivals_total` frente a un
+  conteo independiente, la paridad de protocolo del Experimento 0 y los guardias de los
+  scripts de entrenamiento. Los tests de las cuatro fronteras (simulaciones concurrentes,
+  Dream sin SUMO, llegadas y protocolo) se comprobaron contra una versión defectuosa del
+  código: fallan con ella y pasan con el código actual.
+- Los scripts de entrenamiento del modelo temporal y del RL directo aceptan semilla, épocas o
+  presupuesto y carpeta de salida, y no sobrescriben resultados oficiales o archivados sin
+  una bandera explícita. `requirements.txt` fija las versiones exactas; SUMO 1.27.1 se
+  instala aparte.
+- **Reproducibilidad del dataset:** la recolección siembra la semilla de SUMO de cada
+  episodio, pero no las acciones aleatorias (`np.random` global). Una recolección nueva daría
+  otro dataset; el dataset oficial está respaldado y no se regeneró.
+
+### 9. Qué no cambió
+
+Dataset, Autoencoder, LSTM oficial, Dream Environment, los 3 PPO del sueño (el mismo modelo;
+solo cambió cuál es el oficial) y los Experimentos 1 y 3 son idénticos: verificado bit a bit
+o por md5, y sus reportes se regeneran exactos.
 
 ## ✅ Medición: impacto de `phase_penalty="actual_switch"` en las políticas oficiales — no cambia ninguna conclusión
+
+> **Nota (26-sep):** los números del RL directo de esta sección son de los checkpoints anteriores al fix de C1. La conclusión (la definición `actual_switch` cambia menos de 1 punto por episodio) no depende de ellos. Resultados vigentes: sección "Auditoría técnica y correcciones".
 
 ### 1. Motivación y protocolo
 
@@ -91,6 +300,8 @@ episodio frente a recompensas de cientos, lo que hace poco probable (sin demostr
 la opción B altere los resultados. El valor por defecto no se cambió.
 
 ## ✅ Verificación: RL directo con 3x presupuesto (30,000 pasos) — alcanza al World Model, con ~8.5 veces sus interacciones reales
+
+> **Superado (26-sep):** estos modelos de 30k se entrenaron con el bug C1. Reentrenados con el fix y 4 semillas, no se detectó una diferencia consistente con el World Model (brecha en los escenarios oficiales, ninguna en los nuevos). Ver la sección "Auditoría técnica y correcciones". Esta sección queda como registro.
 
 ### 1. Motivación y protocolo
 
@@ -222,6 +433,8 @@ diría con más precisión cuántas interacciones necesita para alcanzar al Worl
 
 ## ✅ Experimento 3: Transformer y TSMixer como alternativas a la LSTM — se mantiene la LSTM
 
+> **Nota (26-sep):** el umbral de 7.3% era la mitad del 14.7% del Experimento 0 publicado, que ya no se sostiene (ver "Auditoría técnica y correcciones", punto 5). La conclusión no cambia: el LSTM gana los 10 horizontes con reducciones del 38–56%.
+
 ### 1. Qué se construyó
 
 Commits `90d7641` a `f49cf09` (62/62 tests):
@@ -343,6 +556,8 @@ apoya en el `latent_mse` de test, no en una medición directa sobre validación.
 
 ## ✅ Escenario asimétrico, segunda ronda: dataset de 80 episodios, selección por SUMO real y `VecNormalize` — resultado con 3 semillas por método
 
+> **Nota (26-sep):** las cifras del RL directo de esta sección son anteriores al fix de C1, el checkpoint oficial del sueño es ahora la semilla 2 y el Experimento 0 del punto 3 se rehízo. Resultados vigentes: sección "Auditoría técnica y correcciones". Las cifras del PPO del sueño siguen siendo exactas.
+
 ### 1. Recapitulación
 
 La demanda asimétrica (500/150 veh/h) rompió la regla trivial "pedir siempre la fase
@@ -412,6 +627,8 @@ no MSE absolutos. El error latente acumulado crece 4.79x de h=1 a h=10 (antes 2.
 porque h=1 mejoró mucho más que h=10, no porque h=10 empeorara.
 
 ### 3. Experimento 0 repetido con el dataset nuevo
+
+> **Superado (26-sep):** la rama cruda de esta comparación se entrenó sin `weight_decay` ni early stopping, a diferencia de la rama z. Con el mismo protocolo, 5 semillas por rama y convergencia igualada, el Autoencoder gana 37 de 50 pares con una mejora mediana de +10.9% (ver "Auditoría técnica y correcciones", punto 5).
 
 Mismos scripts, sin modificar. Además se corrió `scripts/evaluate_world_model_raw.py`,
 sin el cual `compare_experiment_0.py` habría comparado el `z` nuevo con el reporte crudo
@@ -1540,18 +1757,27 @@ handoff anterior.
 5. Ambos PPO de la primera ronda asimétrica nunca sostenían el verde de la fase 1 más
    de 8 s (la duración mínima posible). No se volvió a medir con los checkpoints
    actuales; no investigado a fondo.
-6. **Episodios catastróficos: reducidos pero no eliminados** (5/90 en el PPO del sueño,
-   23/90 en el directo); causa no identificada por completo.
+6. **Episodios catastróficos: reducidos pero no eliminados.** Escenarios oficiales: 5/90
+   en el PPO del sueño, 25/120 en el RL directo de 10k y 24/120 en el de 30k; escenarios
+   nuevos: 1/90, 29/120 y 9/120. Causa no identificada por completo.
 7. **Función de valor del PPO directo:** `explained_variance` sigue bajo e inestable
-   incluso con `VecNormalize` de recompensa y observaciones; causa no identificada.
+   incluso con `VecNormalize` de recompensa y observaciones, y también con el fix de C1
+   (que se descartó como causa); causa no identificada.
+8. **LSTM oficial entrenado hasta el tope de 100 épocas**, no hasta converger (ver
+   "Auditoría técnica y correcciones", punto 6). No se reentrenó porque todo el sistema
+   depende de él; hacerlo exigiría rehacer el Dream Environment, los PPO del sueño y su
+   evaluación.
+9. **Acciones del dataset sin semilla:** `collect_dataset.py` no siembra `np.random`, así
+   que una recolección nueva no reproduce el dataset oficial (respaldado, no regenerado).
 
 ## ⚪ No implementado todavía
 
-- Más semillas por método (siguen siendo 3), para poder afirmar o descartar diferencias
-  a nivel de semilla. El presupuesto del RL directo ya se verificó (30,000 pasos).
+- Más semillas por método: 3 en el PPO del sueño y 4 en el RL directo. Para el RL directo
+  harían falta al menos 5 antes de afirmar diferencias de método (ver "Auditoría técnica y
+  correcciones", punto 2).
 - Curva de desempeño frente a interacciones reales del RL directo (hoy solo hay dos
-  puntos: 13,000 y 39,000 por semilla), para saber cuántas interacciones necesita para
-  alcanzar al World Model.
+  puntos: 13,240 y 39,208 por semilla), para saber cuántas interacciones necesita para
+  dejar de distinguirse del World Model.
 - Análisis del momento de los cambios de fase respecto a las colas de cada brazo, para
   los episodios catastróficos que quedan.
 - Demanda variable en el tiempo (el escenario asimétrico ya está implementado; la
@@ -1559,24 +1785,14 @@ handoff anterior.
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Se midió el impacto de `phase_penalty="actual_switch"` (mecanismo de `d69d411`) sobre las
-políticas oficiales: re-puntuando las mismas trayectorias con ambas definiciones, el
-reward de cada política cambia menos de 1 punto y ningún ranking ni conclusión cambia.
-La opción B (cambiar el valor por defecto y rehacer el pipeline) queda abierta, pero
-esta medición no da motivo para priorizarla. Antes se corrigió el conteo de tests
-(62 → 67) en la documentación (`f3adde3`).
+Auditoría técnica del repositorio y sus correcciones (ver "Auditoría técnica y
+correcciones"): fix de C1 y reentrenamiento del RL directo con 4 semillas, evaluación en
+escenarios oficiales y nuevos con un script versionado, reorganización de los checkpoints
+oficiales con el mismo criterio para los tres métodos, Experimento 0 rehecho con 5 semillas
+por rama y convergencia igualada, métrica de llegadas correcta y 14 tests nuevos. Lo
+siguiente es consolidar el resto de la documentación (CLAUDE.md, README.md, TODO.md,
+docs/PROPUESTA.md y docs/DOCUMENTACION_PROYECTO.md) con estos resultados.
 
-Antes de eso, se verificó si más presupuesto cierra la brecha del RL directo (limitación abierta de la
-segunda ronda). Las 3 semillas del directo se reentrenaron con 30,000 pasos en vez de
-10,000, sin tocar los checkpoints oficiales, y se evaluaron con el protocolo de siempre
-(reproduciendo antes las medias documentadas del sueño y del directo de 10k). Resultado:
-el directo pasa de -453.74 a -335.24, la desviación de sus medias por semilla baja de
-96.2 a 30.6, la semilla 2 deja de colapsar a la regla trivial y los episodios
-catastróficos bajan de 23/90 a 11/90. Frente al sueño (-326.79), la diferencia ya no es
-significativa (p = 0.74 por episodio y 0.71 por semilla) y el directo gana 159 de 270
-comparaciones episodio a episodio. Pero cada semilla del directo consumió 39,000
-interacciones reales, frente a ~4,600 del World Model (~8.5 veces). La conclusión del
-proyecto se precisa: el World Model alcanza un control equivalente con una fracción de
-las interacciones reales; su ventaja es de eficiencia, no de control a presupuesto
-ilimitado. Antes de esto se había cerrado el Experimento 3 (se mantiene la LSTM) y se
-había corregido la documentación de la semántica de la acción (`c253d88`, `30c3fae`).
+Antes de eso se midió el impacto de `phase_penalty="actual_switch"` (cambia menos de 1
+punto por episodio) y se verificó el RL directo con 3x presupuesto; esa verificación quedó
+superada por el reentrenamiento con el fix.
