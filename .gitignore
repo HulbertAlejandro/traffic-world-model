@@ -40,6 +40,8 @@ logs/
 
 # Evaluation figures (generated)
 results/
+# Versioned evaluation results (per-episode JSON/CSV behind the published tables)
+!docs/results/
 
 external_sumo_rl/
 # Direct-RL retraining after the TraCI connection fix (verification runs, not official yet)
