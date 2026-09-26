@@ -44,13 +44,6 @@ results/
 !docs/results/
 
 external_sumo_rl/
-# Direct-RL retraining after the TraCI connection fix (verification runs, not official yet)
-models/checkpoints/controller_direct_fixed/**/*.zip
-models/checkpoints/controller_direct_fixed/**/*.npz
-models/checkpoints/controller_direct_fixed/**/*.pkl
-models/checkpoints/controller_direct_30k_fixed/**/*.zip
-models/checkpoints/controller_direct_30k_fixed/**/*.npz
-models/checkpoints/controller_direct_30k_fixed/**/*.pkl
 # Direct-RL checkpoints trained BEFORE the TraCI connection fix (archived evidence)
 models/checkpoints/controller_direct_prefix_bug/*.zip
 models/checkpoints/controller_direct_prefix_bug/*.npz
