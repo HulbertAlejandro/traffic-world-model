@@ -17,6 +17,14 @@ clase lee la fase y el tiempo transcurrido directamente de los atributos que
 sumo_rl sí mantiene actualizados (TrafficSignal.green_phase y
 TrafficSignal.time_since_last_phase_change), obtenidos a través de la
 referencia al entorno sumo_rl que TrafficEnvironment provee en build_state().
+
+Conexión TraCI: todas las lecturas pasan por la conexión propia del entorno
+sumo_rl (``SumoEnvironment.sumo``, la misma que usa sumo_rl.TrafficSignal), no
+por el módulo ``traci`` global. El módulo global apunta a la ÚLTIMA simulación
+iniciada en el proceso: con dos entornos abiertos a la vez (entrenamiento +
+EvalCallback en train_controller_direct.py), un entorno leía los carriles de la
+simulación del otro. Solo sin referencia al entorno (uso aislado) se cae de vuelta
+al módulo global.
 """
 
 from __future__ import annotations
@@ -25,6 +33,13 @@ import numpy as np
 import traci
 
 from environments.traffic_state import TrafficState
+
+
+def _connection(sumo_rl_env):
+    """TraCI connection of the given sumo_rl environment; the global module only
+    when no environment (or no open simulation) is provided."""
+    sumo = getattr(sumo_rl_env, "sumo", None) if sumo_rl_env is not None else None
+    return sumo if sumo is not None else traci
 
 
 class CustomStateBuilder:
@@ -39,20 +54,20 @@ class CustomStateBuilder:
         self._lane_ids: list[str] | None = None
         self._num_phases: int | None = None
 
-    def _resolve_traffic_light_id(self) -> str:
+    def _resolve_traffic_light_id(self, conn) -> str:
         """Resolve the traffic signal ID only when the simulation is connected."""
         if self.traffic_light_id is not None:
             return self.traffic_light_id
 
-        signal_ids = traci.trafficlight.getIDList()
+        signal_ids = conn.trafficlight.getIDList()
         if not signal_ids:
             raise RuntimeError("No traffic lights are available in the SUMO simulation.")
         self.traffic_light_id = signal_ids[0]
         return self.traffic_light_id
 
-    def _resolve_num_phases(self, traffic_light_id: str) -> int:
+    def _resolve_num_phases(self, conn, traffic_light_id: str) -> int:
         """Read the number of phases from the currently loaded program logic."""
-        logics = traci.trafficlight.getAllProgramLogics(traffic_light_id)
+        logics = conn.trafficlight.getAllProgramLogics(traffic_light_id)
         if not logics:
             raise RuntimeError(f"No program logic found for traffic light '{traffic_light_id}'.")
         return len(logics[0].getPhases())
@@ -99,11 +114,12 @@ class CustomStateBuilder:
                 TraCI puro para esos dos valores -- con la advertencia de que
                 en ese caso no reflejarán acciones aplicadas por sumo_rl.
         """
-        traffic_light_id = self._resolve_traffic_light_id()
+        conn = _connection(sumo_rl_env)
+        traffic_light_id = self._resolve_traffic_light_id(conn)
         if self._lane_ids is None:
-            self._lane_ids = self._incoming_lanes(traffic_light_id)
+            self._lane_ids = self._incoming_lanes(conn, traffic_light_id)
         if self._num_phases is None:
-            self._num_phases = self._resolve_num_phases(traffic_light_id)
+            self._num_phases = self._resolve_num_phases(conn, traffic_light_id)
 
         lane_ids = self._lane_ids
         n = len(lane_ids)
@@ -115,14 +131,14 @@ class CustomStateBuilder:
         occupancies = np.empty(n, dtype=np.float32)
 
         for i, lane in enumerate(lane_ids):
-            vehicle_counts[i] = traci.lane.getLastStepVehicleNumber(lane)
-            queue_lengths[i] = traci.lane.getLastStepHaltingNumber(lane)
-            waiting_times[i] = traci.lane.getWaitingTime(lane)
-            mean_speeds[i] = traci.lane.getLastStepMeanSpeed(lane)
-            occupancies[i] = traci.lane.getLastStepOccupancy(lane)
+            vehicle_counts[i] = conn.lane.getLastStepVehicleNumber(lane)
+            queue_lengths[i] = conn.lane.getLastStepHaltingNumber(lane)
+            waiting_times[i] = conn.lane.getWaitingTime(lane)
+            mean_speeds[i] = conn.lane.getLastStepMeanSpeed(lane)
+            occupancies[i] = conn.lane.getLastStepOccupancy(lane)
 
         current_phase_index, elapsed_phase_time, remaining_phase_time = self._resolve_phase_timing(
-            traffic_light_id, sumo_rl_env
+            conn, traffic_light_id, sumo_rl_env
         )
 
         phase_one_hot = np.zeros(self._num_phases, dtype=np.float32)
@@ -141,7 +157,7 @@ class CustomStateBuilder:
         )
 
     def _resolve_phase_timing(
-        self, traffic_light_id: str, sumo_rl_env
+        self, conn, traffic_light_id: str, sumo_rl_env
     ) -> tuple[int, float, float]:
         """Return (phase_index, elapsed_time, remaining_time), from sumo_rl when available."""
         traffic_signal = None
@@ -161,21 +177,18 @@ class CustomStateBuilder:
         # Fallback for standalone use without a sumo_rl environment reference
         # (e.g. unit tests constructing this builder in isolation). Known to
         # NOT reflect sumo_rl-driven phase changes -- see module docstring.
-        phase_index = traci.trafficlight.getPhase(traffic_light_id)
+        phase_index = conn.trafficlight.getPhase(traffic_light_id)
         remaining = max(
             0.0,
-            float(traci.trafficlight.getNextSwitch(traffic_light_id) - traci.simulation.getTime()),
+            float(conn.trafficlight.getNextSwitch(traffic_light_id) - conn.simulation.getTime()),
         )
-        phase_duration = float(traci.trafficlight.getPhaseDuration(traffic_light_id))
+        phase_duration = float(conn.trafficlight.getPhaseDuration(traffic_light_id))
         elapsed = max(0.0, phase_duration - remaining)
         return phase_index, elapsed, remaining
 
-    def _incoming_lanes(self, traffic_light_id: str | None = None) -> list[str]:
+    def _incoming_lanes(self, conn, traffic_light_id: str) -> list[str]:
         """Devuelve únicamente los carriles de entrada al semáforo, sin duplicados."""
-        if traffic_light_id is None:
-            traffic_light_id = self._resolve_traffic_light_id()
-
-        controlled_links = traci.trafficlight.getControlledLinks(traffic_light_id)
+        controlled_links = conn.trafficlight.getControlledLinks(traffic_light_id)
         lanes: list[str] = []
         for links in controlled_links:
             if not links:
