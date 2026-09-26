@@ -257,8 +257,8 @@ el pipeline), se midió si la definición nueva altera alguna conclusión ya doc
   con `ProjectRewardFunction` sobre el mismo `info`, así que ambas definiciones puntúan
   trayectorias idénticas.
 - Políticas: las 3 semillas del PPO del sueño, las 3 del PPO directo de 10,000 pasos,
-  tiempo fijo (ciclo=5), la regla "pedir fase contraria" y, como referencia (por el
-  ~8.5x), las 3 semillas del directo de 30,000 pasos.
+  tiempo fijo (ciclo=5), la regla "pedir fase contraria" y, como referencia (por la
+  razón de interacciones de ~8.5x), las 3 semillas del directo de 30,000 pasos.
 - Controles: con `"requested_phase_1"` se reproducen **exactamente** las 11 medias por
   semilla documentadas; el md5 de los 92 archivos de `models/checkpoints/` es idéntico
   antes y después. Script y resultados por episodio fuera del repositorio.
@@ -287,9 +287,11 @@ cambia ~29; los PPO del sueño piden ~10 y cambian ~19–20.
 - **Sueño frente a directo 10k:** Welch a nivel de semilla, t = 2.24 con ambas.
 - **Sueño frente a directo 30k:** la diferencia de medias pasa de 8.46 a 8.01, Welch a
   nivel de semilla de t = 0.41 a 0.38, y el sueño gana 110/270 comparaciones episodio a
-  episodio (antes 111/270). Sigue siendo "desempeño comparable", sin significancia.
-- **El ~8.5x de interacciones reales** es contabilidad de pasos de SUMO; no depende de la
-  recompensa.
+  episodio (antes 111/270). Sigue sin detectarse una diferencia significativa, lo que no
+  demuestra que los dos desempeños sean equivalentes.
+- **La razón de interacciones reales** (~8.5x con la contabilidad de entonces; 2.9x a
+  8.5x, o 1.7x a 5.0x sin amortizar el dataset, con la actual) es contabilidad de pasos de
+  SUMO; no depende de la recompensa.
 
 ### 4. Alcance y limitación
 
@@ -299,7 +301,7 @@ Lo que sí muestra es que, con `delta = 0.1`, el término de fase pesa menos de 
 episodio frente a recompensas de cientos, lo que hace poco probable (sin demostrarlo) que
 la opción B altere los resultados. El valor por defecto no se cambió.
 
-## ✅ Verificación: RL directo con 3x presupuesto (30,000 pasos) — alcanza al World Model, con ~8.5 veces sus interacciones reales
+## ✅ Verificación: RL directo con 3x presupuesto (30,000 pasos) — sin diferencia significativa con el World Model, con ~8.5 veces sus interacciones reales (antes del fix de C1)
 
 > **Superado (26-sep):** estos modelos de 30k se entrenaron con el bug C1. Reentrenados con el fix y 4 semillas, no se detectó una diferencia consistente con el World Model (brecha en los escenarios oficiales, ninguna en los nuevos). Ver la sección "Auditoría técnica y correcciones". Esta sección queda como registro.
 
@@ -388,8 +390,16 @@ trayectoria. Con 10,000 pasos: 37.0%, 48.7% y **97.8%** (semillas 0, 1, 2).
 | Nivel episodio, Mann-Whitney | p ≈ 1.4e-5 | p = 0.10 (mediana mejor en el directo) |
 | Nivel semilla (3 vs 3), Welch | t = 2.24, gl ≈ 2.2, p = 0.145 | **t = 0.41, gl ≈ 3.4, p = 0.71** |
 
-Con 30,000 pasos, el RL directo **alcanza un desempeño comparable** al del World Model:
-la diferencia de medias (8.46 puntos) no es significativa a ningún nivel, el directo gana
+> **Precisión (26-sep):** las filas "nivel episodio" tratan 90 episodios de 3 políticas
+> entrenadas como 90 observaciones independientes (pseudorreplicación): dicen algo sobre
+> *estas* políticas en *estos* escenarios, no sobre el método. La prueba que dice algo
+> sobre el método es la de nivel de semilla, con n = 3 y poca potencia. Como los
+> escenarios son compartidos, la comparación adecuada a nivel de escenario es la t
+> pareada (ver "Auditoría técnica y correcciones").
+
+Con 30,000 pasos, el RL directo **no se distingue estadísticamente** del World Model (con 3
+semillas por método, lo que no demuestra que sean equivalentes): la diferencia de medias
+(8.46 puntos) no es significativa a ningún nivel, el directo gana
 la mayoría de las comparaciones episodio a episodio y tiene mejor mediana, y el sueño
 conserva menos episodios catastróficos (5/90 frente a 11/90; esta diferencia no se
 sometió a prueba).
@@ -401,6 +411,12 @@ sometió a prueba).
 | World Model (PPO del sueño) | 4,800 del dataset, recolectado una vez y compartido (1,600 por semilla) | 3,000 | **~4,600** | **13,800** |
 | Directo, 10,000 pasos | 10,000 | 3,000 (10 evaluaciones × 5 × 60) | 13,000 (~2.8x) | 39,000 |
 | Directo, 30,000 pasos | 30,000 | 9,000 (30 evaluaciones × 5 × 60) | **39,000 (~8.5x)** | **117,000** |
+
+> **Precisión (26-sep):** SB3 completa el último rollout, así que los pasos reales de
+> entrenamiento son 10,240 y 30,208 (13,240 y 39,208 por semilla con la evaluación
+> periódica). La razón depende de cómo se contabilice el dataset del World Model: 2.9x y
+> 8.5x si se amortiza entre las 3 semillas (~4,600), o 1.7x y 5.0x si no (7,800). Se
+> reporta como rango, no como un solo número.
 
 El overhead de evaluación periódica crece con el presupuesto (una evaluación cada 1,000
 pasos) y se cuenta como interacción real, igual que en la segunda ronda.
@@ -421,10 +437,11 @@ Esta verificación **precisa** el resultado de la segunda ronda, no lo corrige. 
 comparación con el presupuesto original sigue siendo válida: con 13,000 interacciones
 reales por semilla (~2.8 veces las del World Model), el RL directo queda claramente por
 debajo del sueño en desempeño medio y en consistencia. Lo que se añade es qué pasa al
-triplicar el presupuesto: **el RL directo alcanza un desempeño comparable, pero
-consumiendo ~8.5 veces más interacciones reales que el World Model** (39,000 frente a
-~4,600 por semilla). La conclusión del proyecto se formula entonces así: el World Model
-llega al mismo nivel de control con una fracción de las interacciones reales. Su
+triplicar el presupuesto: **el RL directo deja de distinguirse estadísticamente del World
+Model, pero consumiendo ~8.5 veces más interacciones reales** (39,000 frente a ~4,600 por
+semilla; 5.0x si el dataset no se amortiza). La conclusión del proyecto se formula entonces
+así: el RL directo solo deja de distinguirse del World Model con muchas más interacciones
+reales. Su
 ventaja demostrada es de **eficiencia en interacciones**, que es exactamente lo que
 pregunta la pregunta de investigación; no es una ventaja de control a igualdad de
 interacciones ilimitadas. Queda sin medir la curva completa de desempeño frente a
@@ -825,7 +842,10 @@ de 10,000 pasos del RL directo):**
 
 - **A nivel de episodio** (90 frente a 90, tratados como independientes): la diferencia
   de 126.95 puntos equivale a **4.56 errores estándar** (Welch t = 4.56, p ≈ 1e-5;
-  Mann-Whitney p ≈ 1.4e-5). No es azar entre episodios.
+  Mann-Whitney p ≈ 1.4e-5). *Precisión (26-sep):* 90 episodios de 3 políticas entrenadas
+  no son 90 observaciones independientes del método (pseudorreplicación). La cifra dice
+  que las 3 políticas del sueño superan a las 3 del directo en estos escenarios, no que el
+  método sea mejor; eso solo lo puede decir el nivel de semilla.
 - **A nivel de semilla de entrenamiento** (3 medias frente a 3 medias): **Welch t = 2.24,
   gl ≈ 2.2, p = 0.145, no significativo.** Los 15 episodios de una semilla no son
   independientes entre sí, y el RL directo varía mucho entre semillas (desviación de las
@@ -833,17 +853,21 @@ de 10,000 pasos del RL directo):**
   toda semilla del directo, pero por muy poco en el peor caso (la peor del sueño, -345.42,
   frente a la mejor del directo, -350.47).
 - **Lectura honesta:** con el presupuesto usado, el método World Model obtiene mejor
-  control medio, es **mucho más consistente entre semillas** y tiene muchos menos
-  episodios catastróficos, con **~35% de las interacciones reales por semilla** (4,600
-  frente a 13,000, con el dataset compartido entre las 3 semillas). Con solo 3
+  control medio, es **mucho más consistente entre semillas** (con 3 semillas por método;
+  con una cuarta semilla y el fix de C1, la desviación del directo de 10k es 39.7, no
+  96.2) y tiene muchos menos episodios catastróficos, con **~35% de las interacciones
+  reales por semilla** (4,600 frente a 13,000, con el dataset compartido entre las 3
+  semillas; ~60% si el dataset no se amortiza). Con solo 3
   semillas por método, la ventaja en la media no se puede afirmar con significancia
   estadística a nivel de semilla. La diferencia más robusta es la **consistencia**: el
   RL directo puede salir tan bien como el sueño (semilla 0) o colapsar a la regla trivial
   (semilla 2). **Precisión posterior:** todo esto vale para este presupuesto (13,000
-  interacciones por semilla). Con 3x presupuesto, el RL directo alcanza un desempeño
-  comparable (-335.24), su desviación entre semillas baja a 30.6 y la semilla 2 deja de
-  colapsar, a cambio de ~8.5 veces las interacciones del World Model (sección
-  "Verificación: RL directo con 3x presupuesto").
+  interacciones por semilla). Con 3x presupuesto, el RL directo deja de distinguirse
+  estadísticamente del sueño (-335.24), su desviación entre semillas baja a 30.6 y la
+  semilla 2 deja de colapsar, a cambio de ~8.5 veces las interacciones del World Model
+  (5.0x sin amortizar el dataset; sección "Verificación: RL directo con 3x presupuesto").
+  Tras el fix de C1, con 4 semillas, ni siquiera eso es consistente entre conjuntos de
+  escenarios (ver "Auditoría técnica y correcciones").
 - **Throughput:** el PPO del sueño sigue algo por debajo de tiempo fijo (12.20–12.33
   frente a 13.27–13.73 con el checkpoint oficial), la misma salvedad de todo el proyecto.
 
@@ -861,11 +885,15 @@ de 10,000 pasos del RL directo):**
   puede descartar que más presupuesto hubiera cerrado la brecha o estabilizado sus
   semillas. La comparación vale **para el presupuesto usado**; no es una afirmación
   general de que el RL directo sea inferior en cualquier condición. **Verificado
-  después:** con 30,000 pasos el RL directo alcanza un desempeño comparable, con ~8.5
-  veces las interacciones del World Model (sección "Verificación: RL directo con 3x
-  presupuesto").
+  después:** con 30,000 pasos el RL directo deja de distinguirse estadísticamente del
+  World Model, con ~8.5 veces sus interacciones (5.0x sin amortizar el dataset; sección
+  "Verificación: RL directo con 3x presupuesto"). Tras el fix de C1: brecha en los
+  escenarios oficiales, ninguna en los nuevos (ver "Auditoría técnica y correcciones").
 - **Solo 3 semillas por método:** suficiente para ver la diferencia de consistencia, no
-  para afirmar significancia a nivel de semilla (punto 8).
+  para afirmar significancia a nivel de semilla (punto 8). *Precisión (26-sep):* con el
+  fix de C1 y una cuarta semilla, esa diferencia se redujo (desviación de las medias por
+  semilla del directo de 10k: 39.7, frente a 19.3 del sueño); tres semillas tampoco
+  bastaban para estimarla con fiabilidad.
 - **Límite de 8 s en la fase 1:** medido con los PPO de la primera ronda; no se volvió a
   medir con los checkpoints actuales.
 
