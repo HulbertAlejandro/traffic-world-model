@@ -15,7 +15,7 @@ every reset() that doesn't specify one, and this policy would train and be
 evaluated against a single traffic scenario. See environments/reseeding_wrapper.py.
 
 Usage (defaults reproduce the official run: seed 0, 10,000 steps):
-    python training/train_controller_direct.py --output-dir models/checkpoints/controller_direct_fixed/seed0
+    python training/train_controller_direct.py --output-dir models/checkpoints/direct_10k/seed0
     python training/train_controller_direct.py --seed 1 --total-timesteps 30000 --output-dir <folder>
 
 The run refuses to write into a folder that already holds any file it would
