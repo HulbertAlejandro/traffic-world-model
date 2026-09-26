@@ -17,17 +17,31 @@ SUMO → estado (26 dims) → Autoencoder → z (16 dims) → LSTM → (ẑ_{t+1
 
 | Experimento | Pregunta | Resultado |
 |---|---|---|
-| 0 | ¿Ayuda comprimir el estado con un Autoencoder? | Sí: gana en 9 de 10 horizontes; se mantiene |
+| 0 | ¿Ayuda comprimir el estado con un Autoencoder? | Sí, de forma moderada y mayoritaria: 5 semillas por rama, 37/50 pares semilla × horizonte, mejora mediana +10.9%; se mantiene |
 | 1 | ¿El LSTM predice mejor que un baseline persistente? | Sí, en los 10 horizontes |
 | 2 | ¿Un PPO entrenado en el sueño controla bien en SUMO real? | Sí; ver el resultado principal |
 | 3 | ¿Transformer o TSMixer mejoran al LSTM? | No: el LSTM gana en los 10 horizontes; se mantiene |
 
-**Resultado principal:** el World Model alcanza un control comparable al del RL directo
-con muchas menos interacciones reales con SUMO. Con el presupuesto original del RL
-directo (13,000 interacciones por semilla), el World Model controla mejor (-326.79 frente
-a -453.74, 3 semillas por método). Al triplicarle el presupuesto, el RL directo lo alcanza
-(-335.24), pero consume **~8.5 veces más interacciones reales** (39,000 frente a ~4,600
-por semilla).
+**Resultado principal:** el World Model iguala o supera al RL directo usando muchas menos
+interacciones reales con SUMO. Media de todas las semillas de entrenamiento (sueño 3, RL
+directo 4), en SUMO real:
+
+| | Escenarios oficiales | Escenarios nuevos (7000–7029) | Interacciones reales por semilla |
+|---|---|---|---|
+| PPO del sueño (World Model) | **-326.79** | **-293.81** | ~4,600 (7,800 sin amortizar el dataset) |
+| RL directo, 10k pasos | -454.51 | -439.73 | 13,240 |
+| RL directo, 30k pasos | -402.13 | -316.59 | 39,208 |
+| Tiempo fijo | -411.27 | -391.70 | — |
+
+- **Frente al RL directo de 10k**, el World Model es mejor en los dos conjuntos de
+  escenarios.
+- **Frente al de 30k no se detectó una diferencia consistente:** hay brecha a favor del
+  World Model en los escenarios oficiales y ninguna detectable en los nuevos.
+- El World Model lo logra con entre 2.9x y 8.5x menos interacciones reales (1.7x a 5.0x
+  sin amortizar el dataset) y es el método con menos episodios catastróficos.
+
+Detalle y pruebas estadísticas en [`PROJECT_STATUS.md`](PROJECT_STATUS.md); resultados
+por episodio en [`docs/results/`](docs/results/).
 
 ## Instalación
 
@@ -71,7 +85,12 @@ traffic-world-model/
 
 ## Pipeline completo
 
-Cada script usa sus valores por defecto; no requieren argumentos. Orden de ejecución:
+Orden de ejecución. Los scripts de entrenamiento que escriben en carpetas oficiales
+(`train_world_model.py`, `train_controller_direct.py`) **se niegan a sobrescribirlas** sin
+`--overwrite-official`: en un clon nuevo, donde esas carpetas solo tienen los `.json`,
+hay que pasar esa bandera para regenerarlas. `train_autoencoder.py`, `train_controller.py`
+y los entrenamientos del Experimento 3 no tienen ese guardia y escriben directamente en
+`models/checkpoints/`: respalda esa carpeta antes de ejecutarlos.
 
 ```powershell
 # 1. Datos: 80 episodios con semilla de SUMO distinta, split por episodio, normalización
@@ -82,14 +101,20 @@ python scripts\normalize_dataset.py
 # 2. Representación y dinámica (Experimento 1)
 python training\train_autoencoder.py
 python scripts\encode_latent_dataset.py
-python training\train_world_model.py
+python training\train_world_model.py --overwrite-official
 python scripts\evaluate_world_model.py
 
-# 3. Experimento 0: modelo temporal sobre el estado crudo, comparado contra z
+# 3. Experimento 0: modelo temporal sobre el estado crudo frente a z, 5 semillas por rama,
+#    entrenadas hasta que corte el early stopping (tope de 300 épocas)
 python scripts\prepare_raw_sequence_dataset.py
-python training\train_world_model_raw.py
-python scripts\evaluate_world_model_raw.py
-python scripts\compare_experiment_0.py
+foreach ($s in 0..4) {
+  python training\train_world_model.py --seed $s --epochs 300 --output-dir models\checkpoints\exp0_multiseed_300ep\z\seed$s
+  python training\train_world_model_raw.py --seed $s --epochs 300 --output-dir models\checkpoints\exp0_multiseed_300ep\raw\seed$s
+}
+python scripts\compare_experiment_0_multiseed.py `
+  --z-dirs (0..4 | % { "models\checkpoints\exp0_multiseed_300ep\z\seed$_" }) `
+  --raw-dirs (0..4 | % { "models\checkpoints\exp0_multiseed_300ep\raw\seed$_" }) `
+  --output docs\results\experiment_0_multiseed_300ep.json
 
 # 4. Experimento 3: Transformer y TSMixer (requieren el reward_scaler.json del paso 2)
 python training\train_world_model_transformer.py
@@ -98,12 +123,19 @@ python scripts\evaluate_world_model_transformer.py
 python scripts\evaluate_world_model_tsmixer.py
 python scripts\compare_experiment_3.py
 
-# 5. Controladores: PPO en el sueño y PPO directo contra SUMO
+# 5. Controladores. PPO en el sueño (semilla oficial 2 por defecto; las semillas 0 y 1
+#    requieren cambiar ControllerConfig.seed). RL directo: 4 semillas × 10k y 30k pasos,
+#    cada una en su carpeta.
 python training\train_controller.py
-python training\train_controller_direct.py
+foreach ($s in 0..3) {
+  python training\train_controller_direct.py --seed $s --total-timesteps 10000 --output-dir models\checkpoints\direct_10k\seed$s
+  python training\train_controller_direct.py --seed $s --total-timesteps 30000 --output-dir models\checkpoints\direct_30k\seed$s
+}
 
-# 6. Comparación final en SUMO real (sueño, directo, tiempo fijo, regla trivial)
-python scripts\evaluate_final_comparison.py
+# 6. Evaluación en SUMO real: todas las semillas de cada método, escenarios oficiales
+#    (3000 y 5000) y nuevos (7000-7029), con pruebas estadísticas y resultados por episodio
+python scripts\evaluate_multiseed_statistical.py --help
+python scripts\evaluate_final_comparison.py   # solo los checkpoints oficiales
 ```
 
 Los pasos 3 y 4 son experimentos de validación y no los necesitan los pasos 5 y 6.
@@ -114,7 +146,7 @@ Los pasos 3 y 4 son experimentos de validación y no los necesitan los pasos 5 y
 pytest -v
 ```
 
-67 tests en 13 archivos.
+81 tests en 16 archivos.
 
 ## Documentación
 

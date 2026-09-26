@@ -2,9 +2,12 @@
 
 ## Ya resuelto (referencia, no acción)
 
-- [x] Experimento 0 completado: el Autoencoder se mantiene en el sistema final,
-      confirmado con `reward_mse` consistentemente mejor en los 10 horizontes
-      evaluados (ver PROJECT_STATUS.md para el detalle numérico).
+- [x] Experimento 0 completado: el Autoencoder se mantiene en el sistema final.
+      **Rehecho el 26-sep** (la rama cruda no compartía el protocolo de la rama z): con 5
+      semillas por rama y convergencia igualada, mejora la predicción de la recompensa de
+      forma moderada y mayoritaria (37/50 pares semilla × horizonte, mediana +10.9%). La
+      versión publicada antes (9/10 horizontes, 14.7%) queda superada. Ver PROJECT_STATUS.md,
+      "Auditoría técnica y correcciones", punto 5.
 - [x] Fix de normalización de recompensa en el LSTM.
 - [x] Fix de lectura de fase del semáforo (bug crítico, ver historial de commits).
 - [x] Dataset regenerado con 40 episodios.
@@ -81,13 +84,33 @@
       sección "Escenario asimétrico, segunda ronda".
 - [x] Más presupuesto de entrenamiento real para el RL directo: verificado con 30,000
       pasos (3x) en las 3 semillas, fuera del repositorio y sin tocar los checkpoints
-      oficiales. **Resultado:** el RL directo alcanza un desempeño comparable al World
+      oficiales. **Superado el 26-sep**: esos modelos tenían el bug C1; los resultados
+      vigentes están en el ítem de la auditoría técnica, más abajo. **Resultado de
+      entonces:** el RL directo alcanza un desempeño comparable al World
       Model (-335.24 frente a -326.79; p = 0.71 a nivel de semilla), la desviación de sus
       medias por semilla baja de 96.2 a 30.6, la semilla 2 deja de colapsar y los
       episodios catastróficos bajan de 23/90 a 11/90, pero consume ~8.5 veces más
       interacciones reales (39,000 frente a ~4,600 por semilla). La ventaja del World
       Model es de eficiencia en interacciones. Ver PROJECT_STATUS.md, sección
       "Verificación: RL directo con 3x presupuesto".
+
+- [x] **Auditoría técnica del repositorio (26-sep) y sus correcciones**, cada una verificada
+      y con su propio commit (ver PROJECT_STATUS.md, "Auditoría técnica y correcciones"):
+      - Bug C1 (conexión TraCI global en `CustomStateBuilder`) corregido; el RL directo,
+        el único afectado, se reentrenó con 4 semillas × 10k y 30k pasos.
+      - Script de evaluación multisemilla versionado (`evaluate_multiseed_statistical.py`),
+        con Welch por semilla y pareado por escenario, y resultados por episodio en
+        `docs/results/`. Evaluación adicional en escenarios nuevos (7000–7029).
+      - Resultado: frente al RL directo de 10k el World Model es mejor en los dos conjuntos;
+        frente al de 30k no se detectó una diferencia consistente.
+      - Checkpoints oficiales con un mismo criterio: sueño semilla 2, RL directo 10k semilla
+        0, 30k semilla 1. Los anteriores al fix están archivados en `*_prefix_bug/`.
+      - Experimento 0 rehecho con el protocolo compartido, 5 semillas y convergencia
+        igualada.
+      - `info["arrivals_total"]`, métrica de llegadas correcta; el "throughput" heredado
+        no medía llegadas (la recompensa no cambió).
+      - Guardias en los scripts de entrenamiento, versiones fijadas en
+        `requirements.txt`, y 81 tests.
 
 ## Siguiente paso recomendado
 
@@ -108,10 +131,20 @@
       `latent_mse` y mejor pérdida de validación, pero peor `reward_mse`, el mismo
       desacople que el reward imaginado del PPO (Pearson +0.08). Ver PROJECT_STATUS.md,
       sección "Experimento 3".
-- [ ] Reflejar el Experimento 3 en `docs/PROPUESTA.md` (H4, H6, Secciones 20, 24 y 30).
-      Lo revisa el autor por separado.
+- [x] Reflejar el Experimento 3 en `docs/PROPUESTA.md` (H4, H6, Secciones 20, 24 y 30):
+      hecho en el commit `379a374`.
+- [ ] Propagar los resultados de la auditoría técnica a `docs/PROPUESTA.md` y
+      `docs/DOCUMENTACION_PROYECTO.md`, y corregir en todos los `.md` las afirmaciones
+      estadísticas (pseudorreplicación, "comparable", rango de interacciones).
 
 ## Pendiente, no bloqueante
+
+- [ ] Decidir la licencia (`LICENSE` está vacío): la decide el autor con su director.
+- [ ] El LSTM oficial se entrenó hasta el tope de 100 épocas, no hasta converger (con early
+      stopping real, su mejor época habría sido la 152). No se reentrena porque el Dream
+      Environment y los PPO del sueño dependen de él; queda como limitación documentada.
+- [ ] `collect_dataset.py` no siembra las acciones aleatorias, así que una recolección
+      nueva no reproduce el dataset oficial (respaldado, no regenerado).
 
 - [x] Actualizar `DOCUMENTACION_PROYECTO.md` con LSTM, bug de fase, Experimento 0,
       cierre del sobreajuste, y Dream Environment (resuelto en el commit `9ca20ac`).
@@ -154,11 +187,13 @@
 
 ## Después (orden según la propuesta del proyecto)
 
-- [ ] Más semillas por método (siguen siendo 3; el presupuesto ya se verificó, ver
-      "Ya resuelto").
+- [ ] Más semillas por método: 3 en el PPO del sueño y 4 en el RL directo, cuyos
+      resultados cambian bastante entre semillas; harían falta al menos 5 para comparar
+      métodos.
 - [ ] Curva de desempeño frente a interacciones reales del RL directo (hoy solo dos
-      puntos: 13,000 y 39,000 por semilla).
+      puntos: 13,240 y 39,208 por semilla).
 - [ ] Medir el momento de los cambios de fase respecto a las colas de cada brazo, comparando
-      episodios catastróficos con buenos (quedan 5/90 en el sueño y 23/90 en el directo).
+      episodios catastróficos con buenos (escenarios oficiales: 5/90 en el sueño, 25/120 y
+      24/120 en el RL directo de 10k y 30k).
 - [ ] Demanda variable en el tiempo (la asimetría ya está implementada; la variación
       temporal no).
