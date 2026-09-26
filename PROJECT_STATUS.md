@@ -673,6 +673,8 @@ decisión de mantener el Autoencoder se sostiene.
 
 ### 4. Hallazgo crítico: el criterio de selección del PPO del sueño estaba roto
 
+> **Nota sobre los escenarios (26-sep):** la investigación que decidió cambiar el criterio de selección (la correlación de Pearson de +0.077 entre reward imaginado y real) midió el reward real en la semilla de evaluación 3000, uno de los escenarios oficiales. El criterio adoptado selecciona luego en escenarios distintos (20000–20004), pero la decisión de adoptarlo se tomó con los escenarios oficiales, así que para ella no eran un test virgen. Los escenarios que sí son un test virgen son las semillas 7000–7029, nunca usadas antes (ver "Auditoría técnica y correcciones", punto 3); ahí el PPO del sueño, seleccionado con este criterio, obtiene -293.81.
+
 - **Síntoma.** El primer PPO del sueño reentrenado con el Autoencoder y el LSTM nuevos
   empeoró en SUMO real: su `best_model`, elegido por reward imaginado (t=26000), dio
   **-536.06 / -547.37** (13/30 episodios catastróficos). El checkpoint final (t=50176) dio
@@ -700,6 +702,8 @@ decisión de mantener el Autoencoder se sostiene.
   opcional (por defecto `None`, sin cambio de comportamiento), con su test.
 
 ### 5. Hallazgo crítico: la función de valor de PPO no aprendía
+
+> **Nota sobre los escenarios (26-sep):** la adopción de `VecNormalize` (recompensa en los dos PPO, este punto; observaciones en el directo, punto 6) se validó con los resultados en los escenarios oficiales (semillas 3000–3014 y 5000–5014), que para esas decisiones no eran un test virgen. Los escenarios que sí son un test virgen son las semillas 7000–7029, nunca usadas antes (ver "Auditoría técnica y correcciones", punto 3).
 
 - **Diagnóstico.** `explained_variance` ≈ 0 en **todas** las corridas del proyecto hasta
   este punto, en los dos PPO. Los retornos no estaban normalizados y eran de cientos a
@@ -788,6 +792,8 @@ están dentro del ruido. Se decidió mantener la semilla 1 como checkpoint ofici
 **reportar como resultado del método la media de las tres semillas en 90 episodios
 (-326.79)**; el desglose por semilla es la evidencia de consistencia, no el número
 principal.
+
+> **Nota sobre los escenarios (26-sep):** la semilla oficial se eligió con los resultados en los escenarios oficiales, que para esa elección no eran un test virgen. Los escenarios que sí son un test virgen son las semillas 7000–7029, nunca usadas antes (ver "Auditoría técnica y correcciones", punto 3); ahí las tres semillas quedan en -300.56, -294.45 y -286.41, con la semilla 2 (la oficial desde el 26-sep) de nuevo como la mejor.
 
 **PPO directo (`VecNormalize` de recompensa y observaciones):**
 
@@ -1310,6 +1316,8 @@ numéricamente, pero son ventajas de la regla, no de control aprendido.
 
 ### 6. Limitación más importante del proyecto (trabajo futuro)
 
+> **Nota sobre los escenarios (26-sep):** la conclusión de que la demanda simétrica era demasiado simple, que motivó el cambio a demanda asimétrica, salió de resultados en los escenarios oficiales. La nueva demanda se calibró con criterios de inserción de vehículos, no con recompensas en esos escenarios. Los escenarios que sí son un test virgen son las semillas 7000–7029, nunca usadas antes (ver "Auditoría técnica y correcciones", punto 3).
+
 El escenario actual (demanda baja y simétrica: 200/90/60 vehículos por hora por acceso
 para recto/izquierda/derecha, dos fases) es **demasiado simple para que el control
 dependiente del estado aporte ventaja sobre una regla fija**: cambiar de fase en cuanto
@@ -1479,6 +1487,8 @@ diagnosticado en (a)–(b), y lo único que cambia entre corridas es la normaliz
   distribución. Con el `z` correcto, el horizonte de 20 **empeoró** la política real.
 
 ### (j) Decisión final
+
+> **Nota sobre los escenarios (26-sep):** la elección de `dream_max_steps=7` (v1) frente a 20 (v2) se tomó comparando las dos versiones en los escenarios oficiales (`seed_base` 3000 y 5000), que para esa decisión no eran un test virgen. Los escenarios que sí son un test virgen son las semillas 7000–7029, nunca usadas antes (ver "Auditoría técnica y correcciones", punto 3). v1 y v2 eran del escenario simétrico y no se evaluaron en ellos; los PPO del sueño actuales (escenario asimétrico), entrenados con la configuración elegida (`dream_max_steps=7`), obtienen -293.81 en los nuevos frente a -326.79 en los oficiales (media de 3 semillas). Eso respalda la configuración, pero no es una comparación directa entre 7 y 20.
 
 Se revierte `ControllerConfig.dream_max_steps` a 7 (commit posterior a `990c6e5`) y v1
 pasa a ser el checkpoint oficial (`models/checkpoints/controller/best_model.zip`). v2 se
