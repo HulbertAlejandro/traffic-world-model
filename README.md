@@ -156,6 +156,10 @@ pytest -v
   experimental, las hipótesis evaluadas y la justificación de cada tecnología.
 - [`PROJECT_STATUS.md`](PROJECT_STATUS.md): registro detallado de resultados y hallazgos,
   con todas las cifras.
+- [`docs/EXPLORACION_LATENT_DIM.md`](docs/EXPLORACION_LATENT_DIM.md): exploración posterior del
+  Experimento 0 (semillas, `latent_dim` y varianza entre Autoencoders), sin cambios en el pipeline
+  oficial. Conclusión: no hay evidencia de que el Autoencoder mejore ni empeore la predicción de la
+  recompensa con la LSTM.
 
 ## Referencias
 
