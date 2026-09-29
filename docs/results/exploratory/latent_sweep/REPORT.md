@@ -237,3 +237,74 @@ nada.
 
 Cómputo del addendum: 3 Autoencoders (incluida la comprobación de la semilla 0) y 6 LSTM, unos
 14 min de pared y unos 2,240 s de proceso en las LSTM.
+
+## 11. Addendum: grilla de 5×5 (semilla del AE × semilla de la LSTM) para `latent_dim` = 12 (criterio en `ADDENDUM_grid5.md`)
+
+Autoencoders con semillas 0–4 (los 3 y 4, nuevos) y LSTM con semillas 0–4 por Autoencoder. Se
+entrenaron 2 Autoencoders y 14 LSTM nuevas (no 16: las semillas 3 y 4 del AE 0 ya existían). Las 14
+se cortaron por early stopping (épocas 96–153). Rama cruda: `raw24/seed0..9`, sin reentrenar.
+
+**Métrica principal (descriptiva): reducción mediana (crudo − z)/crudo contra `raw24/seed s`**
+
+| | LSTM s0 | LSTM s1 | LSTM s2 | LSTM s3 | LSTM s4 | Media de fila |
+|---|---|---|---|---|---|---|
+| AE s0 | +0.9% | +45.3% | +38.2% | +26.9% | +14.5% | +25.1% |
+| AE s1 | -32.6% | +37.6% | +23.5% | +25.2% | +8.8% | +12.5% |
+| AE s2 | -28.0% | +40.8% | +14.1% | -6.3% | +1.3% | +4.4% |
+| AE s3 | -9.6% | +35.4% | +37.0% | +12.7% | -2.5% | +14.6% |
+| AE s4 | -112.9% | +18.8% | -27.3% | -4.6% | -11.0% | -27.4% |
+| Media de columna | -36.4% | +35.6% | +17.1% | +10.8% | +2.2% | |
+
+16 de 25 celdas son positivas.
+
+**Métrica de decisión: media geométrica del `reward_mse` de z sobre h = 1..10 (menor es mejor)**
+
+| | LSTM s0 | LSTM s1 | LSTM s2 | LSTM s3 | LSTM s4 | Media geométrica del AE | Reconstrucción (val) |
+|---|---|---|---|---|---|---|---|
+| AE s0 | 224.1 | 234.3 | 231.7 | 205.8 | 257.7 | **230.1** | 0.0418 |
+| AE s1 | 322.0 | 260.2 | 289.9 | 213.5 | 281.6 | 271.0 | 0.0321 |
+| AE s2 | 288.7 | 247.0 | 296.1 | 301.8 | 290.9 | 284.2 | 0.0312 |
+| AE s3 | 258.3 | 269.9 | 235.7 | 250.0 | 299.6 | 261.8 | 0.0428 |
+| AE s4 | 446.7 | 343.8 | 489.7 | 268.9 | 328.7 | 366.9 | 0.0452 |
+
+Crudo de 24 dimensiones (10 corridas): media geométrica 300.9.
+
+**ANOVA de dos factores sin réplica (5 × 5; F con 4 y 16 gl)**
+
+| Métrica | Autoencoder | Semilla de LSTM | Residuo |
+|---|---|---|---|
+| Decisión (log de la media geométrica de z) | F = 8.61, **p = 0.0007**; σ_AE = 0.161 (~16%) | F = 2.07, p = 0.13; σ_LSTM = 0.060 (~6%) | σ = 0.131 |
+| Principal (reducción; descriptiva) | F = 6.80, p = 0.002; σ_AE = 18.5 puntos | F = 12.06, p = 0.0001; σ_LSTM = 25.5 puntos | σ = 17.1 puntos |
+
+**Comparación contra el crudo (criterio fijado)**
+
+- Δ = media de g en z (25 corridas) − media de g en el crudo de 24 (10 corridas) = −0.074, es decir,
+  z tiene un 7.1% menos de `reward_mse` geométrico.
+- **IC del 95% por bootstrap por conglomerados (B = 100,000): de −21.7% a +12.0%. Incluye 0.**
+- Permutación por corrida (no decisoria, anticonservadora): p = 0.33.
+- **Conclusión según el criterio fijado: SIN EVIDENCIA de que `latent_dim` = 12 prediga la
+  recompensa mejor (ni peor) que el estado crudo.**
+
+**Lectura.**
+
+- **La semilla del Autoencoder es la fuente de varianza dominante y significativa** en la métrica
+  que solo depende de z: σ_AE ≈ 16% frente a σ_LSTM ≈ 6%, con p = 0.0007 frente a p = 0.13. Con 5
+  niveles se confirma lo que el diseño de 3×3 sugería. En la métrica de reducción domina la columna,
+  pero eso es ruido de la rama cruda compartida (sección 10), no de la LSTM sobre z.
+- **El Autoencoder de semilla 0 es el mejor de los cinco** (230.1, frente a 262–367). Todo el
+  resultado significativo anterior (secciones 4 y 9) dependía de él. El Autoencoder 4 es el peor por
+  mucho (366.9, peor que el crudo). La pérdida de reconstrucción no ordena esto: el AE 0 (0.042) y el
+  AE 4 (0.045) reconstruyen casi igual.
+- **Respuesta directa:** con las dos fuentes de varianza controladas, **no hay evidencia** de que
+  comprimir el estado con `latent_dim` = 12 ayude a predecir mejor la recompensa que el estado
+  crudo. La estimación puntual favorece ligeramente al latente (−7%), pero el intervalo va desde una
+  mejora del 22% hasta un empeoramiento del 12%. El resultado es **ambiguo**: tampoco hay evidencia
+  de que perjudique. Lo que sí queda establecido es que el Autoencoder concreto que se entrene
+  importa más que la semilla de la LSTM, y que un Autoencoder puede salir claramente útil (AE 0) o
+  claramente perjudicial (AE 4).
+- Salvedad fijada: con 5 Autoencoders, el bootstrap por conglomerados tiene pocos grupos. Aquí no
+  cambia nada: la conclusión no depende de un margen pequeño, porque el 0 queda bien dentro del IC.
+
+**Cómputo.** Addendum: 2 Autoencoders (28 s) y 14 LSTM (4,337 s de proceso), 26 min de pared. Toda la
+exploración `latent_sweep` hasta aquí: 61 LSTM (7.4 h de proceso) y 11 Autoencoders (582 s), sin
+contar las 2 corridas de validación iniciales.
