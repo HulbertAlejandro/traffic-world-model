@@ -1,0 +1,19 @@
+mediana por horizonte de reward_mse (10 corridas por grupo)
+h  |          z12 (24 dims) |               crudo 24 |  z16 oficial (26 dims) |               crudo 26
+ 1 |                   55.3 |                   54.9 |                   57.1 |                   55.4
+ 2 |                  103.6 |                  120.6 |                  114.6 |                  123.0
+ 3 |                  160.2 |                  184.7 |                  178.7 |                  203.1
+ 4 |                  218.7 |                  248.8 |                  230.6 |                  290.0
+ 5 |                  268.4 |                  316.2 |                  290.6 |                  362.5
+ 6 |                  294.4 |                  389.4 |                  359.8 |                  417.2
+ 7 |                  323.0 |                  459.9 |                  442.5 |                  484.9
+ 8 |                  365.6 |                  537.4 |                  517.0 |                  528.5
+ 9 |                  433.2 |                  611.2 |                  594.9 |                  611.3
+10 |                  554.5 |                  691.8 |                  745.8 |                  698.8
+
+media geometrica sobre h por corrida (mediana del grupo): {'z12 (24 dims)': 232.9, 'crudo 24': 291.2, 'z16 oficial (26 dims)': 269.7, 'crudo 26': 299.4}
+z12 (24 dims) vs crudo 24: razon de medias geometricas 0.782 (-21.8%), permutacion exacta p = 0.0011
+z12 (24 dims) vs crudo 26: razon de medias geometricas 0.783 (-21.7%), permutacion exacta p = 0.0002
+crudo 24 vs crudo 26: razon de medias geometricas 1.000 (+0.0%), permutacion exacta p = 0.9967
+z16 oficial (26 dims) vs crudo 26: razon de medias geometricas 0.933 (-6.7%), permutacion exacta p = 0.2721
+z12 (24 dims) vs z16 oficial (26 dims): razon de medias geometricas 0.839 (-16.1%), permutacion exacta p = 0.0083
