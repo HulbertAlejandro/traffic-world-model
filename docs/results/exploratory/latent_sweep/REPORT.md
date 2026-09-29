@@ -124,3 +124,55 @@ horizonte (h = 10: 554.5 frente a 691.8).
   corriendo huérfanos. La primera vez se detuvieron por instrucción del autor y se relanzaron con 3
   en paralelo, conservando las 3 corridas ya completas (el entrenamiento es determinista). La segunda
   vez se dejaron terminar. Ninguna corrida se repitió ni se excluyó por su resultado.
+
+## 9. Addendum: `latent_dim` = 8 reforzado a 10 semillas (pedido del autor; criterio en `ADDENDUM_z8.md`)
+
+Mismo procedimiento que para 12 (`run_reinforce.sh 8`): 7 corridas nuevas de z8 (semillas 3–9),
+todas cortadas por early stopping (épocas 61–137). La rama cruda de 24 con semillas 3–9 es la misma
+que la del refuerzo de 12 (se reutilizó; el script lo verifica).
+
+| Semilla | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| z8: reducción | +0.2% | +39.5% | +25.4% | +11.8% | -1.6% | +0.2% | -17.5% | +14.0% | +36.7% | -8.5% |
+| z8: horizontes ganados | 5 | 9 | 10 | 9 | 4 | 5 | 0 | 7 | 9 | 2 |
+| z12: reducción | +0.9% | +45.3% | +38.2% | +26.9% | +14.5% | +20.1% | +19.7% | +1.2% | +42.5% | +0.7% |
+
+| | z8, 10 semillas | z8, solo 3–9 | z12, 10 semillas | z12, solo 3–9 |
+|---|---|---|---|---|
+| Pares ganados | 60/100 | 35/70 | 85/100 | 60/70 |
+| Semillas positivas | 7/10 | 4/7 | 10/10 | 7/7 |
+| Prueba de signo | p = 0.34 | p = 1.00 | p = 0.002 | p = 0.016 |
+| Wilcoxon | p = 0.19 | p = 0.69 | p = 0.002 | p = 0.016 |
+| Reducción mediana por semilla | +6.0% | +0.2% | +19.9% | +19.7% |
+| Rango de las reducciones por semilla | -17.5% a +39.5% | -17.5% a +36.7% | +0.7% a +45.3% | +0.7% a +42.5% |
+
+**Sin emparejar** (media geométrica del `reward_mse` sobre h = 1..10; permutación exacta):
+
+| Comparación | Diferencia | p | Estado |
+|---|---|---|---|
+| **z8 frente a z12** | **+13.3%** (z8 peor) | **0.014** | preregistrada (`ADDENDUM_z8.md`) |
+| z8 frente a crudo 24 | -11.4% | 0.090 | *post hoc* |
+| z8 frente a crudo 26 | -11.3% | 0.022 | *post hoc* |
+| z12 frente a crudo 24 / crudo 26 | -21.8% / -21.7% | 0.001 / 0.0002 | *post hoc* |
+
+Mediana por horizonte (10 corridas): z8 es peor que z12 en h = 1..9 (h = 1: 64.6 frente a 55.3,
+peor incluso que el crudo, 54.9) y mejor solo en h = 10 (497.1 frente a 554.5).
+
+**Interpretación.**
+
+- **El efecto de z8 se diluye con semillas nuevas, como el de z16:** en las semillas 3–9 queda en
+  +0.2% de mediana y 4/7 positivas. Sus semillas 1 y 2 del barrido (+39.5% y +25.4%) coincidían con
+  las dos semillas malas de la rama cruda de 24 (sección 5).
+- **Con el criterio preregistrado, 8 y 12 se distinguen** (p = 0.014): 12 tiene un error un 13%
+  menor. Los rangos por semilla se traslapan mucho (z8 de -17.5% a +39.5%; z12 de +0.7% a +45.3%),
+  pero la diferencia está en la cola inferior: 4 de 10 semillas de z8 son negativas y ninguna de z12
+  lo es. Los datos **no** apoyan una meseta de valores igualmente buenos entre 8 y 12.
+- **Salvedad principal:** cada `latent_dim` tiene un único Autoencoder (semilla 0). Las 10 semillas
+  replican el ruido de la LSTM, no el del Autoencoder. "12 es mejor que 8" puede ser en parte "este
+  Autoencoder de 12 es mejor que este de 8". Separarlo exigiría varias semillas del Autoencoder por
+  valor.
+- Con z8, z16 y el z16 oficial diluyéndose, **z12 queda como el único resultado positivo robusto del
+  barrido**. Que sea un óptimo real en k = 12, o una buena inicialización de un Autoencoder concreto,
+  no se puede decidir con estos datos.
+
+Cómputo del addendum: 7 LSTM, 2,073 s de proceso y 736 s de pared.

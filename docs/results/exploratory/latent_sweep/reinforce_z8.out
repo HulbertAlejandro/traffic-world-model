@@ -1,0 +1,26 @@
+raw24 seed3 already done, skipped
+raw24 seed4 already done, skipped
+raw24 seed5 already done, skipped
+z8 seed3 exit=0
+raw24 seed6 already done, skipped
+z8 seed4 exit=0
+raw24 seed7 already done, skipped
+z8 seed5 exit=0
+raw24 seed8 already done, skipped
+z8 seed6 exit=0
+raw24 seed9 already done, skipped
+z8 seed7 exit=0
+z8 seed9 exit=0
+z8 seed8 exit=0
+wall seconds: 736
+seed 0: z gana 5/10 horizontes, reduccion mediana +0.2%
+seed 1: z gana 9/10 horizontes, reduccion mediana +39.5%
+seed 2: z gana 10/10 horizontes, reduccion mediana +25.4%
+seed 3: z gana 9/10 horizontes, reduccion mediana +11.8%
+seed 4: z gana 4/10 horizontes, reduccion mediana -1.6%
+seed 5: z gana 5/10 horizontes, reduccion mediana +0.2%
+seed 6: z gana 0/10 horizontes, reduccion mediana -17.5%
+seed 7: z gana 7/10 horizontes, reduccion mediana +14.0%
+seed 8: z gana 9/10 horizontes, reduccion mediana +36.7%
+seed 9: z gana 2/10 horizontes, reduccion mediana -8.5%
+z gana 60/100 pares; mediana de medianas por horizonte +4.4%; mediana de las medianas por semilla +6.0% -> docs\results\exploratory\latent_sweep\winner_z8_10seeds.json

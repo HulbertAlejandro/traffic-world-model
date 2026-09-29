@@ -1,4 +1,4 @@
-"""POST HOC (not pre-registered): unpaired comparison of the 10-run groups, since the seed pairing
+"""POST HOC (z8 vs z12 is the pre-registered test of ADDENDUM_z8.md; the rest is post hoc) : unpaired comparison of the 10-run groups, since the seed pairing
 between branches is nominal (different input sizes -> different initializations and batch orders).
 Per run: geometric mean over h=1..10 of reward_mse (each horizon weighs the same).
 Exact two-sided permutation test on the difference of group means of log reward_mse (C(20,10))."""
@@ -11,6 +11,7 @@ import numpy as np
 HERE = Path(__file__).parent
 H = [str(h) for h in range(1, 11)]
 win = json.loads((HERE / "winner_z12_10seeds.json").read_text(encoding="utf-8"))
+z8 = json.loads((HERE / "winner_z8_10seeds.json").read_text(encoding="utf-8"))
 old = json.loads((HERE.parent / "seed_zero_check/experiment_0_10seeds_combined.json").read_text(encoding="utf-8"))
 
 
@@ -18,7 +19,8 @@ def runs(report, branch):
     return np.array([[p[branch][h]["model_reward_mse"] for h in H] for p in report["pairs"]])
 
 
-groups = {"z12 (24 dims)": runs(win, "z"), "crudo 24": runs(win, "raw"),
+assert np.array_equal(runs(win, "raw"), runs(z8, "raw"))  # both reinforcements share the same raw-24 runs
+groups = {"z8 (24 dims)": runs(z8, "z"), "z12 (24 dims)": runs(win, "z"), "crudo 24": runs(win, "raw"),
           "z16 oficial (26 dims)": runs(old, "z"), "crudo 26": runs(old, "raw")}
 score = {g: np.log(v).mean(axis=1) for g, v in groups.items()}
 print("mediana por horizonte de reward_mse (10 corridas por grupo)")
@@ -35,7 +37,8 @@ def perm(a, b):
 
 
 out = {}
-for a, b in [("z12 (24 dims)", "crudo 24"), ("z12 (24 dims)", "crudo 26"), ("crudo 24", "crudo 26"),
+for a, b in [("z8 (24 dims)", "z12 (24 dims)"), ("z8 (24 dims)", "crudo 24"), ("z8 (24 dims)", "crudo 26"),
+             ("z12 (24 dims)", "crudo 24"), ("z12 (24 dims)", "crudo 26"), ("crudo 24", "crudo 26"),
              ("z16 oficial (26 dims)", "crudo 26"), ("z12 (24 dims)", "z16 oficial (26 dims)")]:
     d, p = perm(score[a], score[b])
     out[f"{a} vs {b}"] = {"ratio_geomean": float(np.exp(d)), "p": p}
