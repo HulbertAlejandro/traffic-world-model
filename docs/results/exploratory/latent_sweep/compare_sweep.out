@@ -1,0 +1,31 @@
+== latent_dim 4 ==
+seed 0: z gana 0/10 horizontes, reduccion mediana -100.8%
+seed 1: z gana 6/10 horizontes, reduccion mediana +11.2%
+seed 2: z gana 3/10 horizontes, reduccion mediana -13.6%
+z gana 9/30 pares; mediana de medianas por horizonte -14.9%; mediana de las medianas por semilla -13.6% -> docs\results\exploratory\latent_sweep\sweep_z4.json
+== latent_dim 8 ==
+seed 0: z gana 5/10 horizontes, reduccion mediana +0.2%
+seed 1: z gana 9/10 horizontes, reduccion mediana +39.5%
+seed 2: z gana 10/10 horizontes, reduccion mediana +25.4%
+z gana 24/30 pares; mediana de medianas por horizonte +25.4%; mediana de las medianas por semilla +25.4% -> docs\results\exploratory\latent_sweep\sweep_z8.json
+== latent_dim 12 ==
+seed 0: z gana 6/10 horizontes, reduccion mediana +0.9%
+seed 1: z gana 9/10 horizontes, reduccion mediana +45.3%
+seed 2: z gana 10/10 horizontes, reduccion mediana +38.2%
+z gana 25/30 pares; mediana de medianas por horizonte +36.6%; mediana de las medianas por semilla +38.2% -> docs\results\exploratory\latent_sweep\sweep_z12.json
+== latent_dim 16 ==
+seed 0: z gana 0/10 horizontes, reduccion mediana -31.9%
+seed 1: z gana 8/10 horizontes, reduccion mediana +27.5%
+seed 2: z gana 10/10 horizontes, reduccion mediana +32.0%
+z gana 18/30 pares; mediana de medianas por horizonte +27.5%; mediana de las medianas por semilla +27.5% -> docs\results\exploratory\latent_sweep\sweep_z16.json
+== latent_dim 20 ==
+seed 0: z gana 1/10 horizontes, reduccion mediana -26.1%
+seed 1: z gana 10/10 horizontes, reduccion mediana +45.1%
+seed 2: z gana 9/10 horizontes, reduccion mediana +28.1%
+z gana 20/30 pares; mediana de medianas por horizonte +28.1%; mediana de las medianas por semilla +28.1% -> docs\results\exploratory\latent_sweep\sweep_z20.json
+latent_dim  4: mediana -13.6% | pares 9/30 | s0 -100.8% (0/10), s1 +11.2% (6/10), s2 -13.6% (3/10)
+latent_dim  8: mediana +25.4% | pares 24/30 | s0 +0.2% (5/10), s1 +39.5% (9/10), s2 +25.4% (10/10)
+latent_dim 12: mediana +38.2% | pares 25/30 | s0 +0.9% (6/10), s1 +45.3% (9/10), s2 +38.2% (10/10)
+latent_dim 16: mediana +27.5% | pares 18/30 | s0 -31.9% (0/10), s1 +27.5% (8/10), s2 +32.0% (10/10)
+latent_dim 20: mediana +28.1% | pares 20/30 | s0 -26.1% (1/10), s1 +45.1% (10/10), s2 +28.1% (9/10)
+GANADOR (criterio del MANIFEST): latent_dim = 12
