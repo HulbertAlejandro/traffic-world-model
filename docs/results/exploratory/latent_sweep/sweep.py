@@ -234,6 +234,13 @@ def main() -> None:
     b.add_argument("--val", type=Path, required=True)
     b.add_argument("--seed", type=int, required=True)
     b.add_argument("--out", type=Path, required=True)
+    t = sub.add_parser("train-arch", help="Transformer/TSMixer via train() of training/train_world_model_<arch>_raw.py")
+    t.add_argument("--arch", choices=("transformer", "tsmixer"), required=True)
+    t.add_argument("--train", type=Path, required=True)
+    t.add_argument("--val", type=Path, required=True)
+    t.add_argument("--seed", type=int, required=True)
+    t.add_argument("--epochs", type=int, default=300)
+    t.add_argument("--out", type=Path, required=True)
     c = sub.add_parser("compare")
     c.add_argument("--z-dirs", type=Path, nargs="+", required=True)
     c.add_argument("--raw-dirs", type=Path, nargs="+", required=True)
@@ -247,6 +254,10 @@ def main() -> None:
         train_ae(args.latent, args.data_dir, args.out, args.seed)
     elif args.cmd == "train-lstm":
         train_lstm(args.train, args.val, args.seed, args.out)
+    elif args.cmd == "train-arch":
+        import importlib
+        module = importlib.import_module(f"training.train_world_model_{args.arch}_raw")
+        print(json.dumps(module.train(args.train, args.val, args.seed, args.epochs, args.out)))
     else:
         compare(args.z_dirs, args.raw_dirs, args.test_z, args.test_raw, args.output)
 
