@@ -176,3 +176,64 @@ peor incluso que el crudo, 54.9) y mejor solo en h = 10 (497.1 frente a 554.5).
   no se puede decidir con estos datos.
 
 Cómputo del addendum: 7 LSTM, 2,073 s de proceso y 736 s de pared.
+
+## 10. Addendum: ¿depende la ventaja de `latent_dim` = 12 del Autoencoder concreto? (criterio en `ADDENDUM_ae_seeds.md`)
+
+Autoencoders de `latent_dim` = 12 con semillas 0 (`ae12/`, reutilizado), 1 y 2, cada uno con la LSTM
+de semillas 0–2 (6 corridas nuevas; todas cortadas por early stopping, épocas 128–167). Se verificó
+antes que `train-ae --seed 0` reproduce `ae12/` tensor a tensor. La rama cruda es `raw24/seed{0,1,2}`.
+
+**Tabla principal: reducción mediana (crudo − z)/crudo**
+
+| | LSTM s0 | LSTM s1 | LSTM s2 | Media de fila | Reconstrucción (val) |
+|---|---|---|---|---|---|
+| AE s0 | +0.9% | +45.3% | +38.2% | **+28.1%** | 0.0418 |
+| AE s1 | -32.6% | +37.6% | +23.5% | +9.5% | 0.0321 |
+| AE s2 | -28.0% | +40.8% | +14.1% | +9.0% | 0.0312 |
+| Media de columna | -19.9% | +41.2% | +25.2% | | |
+
+| Descomposición | Métrica principal (reducción) | Métrica secundaria (solo z: 100 × log de la media geométrica del `reward_mse`) |
+|---|---|---|
+| Varianza entre AE (con la LSTM fija), media de 3 columnas | 164.4 | 185.9 |
+| Varianza entre semillas de LSTM (con el AE fijo), media de 3 filas | 1,050.0 | 71.7 |
+| ANOVA: σ²_AE / σ²_LSTM (desviación) | 96.9 (9.8) / 982.6 (31.3) | 129.7 (11.4) / 15.6 (3.9) |
+| F del AE / F de la LSTM (2 y 4 gl) | 5.3 / 44.7 | 7.9 / 1.8 |
+| ¿AE s0 atípico? (criterio fijado) | **sí**: +28.1 frente a +9.2 de las otras dos; umbral 11.6 | **sí**: 543.8 frente a 564.5; umbral 10.6 |
+
+Varianza entre semillas de LSTM con el AE s0 y 10 semillas: 293.0 (desviación de 17.1 puntos).
+
+**Lectura.**
+
+- **En la métrica principal domina la semilla de la LSTM**, pero casi toda esa varianza es ruido de
+  la **rama cruda**, no de la LSTM sobre z. La columna s comparte `raw24/seed s`, cuya media
+  geométrica vale 229.7, 392.8 y 354.3 para s = 0, 1, 2. Por eso la columna 0 es negativa en las
+  tres filas y la 1 positiva en las tres.
+- **En la métrica que solo depende de z, domina el Autoencoder:** su desviación es del 11.4% frente
+  al 3.9% de la LSTM. Con la misma LSTM (mismos pesos iniciales y mismo orden de lotes, porque las
+  tres entradas tienen 12 dimensiones), cambiar el Autoencoder mueve el error más que cambiar la
+  semilla de la LSTM.
+- **El Autoencoder de semilla 0 es atípico, y en la dirección favorable**, según el criterio fijado
+  y en las dos métricas. Sus LSTM tienen un error de recompensa unos 19% menor que las de los
+  Autoencoders 1 y 2 (medias geométricas por corrida de 224–234, frente a 247–322). Los otros dos
+  coinciden entre sí (566.9 y 562.2). Además, el Autoencoder 0 es el que **peor reconstruye**
+  (0.042 frente a 0.032 y 0.031): la calidad de reconstrucción no predice la utilidad para la
+  dinámica.
+- **Descriptivo, *post hoc*, sin prueba:** con los Autoencoders 1 y 2, la media geométrica de sus 6
+  corridas (247–322) cae dentro de la de las 10 corridas crudas de 24 (mediana 291.3, rango
+  229.7–395.3) y de 26 (mediana 299.4), con una mediana de unos 289. **Con esos Autoencoders, z12
+  no se distingue del estado crudo.**
+
+**Conclusión.** La ventaja significativa de `latent_dim` = 12 (secciones 4 y 9) **no es robusta al
+Autoencoder: depende en gran parte de esa lotería.** Las pruebas de las secciones 4 y 9 son
+válidas para el Autoencoder 0, pero **no generalizan a `latent_dim` = 12 como valor.** Con 2 de 3
+Autoencoders el efecto desaparece, y el que lo produce es precisamente el que se usó en todo el
+barrido. Eso debilita también el orden del barrido (sección 2), porque cada `latent_dim` usó un único
+Autoencoder de semilla 0: la comparación entre valores confunde el tamaño del cuello de botella con
+la semilla del Autoencoder. Con solo 3 Autoencoders no se puede estimar si el 0 es "afortunado" o
+los otros dos "típicos", más allá de que el 0 se aparte y los otros dos coincidan. Una conclusión
+sobre `latent_dim` en general exigiría varias semillas de Autoencoder por valor, y quizás un
+criterio para elegir el Autoencoder que no sea su pérdida de reconstrucción, que aquí no predijo
+nada.
+
+Cómputo del addendum: 3 Autoencoders (incluida la comprobación de la semilla 0) y 6 LSTM, unos
+14 min de pared y unos 2,240 s de proceso en las LSTM.
