@@ -72,7 +72,7 @@ def make_data() -> None:
         print(f"{split}: states {payload['states'].shape}, keys {sorted(payload)}")
 
 
-def train_ae(latent: int, data_dir: Path, out: Path) -> None:
+def train_ae(latent: int, data_dir: Path, out: Path, seed: int = 0) -> None:
     """training/train_autoencoder.py main(), with hidden_dim = latent_dim and explicit paths."""
     t0 = time.time()
     out.mkdir(parents=True, exist_ok=True)
@@ -81,7 +81,7 @@ def train_ae(latent: int, data_dir: Path, out: Path) -> None:
 
     train_dataset = TransitionDataset(train_path)
     input_dim = train_dataset.states.shape[1]
-    config = RepresentationConfig(input_dim=input_dim, hidden_dim=latent, latent_dim=latent, seed=0, checkpoint_dir=out)
+    config = RepresentationConfig(input_dim=input_dim, hidden_dim=latent, latent_dim=latent, seed=seed, checkpoint_dir=out)
 
     torch.manual_seed(config.seed)
     np.random.seed(config.seed)
@@ -119,7 +119,7 @@ def train_ae(latent: int, data_dir: Path, out: Path) -> None:
                  actions=fields["actions"].astype(np.int64), rewards=fields["rewards"].astype(np.float32),
                  episode_id=fields["episode_id"].astype(np.int64), time_step=fields["time_step"].astype(np.int64),
                  terminated=fields["terminated"].astype(bool), truncated=fields["truncated"].astype(bool))
-    summary = {"latent_dim": latent, "hidden_dim": latent, "input_dim": input_dim, "best_epoch": best_epoch,
+    summary = {"latent_dim": latent, "hidden_dim": latent, "seed": seed, "input_dim": input_dim, "best_epoch": best_epoch,
                "best_validation_loss": best_validation_loss, "seconds": round(time.time() - t0, 1)}
     (out / "ae_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(json.dumps(summary))
@@ -228,6 +228,7 @@ def main() -> None:
     a.add_argument("--latent", type=int, required=True)
     a.add_argument("--data-dir", type=Path, default=DATA_DIR)
     a.add_argument("--out", type=Path, required=True)
+    a.add_argument("--seed", type=int, default=0, help="Autoencoder seed (0 = the official protocol)")
     b = sub.add_parser("train-lstm")
     b.add_argument("--train", type=Path, required=True)
     b.add_argument("--val", type=Path, required=True)
@@ -243,7 +244,7 @@ def main() -> None:
     if args.cmd == "make-data":
         make_data()
     elif args.cmd == "train-ae":
-        train_ae(args.latent, args.data_dir, args.out)
+        train_ae(args.latent, args.data_dir, args.out, args.seed)
     elif args.cmd == "train-lstm":
         train_lstm(args.train, args.val, args.seed, args.out)
     else:
