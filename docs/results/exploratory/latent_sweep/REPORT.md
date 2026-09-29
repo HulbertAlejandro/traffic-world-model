@@ -308,3 +308,70 @@ Crudo de 24 dimensiones (10 corridas): media geométrica 300.9.
 **Cómputo.** Addendum: 2 Autoencoders (28 s) y 14 LSTM (4,337 s de proceso), 26 min de pared. Toda la
 exploración `latent_sweep` hasta aquí: 61 LSTM (7.4 h de proceso) y 11 Autoencoders (582 s), sin
 contar las 2 corridas de validación iniciales.
+
+## 12. Fase 2, Parte A: LSTM y Transformer a `latent_dim` = 16 (criterio en `ADDENDUM_transformer_tsmixer.md`)
+
+Los mismos 5 Autoencoders de `latent_dim` = 16 (estado de 24 dims, semillas 0–4) para las dos
+arquitecturas. Tope de 300 épocas y paciencia 15 en las dos ramas. Nuevas: 4 Autoencoders, 22 LSTM
+y 35 Transformer, 2.46 h de pared.
+
+**Convergencia.** Las 70 corridas se cortaron por early stopping; ninguna llegó al tope.
+
+| Grupo | Época de corte, mediana (rango) | Mejor época, mediana |
+|---|---|---|
+| LSTM latente | 124 (86–227) | 109 |
+| LSTM cruda | 110 (95–163) | 96 |
+| Transformer latente | 62 (38–104) | 47 |
+| Transformer crudo | 75 (57–116) | 60 |
+
+La fila del AE 0 de la LSTM coincide con el barrido (sección 2: −31.9%, +27.5%, +32.0%).
+
+**Media geométrica del `reward_mse` (menor es mejor), por celda y por Autoencoder**
+
+| | s0 | s1 | s2 | s3 | s4 | AE |
+|---|---|---|---|---|---|---|
+| LSTM, AE 0 | 300.3 | 307.1 | 239.2 | 365.6 | 308.4 | 301.4 |
+| LSTM, AE 1 | 278.2 | 198.3 | 253.2 | 290.2 | 326.6 | 265.7 |
+| LSTM, AE 2 | 266.0 | 294.2 | 242.2 | 239.4 | 243.3 | 256.2 |
+| LSTM, AE 3 | 343.6 | 330.3 | 325.4 | 209.2 | 224.2 | 280.4 |
+| LSTM, AE 4 | 243.1 | 285.6 | 263.4 | 212.0 | 270.4 | 253.6 |
+| **LSTM cruda (10 corridas)** | | | | | | **300.9** |
+| Transformer, AE 0 | 464.8 | 400.2 | 383.9 | 423.0 | 411.6 | 415.8 |
+| Transformer, AE 1 | 423.1 | 474.8 | 554.6 | 673.7 | 589.4 | 536.0 |
+| Transformer, AE 2 | 432.6 | 465.2 | 448.4 | 579.8 | 659.6 | 510.0 |
+| Transformer, AE 3 | 321.9 | 374.9 | 496.5 | 491.0 | 524.0 | 434.1 |
+| Transformer, AE 4 | 436.3 | 280.3 | 294.2 | 313.4 | 348.5 | 330.3 |
+| **Transformer crudo (10 corridas)** | | | | | | **329.1** |
+
+Reducción mediana por celda (descriptiva): LSTM, 16/25 celdas positivas; Transformer, 7/25. Tabla
+completa en `grid_arch_A.out`.
+
+**ANOVA (5 × 5) y decisión**
+
+| | Autoencoder | Semilla del modelo | Δ (z − crudo) | IC del 95% por conglomerados | Permutación por corrida | Conclusión (criterio fijado) |
+|---|---|---|---|---|---|---|
+| LSTM | F = 0.80, p = 0.54 (σ ≈ 0) | F = 0.27, p = 0.90 | **−10.0%** | [−21.3%, +2.8%] | p = 0.11 | **SIN EVIDENCIA** |
+| Transformer | F = 7.38, **p = 0.001** (σ ≈ 18%) | F = 1.97, p = 0.15 | **+33.4%** | **[+9.8%, +60.4%]** | p = 0.001 | **EVIDENCIA: el latente predice PEOR** |
+
+**Entre arquitecturas** (bootstrap conjunto sobre los mismos Autoencoders): Δ_LSTM − Δ_Transformer =
+−0.393 en log, IC del 95% de −0.627 a −0.164. **Hay evidencia de que la ayuda del Autoencoder
+difiere entre la LSTM y el Transformer**: es neutra con la LSTM y perjudicial con el Transformer.
+
+**Lectura (intermedia; TSMixer, pendiente de la Parte B).**
+
+- **LSTM a 16:** la misma conclusión que a 12 (sección 11). No hay evidencia de ventaja ni de
+  desventaja, con una estimación puntual algo favorable al latente (−10%). Aquí, a diferencia de
+  12, la semilla del Autoencoder **no** explica una varianza significativa (p = 0.54): con 16
+  dimensiones, los cinco Autoencoders se comportan de forma parecida para la LSTM.
+- **Transformer a 16:** el latente **empeora** la predicción de la recompensa en un 33%, con un IC
+  que excluye 0. Cuatro de los cinco Autoencoders quedan por encima del crudo (415–536 frente a
+  329); solo el AE 4 lo iguala (330). En el Transformer, la semilla del Autoencoder vuelve a ser la
+  fuente dominante de varianza (p = 0.001).
+- Coherente con el Experimento 3: el Transformer predice la recompensa peor que la LSTM. Además,
+  sobre el estado crudo el Transformer (329) queda cerca de la LSTM (301): buena parte de su
+  desventaja en el Experimento 3 aparece al trabajar sobre el latente.
+- Salvedades: una sola `latent_dim` (16); el Transformer usa los hiperparámetros del Experimento 3
+  sin ajustar al latente ni al crudo; y es una sola comparación preregistrada entre arquitecturas
+  (quedan dos más cuando esté TSMixer).
+
+Cómputo de la Parte A: 2.46 h de pared (3 en paralelo); las 22 LSTM nuevas, 9,292 s de proceso.
