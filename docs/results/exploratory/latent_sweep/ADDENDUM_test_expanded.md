@@ -135,3 +135,13 @@ traci responde "Could not connect.". Por decisión del autor:
 `test_expanded.py` queda como código **sin probar**, marcado como incompleto, para retomar la fase si
 se levanta el bloqueo. La respuesta vigente a la pregunta de los episodios es la sección 15 de
 REPORT.md (bootstrap sobre los 12 episodios existentes).
+
+**Retomada y completada (2026-09-30, el criterio no cambia).** El autor reinstaló SUMO 1.27.1, la
+misma versión que usan traci y sumolib del `.venv`, y el bloqueo se levantó.
+
+- Los controles 1 a 4 pasaron exactos: el replay de los episodios 8 y 53 sale idéntico bit a bit.
+- Se añadió un control 5, que no relaja nada: la evaluación importada reproduce exactamente el E[e, h]
+  de la sección 15.
+- Después se recolectaron los 36 episodios y se completó el análisis tal como se fijó aquí.
+
+Resultados en la sección 16 de REPORT.md, que reemplaza a la 15 como respuesta vigente.

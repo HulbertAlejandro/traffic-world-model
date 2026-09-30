@@ -1,0 +1,87 @@
+[consistencia] set de 12 frente a episode_bootstrap.json (sec. 15): max |dif| de los limites de IC (log) = 8.88e-16
+
+==================== Comparabilidad: recompensa total por episodio ====================
+test12  n=12  media  -2960.4  sd  1403.1  min  -5342.7  mediana  -2980.0
+new36   n=36  media  -2804.5  sd  1510.1  min  -8213.8  mediana  -2575.8
+train   n=56  media  -2559.1  sd  1385.4  min  -8414.0  mediana  -2256.8
+
+==================== Estadisticos en 12 / 36 / 48 episodios (IC95; niveles en GM, deltas en %) ====================
+level_off_lstm               n=12     324.8 | episodios [195.1, 464.3] ancho 0.867
+level_off_lstm               n=36     326.5 | episodios [240.1, 434.2] ancho 0.593
+level_off_lstm               n=48     327.4 | episodios [252.1, 415.3] ancho 0.499
+level_off_transformer        n=12     499.1 | episodios [204.4, 902.4] ancho 1.485
+level_off_transformer        n=36     473.8 | episodios [309.9, 656.4] ancho 0.750
+level_off_transformer        n=48     481.9 | episodios [325.0, 655.1] ancho 0.701
+level_off_tsmixer            n=12     723.7 | episodios [401.4, 1082.7] ancho 0.992
+level_off_tsmixer            n=36     731.3 | episodios [556.1, 918.8] ancho 0.502
+level_off_tsmixer            n=48     732.2 | episodios [574.8, 897.0] ancho 0.445
+E2_exp0_z_vs_raw             n=12    -13.0% | episodios [-21.3%, -2.4%] ancho 0.216 | semillas ancho 0.197 | conjunto [-26.6%, +4.9%] incluye 0
+E2_exp0_z_vs_raw             n=36     +3.6% | episodios [-5.0%, +13.0%] ancho 0.173 | semillas ancho 0.248 | conjunto [-13.0%, +22.4%] incluye 0
+E2_exp0_z_vs_raw             n=48     -0.7% | episodios [-8.2%, +7.8%] ancho 0.160 | semillas ancho 0.227 | conjunto [-14.6%, +15.4%] incluye 0
+E3_z12_vs_raw24              n=12     -7.1% | episodios [-15.4%, +2.2%] ancho 0.189 | semillas ancho 0.358 | conjunto [-25.9%, +14.9%] incluye 0
+E3_z12_vs_raw24              n=36     +1.8% | episodios [-7.7%, +13.3%] ancho 0.205 | semillas ancho 0.160 | conjunto [-12.1%, +17.3%] incluye 0
+E3_z12_vs_raw24              n=48     -0.4% | episodios [-8.1%, +9.0%] ancho 0.170 | semillas ancho 0.184 | conjunto [-13.2%, +14.1%] incluye 0
+E4_lstm_z16_vs_raw24         n=12    -10.0% | episodios [-17.6%, -0.2%] ancho 0.191 | semillas ancho 0.264 | conjunto [-24.9%, +8.4%] incluye 0
+E4_lstm_z16_vs_raw24         n=36     -0.5% | episodios [-11.8%, +11.6%] ancho 0.235 | semillas ancho 0.116 | conjunto [-15.1%, +14.6%] incluye 0
+E4_lstm_z16_vs_raw24         n=48     -2.9% | episodios [-11.9%, +7.0%] ancho 0.195 | semillas ancho 0.116 | conjunto [-14.7%, +9.8%] incluye 0
+E4_transformer_z16_vs_raw24  n=12    +33.4% | episodios [+21.2%, +47.2%] ancho 0.194 | semillas ancho 0.377 | conjunto [+5.4%, +69.3%] excluye 0
+E4_transformer_z16_vs_raw24  n=36    +31.7% | episodios [+23.1%, +38.8%] ancho 0.120 | semillas ancho 0.311 | conjunto [+9.9%, +58.3%] excluye 0
+E4_transformer_z16_vs_raw24  n=48    +32.7% | episodios [+25.4%, +39.0%] ancho 0.103 | semillas ancho 0.307 | conjunto [+11.9%, +57.9%] excluye 0
+E4_tsmixer_z16_vs_raw24      n=12    +42.0% | episodios [+33.8%, +57.3%] ancho 0.162 | semillas ancho 0.310 | conjunto [+17.0%, +71.8%] excluye 0
+E4_tsmixer_z16_vs_raw24      n=36    +43.6% | episodios [+30.9%, +55.9%] ancho 0.174 | semillas ancho 0.279 | conjunto [+18.3%, +70.9%] excluye 0
+E4_tsmixer_z16_vs_raw24      n=48    +43.6% | episodios [+33.4%, +53.3%] ancho 0.139 | semillas ancho 0.267 | conjunto [+20.9%, +68.0%] excluye 0
+E4b_lstm-transformer         n=12    -38.3% | episodios [-45.4%, -23.7%] ancho 0.334 | semillas ancho 0.360 | conjunto [-51.6%, -19.7%] excluye 0 | Bonf. [-54.9%, -15.4%] excluye 0
+E4b_lstm-transformer         n=36    -33.6% | episodios [-39.7%, -24.8%] ancho 0.221 | semillas ancho 0.268 | conjunto [-45.6%, -20.6%] excluye 0 | Bonf. [-49.0%, -18.0%] excluye 0
+E4b_lstm-transformer         n=48    -35.0% | episodios [-40.1%, -27.6%] ancho 0.190 | semillas ancho 0.268 | conjunto [-45.8%, -22.8%] excluye 0 | Bonf. [-48.4%, -20.6%] excluye 0
+E4b_lstm-tsmixer             n=12    -60.1% | episodios [-69.9%, -48.2%] ancho 0.542 | semillas ancho 0.349 | conjunto [-71.7%, -43.8%] excluye 0 | Bonf. [-74.0%, -39.9%] excluye 0
+E4b_lstm-tsmixer             n=36    -58.8% | episodios [-62.9%, -53.5%] ancho 0.227 | semillas ancho 0.199 | conjunto [-64.8%, -51.3%] excluye 0 | Bonf. [-66.1%, -49.4%] excluye 0
+E4b_lstm-tsmixer             n=48    -59.2% | episodios [-63.4%, -54.0%] ancho 0.229 | semillas ancho 0.225 | conjunto [-65.4%, -51.2%] excluye 0 | Bonf. [-66.7%, -49.5%] excluye 0
+E4b_transformer-tsmixer      n=12    -35.3% | episodios [-48.8%, -18.1%] ancho 0.469 | semillas ancho 0.336 | conjunto [-52.0%, -9.9%] excluye 0 | Bonf. [-54.5%, -0.9%] excluye 0
+E4b_transformer-tsmixer      n=36    -38.0% | episodios [-45.2%, -31.4%] ancho 0.225 | semillas ancho 0.334 | conjunto [-49.8%, -23.2%] excluye 0 | Bonf. [-52.5%, -19.0%] excluye 0
+E4b_transformer-tsmixer      n=48    -37.2% | episodios [-44.2%, -30.3%] ancho 0.223 | semillas ancho 0.316 | conjunto [-49.1%, -23.4%] excluye 0 | Bonf. [-51.4%, -19.4%] excluye 0
+
+==================== P1. Razon de anchos del IC solo por episodios (48 / 12; sqrt predice 0.50) ====================
+level_off_lstm               48/12 0.58   (36/12 0.68; sqrt predice 0.58)
+level_off_transformer        48/12 0.47   (36/12 0.51; sqrt predice 0.58)
+level_off_tsmixer            48/12 0.45   (36/12 0.51; sqrt predice 0.58)
+E2_exp0_z_vs_raw             48/12 0.74   (36/12 0.80; sqrt predice 0.58)
+E3_z12_vs_raw24              48/12 0.90   (36/12 1.08; sqrt predice 0.58)
+E4_lstm_z16_vs_raw24         48/12 1.02   (36/12 1.23; sqrt predice 0.58)
+E4_transformer_z16_vs_raw24  48/12 0.53   (36/12 0.62; sqrt predice 0.58)
+E4_tsmixer_z16_vs_raw24      48/12 0.86   (36/12 1.08; sqrt predice 0.58)
+E4b_lstm-transformer         48/12 0.57   (36/12 0.66; sqrt predice 0.58)
+E4b_lstm-tsmixer             48/12 0.42   (36/12 0.42; sqrt predice 0.58)
+E4b_transformer-tsmixer      48/12 0.47   (36/12 0.48; sqrt predice 0.58)
+mediana 48/12 = 0.57 -> se cumple aproximadamente   (mediana 36/12 = 0.66)
+
+==================== P2. La estimacion con los 36 nuevos, dentro del IC solo por episodios de los 12? ====================
+level_off_lstm               12: [+5.274, +6.141]  36: +5.788  dentro (posicion relativa 0.59)
+level_off_transformer        12: [+5.320, +6.805]  36: +6.161  dentro (posicion relativa 0.57)
+level_off_tsmixer            12: [+5.995, +6.987]  36: +6.595  dentro (posicion relativa 0.60)
+E2_exp0_z_vs_raw             12: [-0.240, -0.024]  36: +0.035  FUERA (posicion relativa 1.27)
+E3_z12_vs_raw24              12: [-0.167, +0.022]  36: +0.018  dentro (posicion relativa 0.98)
+E4_lstm_z16_vs_raw24         12: [-0.194, -0.002]  36: -0.005  dentro (posicion relativa 0.98)
+E4_transformer_z16_vs_raw24  12: [+0.193, +0.387]  36: +0.276  dentro (posicion relativa 0.43)
+E4_tsmixer_z16_vs_raw24      12: [+0.291, +0.453]  36: +0.362  dentro (posicion relativa 0.44)
+E4b_lstm-transformer         12: [-0.605, -0.271]  36: -0.410  dentro (posicion relativa 0.58)
+E4b_lstm-tsmixer             12: [-1.199, -0.658]  36: -0.888  dentro (posicion relativa 0.58)
+E4b_transformer-tsmixer      12: [-0.669, -0.200]  36: -0.478  dentro (posicion relativa 0.41)
+dentro: 10/11 -> compatible con un bootstrap razonablemente calibrado
+
+==================== P3. Cambia alguna conclusion? (IC conjunto excluye 0, 12 -> 48) ====================
+E2_exp0_z_vs_raw             95%: 12 incluye -> 48 incluye (36 solos: incluye)
+E3_z12_vs_raw24              95%: 12 incluye -> 48 incluye (36 solos: incluye)
+E4_lstm_z16_vs_raw24         95%: 12 incluye -> 48 incluye (36 solos: incluye)
+E4_transformer_z16_vs_raw24  95%: 12 excluye -> 48 excluye (36 solos: excluye)
+E4_tsmixer_z16_vs_raw24      95%: 12 excluye -> 48 excluye (36 solos: excluye)
+E4b_lstm-transformer         95%: 12 excluye -> 48 excluye (36 solos: excluye) | Bonferroni: 12 excluye -> 48 excluye (36: excluye)
+E4b_lstm-tsmixer             95%: 12 excluye -> 48 excluye (36 solos: excluye) | Bonferroni: 12 excluye -> 48 excluye (36: excluye)
+E4b_transformer-tsmixer      95%: 12 excluye -> 48 excluye (36 solos: excluye) | Bonferroni: 12 excluye -> 48 excluye (36: excluye)
+
+==================== P4. Siguen dominando ep53, ep47, ep12 y ep77? (descriptivo) ====================
+fraccion del error h=10 de la LSTM oficial en los 4: 24.3% de 48 (era 75.7% de 12)
+rango entre 48 (1 = mayor error): ep53: 2, ep47: 4, ep12: 6, ep77: 7
+episodios nuevos con error h=10 mayor que el menor de los 4 (ep77, 1541): 3/36
+top-10 por error h=10: ep9032:5447 ep53:3311 ep9003:2425 ep47:2334 ep9017:1995 ep12:1840 ep77:1541 ep9009:1409 ep9021:1114 ep9019:1011
+jackknife 48, Delta LSTM z16-crudo24 (Delta -2.9%): mayores cambios ep9017:+0.048 ep12:+0.014 ep9024:+0.013 ep9003:-0.010 ep9032:-0.009 ep9000:-0.009 | los 4: ep53:-0.002 ep47:+0.003 ep12:+0.014 ep77:+0.000
+jackknife 48, LSTM-Transformer z16 (Delta -35.0%): mayores cambios ep9017:+0.034 ep9032:+0.031 ep77:+0.016 ep12:+0.015 ep9029:-0.008 ep9022:-0.007 | los 4: ep53:+0.003 ep47:-0.003 ep12:+0.015 ep77:+0.016

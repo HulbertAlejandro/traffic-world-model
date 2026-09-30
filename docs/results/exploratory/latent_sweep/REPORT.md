@@ -736,3 +736,149 @@ qué 12 episodios se eligieron.
 - El inventario de `.pt`/`.zip`/`.npz`/`.pkl` de `models/checkpoints/` y `datasets/` es idéntico antes
   y después (647 archivos).
 - No hay ningún archivo en `models/checkpoints/`, `datasets/` ni `results/` posterior al addendum.
+
+## 16. Test ampliado a 48 episodios con SUMO: 12 originales + 36 nuevos (criterio en `ADDENDUM_test_expanded.md`)
+
+La sección 15 solo podía recombinar los 12 episodios existentes. Aquí se simulan **36 episodios de
+test nuevos** con el protocolo oficial de recolección, importado sin copiarlo:
+
+- semillas de SUMO 9000–9035;
+- 60 pasos por episodio;
+- acciones uniformes con `np.random.seed(9000)`;
+- el `scaler.pkl` oficial, sin reajustar.
+
+Sobre ellos se evalúan los mismos 143 checkpoints. No se reentrena nada y train y validación no se
+tocan.
+
+- **Archivos:**
+  - `test_expanded.py`, con los subcomandos `replay`, `collect`, `prepare`, `evaluate` y `analyze`;
+  - `test_expanded.out` y `test_expanded.json`;
+  - `episode_errors_new.json`, con E[e, h] de los 143 checkpoints en los 36 episodios;
+  - `test_episodes_expanded/MANIFEST.json`, con las semillas y el md5 de cada `.npz`. Los `.npz` no
+    se versionan.
+- **Contexto:** la fase estuvo en pausa por el bloqueo de Smart App Control. Se retomó tras reinstalar
+  SUMO 1.27.1, la misma versión que usan traci y sumolib del `.venv`.
+
+**Controles (todos obligatorios, todos pasaron antes de usar los episodios nuevos)**
+
+1. **El simulador es el mismo.** Se re-simularon los episodios originales de test 8 y 53 con sus
+   acciones registradas. Estados, recompensas y `next_states` salen **idénticos** a `test_raw.npz`,
+   con diferencia máxima 0. La reinstalación de SUMO reproduce el dataset bit a bit.
+2. **La normalización es la misma.** `scaler.pkl` aplicado a `test_raw.npz` reproduce exactamente
+   `test.npz`.
+3. **Las codificaciones son las mismas.** Reproducen exactamente sus `test_latent.npz` el
+   Autoencoder oficial y los 10 exploratorios (`ae12*` y `ae16*`). También sale exacto el test de
+   24 dims, que es el oficial sin las columnas 22 y 23.
+4. **Formato.** 36 episodios × 60 pasos, finitos, columnas 22 y 23 en cero, `episode_id` 9000–9035.
+5. **La evaluación es la misma** (control añadido). Los 3 checkpoints oficiales, evaluados de nuevo
+   sobre los 12 originales, reproducen exactamente `episode_errors.json`. Además, con los 12 episodios,
+   el análisis nuevo reproduce los IC de la sección 15 con una diferencia máxima de 8.9e-16 en log.
+
+**Comparabilidad: recompensa total por episodio**
+
+| Conjunto | n | Media | sd | Mínimo | Mediana |
+|---|---|---|---|---|---|
+| Test original | 12 | −2960.4 | 1403.1 | −5342.7 | −2980.0 |
+| Test nuevo | 36 | −2804.5 | 1510.1 | −8213.8 | −2575.8 |
+| Train oficial | 56 | −2559.1 | 1385.4 | −8414.0 | −2256.8 |
+
+Los nuevos vienen de la misma distribución, con media y dispersión intermedias entre test y train.
+Hay un detalle: el test original **no tenía ningún episodio del régimen más congestionado** del train
+(su mínimo es −5343, frente a −8414). Los nuevos sí lo cubren, con un mínimo de −8214.
+
+**Estadísticos en 12, 36 y 48 episodios** (IC del 95%. Los niveles se dan en media geométrica del
+`reward_mse` y los Δ en %. "Conjunto" es el IC por semillas y episodios.)
+
+| Estadístico | 12 originales | 36 nuevos | 48 | Conjunto con 48 |
+|---|---|---|---|---|
+| Nivel LSTM oficial | 324.8 [195.1, 464.3] | 326.5 [240.1, 434.2] | 327.4 [252.1, 415.3] | — |
+| Nivel Transformer oficial | 499.1 [204.4, 902.4] | 473.8 [309.9, 656.4] | 481.9 [325.0, 655.1] | — |
+| Nivel TSMixer oficial | 723.7 [401.4, 1082.7] | 731.3 [556.1, 918.8] | 732.2 [574.8, 897.0] | — |
+| E2 Exp. 0 oficial, z − crudo | −13.0% [−21.3, −2.4] | **+3.6%** [−5.0, +13.0] | −0.7% [−8.2, +7.8] | [−14.6, +15.4] incluye 0 |
+| E3 z12 − crudo 24 | −7.1% [−15.4, +2.2] | +1.8% [−7.7, +13.3] | −0.4% [−8.1, +9.0] | [−13.2, +14.1] incluye 0 |
+| E4 LSTM z16 − crudo | −10.0% [−17.6, −0.2] | −0.5% [−11.8, +11.6] | −2.9% [−11.9, +7.0] | [−14.7, +9.8] incluye 0 |
+| E4 Transformer z16 − crudo | +33.4% [+21.2, +47.2] | +31.7% [+23.1, +38.8] | +32.7% [+25.4, +39.0] | [+11.9, +57.9] excluye 0 |
+| E4 TSMixer z16 − crudo | +42.0% [+33.8, +57.3] | +43.6% [+30.9, +55.9] | +43.6% [+33.4, +53.3] | [+20.9, +68.0] excluye 0 |
+| E4' LSTM − Transformer | −38.3% [−45.4, −23.7] | −33.6% [−39.7, −24.8] | −35.0% [−40.1, −27.6] | [−45.8, −22.8] excluye 0 |
+| E4' LSTM − TSMixer | −60.1% [−69.9, −48.2] | −58.8% [−62.9, −53.5] | −59.2% [−63.4, −54.0] | [−65.4, −51.2] excluye 0 |
+| E4' Transformer − TSMixer | −35.3% [−48.8, −18.1] | −38.0% [−45.2, −31.4] | −37.2% [−44.2, −30.3] | [−49.1, −23.4] excluye 0 |
+
+En las tres columnas de episodios, el IC es solo por episodios. Tabla completa, con los IC por semillas
+y conjuntos de cada conjunto, en `test_expanded.out`.
+
+**P1. ¿Se reduce el ancho a la mitad?** La mediana de la razón de anchos (48 / 12) es **0.57**, así
+que **se cumple aproximadamente** según el criterio fijado (0.40 a 0.60). Con los 36 solos es 0.66,
+frente a la predicción de 0.58. La mediana esconde dos grupos:
+
+- **Niveles y contrastes entre arquitecturas: 0.42–0.58.** Se comportan como predice √n.
+- **Contrastes z − crudo: 0.74–1.02.** E2 0.74, E3 0.90, LSTM z16 1.02 y TSMixer z16 0.86. Con 48
+  episodios, el IC de estos contrastes **no es más estrecho** que el de 12. Los IC de 12 eran
+  demasiado cortos para estos contrastes: la variabilidad por episodios de la diferencia z − crudo
+  es mayor de lo que dejaban ver los 12 originales. Coincide con el límite anunciado en la sección 15.
+
+**P2. ¿Acertaba el bootstrap de 12?** En **10 de 11** estadísticos, la estimación con los 36 nuevos
+cae dentro del IC solo por episodios de los 12. La lectura del criterio es "compatible con un
+bootstrap razonablemente calibrado". Como referencia, no fijada en el addendum: si el IC de 12
+estuviera bien calibrado y la estimación con 36 tuviera un tercio de su varianza, se esperaría ~91%.
+
+- Queda **fuera E2** (Experimento 0 oficial): −13.0% con los 12 y **+3.6%** con los 36 nuevos, en la
+  posición 1.27 del IC.
+- **E3 y la LSTM z16 caen justo en el borde** (posición 0.98): de −7.1% a +1.8% y de −10.0% a −0.5%.
+- Los tres contrastes z − crudo con la LSTM se mueven en la **misma dirección, hacia 0**. Los otros
+  ocho estadísticos caen cerca del centro (posición 0.41–0.60).
+
+**P3. ¿Cambia alguna conclusión?** **No.** Los ocho contrastes mantienen con 48 lo que decía el IC
+conjunto con 12, y también con los 36 solos:
+
+- z − crudo con la LSTM (E2, E3, E4) incluye 0;
+- el latente perjudica al Transformer y a TSMixer (excluye 0);
+- el orden LSTM > Transformer > TSMixer se mantiene, también con Bonferroni al 98.33%.
+
+El par Transformer − TSMixer, cuyo borde corregido era −0.9% con 12, queda en [−51.4%, −19.4%]
+con 48.
+
+**P4. ¿Siguen dominando ep53, ep47, ep12 y ep77?** **No en el conjunto de 48**, aunque siguen entre
+los difíciles.
+
+- Concentran el **24.3%** del error en h = 10 de la LSTM oficial, frente al 75.7% dentro de los 12.
+- Sus rangos entre los 48 son 2, 4, 6 y 7.
+- El episodio más difícil es uno nuevo, **ep9032** (5447, frente a 3311 de ep53). Tres episodios
+  nuevos superan al menor de los cuatro (ep77, 1541).
+- **Jackknife sobre 48:** ningún episodio mueve un contraste más de 0.048 en log (ep9017), frente a
+  0.06–0.07 con 12.
+  - Δ LSTM z16 − crudo: el mayor cambio es de ep9017 (+0.048); ep12 queda en +0.014.
+  - LSTM − Transformer: ep9017 +0.034, ep9032 +0.031; ep77 queda en +0.016.
+
+**Lectura.**
+
+- **Lo robusto se confirma con episodios independientes.** Se replican en los 36 nuevos:
+  - los niveles de error de los tres modelos oficiales (la LSTM, 324.8 frente a 326.5);
+  - el daño del latente al Transformer (+32%) y a TSMixer (+43%);
+  - el orden entre arquitecturas.
+
+  Con 48 episodios, esos IC son del orden de la mitad de anchos, como predice √n.
+- **Lo pequeño no se replica.** La ventaja del Autoencoder con la LSTM medida sobre los 12 originales
+  (−13% en el Experimento 0, −7% y −10% en la exploración) **desaparece** en los 36 nuevos: +3.6%,
+  +1.8% y −0.5%. Con 48 queda en −0.7%, −0.4% y −2.9%. Es la lectura "sin evidencia en ninguna
+  dirección" de las secciones 11 y 13, ahora con una réplica independiente, y apunta a que el
+  **efecto real es cercano a 0**.
+- **No reescribe nada oficial.** El Experimento 0 oficial (+10.9% de reducción mediana, 37/50 pares)
+  se midió sobre los 12 episodios del test oficial, y así sigue. Lo que muestra esta réplica es que
+  esa ventaja **dependía de la composición de esos 12 episodios**. Como establece el addendum, se
+  reporta y no se reescribe.
+- **Límites:**
+  - Los 36 nuevos usan las mismas acciones aleatorias uniformes que el dataset. No miden el error bajo
+    las acciones de un controlador.
+  - Para los contrastes z − crudo, incluso 48 episodios dan IC solo por episodios de unos ±8–12%.
+
+**Cómputo.** Recolección: 43 s de pared (36 × 60 pasos). Evaluación: 143 checkpoints × 36 episodios en
+CPU, 33 min de pared.
+
+**Integridad.**
+
+- Los md5 oficiales coinciden, con las mismas excepciones documentadas de siempre (`CLAUDE.md`,
+  `PROJECT_STATUS.md`, `README.md` y `TODO.md`, cambiados en commits de documentación anteriores).
+- El inventario de `.pt`/`.zip`/`.npz`/`.pkl` fuera de la carpeta exploratoria es idéntico antes y
+  después (232 archivos, md5 uno a uno). En total siguen siendo 647.
+- No hay ningún archivo en `models/checkpoints/`, `datasets/` ni `results/` posterior al addendum.
+  Todo lo nuevo está en `docs/results/exploratory/latent_sweep/`.
