@@ -121,3 +121,17 @@ Pregunta: si el test tuviera más episodios, ¿el resultado se estabiliza como p
 - Script: `test_expanded.py` en `latent_sweep/`. Salidas: `test_expanded.out` y
   `test_expanded.json`, y `episode_errors_new.json` con E[e, h] de los 36 nuevos para los 143
   checkpoints.
+
+## Estado (añadido el 2026-09-30, después del commit de este addendum; el criterio no cambia)
+
+**En pausa, sin completar.** El control 1 (reproducir los episodios de test 8 y 53) no llegó a
+ejecutarse. Smart App Control bloquea SUMO en este equipo: `sumo.exe` no puede cargar `fmt.dll`, y
+traci responde "Could not connect.". Por decisión del autor:
+
+- no se tocó ninguna configuración de Windows;
+- no se simuló ni recolectó ningún episodio;
+- no hay datos nuevos ni resultados.
+
+`test_expanded.py` queda como código **sin probar**, marcado como incompleto, para retomar la fase si
+se levanta el bloqueo. La respuesta vigente a la pregunta de los episodios es la sección 15 de
+REPORT.md (bootstrap sobre los 12 episodios existentes).
