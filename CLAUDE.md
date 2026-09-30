@@ -54,8 +54,9 @@ ver abajo).
 Exploración posterior del Experimento 0, **sin cambios en lo oficial** (`latent_dim` sigue en 16
 y el estado en 26 dims): `docs/EXPLORACION_LATENT_DIM.md`, rama `exploratory/latent-dim-sweep`.
 Con 5 semillas de Autoencoder × 5 de LSTM no hay evidencia de que el Autoencoder mejore ni empeore
-la predicción de la recompensa; la varianza dominante es qué Autoencoder se entrena. Solo se probó
-con la LSTM.
+la predicción de la recompensa; la varianza dominante es qué Autoencoder se entrena. Completada también
+con Transformer y TSMixer (5×5 a `latent_dim` = 16): el latente es neutro con la LSTM y empeora la
+predicción de la recompensa con el Transformer (+33%) y con TSMixer (+42%).
 
 Transformer y TSMixer (`models/world_model/transformer.py`, `tsmixer.py`) están
 **implementados y evaluados** como sustitutos intercambiables del LSTM (misma interfaz,
