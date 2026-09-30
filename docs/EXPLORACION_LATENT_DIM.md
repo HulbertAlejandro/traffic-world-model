@@ -125,7 +125,7 @@ semilla con semilla.
     queda peor que el crudo (367 frente a 301).
 - **Conclusión:** **sin evidencia** de ventaja ni de desventaja.
 
-## 3. Conclusión
+## 3. Conclusión (con la LSTM; para las otras arquitecturas, ver la sección 4)
 
 Con la evidencia disponible, y controlando a la vez la varianza del Autoencoder y la del modelo
 temporal, **no hay evidencia de que comprimir el estado con el Autoencoder mejore la predicción de la
@@ -145,12 +145,50 @@ de que la empeore.** Precisiones sobre el alcance:
   invalida ni lo reemplaza, pero indica que su conclusión ("mejora moderada y mayoritaria") depende
   de ese Autoencoder concreto y no se sostiene al ampliar las semillas.
 
-## 4. Alcance: solo con la LSTM
+## 4. Fase 2: LSTM, Transformer y TSMixer a `latent_dim` = 16
 
-Toda la exploración usó la **LSTM** como modelo temporal. No se sabe si el Transformer o TSMixer
-(Experimento 3) se comportan igual, distinto, o si algún `latent_dim` les resulta mejor aunque no le
-haya resultado mejor a la LSTM. Esa es la pregunta de la siguiente fase (misma rama,
-`ADDENDUM_transformer_tsmixer.md`).
+Las rondas anteriores solo usaron la LSTM. La Fase 2 repite el diseño de 5×5 con las tres
+arquitecturas del Experimento 3.
+
+- **Diseño (preregistrado en `ADDENDUM_transformer_tsmixer.md`):**
+  - `latent_dim` = 16 (el valor oficial) y estado de 24 dimensiones.
+  - Los **mismos** 5 Autoencoders (semillas 0–4) para las tres arquitecturas, con 5 semillas del
+    modelo temporal por Autoencoder, y 10 corridas crudas por arquitectura.
+  - Tope de 300 épocas y paciencia 15 para todas las ramas. Las 105 corridas se cortaron por early
+    stopping.
+  - Decisión con el mismo IC del 95% por bootstrap por conglomerados que la ronda (f).
+- **Resultado** (media geométrica del `reward_mse`; negativo significa que el latente predice mejor):
+
+| Arquitectura | Latente (25) | Crudo (10) | Efecto del Autoencoder | IC del 95% | Conclusión |
+|---|---|---|---|---|---|
+| LSTM | 271 | 301 | −10.0% | [−21.3%, +2.8%] | sin evidencia |
+| Transformer | 439 | 329 | +33.4% | [+9.8%, +60.4%] | **el latente predice peor** |
+| TSMixer | 679 | 478 | +42.0% | [+21.1%, +65.0%] | **el latente predice peor** |
+
+- **Entre arquitecturas:** la ayuda del Autoencoder difiere entre la LSTM y cada una de las otras
+  dos (los IC excluyen 0), pero no entre el Transformer y TSMixer.
+- **Comparaciones múltiples:** son tres pruebas por arquitectura, sin corrección, así que el riesgo
+  conjunto de algún falso positivo supera el 5% de cada una. Con Bonferroni (98.33%), una
+  comprobación añadida después y no preregistrada, **ninguna conclusión cambia**: Transformer
+  [+5.3%, +66.4%], TSMixer [+16.8%, +70.0%].
+- **Fuentes de varianza (ANOVA 5×5):** en el Transformer domina el Autoencoder (p = 0.001). En la
+  LSTM a 16, ninguna. En TSMixer ningún factor es significativo (Autoencoder p = 0.084, semilla
+  p = 0.12) y los dos pesan parecido: ahí no domina ninguno.
+- **Conclusión de la Fase 2:** con la LSTM el Autoencoder es neutro; con el Transformer y con TSMixer
+  **perjudica** la predicción de la recompensa. Sobre el estado crudo las tres quedan en el orden del
+  Experimento 3 (LSTM 301, Transformer 329, TSMixer 478), y la distancia crece sobre el latente.
+  Buena parte de la desventaja de esas dos arquitecturas en el Experimento 3 viene, entonces, de
+  trabajar sobre z.
+- **Alcance:**
+  - Una sola `latent_dim`.
+  - Hiperparámetros del Experimento 3 sin ajustar a ninguna rama.
+  - Solo la predicción de la recompensa, no el control.
+  - No cambia la decisión del Experimento 3: el LSTM sigue siendo el modelo del sistema, y esta
+    exploración refuerza esa elección.
+- **Nota del entorno:** la evaluación de TSMixer se hizo con una copia literal de la evaluación
+  oficial, porque un bloqueo de Windows impedía cargar matplotlib. Esa copia reprodujo exactamente
+  los resultados ya guardados de LSTM y Transformer antes de usarse (detalle en `REPORT.md`,
+  sección 13).
 
 ## 5. Dónde está el detalle (rama `exploratory/latent-dim-sweep`)
 
@@ -163,8 +201,9 @@ haya resultado mejor a la LSTM. Esa es la pregunta de la siguiente fase (misma r
 | (d) | `ADDENDUM_z8.md`, `winner_z8_10seeds.json` | `7acbe21`, `813677e` |
 | (e) | `ADDENDUM_ae_seeds.md`, `ae_variance.*` | `c9f3aa9`, `4b3cf21` |
 | (f) | `ADDENDUM_grid5.md`, `grid5.py`, `grid5.json`, `grid5.out` | `fdc148d`, `8fe1ed6` |
+| Fase 2 | `ADDENDUM_transformer_tsmixer.md`, `grid_arch.py`, `gridarch_{lstm,transformer,tsmixer}.json`, `grid_arch_A.out`, `grid_arch_B.out`, `grid_arch_lstm_transformer_tsmixer.json`, `multiple_comparisons.*`, `_DESCARTABLE_bloqueo_windows/` | `36ad129`, `78a7ccd`, `5d859df`, `7d317e9` y el commit de cierre |
 
 Informe completo con todas las tablas:
 [`results/exploratory/latent_sweep/REPORT.md`](results/exploratory/latent_sweep/REPORT.md)
-(secciones 1–11). Los pesos y los datos derivados están en `models/checkpoints/exploratory_*`, no
+(secciones 1–13). Los pesos y los datos derivados están en `models/checkpoints/exploratory_*`, no
 versionados.

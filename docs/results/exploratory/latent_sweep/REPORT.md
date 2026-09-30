@@ -375,3 +375,130 @@ difiere entre la LSTM y el Transformer**: es neutra con la LSTM y perjudicial co
   (quedan dos más cuando esté TSMixer).
 
 Cómputo de la Parte A: 2.46 h de pared (3 en paralelo); las 22 LSTM nuevas, 9,292 s de proceso.
+
+## 13. Fase 2, Parte B y cierre: TSMixer y la comparación de las tres arquitecturas (criterio en `ADDENDUM_transformer_tsmixer.md`)
+
+Los mismos 5 Autoencoders de `latent_dim` = 16 que en la sección 12, y el mismo protocolo: tope de 300
+épocas, paciencia 15, `train()` de `training/train_world_model_tsmixer_raw.py` para las dos ramas.
+TSMixer: 25 corridas latentes (5 Autoencoders × 5 semillas) y 10 crudas (semillas 0–9), 1.23 h de
+pared. El análisis es el preregistrado, sin cambios. Salida completa en `grid_arch_B.out`; números en
+`grid_arch_lstm_transformer_tsmixer.json` y `gridarch_tsmixer.json`.
+
+**Cómo se calculó.** `grid_arch.py` no pudo ejecutarse en este equipo: Smart App Control bloquea la
+DLL de `kiwisolver`, de la que depende matplotlib, y la evaluación oficial importa matplotlib aunque
+no dibuje. Por eso la evaluación de TSMixer se hizo con una copia literal de esa evaluación, en
+`_DESCARTABLE_bloqueo_windows/` (ver su README). Antes de usarla se recalcularon las 70 corridas de
+LSTM y Transformer desde los checkpoints: reproduce **exactamente**, con igualdad de floats,
+`gridarch_lstm.json`, `gridarch_transformer.json` y `grid_arch_lstm_transformer.json`. Las filas de
+LSTM y Transformer de abajo son idénticas a las de la sección 12.
+
+**Convergencia.** Las 35 corridas se cortaron por early stopping; ninguna llegó al tope.
+
+| Grupo | Época de corte, mediana (rango) | Mejor época, mediana |
+|---|---|---|
+| TSMixer latente | 126 (88–226) | 111 |
+| TSMixer crudo | 107 (93–141) | 92 |
+
+**Media geométrica del `reward_mse` (menor es mejor), TSMixer**
+
+| | s0 | s1 | s2 | s3 | s4 | AE |
+|---|---|---|---|---|---|---|
+| TSMixer, AE 0 | 606.5 | 438.4 | 487.8 | 600.6 | 637.8 | 548.6 |
+| TSMixer, AE 1 | 735.1 | 808.9 | 637.0 | 821.6 | 976.5 | 788.0 |
+| TSMixer, AE 2 | 558.7 | 675.2 | 1085.3 | 579.2 | 698.3 | 697.9 |
+| TSMixer, AE 3 | 720.6 | 571.6 | 595.4 | 816.2 | 856.2 | 702.8 |
+| TSMixer, AE 4 | 623.3 | 493.9 | 652.2 | 736.3 | 974.1 | 678.7 |
+| **TSMixer crudo (10 corridas)** | | | | | | **477.9** |
+
+Crudo por semilla: 598.5, 475.7, 422.6, 641.7, 463.7, 505.4, 462.6, 443.5, 390.2 y 429.0. Los cinco
+Autoencoders quedan por encima del crudo (549–788 frente a 478). Reducción mediana por celda
+(descriptiva): 5/25 celdas positivas.
+
+**Tabla final: efecto del Autoencoder (`latent_dim` = 16) por arquitectura**
+
+Δ = media de g (log del `reward_mse` geométrico) de las 25 corridas latentes − media de g de las 10
+crudas de la misma arquitectura. Se reporta como exp(Δ) − 1; un valor negativo significa que el
+latente predice mejor.
+
+| Arquitectura | Latente (25) | Crudo (10) | exp(Δ) − 1 | IC del 95% por conglomerados | Permutación por corrida | Conclusión (criterio fijado) |
+|---|---|---|---|---|---|---|
+| LSTM | 270.9 | 300.9 | **−10.0%** | [−21.3%, +2.8%] | p = 0.11 | **SIN EVIDENCIA** |
+| Transformer | 439.0 | 329.1 | **+33.4%** | [+9.8%, +60.4%] | p = 0.001 | **EVIDENCIA: el latente predice PEOR** |
+| TSMixer | 678.6 | 477.9 | **+42.0%** | [+21.1%, +65.0%] | p = 0.0001 | **EVIDENCIA: el latente predice PEOR** |
+
+**ANOVA de dos factores (Autoencoder × semilla del modelo temporal, 5 × 5, sobre g)**
+
+| | Autoencoder | Semilla del modelo | Residuo | Fuente dominante |
+|---|---|---|---|---|
+| LSTM | F = 0.80, p = 0.54 (σ ≈ 0) | F = 0.27, p = 0.90 (σ ≈ 0) | σ = 0.178 | ninguna |
+| Transformer | F = 7.38, **p = 0.001** (σ ≈ 18%) | F = 1.97, p = 0.15 (σ ≈ 7%) | σ = 0.157 | el Autoencoder |
+| TSMixer | F = 2.50, p = 0.084 (σ ≈ 10%) | F = 2.20, p = 0.12 (σ ≈ 9%) | σ = 0.187 | ninguna clara |
+
+En TSMixer ningún factor es significativo, y sus componentes estimadas son parecidas (10% y 9%): no
+domina ni la varianza del Autoencoder ni la de la inicialización. La mayor parte de la varianza es
+residual, es decir, la interacción entre los dos factores más el ruido de cada corrida. El patrón de
+la LSTM a 12 (sección 11) y del Transformer, donde el Autoencoder domina, no se repite con claridad
+aquí. Tampoco se contradice: con 5 niveles por factor, un p = 0.084 no permite afirmar ninguna de
+las dos cosas.
+
+**¿La ayuda del Autoencoder difiere entre arquitecturas?** Bootstrap conjunto, Δ_A − Δ_B en log:
+
+| Par | Δ_A − Δ_B | IC del 95% | Conclusión |
+|---|---|---|---|
+| LSTM − Transformer | −0.393 | [−0.627, −0.164] | **EVIDENCIA de diferencia** |
+| LSTM − TSMixer | −0.456 | [−0.672, −0.224] | **EVIDENCIA de diferencia** |
+| Transformer − TSMixer | −0.063 | [−0.286, +0.145] | SIN EVIDENCIA de diferencia |
+
+**Comparaciones múltiples.** Hay tres pruebas por arquitectura y tres entre arquitecturas, cada una
+con un 5% nominal y sin corrección, como fijó el addendum. Si las tres pruebas por arquitectura
+fueran independientes y ninguna tuviera efecto real, la probabilidad de al menos un falso positivo
+sería de hasta 1 − 0.95³ ≈ 14%, no del 5%. Como comprobación complementaria, **no preregistrada**
+(`multiple_comparisons.py`, `multiple_comparisons.json`), se recalcularon los IC con corrección de
+Bonferroni para 3 pruebas (nivel del 98.33%, mismo bootstrap):
+
+| | IC del 95% | IC de Bonferroni (98.33%) |
+|---|---|---|
+| LSTM | [−21.3%, +2.8%] | [−23.5%, +5.8%] (incluye 0) |
+| Transformer | [+9.8%, +60.4%] | [+5.3%, +66.4%] (excluye 0) |
+| TSMixer | [+21.1%, +65.0%] | [+16.8%, +70.0%] (excluye 0) |
+| LSTM − Transformer | [−0.627, −0.164] | [−0.675, −0.117] (excluye 0) |
+| LSTM − TSMixer | [−0.672, −0.224] | [−0.716, −0.172] (excluye 0) |
+| Transformer − TSMixer | [−0.286, +0.145] | [−0.336, +0.188] (incluye 0) |
+
+Ninguna conclusión cambia con la corrección. El resultado del Transformer es el más cercano al
+límite: su borde inferior baja de +9.8% a +5.3%.
+
+**Lectura final de la Fase 2.**
+
+- **LSTM:** sin evidencia de que el Autoencoder ayude ni de que perjudique. La estimación puntual es
+  −10%, con un IC que va de una mejora del 21% a un empeoramiento del 3%.
+- **Transformer y TSMixer:** el latente **empeora** la predicción de la recompensa, un 33% y un 42%
+  respectivamente. Los dos IC excluyen 0, también con Bonferroni.
+- **La ayuda del Autoencoder depende de la arquitectura:** es neutra con la LSTM, perjudicial con las
+  otras dos, y no se distingue entre el Transformer y TSMixer.
+- **Sobre el estado crudo el orden es el mismo que en el Experimento 3:** LSTM 301, Transformer 329,
+  TSMixer 478. Sobre el latente la distancia crece (271, 439 y 679), así que buena parte de la
+  desventaja del Transformer y de TSMixer en el Experimento 3, que se evaluó sobre z, viene de
+  trabajar sobre el latente.
+- **Qué Autoencoder es "bueno" cambia con la arquitectura** (descriptivo, 5 puntos, sin prueba):
+  para la LSTM el AE 0 es el peor, para el Transformer el mejor es el AE 4 y para TSMixer el AE 0.
+  No hay un Autoencoder universalmente favorable.
+- **Salvedades:**
+  - Una sola `latent_dim` (16), el valor oficial.
+  - Hiperparámetros del Experimento 3 sin ajustar a ninguna rama. Un Transformer o un TSMixer
+    ajustado al latente podría acortar la brecha, y esto no lo descarta.
+  - Solo 5 Autoencoders, así que el bootstrap por conglomerados tiene pocos grupos. Aquí no cambia
+    nada: los dos IC que excluyen 0 lo hacen con margen.
+  - La métrica es la predicción de la recompensa, no el desempeño de control.
+
+**Integridad.** Los 77 md5 de `official_md5_before.txt` coinciden, salvo los de `CLAUDE.md`,
+`PROJECT_STATUS.md`, `README.md` y `TODO.md`. Esos cuatro los cambió a propósito el commit `1b63b10`,
+y sus md5 en `main` coinciden con el registro. Diferencias con `main` fuera de
+`docs/results/exploratory/`:
+
+- esos cuatro documentos y `docs/EXPLORACION_LATENT_DIM.md`;
+- los tres archivos nuevos de `36ad129`: `training/train_world_model_{transformer,tsmixer}_raw.py` y
+  `tests/test_transformer_tsmixer_raw_protocol.py`. Son añadidos; ningún archivo existente cambia.
+
+**Cómputo de la Fase 2.** Parte A, 2.46 h de pared; Parte B, 1.23 h. La evaluación de los 35
+checkpoints de TSMixer tomó 1 min 44 s en CPU.
