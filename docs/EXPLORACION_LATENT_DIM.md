@@ -263,7 +263,7 @@ remuestreaba episodios. Diseño (`ADDENDUM_test_episodes.md`):
 | (d) | `ADDENDUM_z8.md`, `winner_z8_10seeds.json` | `7acbe21`, `813677e` |
 | (e) | `ADDENDUM_ae_seeds.md`, `ae_variance.*` | `c9f3aa9`, `4b3cf21` |
 | (f) | `ADDENDUM_grid5.md`, `grid5.py`, `grid5.json`, `grid5.out` | `fdc148d`, `8fe1ed6` |
-| Fase 2 | `ADDENDUM_transformer_tsmixer.md`, `grid_arch.py`, `gridarch_{lstm,transformer,tsmixer}.json`, `grid_arch_A.out`, `grid_arch_B.out`, `grid_arch_lstm_transformer_tsmixer.json`, `multiple_comparisons.*`, `_DESCARTABLE_bloqueo_windows/` | `36ad129`, `78a7ccd`, `5d859df`, `7d317e9`, `b3eb6db` |
+| Fase 2 | `ADDENDUM_transformer_tsmixer.md`, `grid_arch.py`, `gridarch_{lstm,transformer,tsmixer}.json`, `grid_arch_A.out`, `grid_arch_B.out`, `grid_arch_lstm_transformer_tsmixer.json`, `multiple_comparisons.*` (la copia descartable de la evaluación se borró; está en `b3eb6db`) | `36ad129`, `78a7ccd`, `5d859df`, `7d317e9`, `b3eb6db` |
 | Reanálisis del orden entre arquitecturas | `ADDENDUM_arch_ranking.md`, `arch_ranking.py`, `arch_ranking.out`, `arch_ranking.json` | `c3685e0`, `2d95bee` |
 | Fase 1 de episodios de test | `ADDENDUM_test_episodes.md`, `episode_bootstrap.py`, `episode_bootstrap.out`, `episode_bootstrap.json`, `episode_errors.json` | `84fc675` y el commit de resultados |
 

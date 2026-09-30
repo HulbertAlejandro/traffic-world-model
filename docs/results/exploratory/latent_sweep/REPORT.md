@@ -387,7 +387,9 @@ pared. El análisis es el preregistrado, sin cambios. Salida completa en `grid_a
 **Cómo se calculó.** `grid_arch.py` no pudo ejecutarse en este equipo: Smart App Control bloquea la
 DLL de `kiwisolver`, de la que depende matplotlib, y la evaluación oficial importa matplotlib aunque
 no dibuje. Por eso la evaluación de TSMixer se hizo con una copia literal de esa evaluación, en
-`_DESCARTABLE_bloqueo_windows/` (ver su README). Antes de usarla se recalcularon las 70 corridas de
+`_DESCARTABLE_bloqueo_windows/`. Esa carpeta se borró cuando se levantó el bloqueo; sigue en el
+historial, en el commit `b3eb6db`. Con matplotlib cargando de nuevo, `grid_arch.py lstm transformer
+tsmixer` reescribe `grid_arch_lstm_transformer_tsmixer.json` idéntico byte a byte. Antes de usarla se recalcularon las 70 corridas de
 LSTM y Transformer desde los checkpoints: reproduce **exactamente**, con igualdad de floats,
 `gridarch_lstm.json`, `gridarch_transformer.json` y `grid_arch_lstm_transformer.json`. Las filas de
 LSTM y Transformer de abajo son idénticas a las de la sección 12.
