@@ -1,0 +1,39 @@
+seed 0: reward_mse h=1 z=60.727 raw=45.933 | h=10 z=771.428 raw=585.041
+seed 1: reward_mse h=1 z=50.590 raw=56.318 | h=10 z=720.077 raw=652.150
+seed 2: reward_mse h=1 z=51.589 raw=58.798 | h=10 z=653.891 raw=691.999
+seed 3: reward_mse h=1 z=57.043 raw=54.579 | h=10 z=502.513 raw=631.334
+seed 4: reward_mse h=1 z=57.096 raw=58.806 | h=10 z=470.393 raw=749.925
+seed 10: reward_mse h=1 z=58.520 raw=52.451 | h=10 z=1061.544 raw=844.073
+seed 20: reward_mse h=1 z=59.258 raw=52.567 | h=10 z=632.610 raw=654.475
+seed 30: reward_mse h=1 z=51.532 raw=57.783 | h=10 z=869.067 raw=1032.962
+seed 40: reward_mse h=1 z=60.824 raw=52.931 | h=10 z=993.872 raw=705.568
+seed 50: reward_mse h=1 z=51.485 raw=57.266 | h=10 z=877.100 raw=729.005
+
+  h | z gana (pares) |  reduccion mediana (raw-z)/raw | reward_mse z (mediana) | reward_mse crudo (mediana)
+--------------------------------------------------------------------------------------------------------------
+  1 |         5/10   |                          -0.8% |                 57.070 |                     55.448
+  2 |         6/10   |                          10.0% |                114.600 |                    122.986
+  3 |         6/10   |                           9.9% |                178.653 |                    203.140
+  4 |         6/10   |                          13.8% |                230.598 |                    290.034
+  5 |         8/10   |                          12.1% |                290.593 |                    362.516
+  6 |         8/10   |                           9.3% |                359.797 |                    417.181
+  7 |         6/10   |                           7.5% |                442.510 |                    484.909
+  8 |         5/10   |                           0.6% |                517.029 |                    528.546
+  9 |         5/10   |                          -0.1% |                594.864 |                    611.254
+ 10 |         5/10   |                          -3.5% |                745.753 |                    698.783
+
+z gana 60/100 pares (semilla x horizonte). Reduccion mediana por horizonte (mediana de las medianas): 8.4%. Mediana sobre los 100 pares: 5.4% (positivo = el Autoencoder ayuda).
+
+h=10, por episodio de test (misma semilla): mediana por episodio y episodios ganados
+sem. | z gana ep. | mediana ep. z | mediana ep. crudo |  media z | media crudo
+   0 |      6/12  |         450.0 |             348.2 |    771.4 |       585.0
+   1 |      6/12  |         531.3 |             477.5 |    720.1 |       652.1
+   2 |      7/12  |         492.1 |             553.3 |    653.9 |       692.0
+   3 |      8/12  |         342.9 |             521.4 |    502.5 |       631.3
+   4 |     11/12  |         235.9 |             533.1 |    470.4 |       749.9
+  10 |      5/12  |         745.5 |             411.6 |   1061.5 |       844.1
+  20 |      6/12  |         453.4 |             320.9 |    632.6 |       654.5
+  30 |      9/12  |         363.1 |             598.6 |    869.1 |      1033.0
+  40 |      6/12  |         668.4 |             366.9 |    993.9 |       705.6
+  50 |      7/12  |         487.0 |             482.7 |    877.1 |       729.0
+Resultados: docs\results\exploratory\seed_zero_check\experiment_0_10seeds_combined.json

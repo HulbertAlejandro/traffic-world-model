@@ -196,6 +196,16 @@ de todas las semillas.
 - **Experimento 3:** su umbral (7.3%) era la mitad del 14.7% publicado, que ya no se
   sostiene. Su conclusión no cambia: el LSTM gana en los 10 horizontes con reducciones del
   38–56%, muy por encima de la mitad del nuevo 10.9%.
+- **Exploración adicional, sin cambios en lo oficial** (rama `exploratory/latent-dim-sweep`;
+  resumen en [`docs/EXPLORACION_LATENT_DIM.md`](docs/EXPLORACION_LATENT_DIM.md)). Después de
+  este resultado se investigó más a fondo, con criterios fijados antes de cada ronda:
+  - 10 semillas de LSTM;
+  - un barrido de `latent_dim` sobre el estado sin sus 2 dimensiones siempre nulas;
+  - una grilla de 5 semillas de Autoencoder × 5 de LSTM.
+  Conclusión: controlando las dos fuentes de varianza, **no hay evidencia** de que el
+  Autoencoder mejore (ni empeore) la predicción de la recompensa frente al estado crudo. La
+  varianza dominante es qué Autoencoder se entrena. Solo se probó con la LSTM. Lo anterior de
+  este punto sigue siendo el resultado oficial documentado.
 
 ### 6. El LSTM oficial se entrenó hasta el tope de 100 épocas, no hasta converger
 

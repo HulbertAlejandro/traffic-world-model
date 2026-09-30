@@ -1,0 +1,10 @@
+train-ae --seed 0 reproduces ae12/: True
+ae12_seed1 exit=0
+ae12_seed2 exit=0
+z12_ae1 seed2 exit=0
+z12_ae1 seed0 exit=0
+z12_ae1 seed1 exit=0
+z12_ae2 seed0 exit=0
+z12_ae2 seed1 exit=0
+z12_ae2 seed2 exit=0
+wall seconds: 835

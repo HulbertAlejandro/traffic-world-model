@@ -1,0 +1,36 @@
+
+== PRINCIPAL: reduccion mediana (crudo-z)/crudo ==
+      LSTM s0       LSTM s1       LSTM s2       media fila
+AE s0      +0.9%      +45.3%      +38.2%      +28.1%
+AE s1     -32.6%      +37.6%      +23.5%       +9.5%
+AE s2     -28.0%      +40.8%      +14.1%       +9.0%
+media col     -19.9%      +41.2%      +25.2%  
+entre AE (por columna)   var: [330.5, 15.1, 147.6]  rango: [33.5, 7.7, 24.1]  media var 164.4
+entre LSTM (por fila)    var: [568.2, 1378.5, 1203.4]  rango: [44.4, 70.2, 68.8]  media var 1050.0
+ANOVA: CM_AE 358.3 (F=5.31), CM_LSTM 3015.1 (F=44.69), CM_res 67.5
+componentes: sigma2_AE 96.9 (sd 9.8), sigma2_LSTM 982.6 (sd 31.3)
+AE0 fila +28.1 vs media otras +9.2; umbral 2*SE = 11.6 -> atipico: True
+
+== SECUNDARIO: 100 x log media geometrica reward_mse de z (diferencias ~ %) ==
+      LSTM s0       LSTM s1       LSTM s2       media fila
+AE s0    +541.2      +545.6      +544.6      +543.8
+AE s1    +577.5      +556.1      +567.0      +566.9
+AE s2    +566.5      +550.9      +569.1      +562.2
+media col    +561.7      +550.9      +560.2   
+entre AE (por columna)   var: [345.4, 27.6, 184.7]  rango: [36.2, 10.5, 24.5]  media var 185.9
+entre LSTM (por fila)    var: [5.3, 113.5, 96.4]  rango: [4.4, 21.3, 18.1]  media var 71.7
+ANOVA: CM_AE 445.3 (F=7.93), CM_LSTM 102.9 (F=1.83), CM_res 56.2
+componentes: sigma2_AE 129.7 (sd 11.4), sigma2_LSTM 15.6 (sd 3.9)
+AE0 fila +543.8 vs media otras +564.5; umbral 2*SE = 10.6 -> atipico: True
+
+AE0, 10 semillas de LSTM: var 293.0 (sd 17.1 puntos), rango +0.7% a +45.3%
+celdas positivas: 7/9
+AE s0: reconstruccion val 0.0418 (mejor epoca 93)
+AE s1: reconstruccion val 0.0321 (mejor epoca 95)
+AE s2: reconstruccion val 0.0312 (mejor epoca 100)
+POST HOC AE s0 z runs geomean: [224.1, 234.3, 231.7]
+POST HOC AE s1 z runs geomean: [322.0, 260.2, 289.9]
+POST HOC AE s2 z runs geomean: [288.7, 247.0, 296.1]
+raw24 10 runs geomean: median 291.3 range 229.7 395.3
+raw26 10 runs: median 299.4 range 239.6 352.1
+raw24 seeds 0,1,2: [229.7, 392.8, 354.3]

@@ -51,6 +51,13 @@ semilla × horizonte, reducción mediana +10.9%), 1 (el LSTM supera al baseline 
 en 10/10), 2 (control en SUMO real, ver el resultado central) y 3 (Transformer y TSMixer,
 ver abajo).
 
+Exploración posterior del Experimento 0, **sin cambios en lo oficial** (`latent_dim` sigue en 16
+y el estado en 26 dims): `docs/EXPLORACION_LATENT_DIM.md`, rama `exploratory/latent-dim-sweep`.
+Con 5 semillas de Autoencoder × 5 de LSTM no hay evidencia de que el Autoencoder mejore ni empeore
+la predicción de la recompensa; la varianza dominante es qué Autoencoder se entrena. Completada también
+con Transformer y TSMixer (5×5 a `latent_dim` = 16): el latente es neutro con la LSTM y empeora la
+predicción de la recompensa con el Transformer (+33%) y con TSMixer (+42%).
+
 Transformer y TSMixer (`models/world_model/transformer.py`, `tsmixer.py`) están
 **implementados y evaluados** como sustitutos intercambiables del LSTM (misma interfaz,
 `models/world_model/base.py::TemporalModel`). **No reemplazan al LSTM**: el LSTM tiene el
@@ -199,7 +206,9 @@ configs/        EnvironmentConfig, RewardConfig, RepresentationConfig, WorldMode
                 ControllerConfig
 datasets/       transition_dataset.py, latent_sequence_dataset.py, metadata.json, raw/, processed/ (generados)
 docs/           PROPUESTA.md (propuesta académica), DOCUMENTACION_PROYECTO.md (documento de estudio),
-                results/ (resultados por episodio de cada evaluación, versionados)
+                EXPLORACION_LATENT_DIM.md (exploración del Experimento 0, no oficial),
+                results/ (resultados por episodio de cada evaluación, versionados;
+                results/exploratory/ = exploraciones, no forman parte del pipeline oficial)
 environments/   TrafficEnvironment, CustomStateBuilder, TrafficState, ProjectActionSpace,
                 ProjectRewardFunction, DreamEnvironment, EncodedTrafficEnvironment,
                 ReseedingWrapper, single-intersection/ (red SUMO propia, demanda asimétrica)

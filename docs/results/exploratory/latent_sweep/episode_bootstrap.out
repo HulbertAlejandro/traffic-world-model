@@ -1,0 +1,178 @@
+off_lstm: EXACTO
+off_transformer: EXACTO
+off_tsmixer: EXACTO
+exp0_z_s0: EXACTO
+exp0_raw_s0: EXACTO
+exp0_z_s1: EXACTO
+exp0_raw_s1: EXACTO
+exp0_z_s2: EXACTO
+exp0_raw_s2: EXACTO
+exp0_z_s3: EXACTO
+exp0_raw_s3: EXACTO
+exp0_z_s4: EXACTO
+exp0_raw_s4: EXACTO
+z12_ae0_s0: EXACTO
+z12_ae0_s1: EXACTO
+z12_ae0_s2: EXACTO
+z12_ae0_s3: EXACTO
+z12_ae0_s4: EXACTO
+z12_ae1_s0: EXACTO
+z12_ae1_s1: EXACTO
+z12_ae1_s2: EXACTO
+z12_ae1_s3: EXACTO
+z12_ae1_s4: EXACTO
+z12_ae2_s0: EXACTO
+z12_ae2_s1: EXACTO
+z12_ae2_s2: EXACTO
+z12_ae2_s3: EXACTO
+z12_ae2_s4: EXACTO
+z12_ae3_s0: EXACTO
+z12_ae3_s1: EXACTO
+z12_ae3_s2: EXACTO
+z12_ae3_s3: EXACTO
+z12_ae3_s4: EXACTO
+z12_ae4_s0: EXACTO
+z12_ae4_s1: EXACTO
+z12_ae4_s2: EXACTO
+z12_ae4_s3: EXACTO
+z12_ae4_s4: EXACTO
+lstm_z16_ae0_s0: EXACTO
+lstm_z16_ae0_s1: EXACTO
+lstm_z16_ae0_s2: EXACTO
+lstm_z16_ae0_s3: EXACTO
+lstm_z16_ae0_s4: EXACTO
+lstm_z16_ae1_s0: EXACTO
+lstm_z16_ae1_s1: EXACTO
+lstm_z16_ae1_s2: EXACTO
+lstm_z16_ae1_s3: EXACTO
+lstm_z16_ae1_s4: EXACTO
+lstm_z16_ae2_s0: EXACTO
+lstm_z16_ae2_s1: EXACTO
+lstm_z16_ae2_s2: EXACTO
+lstm_z16_ae2_s3: EXACTO
+lstm_z16_ae2_s4: EXACTO
+lstm_z16_ae3_s0: EXACTO
+lstm_z16_ae3_s1: EXACTO
+lstm_z16_ae3_s2: EXACTO
+lstm_z16_ae3_s3: EXACTO
+lstm_z16_ae3_s4: EXACTO
+lstm_z16_ae4_s0: EXACTO
+lstm_z16_ae4_s1: EXACTO
+lstm_z16_ae4_s2: EXACTO
+lstm_z16_ae4_s3: EXACTO
+lstm_z16_ae4_s4: EXACTO
+lstm_raw24_s0: EXACTO
+lstm_raw24_s1: EXACTO
+lstm_raw24_s2: EXACTO
+lstm_raw24_s3: EXACTO
+lstm_raw24_s4: EXACTO
+lstm_raw24_s5: EXACTO
+lstm_raw24_s6: EXACTO
+lstm_raw24_s7: EXACTO
+lstm_raw24_s8: EXACTO
+lstm_raw24_s9: EXACTO
+transformer_z16_ae0_s0: EXACTO
+transformer_z16_ae0_s1: EXACTO
+transformer_z16_ae0_s2: EXACTO
+transformer_z16_ae0_s3: EXACTO
+transformer_z16_ae0_s4: EXACTO
+transformer_z16_ae1_s0: EXACTO
+transformer_z16_ae1_s1: EXACTO
+transformer_z16_ae1_s2: EXACTO
+transformer_z16_ae1_s3: EXACTO
+transformer_z16_ae1_s4: EXACTO
+transformer_z16_ae2_s0: EXACTO
+transformer_z16_ae2_s1: EXACTO
+transformer_z16_ae2_s2: EXACTO
+transformer_z16_ae2_s3: EXACTO
+transformer_z16_ae2_s4: EXACTO
+transformer_z16_ae3_s0: EXACTO
+transformer_z16_ae3_s1: EXACTO
+transformer_z16_ae3_s2: EXACTO
+transformer_z16_ae3_s3: EXACTO
+transformer_z16_ae3_s4: EXACTO
+transformer_z16_ae4_s0: EXACTO
+transformer_z16_ae4_s1: EXACTO
+transformer_z16_ae4_s2: EXACTO
+transformer_z16_ae4_s3: EXACTO
+transformer_z16_ae4_s4: EXACTO
+transformer_raw24_s0: EXACTO
+transformer_raw24_s1: EXACTO
+transformer_raw24_s2: EXACTO
+transformer_raw24_s3: EXACTO
+transformer_raw24_s4: EXACTO
+transformer_raw24_s5: EXACTO
+transformer_raw24_s6: EXACTO
+transformer_raw24_s7: EXACTO
+transformer_raw24_s8: EXACTO
+transformer_raw24_s9: EXACTO
+tsmixer_z16_ae0_s0: EXACTO
+tsmixer_z16_ae0_s1: EXACTO
+tsmixer_z16_ae0_s2: EXACTO
+tsmixer_z16_ae0_s3: EXACTO
+tsmixer_z16_ae0_s4: EXACTO
+tsmixer_z16_ae1_s0: EXACTO
+tsmixer_z16_ae1_s1: EXACTO
+tsmixer_z16_ae1_s2: EXACTO
+tsmixer_z16_ae1_s3: EXACTO
+tsmixer_z16_ae1_s4: EXACTO
+tsmixer_z16_ae2_s0: EXACTO
+tsmixer_z16_ae2_s1: EXACTO
+tsmixer_z16_ae2_s2: EXACTO
+tsmixer_z16_ae2_s3: EXACTO
+tsmixer_z16_ae2_s4: EXACTO
+tsmixer_z16_ae3_s0: EXACTO
+tsmixer_z16_ae3_s1: EXACTO
+tsmixer_z16_ae3_s2: EXACTO
+tsmixer_z16_ae3_s3: EXACTO
+tsmixer_z16_ae3_s4: EXACTO
+tsmixer_z16_ae4_s0: EXACTO
+tsmixer_z16_ae4_s1: EXACTO
+tsmixer_z16_ae4_s2: EXACTO
+tsmixer_z16_ae4_s3: EXACTO
+tsmixer_z16_ae4_s4: EXACTO
+tsmixer_raw24_s0: EXACTO
+tsmixer_raw24_s1: EXACTO
+tsmixer_raw24_s2: EXACTO
+tsmixer_raw24_s3: EXACTO
+tsmixer_raw24_s4: EXACTO
+tsmixer_raw24_s5: EXACTO
+tsmixer_raw24_s6: EXACTO
+tsmixer_raw24_s7: EXACTO
+tsmixer_raw24_s8: EXACTO
+tsmixer_raw24_s9: EXACTO
+[control] 143/143 curvas reproducen exactamente lo guardado
+
+==================== E1. Checkpoints oficiales (una corrida), IC95 solo por episodios ====================
+lstm         GM   324.8  IC95 episodios [195.1, 464.3]  (-39.9% / +42.9%)  sd(g) episodios 0.223 | sd(g) entre 25 corridas z16 0.164, entre 5 semillas z del Exp. 0 0.077
+   reward_mse por h: h1:57[39,77]  h2:127[79,181]  h3:204[119,301]  h4:279[161,414]  h5:350[206,517]  h6:409[233,613]  h7:495[270,750]  h8:592[318,904]  h9:758[400,1159]  h10:993[479,1597]
+transformer  GM   499.1  IC95 episodios [204.4, 902.4]  (-59.0% / +80.8%)  sd(g) episodios 0.392 | sd(g) entre 25 corridas z16 0.235
+   reward_mse por h: h1:59[39,82]  h2:167[95,253]  h3:309[139,550]  h4:489[175,1002]  h5:674[217,1462]  h6:819[261,1784]  h7:896[300,1853]  h8:1027[352,1983]  h9:1090[406,1964]  h10:1155[432,2018]
+tsmixer      GM   723.7  IC95 episodios [401.4, 1082.7]  (-44.5% / +49.6%)  sd(g) episodios 0.252 | sd(g) entre 25 corridas z16 0.225
+   reward_mse por h: h1:79[55,105]  h2:217[142,304]  h3:446[242,689]  h4:564[309,859]  h5:729[388,1114]  h6:977[492,1536]  h7:1369[678,2196]  h8:1740[797,2924]  h9:2124[972,3524]  h10:2531[1289,3987]
+LSTM - transformer (oficiales): -34.9%  IC95 solo episodios [-56.6%, +18.5%]  ancho log 1.004
+LSTM - tsmixer (oficiales): -55.1%  IC95 solo episodios [-61.8%, -45.6%]  ancho log 0.355
+
+==================== E2-E4'. Delta con IC95: solo semillas / solo episodios / conjunto ====================
+E2 Exp.0 oficial z-crudo      -13.0% | semillas [-20.8, -3.6] (excluye 0) | episodios [-21.3, -2.4] | conjunto [-26.6, +4.9] (incluye 0) | anchos log s 0.197 e 0.216 j 0.358 | razon e/s 1.10 -> fuente dominante o igual | frac var ep 0.57 | CAMBIA LA CONCLUSION
+E3 sec.11 z12-crudo24          -7.1% | semillas [-21.7, +12.1] (incluye 0) | episodios [-15.4, +2.2] | conjunto [-25.9, +14.9] (incluye 0) | anchos log s 0.358 e 0.189 j 0.439 | razon e/s 0.53 -> fuente relevante (menor que semillas) | frac var ep 0.23
+E4 sec.13 lstm z16-crudo      -10.0% | semillas [-21.0, +2.9] (incluye 0) | episodios [-17.6, -0.2] | conjunto [-24.9, +8.4] (incluye 0) | anchos log s 0.264 e 0.191 j 0.366 | razon e/s 0.73 -> fuente relevante (menor que semillas) | frac var ep 0.36
+E4 sec.13 transformer z16-crudo  +33.4% | semillas [+10.0, +60.3] (excluye 0) | episodios [+21.2, +47.2] | conjunto [+5.4, +69.3] (excluye 0) | anchos log s 0.377 e 0.194 j 0.474 | razon e/s 0.52 -> fuente relevante (menor que semillas) | frac var ep 0.20
+E4 sec.13 tsmixer z16-crudo   +42.0% | semillas [+20.7, +64.6] (excluye 0) | episodios [+33.8, +57.3] | conjunto [+17.0, +71.8] (excluye 0) | anchos log s 0.310 e 0.162 j 0.384 | razon e/s 0.52 -> fuente relevante (menor que semillas) | frac var ep 0.21
+E4' sec.14 lstm-transformer   -38.3% | semillas [-48.5, -26.2] (excluye 0) | episodios [-45.4, -23.7] | conjunto [-51.6, -19.7] (excluye 0) | anchos log s 0.360 e 0.334 j 0.506 | razon e/s 0.93 -> fuente relevante (menor que semillas) | frac var ep 0.45
+                             Bonferroni 98.33%: semillas [-50.5, -23.7] -> conjunto [-54.9, -15.4] | no cambia
+E4' sec.14 lstm-tsmixer       -60.1% | semillas [-66.0, -51.8] (excluye 0) | episodios [-69.9, -48.2] | conjunto [-71.7, -43.8] (excluye 0) | anchos log s 0.349 e 0.542 j 0.687 | razon e/s 1.55 -> fuente dominante o igual | frac var ep 0.72
+                             Bonferroni 98.33%: semillas [-67.0, -49.7] -> conjunto [-74.0, -39.9] | no cambia
+E4' sec.14 transformer-tsmixer  -35.3% | semillas [-46.0, -24.4] (excluye 0) | episodios [-48.8, -18.1] | conjunto [-52.0, -9.9] (excluye 0) | anchos log s 0.336 e 0.469 j 0.630 | razon e/s 1.40 -> fuente dominante o igual | frac var ep 0.69
+                             Bonferroni 98.33%: semillas [-48.1, -22.3] -> conjunto [-54.5, -0.9] | no cambia
+
+==================== Influencia de episodios (descriptivo) ====================
+g LSTM oficial: cola baja ep36 x1.93, ep35 x1.80, ep13 x1.64 | cola alta ep12 x2.34, ep77 x2.26, ep47 x2.02
+   jackknife (cambio al quitar cada episodio, log): ep8:+0.016 ep12:-0.117 ep13:+0.063 ep14:+0.055 ep35:+0.062 ep36:+0.069 ep47:-0.103 ep53:-0.017 ep64:+0.054 ep65:-0.019 ep66:+0.015 ep77:-0.113
+Delta Exp.0 z-crudo: cola baja ep12 x3.43, ep47 x1.57, ep36 x1.04 | cola alta ep35 x2.45, ep13 x1.50, ep14 x1.44
+   jackknife (cambio al quitar cada episodio, log): ep8:-0.003 ep12:+0.062 ep13:-0.007 ep14:-0.007 ep35:-0.014 ep36:-0.001 ep47:+0.022 ep53:-0.006 ep64:+0.001 ep65:-0.013 ep66:-0.012 ep77:-0.014
+Delta LSTM z16-crudo24: cola baja ep12 x3.51, ep66 x1.54, ep64 x0.98 | cola alta ep14 x1.79, ep53 x1.78, ep36 x1.57
+   jackknife (cambio al quitar cada episodio, log): ep8:-0.008 ep12:+0.055 ep13:-0.006 ep14:-0.008 ep35:-0.006 ep36:-0.007 ep47:+0.006 ep53:-0.013 ep64:+0.002 ep65:-0.009 ep66:+0.013 ep77:-0.009
+LSTM-Transformer z16: cola baja ep77 x3.49, ep12 x1.39, ep53 x0.96 | cola alta ep36 x1.84, ep64 x1.53, ep14 x1.50
+   jackknife (cambio al quitar cada episodio, log): ep8:-0.005 ep12:+0.056 ep13:-0.008 ep14:-0.009 ep35:-0.007 ep36:-0.011 ep47:-0.021 ep53:+0.007 ep64:-0.008 ep65:-0.019 ep66:-0.010 ep77:+0.073
+peso de cada episodio en el error h=10 de la LSTM oficial: ep53:27.8% ep47:19.6% ep12:15.4% ep77:12.9% ep66:8.0% ep65:4.9% ep64:4.3% ep8:3.0% ep36:1.4% ep35:1.3% ep14:0.8% ep13:0.6%

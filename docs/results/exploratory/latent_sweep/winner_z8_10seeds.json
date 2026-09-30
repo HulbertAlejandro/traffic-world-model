@@ -1,0 +1,2093 @@
+{
+  "pairs": [
+    {
+      "seed": 0,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed0",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed0",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.07978261481094662,
+          "model_reward_mse": 58.67729672758682,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.1323198670593445,
+          "model_reward_mse": 108.77785479679906,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.16571735779732644,
+          "model_reward_mse": 172.70064996303825,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.22685282185585015,
+          "model_reward_mse": 232.77622883440986,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.2699133994135385,
+          "model_reward_mse": 276.26610080603774,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.32524655097818356,
+          "model_reward_mse": 295.60099008830105,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.3424604795917514,
+          "model_reward_mse": 307.5228018377295,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.3541048385080926,
+          "model_reward_mse": 328.02403096094326,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.3782109998305151,
+          "model_reward_mse": 342.0182852342031,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.4103507777021843,
+          "model_reward_mse": 344.70505012494425,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.06793438539293314,
+          "model_reward_mse": 52.83758659387434,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.10155166440776416,
+          "model_reward_mse": 95.90839702431376,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.12379143000506455,
+          "model_reward_mse": 170.4722560291539,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.13791368442868432,
+          "model_reward_mse": 227.07678941654902,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.14801236608967422,
+          "model_reward_mse": 267.92630291464354,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.1615107891164602,
+          "model_reward_mse": 300.90246223413465,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.1709372765222003,
+          "model_reward_mse": 333.98561932378493,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.17684234325581838,
+          "model_reward_mse": 378.5327942972917,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.18640582355123667,
+          "model_reward_mse": 431.98231892493067,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.200276826481734,
+          "model_reward_mse": 472.61180334626124,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 231.11081466504507,
+        "12": 735.7531283148697,
+        "13": 104.6152382729309,
+        "14": 116.8464253231883,
+        "35": 188.84632318913935,
+        "36": 181.80176372198122,
+        "47": 370.6068231459441,
+        "53": 431.8634482446526,
+        "64": 45.443979383419666,
+        "65": 582.3722616065826,
+        "66": 207.7117540003998,
+        "77": 939.4886416311775
+      },
+      "raw_h10_per_episode": {
+        "8": 312.0774033835956,
+        "12": 2103.072569168572,
+        "13": 115.48966633549759,
+        "14": 88.19605039613587,
+        "35": 194.02595798117773,
+        "36": 62.817506871915455,
+        "47": 453.98075947591235,
+        "53": 289.64713284202986,
+        "64": 203.4865104641233,
+        "65": 689.6951395273209,
+        "66": 442.67061520197564,
+        "77": 716.1823285068784
+      }
+    },
+    {
+      "seed": 1,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed1",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed1",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.0945322392824372,
+          "model_reward_mse": 67.46223071445486,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.16914923484326297,
+          "model_reward_mse": 115.68475387593998,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.20706423173126365,
+          "model_reward_mse": 179.874663477855,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.254634931975133,
+          "model_reward_mse": 242.72619456545632,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.28981824605060474,
+          "model_reward_mse": 276.169581545452,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.34814180368613007,
+          "model_reward_mse": 324.69046359986646,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.3953447471827357,
+          "model_reward_mse": 404.2623016166966,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.4146022602937938,
+          "model_reward_mse": 471.92816190000946,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.45779385686674645,
+          "model_reward_mse": 534.6649050061578,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.5195675290078812,
+          "model_reward_mse": 587.4841908369492,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.060383073831834486,
+          "model_reward_mse": 51.75426572978821,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.08880252652609397,
+          "model_reward_mse": 124.16152090836604,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.108854793205059,
+          "model_reward_mse": 244.1605832231425,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.12652522321080878,
+          "model_reward_mse": 378.32500256056164,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.1428841376041491,
+          "model_reward_mse": 494.2367596577149,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.16086259926891044,
+          "model_reward_mse": 596.0060086011997,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.17599435240207684,
+          "model_reward_mse": 698.5414726320189,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.1829449985176325,
+          "model_reward_mse": 786.6755138474869,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.19371244805968468,
+          "model_reward_mse": 875.610357239037,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.20702268681415018,
+          "model_reward_mse": 1038.420508363163,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 137.01097136034764,
+        "12": 2324.888060769161,
+        "13": 57.81981710988496,
+        "14": 90.27265230869608,
+        "35": 166.30618539367404,
+        "36": 136.29387003694262,
+        "47": 983.9401372058051,
+        "53": 983.3186422445945,
+        "64": 163.7991355445868,
+        "65": 751.0040751963355,
+        "66": 909.4257407941989,
+        "77": 345.73100207916326
+      },
+      "raw_h10_per_episode": {
+        "8": 1259.8597035665598,
+        "12": 3826.2184702021736,
+        "13": 246.04068010644363,
+        "14": 74.74754673412868,
+        "35": 272.77567502451797,
+        "36": 174.24843909687397,
+        "47": 667.6451067243304,
+        "53": 1449.6903400387082,
+        "64": 759.6420793141638,
+        "65": 1078.9781584869538,
+        "66": 1598.992254444531,
+        "77": 1052.2076466185706
+      }
+    },
+    {
+      "seed": 2,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed2",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed2",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.09265077468728469,
+          "model_reward_mse": 59.20027563627231,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.16399000525596508,
+          "model_reward_mse": 114.3178668547728,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.20766826477677872,
+          "model_reward_mse": 207.4304236432162,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.27111936537105413,
+          "model_reward_mse": 292.31622492238944,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.34135892020449754,
+          "model_reward_mse": 348.3654192804897,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.41026099048488374,
+          "model_reward_mse": 380.9696275113764,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.4483570733584375,
+          "model_reward_mse": 412.468662360096,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.45957108980843,
+          "model_reward_mse": 433.09068916638006,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.46082515538936214,
+          "model_reward_mse": 451.0136032714892,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.5060753299178378,
+          "model_reward_mse": 460.973076382036,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.06001982820730302,
+          "model_reward_mse": 59.40622287280345,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.08858348186098276,
+          "model_reward_mse": 126.67716046520343,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.10824897206565809,
+          "model_reward_mse": 234.42612661302746,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.12309885192958137,
+          "model_reward_mse": 347.88146988386563,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.1346041284457204,
+          "model_reward_mse": 450.2504519317701,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.14645225212184917,
+          "model_reward_mse": 529.9170579784893,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.15505070943562757,
+          "model_reward_mse": 585.9923747402607,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.15779950193883407,
+          "model_reward_mse": 640.1229153492754,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.16779327163591037,
+          "model_reward_mse": 702.8460446617095,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.18115891046851637,
+          "model_reward_mse": 808.1578282033138,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 215.90342982241086,
+        "12": 1091.04925682715,
+        "13": 58.76346603526201,
+        "14": 95.50159728894276,
+        "35": 154.50511026808195,
+        "36": 132.0226073347032,
+        "47": 338.13890593264784,
+        "53": 714.5621185302734,
+        "64": 96.08201024851628,
+        "65": 840.4564323697772,
+        "66": 602.6758023517473,
+        "77": 1192.0161795749195
+      },
+      "raw_h10_per_episode": {
+        "8": 2022.0892473663603,
+        "12": 2211.1313302448816,
+        "13": 160.7325038611889,
+        "14": 116.54009471046074,
+        "35": 140.7958903670311,
+        "36": 93.32157641393798,
+        "47": 695.8498920713153,
+        "53": 1363.4130705939872,
+        "64": 253.9276686877012,
+        "65": 548.9479966269008,
+        "66": 740.0253771441323,
+        "77": 1351.1192903518677
+      }
+    },
+    {
+      "seed": 3,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed3",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed3",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.10145861628975364,
+          "model_reward_mse": 60.43623499438467,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.16930812724001174,
+          "model_reward_mse": 107.49239710336938,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.20767996494957644,
+          "model_reward_mse": 165.2536536665234,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.2561437770901691,
+          "model_reward_mse": 227.51924758185854,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.295551111358994,
+          "model_reward_mse": 272.20353881585316,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.3348904994837496,
+          "model_reward_mse": 314.16502128694555,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.37015767820467727,
+          "model_reward_mse": 367.2329208868403,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.3744765227161614,
+          "model_reward_mse": 407.16924249809654,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.3959339028823056,
+          "model_reward_mse": 443.00459400454616,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.4286146307940639,
+          "model_reward_mse": 490.6729268983293,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.06287047363788126,
+          "model_reward_mse": 58.507319013264535,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.09378490168305617,
+          "model_reward_mse": 122.20957361434203,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.11211149185555914,
+          "model_reward_mse": 186.73175518872037,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.12713868587410876,
+          "model_reward_mse": 234.93755914330416,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.1410670885003157,
+          "model_reward_mse": 284.696501784911,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.15447668754717425,
+          "model_reward_mse": 343.2628400577361,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.1664439268469337,
+          "model_reward_mse": 446.5322850825764,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.1737879459169649,
+          "model_reward_mse": 531.8280362888688,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.18285872974092995,
+          "model_reward_mse": 609.9597856596312,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.19240683336106557,
+          "model_reward_mse": 692.0534009974672,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 163.95934919640422,
+        "12": 1717.7877536807741,
+        "13": 237.95125321431883,
+        "14": 130.54135628257478,
+        "35": 137.92292888654129,
+        "36": 151.16054863248553,
+        "47": 656.813033575671,
+        "53": 360.3791190075272,
+        "64": 114.26643966835525,
+        "65": 668.4560006856918,
+        "66": 264.44039039441515,
+        "77": 1284.3969495551926
+      },
+      "raw_h10_per_episode": {
+        "8": 415.4568470519036,
+        "12": 2320.5924127238136,
+        "13": 137.7070747625615,
+        "14": 119.44509819575718,
+        "35": 75.05872769824096,
+        "36": 111.45743980578014,
+        "47": 1160.328038268004,
+        "53": 1146.4460348401751,
+        "64": 559.879930871725,
+        "65": 794.1798025033304,
+        "66": 266.46623601689936,
+        "77": 1197.6231692314147
+      }
+    },
+    {
+      "seed": 4,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed4",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed4",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.09568780631248262,
+          "model_reward_mse": 64.94035361146545,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.1590285664158208,
+          "model_reward_mse": 130.52010373723755,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.19944971897861077,
+          "model_reward_mse": 225.10070077419937,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.2906187124691704,
+          "model_reward_mse": 299.05267040491174,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.34478311236238196,
+          "model_reward_mse": 348.3852277955894,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.40144010713501344,
+          "model_reward_mse": 407.2969462327342,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.45158399424426965,
+          "model_reward_mse": 460.43822001275953,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.47813888667927434,
+          "model_reward_mse": 506.90233043780705,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.49406847065769227,
+          "model_reward_mse": 557.3806179086318,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.5469129205038328,
+          "model_reward_mse": 614.6850527268851,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.06348609367666382,
+          "model_reward_mse": 54.112416230651434,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.09502358179509876,
+          "model_reward_mse": 123.28747145670519,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.11392247190196361,
+          "model_reward_mse": 210.18867254041695,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.12917441487134923,
+          "model_reward_mse": 275.10393168735334,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.14118631717172406,
+          "model_reward_mse": 340.8953425325409,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.15905335064947843,
+          "model_reward_mse": 403.39523275925256,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.17391403275763706,
+          "model_reward_mse": 470.57035876075247,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.18263209735649444,
+          "model_reward_mse": 543.0486565791052,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.1959466200144518,
+          "model_reward_mse": 612.5391760243139,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.2108238882843464,
+          "model_reward_mse": 688.9988470793868,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 414.8088830241135,
+        "12": 2295.825071029578,
+        "13": 104.61001118226642,
+        "14": 103.17620407257762,
+        "35": 152.07468281915146,
+        "36": 217.49939168861934,
+        "47": 1172.0858013421298,
+        "53": 641.4480896813529,
+        "64": 105.81367786015782,
+        "65": 1071.8455207488366,
+        "66": 514.6854172720973,
+        "77": 582.3478820017406
+      },
+      "raw_h10_per_episode": {
+        "8": 382.7270687125623,
+        "12": 2118.221755204882,
+        "13": 132.15181738667474,
+        "14": 120.04395558823765,
+        "35": 236.56006510396088,
+        "36": 102.47496752233377,
+        "47": 1981.0130100067172,
+        "53": 606.5119276625769,
+        "64": 309.6986057826451,
+        "65": 869.0961805264865,
+        "66": 974.3045853887286,
+        "77": 435.182226066836
+      }
+    },
+    {
+      "seed": 5,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed5",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed5",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.09556683014989609,
+          "model_reward_mse": 67.32184625869537,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.17625477796065667,
+          "model_reward_mse": 126.76198227413697,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.22154501599836207,
+          "model_reward_mse": 208.84797931229585,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.27173584757062297,
+          "model_reward_mse": 286.00715619581393,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.31401734062514847,
+          "model_reward_mse": 333.40029761003484,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.3656723497213707,
+          "model_reward_mse": 350.10552283358743,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.3943185559185665,
+          "model_reward_mse": 375.73662721365093,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.4293136998645163,
+          "model_reward_mse": 403.12181098059574,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.47203777433993915,
+          "model_reward_mse": 427.7183812010859,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.5585005506318772,
+          "model_reward_mse": 468.47556592993124,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.05890425201061936,
+          "model_reward_mse": 59.988697873750546,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.08571441530708283,
+          "model_reward_mse": 118.90471943870895,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.10323403865572008,
+          "model_reward_mse": 182.69925479002856,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.11775377084988924,
+          "model_reward_mse": 249.77169483956297,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.1320644942363576,
+          "model_reward_mse": 310.76813865431495,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.14766184238953486,
+          "model_reward_mse": 376.09307248674105,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.156650952625251,
+          "model_reward_mse": 449.20512938202495,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.16338805661255876,
+          "model_reward_mse": 503.97166485713524,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.17238034525413126,
+          "model_reward_mse": 562.7035809869654,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.18392159208832753,
+          "model_reward_mse": 691.4573026863054,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 431.949135354587,
+        "12": 1207.22199218039,
+        "13": 163.96556468052523,
+        "14": 127.06137691566587,
+        "35": 128.60261103367168,
+        "36": 123.62091843698705,
+        "47": 539.8644686375345,
+        "53": 841.4528103830559,
+        "64": 132.9759458882468,
+        "65": 904.6265786647797,
+        "66": 549.1889577365647,
+        "77": 471.17643124716625
+      },
+      "raw_h10_per_episode": {
+        "8": 1170.6214449597257,
+        "12": 1462.5346223316021,
+        "13": 198.13466197454503,
+        "14": 110.16226070278458,
+        "35": 198.6344693507467,
+        "36": 139.3129079660667,
+        "47": 740.0266752685819,
+        "53": 1350.5313945656376,
+        "64": 433.36545547803064,
+        "65": 827.2175788496222,
+        "66": 1079.8086415785963,
+        "77": 587.1375192097255
+      }
+    },
+    {
+      "seed": 6,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed6",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed6",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.10288429329659612,
+          "model_reward_mse": 79.11372321948778,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.1794452593174009,
+          "model_reward_mse": 153.25989770484657,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.21498183528449208,
+          "model_reward_mse": 247.09426450504745,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.28090655292672595,
+          "model_reward_mse": 320.18810969730447,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.34930900899205536,
+          "model_reward_mse": 372.0812556249751,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.4135827865562446,
+          "model_reward_mse": 411.33382394594054,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.4756738618171463,
+          "model_reward_mse": 476.86390454554765,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.49747518797272017,
+          "model_reward_mse": 532.6461819332598,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.5007832265525524,
+          "model_reward_mse": 571.5663447105946,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.5453384442210553,
+          "model_reward_mse": 635.8096156145951,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.06395281359316811,
+          "model_reward_mse": 51.98612270463768,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.09282665659510901,
+          "model_reward_mse": 101.16532264910694,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.1148096412109832,
+          "model_reward_mse": 167.49747687319984,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.1344656664434643,
+          "model_reward_mse": 246.73820779937185,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.14796417780693563,
+          "model_reward_mse": 318.164917515449,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.1666480143391897,
+          "model_reward_mse": 371.27517776422513,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.17867494644745002,
+          "model_reward_mse": 417.75746964505754,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.1855989397754745,
+          "model_reward_mse": 451.5889618063218,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.1934454993507455,
+          "model_reward_mse": 488.21572040787044,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.2110311978215736,
+          "model_reward_mse": 584.3641953218379,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 308.97122943060737,
+        "12": 1617.1877123814209,
+        "13": 54.34636444774057,
+        "14": 110.80620243966446,
+        "35": 121.16168119295367,
+        "36": 134.5974314632443,
+        "47": 1261.6623774290085,
+        "53": 901.553975372868,
+        "64": 174.01155312771775,
+        "65": 1067.362395131588,
+        "66": 1121.6197143021438,
+        "77": 756.4347506561849
+      },
+      "raw_h10_per_episode": {
+        "8": 310.37356913174904,
+        "12": 1934.976933843004,
+        "13": 85.09071773588657,
+        "14": 89.16455891235465,
+        "35": 135.0624797973649,
+        "36": 151.02023504418986,
+        "47": 293.4768675812653,
+        "53": 1507.3598572988594,
+        "64": 142.74447825934206,
+        "65": 662.5050753014428,
+        "66": 655.1302228899939,
+        "77": 1045.4653480666025
+      }
+    },
+    {
+      "seed": 7,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed7",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed7",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.09159867306228815,
+          "model_reward_mse": 64.28552036271465,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.16740325378874937,
+          "model_reward_mse": 121.92668259134803,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.201191500901422,
+          "model_reward_mse": 180.98853195504643,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.27229546423491446,
+          "model_reward_mse": 238.613645693254,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.3114166710836192,
+          "model_reward_mse": 283.6423164234878,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.3628931505317312,
+          "model_reward_mse": 328.8140059667484,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.3925304913383332,
+          "model_reward_mse": 385.9288294677157,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.3869066530494906,
+          "model_reward_mse": 441.8033956992835,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.4077676109886462,
+          "model_reward_mse": 475.7998576431913,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.4803684696738076,
+          "model_reward_mse": 503.6096613362121,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.06276430506998347,
+          "model_reward_mse": 54.272861662087685,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.09214389732639705,
+          "model_reward_mse": 102.20188704183951,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.11483620374448716,
+          "model_reward_mse": 175.50271576481038,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.1347335327801014,
+          "model_reward_mse": 247.84530812274397,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.14983332683997497,
+          "model_reward_mse": 314.1475605475227,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.16902223868325114,
+          "model_reward_mse": 402.7014908016629,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.18392498550847883,
+          "model_reward_mse": 534.0687212117512,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.192852638200635,
+          "model_reward_mse": 652.3440846915485,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.2091877990150972,
+          "model_reward_mse": 720.2936952376186,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.22468120645258632,
+          "model_reward_mse": 767.9700338489566,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 603.3252702719399,
+        "12": 1609.541393487794,
+        "13": 146.13882618120738,
+        "14": 81.74039140428816,
+        "35": 151.87043520680496,
+        "36": 216.85872065850666,
+        "47": 384.8916163146496,
+        "53": 317.2827242221151,
+        "64": 123.8794390612947,
+        "65": 643.931262920584,
+        "66": 365.322790322985,
+        "77": 1398.5330659823758
+      },
+      "raw_h10_per_episode": {
+        "8": 229.54812393614225,
+        "12": 3588.5077392317885,
+        "13": 159.12520859431908,
+        "14": 109.09742462464742,
+        "35": 162.92214417864702,
+        "36": 126.36370495472636,
+        "47": 733.3656128031867,
+        "53": 651.4944932188306,
+        "64": 482.6728620137487,
+        "65": 1092.260047084093,
+        "66": 877.727727147511,
+        "77": 1002.555318399838
+      }
+    },
+    {
+      "seed": 8,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed8",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed8",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.08401774837679807,
+          "model_reward_mse": 65.30881694053826,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.13790793487624753,
+          "model_reward_mse": 126.17223018666458,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.16530822171120063,
+          "model_reward_mse": 196.0543809514835,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.19804554320317472,
+          "model_reward_mse": 258.262469301867,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.22417740728927865,
+          "model_reward_mse": 297.6769827191269,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.2624948813790633,
+          "model_reward_mse": 330.20609755111565,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.30795909155248885,
+          "model_reward_mse": 379.97779632912534,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.3658479443673665,
+          "model_reward_mse": 424.21140104900445,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.4294180024503952,
+          "model_reward_mse": 457.8873513078755,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.531030980927781,
+          "model_reward_mse": 477.8894315330822,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.058911730839116945,
+          "model_reward_mse": 58.50563660176773,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.09209606172073455,
+          "model_reward_mse": 161.93981324307114,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.11183157151653653,
+          "model_reward_mse": 283.22234100188194,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.12710072921056834,
+          "model_reward_mse": 379.6680110530617,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.13839801198522012,
+          "model_reward_mse": 452.752874583818,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.15212699963992077,
+          "model_reward_mse": 542.9370957671986,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.16562563631210533,
+          "model_reward_mse": 657.2940319861975,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.17510042148863986,
+          "model_reward_mse": 753.6846416339234,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.19016787711649186,
+          "model_reward_mse": 841.047584351588,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.2009168587004145,
+          "model_reward_mse": 892.3762258252948,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 352.69201674546514,
+        "12": 903.1513061276504,
+        "13": 75.48735847353403,
+        "14": 151.33213097556893,
+        "35": 239.1801947660744,
+        "36": 136.63282674641482,
+        "47": 1067.4807056214129,
+        "53": 527.9168422439269,
+        "64": 328.6548424977011,
+        "65": 772.1195231642042,
+        "66": 404.1803595898407,
+        "77": 775.8450714451926
+      },
+      "raw_h10_per_episode": {
+        "8": 431.83920667770184,
+        "12": 2196.566895995821,
+        "13": 74.44623924568296,
+        "14": 115.99953375149884,
+        "35": 182.21646971660002,
+        "36": 153.8094899075372,
+        "47": 2746.0227745039124,
+        "53": 784.5762083937014,
+        "64": 434.69296848646235,
+        "65": 795.1549566132682,
+        "66": 1764.8783803944077,
+        "77": 1028.3115862169436
+      }
+    },
+    {
+      "seed": 9,
+      "z_dir": "models/checkpoints/exploratory_latent_sweep/z8/seed9",
+      "raw_dir": "models/checkpoints/exploratory_latent_sweep/raw24/seed9",
+      "z": {
+        "1": {
+          "model_latent_mse": 0.11524345183501108,
+          "model_reward_mse": 63.0415426968583,
+          "baseline_latent_mse": 1.2634813489303702,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.19462754335864224,
+          "model_reward_mse": 122.20831705467994,
+          "baseline_latent_mse": 2.3383653932871917,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.23205050070149202,
+          "model_reward_mse": 185.9112092962799,
+          "baseline_latent_mse": 2.9090732753986406,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.30927049457206435,
+          "model_reward_mse": 246.94102581915047,
+          "baseline_latent_mse": 3.0519486797651987,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.3964421345541875,
+          "model_reward_mse": 294.9675264513852,
+          "baseline_latent_mse": 3.004967289495592,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.46553476907179825,
+          "model_reward_mse": 343.45623265082196,
+          "baseline_latent_mse": 2.84287206802872,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.5698378325617385,
+          "model_reward_mse": 437.37381709377735,
+          "baseline_latent_mse": 2.903187050617167,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.6049699974933728,
+          "model_reward_mse": 492.0177657549491,
+          "baseline_latent_mse": 2.7621680079870634,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.6311404579518629,
+          "model_reward_mse": 515.4935573373394,
+          "baseline_latent_mse": 2.772425071198848,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.6909921113113385,
+          "model_reward_mse": 535.5655342120145,
+          "baseline_latent_mse": 2.670572176690967,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "raw": {
+        "1": {
+          "model_latent_mse": 0.060195961667756946,
+          "model_reward_mse": 55.542583461042625,
+          "baseline_latent_mse": 0.6034491850920612,
+          "baseline_reward_mse": 2130.944841542339,
+          "n_samples": 420
+        },
+        "2": {
+          "model_latent_mse": 0.09182775149654065,
+          "model_reward_mse": 117.29129831712538,
+          "baseline_latent_mse": 1.1457290886886538,
+          "baseline_reward_mse": 5997.400538348897,
+          "n_samples": 420
+        },
+        "3": {
+          "model_latent_mse": 0.10959411309588524,
+          "model_reward_mse": 179.83416364338206,
+          "baseline_latent_mse": 1.4073443623289228,
+          "baseline_reward_mse": 8752.993019326057,
+          "n_samples": 420
+        },
+        "4": {
+          "model_latent_mse": 0.12333886895387892,
+          "model_reward_mse": 226.7632393481124,
+          "baseline_latent_mse": 1.425243683972411,
+          "baseline_reward_mse": 9875.394020342772,
+          "n_samples": 420
+        },
+        "5": {
+          "model_latent_mse": 0.13435176645021235,
+          "model_reward_mse": 267.9050989699642,
+          "baseline_latent_mse": 1.3485681737329633,
+          "baseline_reward_mse": 10027.762755188272,
+          "n_samples": 420
+        },
+        "6": {
+          "model_latent_mse": 0.14770969067892384,
+          "model_reward_mse": 310.55915724050277,
+          "baseline_latent_mse": 1.2865532045385668,
+          "baseline_reward_mse": 10105.194566787097,
+          "n_samples": 420
+        },
+        "7": {
+          "model_latent_mse": 0.15464174116532955,
+          "model_reward_mse": 375.08550338627356,
+          "baseline_latent_mse": 1.291227084587491,
+          "baseline_reward_mse": 10669.869507430312,
+          "n_samples": 420
+        },
+        "8": {
+          "model_latent_mse": 0.16031684323642698,
+          "model_reward_mse": 455.2771605111211,
+          "baseline_latent_mse": 1.2603072340289752,
+          "baseline_reward_mse": 10991.979093303238,
+          "n_samples": 420
+        },
+        "9": {
+          "model_latent_mse": 0.17010447134426424,
+          "model_reward_mse": 563.7811154999837,
+          "baseline_latent_mse": 1.2864903360841766,
+          "baseline_reward_mse": 10896.905757170352,
+          "n_samples": 420
+        },
+        "10": {
+          "model_latent_mse": 0.18264003224109135,
+          "model_reward_mse": 648.5538721513913,
+          "baseline_latent_mse": 1.284260195339956,
+          "baseline_reward_mse": 10817.108456787246,
+          "n_samples": 420
+        }
+      },
+      "z_h10_per_episode": {
+        "8": 495.81497012270347,
+        "12": 1321.4052072252546,
+        "13": 457.03360554150174,
+        "14": 129.1871784397534,
+        "35": 319.699394600732,
+        "36": 215.59604658990034,
+        "47": 1007.9462381156694,
+        "53": 437.6282009623945,
+        "64": 157.0646312883922,
+        "65": 611.712613093853,
+        "66": 713.1785637860852,
+        "77": 560.5197607779343
+      },
+      "raw_h10_per_episode": {
+        "8": 471.11719069991796,
+        "12": 2679.6122618504933,
+        "13": 82.32967385575175,
+        "14": 156.6590144121221,
+        "35": 179.786731542434,
+        "36": 157.20868754493338,
+        "47": 955.4929451125008,
+        "53": 1314.4925913002874,
+        "64": 134.56519539771335,
+        "65": 551.3436205390575,
+        "66": 608.6339358023234,
+        "77": 491.40461775915963
+      }
+    }
+  ],
+  "per_horizon": {
+    "1": {
+      "z_wins": 1,
+      "pairs": 10,
+      "median_reduction": -0.1286274788884079,
+      "reductions": [
+        -0.1105218937912183,
+        -0.30351053701889574,
+        0.0034667620086215223,
+        -0.032968797983767104,
+        -0.20010079266578093,
+        -0.12224216635569977,
+        -0.5218238849813288,
+        -0.18448739193019756,
+        -0.11628247693599106,
+        -0.135012791421116
+      ],
+      "median_z_reward_mse": 64.61293698709005,
+      "median_raw_reward_mse": 54.90772256156515
+    },
+    "2": {
+      "z_wins": 4,
+      "pairs": 10,
+      "median_reduction": -0.050293103642802504,
+      "reductions": [
+        -0.13418489070589687,
+        0.06827209404660974,
+        0.09756528773650214,
+        0.12042572505338894,
+        -0.05866477911400947,
+        -0.06608032778276854,
+        -0.5149449800741529,
+        -0.19299834983901576,
+        0.22086960791241333,
+        -0.04192142817159554
+      ],
+      "median_z_reward_mse": 122.06749982301397,
+      "median_raw_reward_mse": 120.55714652652549
+    },
+    "3": {
+      "z_wins": 4,
+      "pairs": 10,
+      "median_reduction": -0.022164807215369495,
+      "reductions": [
+        -0.013071886216506994,
+        0.26329360331899077,
+        0.1151565457308165,
+        0.11502115160054127,
+        -0.07094591755849737,
+        -0.1431244180624564,
+        -0.4752118606067394,
+        -0.03125772821423199,
+        0.3077721896586514,
+        -0.03379249820934393
+      ],
+      "median_z_reward_mse": 190.98279512388171,
+      "median_raw_reward_mse": 184.71550498937447
+    },
+    "4": {
+      "z_wins": 5,
+      "pairs": 10,
+      "median_reduction": 0.0032382504885760596,
+      "reductions": [
+        -0.025099172101670897,
+        0.35841883850486167,
+        0.15972464696100577,
+        0.031575673078823016,
+        -0.08705342221271982,
+        -0.1450743302980198,
+        -0.297683534921581,
+        0.03724767880180344,
+        0.31976763439843053,
+        -0.08898173499833643
+      ],
+      "median_z_reward_mse": 252.60174756050873,
+      "median_raw_reward_mse": 248.80850148115348
+    },
+    "5": {
+      "z_wins": 5,
+      "pairs": 10,
+      "median_reduction": 0.010955235743365838,
+      "reductions": [
+        -0.03112720849229613,
+        0.4412200708488093,
+        0.2262852423893177,
+        0.04388168765943003,
+        -0.02197121617269835,
+        -0.07282650999462632,
+        -0.1694603494645448,
+        0.09710482574134209,
+        0.3425177410684379,
+        -0.10101497726422555
+      ],
+      "median_z_reward_mse": 296.322254585256,
+      "median_raw_reward_mse": 316.1562390314858
+    },
+    "6": {
+      "z_wins": 7,
+      "pairs": 10,
+      "median_reduction": 0.07693352621464726,
+      "reductions": [
+        0.01761857349544877,
+        0.4552228351490937,
+        0.2810768746250834,
+        0.08476833311143259,
+        -0.00967218538204729,
+        0.06909871931786193,
+        -0.10789475995390749,
+        0.18347954135413236,
+        0.39181518425349604,
+        -0.10592853130665564
+      ],
+      "median_z_reward_mse": 336.8311651009688,
+      "median_raw_reward_mse": 389.39728164420194
+    },
+    "7": {
+      "z_wins": 8,
+      "pairs": 10,
+      "median_reduction": 0.17057077595320513,
+      "reductions": [
+        0.07923340394006859,
+        0.42127659207765333,
+        0.2961194033575583,
+        0.17758931849926907,
+        0.021531612774497607,
+        0.16355223340714123,
+        -0.14148504621762759,
+        0.2773798312095869,
+        0.4219059084091844,
+        -0.16606430572540026
+      ],
+      "median_z_reward_mse": 395.09556554220615,
+      "median_raw_reward_mse": 459.88774407138874
+    },
+    "8": {
+      "z_wins": 8,
+      "pairs": 10,
+      "median_reduction": 0.2172534870587425,
+      "reductions": [
+        0.1334329920611314,
+        0.400098066365515,
+        0.3234257378052631,
+        0.2343968073978378,
+        0.0665618553759055,
+        0.2001101667196472,
+        -0.17949336007398234,
+        0.32274484268806714,
+        0.4371499993294932,
+        -0.0806994253842666
+      ],
+      "median_z_reward_mse": 437.4470424328318,
+      "median_raw_reward_mse": 537.438346433987
+    },
+    "9": {
+      "z_wins": 9,
+      "pairs": 10,
+      "median_reduction": 0.25680097421966236,
+      "reductions": [
+        0.20825860168217067,
+        0.38938033271778993,
+        0.35830384662893144,
+        0.2737150802073517,
+        0.09004902914730889,
+        0.23988686823197305,
+        -0.17072499065185884,
+        0.3394363149517378,
+        0.4555749759855891,
+        0.08564947784712672
+      ],
+      "median_z_reward_mse": 466.8436044755334,
+      "median_raw_reward_mse": 611.2494808419725
+    },
+    "10": {
+      "z_wins": 9,
+      "pairs": 10,
+      "median_reduction": 0.3067353187860784,
+      "reductions": [
+        0.27063808460916816,
+        0.43425212993627577,
+        0.4296001841535514,
+        0.29098979039606643,
+        0.10785764688505955,
+        0.32248084717609043,
+        -0.08803657155008232,
+        0.34423266645940326,
+        0.4644753886275752,
+        0.1742158096513561
+      ],
+      "median_z_reward_mse": 497.1412941172707,
+      "median_raw_reward_mse": 691.7553518418863
+    }
+  },
+  "z_wins_total": 60,
+  "median_of_horizon_median_reductions": 0.04394438097900655,
+  "median_reduction_all_pairs": 0.08200086852575059,
+  "h10_per_episode_summary": [
+    {
+      "seed": 0,
+      "z_wins_episodes": 8,
+      "episodes": 12,
+      "median_episode_z": 219.41128433272243,
+      "median_episode_raw": 300.8622681128127
+    },
+    {
+      "seed": 1,
+      "z_wins_episodes": 10,
+      "episodes": 12,
+      "median_episode_z": 256.01859373641867,
+      "median_episode_raw": 905.9248629663672
+    },
+    {
+      "seed": 2,
+      "z_wins_episodes": 9,
+      "episodes": 12,
+      "median_episode_z": 277.02116787752936,
+      "median_episode_raw": 622.398944349108
+    },
+    {
+      "seed": 3,
+      "z_wins_episodes": 7,
+      "episodes": 12,
+      "median_episode_z": 251.19582180436697,
+      "median_episode_raw": 487.66838896181434
+    },
+    {
+      "seed": 4,
+      "z_wins_episodes": 6,
+      "episodes": 12,
+      "median_episode_z": 464.74715014810545,
+      "median_episode_raw": 408.9546473896992
+    },
+    {
+      "seed": 5,
+      "z_wins_episodes": 10,
+      "episodes": 12,
+      "median_episode_z": 451.5627833008766,
+      "median_episode_raw": 663.5820972391537
+    },
+    {
+      "seed": 6,
+      "z_wins_episodes": 7,
+      "episodes": 12,
+      "median_episode_z": 532.7029900433961,
+      "median_episode_raw": 301.9252183565072
+    },
+    {
+      "seed": 7,
+      "z_wins_episodes": 9,
+      "episodes": 12,
+      "median_episode_z": 341.30275727255,
+      "median_episode_raw": 567.0836776162896
+    },
+    {
+      "seed": 8,
+      "z_wins_episodes": 9,
+      "episodes": 12,
+      "median_episode_z": 378.4361881676529,
+      "median_episode_raw": 609.6345884400819
+    },
+    {
+      "seed": 9,
+      "z_wins_episodes": 3,
+      "episodes": 12,
+      "median_episode_z": 476.4242878321026,
+      "median_episode_raw": 481.2609042295388
+    }
+  ],
+  "per_seed": [
+    {
+      "seed": 0,
+      "z_wins_horizons": 5,
+      "median_reduction": 0.0022733436394708883
+    },
+    {
+      "seed": 1,
+      "z_wins_horizons": 9,
+      "median_reduction": 0.3947391995416525
+    },
+    {
+      "seed": 2,
+      "z_wins_horizons": 10,
+      "median_reduction": 0.2536810585072006
+    },
+    {
+      "seed": 3,
+      "z_wins_horizons": 9,
+      "median_reduction": 0.11772343832696511
+    },
+    {
+      "seed": 4,
+      "z_wins_horizons": 4,
+      "median_reduction": -0.01582170077737282
+    },
+    {
+      "seed": 5,
+      "z_wins_horizons": 5,
+      "median_reduction": 0.0015091957675466977
+    },
+    {
+      "seed": 6,
+      "z_wins_horizons": 0,
+      "median_reduction": -0.1751091753629206
+    },
+    {
+      "seed": 7,
+      "z_wins_horizons": 7,
+      "median_reduction": 0.14029218354773723
+    },
+    {
+      "seed": 8,
+      "z_wins_horizons": 9,
+      "median_reduction": 0.367166462660967
+    },
+    {
+      "seed": 9,
+      "z_wins_horizons": 2,
+      "median_reduction": -0.08484058019130152
+    }
+  ]
+}

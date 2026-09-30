@@ -186,6 +186,16 @@
       **Resuelto**: actualizado con el Experimento 3, la verificación de presupuesto del
       RL directo, los 62 tests y la semántica de la acción.
 
+## Exploración (rama `exploratory/latent-dim-sweep`, sin fusionar)
+
+- [x] Experimento 0 explorado a fondo con la LSTM (10 semillas, barrido de `latent_dim`, grilla
+      de 5 semillas de Autoencoder × 5 de LSTM): no hay evidencia de que el Autoencoder mejore ni
+      empeore la predicción de la recompensa. Ver `docs/EXPLORACION_LATENT_DIM.md`. No cambia nada
+      oficial.
+- [ ] La misma evaluación con Transformer y TSMixer (`latent_dim` = 16, grilla de 5×5): en curso en la
+      misma rama.
+- [ ] Decidir si la rama se fusiona a `main` (lo decide el autor).
+
 ## Después (orden según la propuesta del proyecto)
 
 - [ ] Más semillas por método: 3 en el PPO del sueño y 4 en el RL directo, cuyos

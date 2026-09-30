@@ -1,0 +1,29 @@
+seed 10: reward_mse h=1 z=58.520 raw=52.451 | h=10 z=1061.544 raw=844.073
+seed 20: reward_mse h=1 z=59.258 raw=52.567 | h=10 z=632.610 raw=654.475
+seed 30: reward_mse h=1 z=51.532 raw=57.783 | h=10 z=869.067 raw=1032.962
+seed 40: reward_mse h=1 z=60.824 raw=52.931 | h=10 z=993.872 raw=705.568
+seed 50: reward_mse h=1 z=51.485 raw=57.266 | h=10 z=877.100 raw=729.005
+
+  h | z gana (pares) |  reduccion mediana (raw-z)/raw | reward_mse z (mediana) | reward_mse crudo (mediana)
+--------------------------------------------------------------------------------------------------------------
+  1 |         2/5    |                         -11.6% |                 58.520 |                     52.931
+  2 |         2/5    |                          -1.7% |                121.085 |                    125.884
+  3 |         2/5    |                          -3.0% |                211.924 |                    211.999
+  4 |         2/5    |                          -4.4% |                300.916 |                    297.195
+  5 |         3/5    |                           0.8% |                368.637 |                    397.876
+  6 |         3/5    |                           3.9% |                420.647 |                    481.574
+  7 |         3/5    |                           3.9% |                479.598 |                    541.297
+  8 |         2/5    |                          -3.6% |                558.328 |                    600.314
+  9 |         2/5    |                          -1.4% |                697.689 |                    673.068
+ 10 |         2/5    |                         -20.3% |                877.100 |                    729.005
+
+z gana 23/50 pares (semilla x horizonte). Reduccion mediana por horizonte (mediana de las medianas): -2.3%. Mediana sobre los 50 pares: -2.3% (positivo = el Autoencoder ayuda).
+
+h=10, por episodio de test (misma semilla): mediana por episodio y episodios ganados
+sem. | z gana ep. | mediana ep. z | mediana ep. crudo |  media z | media crudo
+  10 |      5/12  |         745.5 |             411.6 |   1061.5 |       844.1
+  20 |      6/12  |         453.4 |             320.9 |    632.6 |       654.5
+  30 |      9/12  |         363.1 |             598.6 |    869.1 |      1033.0
+  40 |      6/12  |         668.4 |             366.9 |    993.9 |       705.6
+  50 |      7/12  |         487.0 |             482.7 |    877.1 |       729.0
+Resultados: docs\results\exploratory\seed_zero_check\experiment_0_extra_seeds.json
