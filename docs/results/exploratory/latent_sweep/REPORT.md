@@ -611,3 +611,126 @@ Experimento 3, es probablemente propia de esa corrida y no un rasgo general.
 `1b63b10`, y `CLAUDE.md` también en `832d534`). El inventario de `.pt`/`.zip`/`.npz` de
 `models/checkpoints/` es idéntico antes y después (525 archivos), y no hay ningún archivo en
 `models/checkpoints/` ni en `results/` posterior al addendum. El cálculo tomó 1.3 s.
+
+## 15. ¿Cuánta incertidumbre viene de tener solo 12 episodios de test? Fase 1 (criterio en `ADDENDUM_test_episodes.md`)
+
+Todos los `reward_mse` del proyecto se midieron sobre el mismo test de 12 episodios (`episode_id` 8,
+12, 13, 14, 35, 36, 47, 53, 64, 65, 66 y 77; 60 pasos y 35 ventanas por horizonte cada uno). Los IC
+anteriores remuestrean semillas y Autoencoders, pero nunca episodios.
+
+- **Método:** bootstrap de episodios, emparejado (el mismo sorteo para todas las corridas),
+  B = 10,000.
+- **Sin entrenamiento ni simulación:** rollouts de 143 checkpoints existentes con la evaluación
+  oficial importada. matplotlib vuelve a cargar en este equipo.
+- **Archivos:** `episode_bootstrap.py`, `episode_bootstrap.out`, `episode_bootstrap.json` y
+  `episode_errors.json` (el error de cada checkpoint por episodio y horizonte).
+
+**Control.** Las 143 curvas agregadas reproducen **exactamente** los valores guardados:
+`gridarch_*.json`, `grid5_ae*_vs_raw24.json`, `experiment_0_multiseed_300ep.json` y los tres reportes
+oficiales de `results/`. El bootstrap de solo semillas, con B = 10,000, casi reproduce los IC
+publicados: sección 11, [−21.7%, +12.1%] frente a [−21.7%, +12.0%]; LSTM de la sección 13,
+[−21.0%, +2.9%] frente a [−21.3%, +2.8%].
+
+**E1. Checkpoints oficiales, una corrida cada uno: IC del 95% solo por episodios**
+
+| Modelo | Media geométrica del `reward_mse` | IC del 95% por episodios | sd(g) por episodios | sd(g) entre corridas |
+|---|---|---|---|---|
+| LSTM oficial | 324.8 | [195.1, 464.3] (−40% / +43%) | 0.223 | 0.077 (5 semillas z del Exp. 0); 0.164 (25 corridas z16) |
+| Transformer oficial | 499.1 | [204.4, 902.4] (−59% / +81%) | 0.392 | 0.235 (25 corridas z16) |
+| TSMixer oficial | 723.7 | [401.4, 1082.7] (−45% / +50%) | 0.252 | 0.225 (25 corridas z16) |
+
+Para el **nivel absoluto** del error, la composición del test pesa **más** que la semilla: con otros
+12 episodios, el `reward_mse` de la LSTM oficial podría haber salido un 40% más bajo o un 43% más
+alto. En h = 10 su IC va de 479 a 1597 (valor publicado: 993). Tabla por horizonte en
+`episode_bootstrap.out`.
+
+Contrastes entre los checkpoints oficiales del Experimento 3, con IC solo por episodios:
+
+- **LSTM − TSMixer:** −55.1%, [−61.8%, −45.6%]. Excluye 0.
+- **LSTM − Transformer:** −34.9%, **[−56.6%, +18.5%]. Incluye 0.** Con una sola corrida por
+  arquitectura, la ventaja de la LSTM sobre el Transformer **no era robusta** a la composición del
+  test. Con 25 corridas por arquitectura sí lo es (ver abajo).
+
+**E2 a E4'. Descomposición: IC del 95% solo por semillas, solo por episodios y conjunto** (Δ en % de
+`reward_mse` geométrico; anchos en log)
+
+| Contraste | Δ | Solo semillas | Solo episodios | Conjunto | Razón de anchos e/s | Fracción de var. por episodios | Lectura (criterio fijado) |
+|---|---|---|---|---|---|---|---|
+| E2 Exp. 0 oficial, z − crudo (5 vs 5) | −13.0% | [−20.8, −3.6] (excluye 0) | [−21.3, −2.4] | **[−26.6, +4.9] (incluye 0)** | 1.10 | 0.57 | dominante; **cambia la conclusión** |
+| E3 sección 11, z12 − crudo 24 | −7.1% | [−21.7, +12.1] | [−15.4, +2.2] | [−25.9, +14.9] | 0.53 | 0.23 | relevante |
+| E4 sección 13, LSTM z16 − crudo | −10.0% | [−21.0, +2.9] | [−17.6, −0.2] | [−24.9, +8.4] | 0.73 | 0.36 | relevante |
+| E4 sección 13, Transformer z16 − crudo | +33.4% | [+10.0, +60.3] | [+21.2, +47.2] | [+5.4, +69.3] | 0.52 | 0.20 | relevante |
+| E4 sección 13, TSMixer z16 − crudo | +42.0% | [+20.7, +64.6] | [+33.8, +57.3] | [+17.0, +71.8] | 0.52 | 0.21 | relevante |
+| E4' sección 14, LSTM − Transformer | −38.3% | [−48.5, −26.2] | [−45.4, −23.7] | [−51.6, −19.7] | 0.93 | 0.45 | relevante |
+| E4' sección 14, LSTM − TSMixer | −60.1% | [−66.0, −51.8] | [−69.9, −48.2] | [−71.7, −43.8] | 1.55 | 0.72 | dominante |
+| E4' sección 14, Transformer − TSMixer | −35.3% | [−46.0, −24.4] | [−48.8, −18.1] | [−52.0, −9.9] | 1.40 | 0.69 | dominante |
+
+Sección 14 con Bonferroni (98.33%), con el IC conjunto:
+
+- LSTM − Transformer: [−54.9%, −15.4%].
+- LSTM − TSMixer: [−74.0%, −39.9%].
+- Transformer − TSMixer: **[−54.5%, −0.9%]**, que queda muy cerca de 0.
+
+Ninguno cambia de conclusión.
+
+**Qué conclusiones dependen del test (criterio fijado)**
+
+- **Ninguna razón de anchos es < 0.33.** La composición del test es una fuente **relevante** en todos
+  los contrastes y **dominante** en tres. Por la limitación de n = 12, estas razones son una cota
+  inferior aproximada.
+- **Cambia una conclusión: la del Experimento 0 oficial (E2).** Con solo sus 5 + 5 semillas, el
+  latente parecería mejorar con un IC que excluye 0 ([−20.8%, −3.6%]). Al sumar la variabilidad por
+  episodios, el IC incluye 0 ([−26.6%, +4.9%]).
+  - Ese IC por semillas nunca se había publicado. El Experimento 0 reportó conteos de pares y
+    reducciones medianas, no un IC.
+  - Aun así, confirma por otra vía lo que ya había mostrado esta exploración: la mejora "moderada y
+    mayoritaria" del Autoencoder no es robusta.
+- **No cambia ninguna conclusión de las secciones 13 y 14:**
+  - el latente sigue perjudicando al Transformer y a TSMixer;
+  - la LSTM sigue sin evidencia en ninguna dirección;
+  - el orden LSTM > Transformer > TSMixer se mantiene, también con Bonferroni.
+- **El margen se estrecha en el par Transformer − TSMixer:** su borde corregido llega a −0.9%.
+- **La conclusión oficial del Experimento 3 (LSTM frente al Transformer), tomada de una sola corrida,
+  no era robusta al test** (E1). La sostienen las 25 corridas, no la corrida oficial.
+
+**Promediar corridas no elimina esta fuente.** En los contrastes entre arquitecturas el ancho
+conjunto crece un 41–97% respecto de las semillas solas. El motivo es que el test es el mismo para
+todas las corridas: promediar más semillas reduce la varianza por semilla, pero no la que viene de
+qué 12 episodios se eligieron.
+
+**Influencia de episodios (descriptivo)**
+
+- **Nivel de error:**
+  - Cuatro episodios concentran el 76% del error en h = 10 de la LSTM oficial: ep53 27.8%, ep47
+    19.6%, ep12 15.4% y ep77 12.9%. Los cuatro más fáciles (ep13, ep14, ep35 y ep36) suman el 4.1%.
+  - En el bootstrap, la cola alta de g sobrerrepresenta a ep12 (×2.3), ep77 (×2.3) y ep47 (×2.0); la
+    cola baja, a ep36, ep35 y ep13.
+- **Contrastes:**
+  - **ep12** es el episodio que más mueve la comparación z − crudo. Aparece ×3.4–3.5 en la cola que
+    favorece al latente, tanto en el Experimento 0 como en la LSTM z16. Quitarlo desplaza Δ en
+    +0.06 en log (unos 6 puntos en contra del latente).
+  - **ep77** mueve LSTM − Transformer: ×3.5 en la cola favorable a la LSTM; quitarlo desplaza +0.07.
+- Es coherente con lo que ya dice el artículo (2 o 3 episodios congestionados dominan los horizontes
+  largos) y lo concreta: ep53, ep47, ep12 y ep77.
+
+**Lectura.**
+
+- **Para valores absolutos de error**, la composición del test es la fuente principal. Un
+  `reward_mse` de la LSTM de "993 en h = 10" es compatible, con otros 12 episodios, con cualquier
+  valor entre ~480 y ~1600.
+- **Para comparaciones**, el emparejamiento cancela parte de esa variabilidad, pero no toda: es
+  relevante siempre y dominante en tres casos. Los resultados con efectos grandes (secciones 13 y
+  14) la resisten.
+- **Los efectos pequeños no la resisten.** Es el caso del Autoencoder con la LSTM, alrededor del
+  −10%: ahí la composición del test es tan limitante como el número de semillas.
+- **Límites:**
+  - El bootstrap solo recombina los 12 episodios existentes. No puede mostrar regímenes de tráfico
+    ausentes del test.
+  - Con n = 12 los IC por episodios quedan algo cortos.
+
+**Integridad.**
+
+- Los md5 oficiales coinciden, con las mismas excepciones documentadas de siempre.
+- El inventario de `.pt`/`.zip`/`.npz`/`.pkl` de `models/checkpoints/` y `datasets/` es idéntico antes
+  y después (647 archivos).
+- No hay ningún archivo en `models/checkpoints/`, `datasets/` ni `results/` posterior al addendum.

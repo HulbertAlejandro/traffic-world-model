@@ -215,6 +215,43 @@ arquitectura sobre z de la Fase 2 se repitió esa comparación, sin entrenar nad
 - **Alcance:** solo sobre z. Sobre el estado crudo, la LSTM y el Transformer quedan mucho más cerca
   (301 frente a 329), y eso no se probó aquí.
 
+### Fase 1: ¿cuánta incertidumbre viene de tener solo 12 episodios de test?
+
+Todos los resultados se evaluaron sobre los mismos 12 episodios de test, y ningún IC anterior
+remuestreaba episodios. Diseño (`ADDENDUM_test_episodes.md`):
+
+- bootstrap de episodios emparejado, con B = 10,000;
+- sin entrenar ni simular: rollouts de 143 checkpoints existentes, que reproducen exactamente sus
+  valores guardados.
+
+| Contraste | Δ | IC solo semillas | IC solo episodios | IC conjunto | Episodios / semillas (ancho) |
+|---|---|---|---|---|---|
+| Experimento 0 oficial, z − crudo | −13.0% | [−20.8, −3.6] | [−21.3, −2.4] | **[−26.6, +4.9]** | 1.10 |
+| LSTM z16 − crudo (sección 13) | −10.0% | [−21.0, +2.9] | [−17.6, −0.2] | [−24.9, +8.4] | 0.73 |
+| Transformer z16 − crudo | +33.4% | [+10.0, +60.3] | [+21.2, +47.2] | [+5.4, +69.3] | 0.52 |
+| TSMixer z16 − crudo | +42.0% | [+20.7, +64.6] | [+33.8, +57.3] | [+17.0, +71.8] | 0.52 |
+| LSTM − Transformer (25 vs 25) | −38.3% | [−48.5, −26.2] | [−45.4, −23.7] | [−51.6, −19.7] | 0.93 |
+| LSTM − TSMixer | −60.1% | [−66.0, −51.8] | [−69.9, −48.2] | [−71.7, −43.8] | 1.55 |
+| Transformer − TSMixer | −35.3% | [−46.0, −24.4] | [−48.8, −18.1] | [−52.0, −9.9] | 1.40 |
+
+- **La composición del test es una fuente relevante en todos los contrastes y dominante en tres.**
+  Ninguna razón de anchos baja de 0.33.
+- **Para el nivel absoluto del error pesa más que la semilla:** el `reward_mse` geométrico de la LSTM
+  oficial, 325, tiene un IC por episodios de [195, 464].
+- **Cambia una conclusión: la del Experimento 0 oficial.** Con solo sus semillas parecería una mejora
+  significativa del latente; al sumar los episodios, el IC incluye 0. Refuerza que esa mejora no es
+  robusta.
+- **Las conclusiones con efectos grandes se mantienen:** el latente perjudica al Transformer y a
+  TSMixer, y el orden LSTM > Transformer > TSMixer también se sostiene con Bonferroni. El par
+  Transformer − TSMixer queda con un margen estrecho.
+- **La ventaja de la LSTM sobre el Transformer con los checkpoints oficiales (una corrida) no era
+  robusta al test:** su IC por episodios es [−56.6%, +18.5%]. La sostienen las 25 corridas por
+  arquitectura.
+- **Cuatro episodios concentran el 76% del error en h = 10:** ep53, ep47, ep12 y ep77. El ep12 es el
+  que más mueve la comparación z − crudo, y el ep77 la de LSTM − Transformer.
+- **Límite:** el bootstrap solo recombina los 12 episodios existentes. Episodios nuevos con SUMO
+  (Fase 2) medirían regímenes de tráfico que hoy no están en el test.
+
 ## 5. Dónde está el detalle (rama `exploratory/latent-dim-sweep`)
 
 | Ronda | Archivos | Commits |
@@ -227,9 +264,10 @@ arquitectura sobre z de la Fase 2 se repitió esa comparación, sin entrenar nad
 | (e) | `ADDENDUM_ae_seeds.md`, `ae_variance.*` | `c9f3aa9`, `4b3cf21` |
 | (f) | `ADDENDUM_grid5.md`, `grid5.py`, `grid5.json`, `grid5.out` | `fdc148d`, `8fe1ed6` |
 | Fase 2 | `ADDENDUM_transformer_tsmixer.md`, `grid_arch.py`, `gridarch_{lstm,transformer,tsmixer}.json`, `grid_arch_A.out`, `grid_arch_B.out`, `grid_arch_lstm_transformer_tsmixer.json`, `multiple_comparisons.*`, `_DESCARTABLE_bloqueo_windows/` | `36ad129`, `78a7ccd`, `5d859df`, `7d317e9`, `b3eb6db` |
-| Reanálisis del orden entre arquitecturas | `ADDENDUM_arch_ranking.md`, `arch_ranking.py`, `arch_ranking.out`, `arch_ranking.json` | `c3685e0` y el commit de resultados |
+| Reanálisis del orden entre arquitecturas | `ADDENDUM_arch_ranking.md`, `arch_ranking.py`, `arch_ranking.out`, `arch_ranking.json` | `c3685e0`, `2d95bee` |
+| Fase 1 de episodios de test | `ADDENDUM_test_episodes.md`, `episode_bootstrap.py`, `episode_bootstrap.out`, `episode_bootstrap.json`, `episode_errors.json` | `84fc675` y el commit de resultados |
 
 Informe completo con todas las tablas:
 [`results/exploratory/latent_sweep/REPORT.md`](results/exploratory/latent_sweep/REPORT.md)
-(secciones 1–14). Los pesos y los datos derivados están en `models/checkpoints/exploratory_*`, no
+(secciones 1–15). Los pesos y los datos derivados están en `models/checkpoints/exploratory_*`, no
 versionados.
