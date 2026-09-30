@@ -190,6 +190,31 @@ arquitecturas del Experimento 3.
   los resultados ya guardados de LSTM y Transformer antes de usarse (detalle en `REPORT.md`,
   sección 13).
 
+### Reanálisis: ¿se sostiene el orden entre arquitecturas del Experimento 3?
+
+El Experimento 3 comparó las arquitecturas con **una corrida** de cada una. Con las 25 corridas por
+arquitectura sobre z de la Fase 2 se repitió esa comparación, sin entrenar nada:
+
+- en bloques por Autoencoder, con IC con Bonferroni fijado de antemano
+  (`ADDENDUM_arch_ranking.md`);
+- no es una réplica exacta del protocolo oficial: 24 dims, cinco Autoencoders nuevos y tope de 300.
+
+| Comparación | Diferencia de error (25 vs 25) | IC corregido | Reducción mediana por horizonte, formato del artículo | Publicado (1 corrida) | Percentil del publicado entre corridas únicas |
+|---|---|---|---|---|---|
+| LSTM vs Transformer | −38.3% | [−50.5%, −24.0%] | +35.8% [+17.8%, +50.8%], 10/10 horizontes | 38.1%, 10/10 | 57 |
+| LSTM vs TSMixer | −60.1% | [−66.9%, −49.9%] | +61.2% [+48.4%, +69.6%], 10/10 horizontes | 56.1%, 10/10 | 36 |
+| Transformer vs TSMixer | −35.3% | [−48.1%, −22.5%] | — | — | — |
+
+- **Conclusión:** el orden **LSTM > Transformer > TSMixer se sostiene con evidencia**. Los tres IC
+  corregidos excluyen 0, y la dirección se repite en los 5 Autoencoders.
+- **Los valores publicados son representativos:** los dos caen dentro del IC nuevo y en el centro de
+  lo que da una sola semilla. No estaban inflados.
+- **Una sola semilla es ruidosa frente al Transformer:** en el 28% de los pares de corridas la LSTM
+  no gana los 10 horizontes, y en el 5.6% la reducción mediana sale negativa. La caída de la ventaja
+  en h = 9–10 que muestra la corrida oficial parece propia de esa corrida.
+- **Alcance:** solo sobre z. Sobre el estado crudo, la LSTM y el Transformer quedan mucho más cerca
+  (301 frente a 329), y eso no se probó aquí.
+
 ## 5. Dónde está el detalle (rama `exploratory/latent-dim-sweep`)
 
 | Ronda | Archivos | Commits |
@@ -201,9 +226,10 @@ arquitecturas del Experimento 3.
 | (d) | `ADDENDUM_z8.md`, `winner_z8_10seeds.json` | `7acbe21`, `813677e` |
 | (e) | `ADDENDUM_ae_seeds.md`, `ae_variance.*` | `c9f3aa9`, `4b3cf21` |
 | (f) | `ADDENDUM_grid5.md`, `grid5.py`, `grid5.json`, `grid5.out` | `fdc148d`, `8fe1ed6` |
-| Fase 2 | `ADDENDUM_transformer_tsmixer.md`, `grid_arch.py`, `gridarch_{lstm,transformer,tsmixer}.json`, `grid_arch_A.out`, `grid_arch_B.out`, `grid_arch_lstm_transformer_tsmixer.json`, `multiple_comparisons.*`, `_DESCARTABLE_bloqueo_windows/` | `36ad129`, `78a7ccd`, `5d859df`, `7d317e9` y el commit de cierre |
+| Fase 2 | `ADDENDUM_transformer_tsmixer.md`, `grid_arch.py`, `gridarch_{lstm,transformer,tsmixer}.json`, `grid_arch_A.out`, `grid_arch_B.out`, `grid_arch_lstm_transformer_tsmixer.json`, `multiple_comparisons.*`, `_DESCARTABLE_bloqueo_windows/` | `36ad129`, `78a7ccd`, `5d859df`, `7d317e9`, `b3eb6db` |
+| Reanálisis del orden entre arquitecturas | `ADDENDUM_arch_ranking.md`, `arch_ranking.py`, `arch_ranking.out`, `arch_ranking.json` | `c3685e0` y el commit de resultados |
 
 Informe completo con todas las tablas:
 [`results/exploratory/latent_sweep/REPORT.md`](results/exploratory/latent_sweep/REPORT.md)
-(secciones 1–13). Los pesos y los datos derivados están en `models/checkpoints/exploratory_*`, no
+(secciones 1–14). Los pesos y los datos derivados están en `models/checkpoints/exploratory_*`, no
 versionados.

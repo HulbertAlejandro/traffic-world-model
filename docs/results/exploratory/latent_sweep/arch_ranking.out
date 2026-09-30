@@ -1,0 +1,42 @@
+==================== A. Pares (D = media g_A - media g_B; Bonferroni 3 pruebas, 98.33%) ====================
+lstm - transformer: D=-0.4827 (-38.3%)  IC98.33 [-50.5%, -24.0%]  (IC95 [-48.6%, -26.4%]) -> EVIDENCIA: lstm predice MEJOR
+   por Autoencoder, exp(D_a)-1: -27.5% -50.4% -49.8% -35.4% -23.2%
+lstm - tsmixer: D=-0.9183 (-60.1%)  IC98.33 [-66.9%, -49.9%]  (IC95 [-66.0%, -52.0%]) -> EVIDENCIA: lstm predice MEJOR
+   por Autoencoder, exp(D_a)-1: -45.1% -66.3% -63.3% -60.1% -62.6%
+transformer - tsmixer: D=-0.4356 (-35.3%)  IC98.33 [-48.1%, -22.5%]  (IC95 [-45.9%, -24.5%]) -> EVIDENCIA: transformer predice MEJOR
+   por Autoencoder, exp(D_a)-1: -24.2% -32.0% -26.9% -38.2% -51.3%
+Orden LSTM < Transformer < TSMixer (error): LSTM<TF True, LSTM<TS True, TF<TS True -> SOSTENIDO CON EVIDENCIA
+
+==================== B. LSTM frente a TRANSFORMER: reduccion r_h = 1 - GM_LSTM/GM_transformer ====================
+  h |  GM LSTM |  GM X  |  r_h (25 corridas) | IC95 descriptivo   | oficial (1 corrida)
+  1 |     57.7 |   67.3 |             +14.3% | [  +5.1%,  +24.2%] |   +3.8%
+  2 |    114.4 |  153.2 |             +25.3% | [ +11.6%,  +38.2%] |  +23.9%
+  3 |    184.1 |  261.1 |             +29.5% | [ +13.3%,  +43.7%] |  +33.8%
+  4 |    254.7 |  375.5 |             +32.2% | [ +16.6%,  +45.5%] |  +42.9%
+  5 |    315.9 |  477.0 |             +33.8% | [ +17.6%,  +47.2%] |  +48.1%
+  6 |    360.3 |  579.5 |             +37.8% | [ +21.6%,  +51.5%] |  +50.0%
+  7 |    410.5 |  739.9 |             +44.5% | [ +31.0%,  +56.4%] |  +44.7%
+  8 |    463.2 |  920.8 |             +49.7% | [ +37.8%,  +59.8%] |  +42.4%
+  9 |    528.1 | 1093.8 |             +51.7% | [ +40.7%,  +60.9%] |  +30.4%
+ 10 |    601.0 | 1275.0 |             +52.9% | [ +42.4%,  +61.5%] |  +14.0%
+  R = mediana de r_h: +35.8%  IC97.5 (Bonferroni 2) [+17.8%, +50.8%]  | publicado 38.1% -> COMPATIBLE
+  horizontes con IC95 a favor de la LSTM: 10/10 (publicado: 10/10)
+  C. una corrida de cada lado (125 pares dentro de Autoencoder): mediana +33.0%, P5 -1.0%, P25 +20.8%, P75 +49.4%, P95 +62.5%
+     el 38.1% publicado cae en el percentil 56.8; pares con la LSTM ganando 10/10: 72.0%; LSTM gana mayoria (>=6/10): 92.0%; reduccion mediana < 0: 5.6%
+
+==================== B. LSTM frente a TSMIXER: reduccion r_h = 1 - GM_LSTM/GM_tsmixer ====================
+  h |  GM LSTM |  GM X  |  r_h (25 corridas) | IC95 descriptivo   | oficial (1 corrida)
+  1 |     57.7 |   76.2 |             +24.2% | [ +17.5%,  +31.6%] |  +27.9%
+  2 |    114.4 |  183.3 |             +37.6% | [ +30.0%,  +44.1%] |  +41.5%
+  3 |    184.1 |  374.5 |             +50.8% | [ +41.4%,  +57.9%] |  +54.1%
+  4 |    254.7 |  576.8 |             +55.8% | [ +44.0%,  +64.0%] |  +50.5%
+  5 |    315.9 |  777.7 |             +59.4% | [ +48.1%,  +67.4%] |  +52.0%
+  6 |    360.3 |  976.5 |             +63.1% | [ +52.3%,  +70.4%] |  +58.1%
+  7 |    410.5 | 1306.4 |             +68.6% | [ +60.4%,  +74.4%] |  +63.9%
+  8 |    463.2 | 1663.5 |             +72.2% | [ +65.5%,  +77.0%] |  +66.0%
+  9 |    528.1 | 1949.7 |             +72.9% | [ +66.7%,  +77.5%] |  +64.3%
+ 10 |    601.0 | 2133.6 |             +71.8% | [ +65.5%,  +76.6%] |  +60.7%
+  R = mediana de r_h: +61.2%  IC97.5 (Bonferroni 2) [+48.4%, +69.6%]  | publicado 56.1% -> COMPATIBLE
+  horizontes con IC95 a favor de la LSTM: 10/10 (publicado: 10/10)
+  C. una corrida de cada lado (125 pares dentro de Autoencoder): mediana +61.3%, P5 +25.8%, P25 +48.5%, P75 +69.4%, P95 +79.3%
+     el 56.1% publicado cae en el percentil 36.0; pares con la LSTM ganando 10/10: 98.4%; LSTM gana mayoria (>=6/10): 100.0%; reduccion mediana < 0: 0.0%

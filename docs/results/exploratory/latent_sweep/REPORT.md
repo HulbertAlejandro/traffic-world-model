@@ -502,3 +502,112 @@ y sus md5 en `main` coinciden con el registro. Diferencias con `main` fuera de
 
 **Cómputo de la Fase 2.** Parte A, 2.46 h de pared; Parte B, 1.23 h. La evaluación de los 35
 checkpoints de TSMixer tomó 1 min 44 s en CPU.
+
+## 14. Reanálisis del orden entre arquitecturas con 25 corridas cada una (criterio en `ADDENDUM_arch_ranking.md`)
+
+El Experimento 3 oficial afirma que la LSTM predice la recompensa mejor que el Transformer y que
+TSMixer en los 10 horizontes, con reducciones medianas del 38.1% y el 56.1%, a partir de **una
+corrida por arquitectura**. Aquí se repite esa comparación con las 25 corridas de cada una sobre z
+de `latent_dim` = 16 (sección 13), en bloques por Autoencoder.
+
+- **Sin entrenamiento:** solo se leen `gridarch_{lstm,transformer,tsmixer}.json` y los reportes
+  oficiales de `results/`.
+- **Criterio fijado antes de calcular:** `ADDENDUM_arch_ranking.md`, commit `c3685e0`, con
+  Bonferroni desde el inicio.
+- **Archivos:** análisis en `arch_ranking.py`; salida en `arch_ranking.out` y `arch_ranking.json`.
+
+**No es una réplica exacta** del Experimento 3: estado de 24 dims en vez de 26, cinco Autoencoders
+nuevos en vez del oficial, y tope de 300 épocas con early stopping en vez de 100. La dirección
+agregada ya se conocía por la sección 13; lo nuevo son los intervalos.
+
+**A. Tres pares: bootstrap emparejado por Autoencoder, IC con Bonferroni para 3 pruebas (98.33%)**
+
+Diferencia en el `reward_mse` geométrico, exp(D) − 1 (negativo significa que la primera
+arquitectura tiene menos error):
+
+| Par | exp(D) − 1 | IC del 98.33% (decide) | IC del 95% | Por Autoencoder (0–4) | Conclusión |
+|---|---|---|---|---|---|
+| LSTM − Transformer | **−38.3%** | [−50.5%, −24.0%] | [−48.6%, −26.4%] | −28, −50, −50, −35, −23% | **la LSTM predice mejor** |
+| LSTM − TSMixer | **−60.1%** | [−66.9%, −49.9%] | [−66.0%, −52.0%] | −45, −66, −63, −60, −63% | **la LSTM predice mejor** |
+| Transformer − TSMixer | **−35.3%** | [−48.1%, −22.5%] | [−45.9%, −24.5%] | −24, −32, −27, −38, −51% | **el Transformer predice mejor** |
+
+**El orden LSTM > Transformer > TSMixer se sostiene con evidencia:** los tres IC corregidos excluyen
+0, con margen, y la dirección se repite en cada uno de los 5 Autoencoders.
+
+**B. Formato del artículo: reducción de la LSTM por horizonte**
+
+r_h = 1 − (media geométrica de la LSTM / media geométrica de X), con 25 corridas de cada una. IC
+del 95% por horizonte, descriptivo: son 20 intervalos sin corrección. La columna "oficial" es la
+corrida única del Experimento 3.
+
+| h | r_h vs Transformer | IC del 95% | Oficial | r_h vs TSMixer | IC del 95% | Oficial |
+|---|---|---|---|---|---|---|
+| 1 | +14.3% | [+5.1%, +24.2%] | +3.8% | +24.2% | [+17.5%, +31.6%] | +27.9% |
+| 2 | +25.3% | [+11.6%, +38.2%] | +23.9% | +37.6% | [+30.0%, +44.1%] | +41.5% |
+| 3 | +29.5% | [+13.3%, +43.7%] | +33.8% | +50.8% | [+41.4%, +57.9%] | +54.1% |
+| 4 | +32.2% | [+16.6%, +45.5%] | +42.9% | +55.8% | [+44.0%, +64.0%] | +50.5% |
+| 5 | +33.8% | [+17.6%, +47.2%] | +48.1% | +59.4% | [+48.1%, +67.4%] | +52.0% |
+| 6 | +37.8% | [+21.6%, +51.5%] | +50.0% | +63.1% | [+52.3%, +70.4%] | +58.1% |
+| 7 | +44.5% | [+31.0%, +56.4%] | +44.7% | +68.6% | [+60.4%, +74.4%] | +63.9% |
+| 8 | +49.7% | [+37.8%, +59.8%] | +42.4% | +72.2% | [+65.5%, +77.0%] | +66.0% |
+| 9 | +51.7% | [+40.7%, +60.9%] | +30.4% | +72.9% | [+66.7%, +77.5%] | +64.3% |
+| 10 | +52.9% | [+42.4%, +61.5%] | +14.0% | +71.8% | [+65.5%, +76.6%] | +60.7% |
+| **Mediana (R)** | **+35.8%** | **[+17.8%, +50.8%]** (97.5%, Bonferroni 2) | **38.1%** | **+61.2%** | **[+48.4%, +69.6%]** (97.5%, Bonferroni 2) | **56.1%** |
+| Horizontes con IC a favor de la LSTM | 10/10 | | 10/10 | 10/10 | | 10/10 |
+
+**C. ¿Qué habría dado una sola semilla?** Se repitió el procedimiento del artículo con una corrida de
+cada lado, sobre los 125 pares (LSTM i, X j) dentro de cada Autoencoder:
+
+| | Reducción mediana: P5 / P25 / P50 / P75 / P95 | Percentil del valor publicado | La LSTM gana 10/10 | La LSTM gana ≥ 6/10 | Reducción < 0 |
+|---|---|---|---|---|---|
+| vs Transformer | −1.0 / +20.8 / +33.0 / +49.4 / +62.5% | 38.1% → P57 | 72.0% | 92.0% | 5.6% |
+| vs TSMixer | +25.8 / +48.5 / +61.3 / +69.4 / +79.3% | 56.1% → P36 | 98.4% | 100% | 0% |
+
+**Valores publicados, según el criterio fijado**
+
+- **38.1% frente al Transformer: COMPATIBLE.** Queda dentro del IC de R ([+17.8%, +50.8%]; la
+  estimación es +35.8%) y cae en el percentil 57 de lo que da una sola semilla, es decir, en el
+  centro. **No estaba inflado ni desinflado.** Pero la dispersión con una sola semilla es grande: el
+  90% central va de −1% a +63%. Con una semilla desafortunada, el Experimento 3 podría haber
+  reportado una ventaja casi nula (en el 5.6% de los pares la reducción mediana es negativa), y en
+  el 28% de los pares la LSTM no habría ganado los 10 horizontes.
+- **56.1% frente a TSMixer: COMPATIBLE.** Queda dentro del IC ([+48.4%, +69.6%]; la estimación es
+  +61.2%) y cae en el percentil 36, algo por debajo del centro. Si acaso, **subestimaba levemente** la
+  ventaja, sin salir del rango típico. Con una sola semilla el resultado es muy estable: la LSTM gana
+  10/10 en el 98.4% de los pares.
+- **"10/10 horizontes":** se sostiene para los dos. En los 20 horizontes el IC de r_h excluye 0 a
+  favor de la LSTM.
+
+**Salvedad sobre la forma por horizonte.** La mediana del Transformer coincide, pero el perfil de la
+corrida oficial no: sube hasta +50% en h = 6 y cae a +14% en h = 10. En la grilla, la ventaja crece de
+forma monótona hasta +53% en h = 10. Cuatro de los diez valores oficiales frente al Transformer (h = 1,
+5, 9 y 10) y dos frente a TSMixer (h = 9 y 10) quedan fuera del IC por horizonte. Esto **no es una
+contradicción**:
+
+- esos IC son para la media geométrica de 25 corridas, no intervalos de predicción para una sola
+  corrida, que naturalmente cae fuera con frecuencia;
+- son 20 intervalos sin corrección;
+- el protocolo difiere.
+
+Lo que sí indica es que la caída de la ventaja en h = 9–10 frente al Transformer, visible en el
+Experimento 3, es probablemente propia de esa corrida y no un rasgo general.
+
+**Lectura.**
+
+- A diferencia de la ventaja inicial del Autoencoder (secciones 4 y 10–11), que no resistió más
+  semillas, **la ventaja de la LSTM sobre el Transformer y sobre TSMixer se sostiene con 25 corridas**,
+  con corrección por comparaciones múltiples y en cada Autoencoder. El orden completo LSTM >
+  Transformer > TSMixer queda sostenido.
+- Los valores publicados (38.1% y 56.1%) son **representativos**: ninguno cae en las colas de la
+  distribución de una semilla. La conclusión del Experimento 3 (mantener la LSTM) sale reforzada.
+- **Alcance:**
+  - Es sobre **z**. Sobre el estado crudo (sección 13), la distancia entre la LSTM (301) y el
+    Transformer (329) es mucho menor, y aquí no se pone a prueba.
+  - Una sola `latent_dim` (16).
+  - Hiperparámetros del Experimento 3 sin ajustar.
+  - Protocolo de 24 dims y tope de 300, no idéntico al oficial.
+
+**Integridad.** Los md5 oficiales coinciden (salvo los cuatro documentos cambiados a propósito en
+`1b63b10`, y `CLAUDE.md` también en `832d534`). El inventario de `.pt`/`.zip`/`.npz` de
+`models/checkpoints/` es idéntico antes y después (525 archivos), y no hay ningún archivo en
+`models/checkpoints/` ni en `results/` posterior al addendum. El cálculo tomó 1.3 s.
