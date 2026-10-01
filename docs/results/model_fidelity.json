@@ -1,0 +1,227 @@
+{
+  "LSTM": {
+    "horizonte": 7,
+    "test_oficial_12": {
+      "n_episodios": 12,
+      "n_tramos": 456,
+      "pearson": 0.9711459119900993,
+      "pearson_p_tramos_independientes": 8.996252539881203e-285,
+      "pearson_ic95_bootstrap_episodios": [
+        0.942329493398125,
+        0.9867261757712702
+      ],
+      "sesgo_medio_imaginado_menos_real": 20.439808557234834,
+      "sesgo_ic95_bootstrap_episodios": [
+        3.5145866083344774,
+        38.05779487921431
+      ],
+      "pearson_baseline_persistente": 0.3348405630137571,
+      "sesgo_baseline_persistente": 48.04166765589463,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.549240509066702,
+        0.7334727206561152
+      ],
+      "retorno_real_medio": -415.27456409085477,
+      "retorno_imaginado_medio": -394.83475553361995,
+      "control_reproduce_rollout_episode": true
+    },
+    "test_nuevos_36": {
+      "n_episodios": 36,
+      "n_tramos": 1368,
+      "pearson": 0.9776749915480739,
+      "pearson_p_tramos_independientes": 0.0,
+      "pearson_ic95_bootstrap_episodios": [
+        0.9611444013753514,
+        0.9855075573201082
+      ],
+      "sesgo_medio_imaginado_menos_real": 22.907503879182478,
+      "sesgo_ic95_bootstrap_episodios": [
+        12.559777694351546,
+        34.35516216283043
+      ],
+      "pearson_baseline_persistente": 0.3714150883571958,
+      "sesgo_baseline_persistente": 18.655555456343013,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5650178592716059,
+        0.6735413631655194
+      ],
+      "retorno_real_medio": -396.9247087187662,
+      "retorno_imaginado_medio": -374.0172048395837,
+      "control_reproduce_rollout_episode": true
+    },
+    "test_48": {
+      "n_episodios": 48,
+      "n_tramos": 1824,
+      "pearson": 0.9756922666318067,
+      "pearson_p_tramos_independientes": 0.0,
+      "pearson_ic95_bootstrap_episodios": [
+        0.9626693945142204,
+        0.983530620617604
+      ],
+      "sesgo_medio_imaginado_menos_real": 22.290580048695567,
+      "sesgo_ic95_bootstrap_episodios": [
+        13.536155155992846,
+        31.71223690813773
+      ],
+      "pearson_baseline_persistente": 0.36229109916319846,
+      "sesgo_baseline_persistente": 26.002083506230917,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5734317744922238,
+        0.6694754867910199
+      ],
+      "retorno_real_medio": -401.51217256178836,
+      "retorno_imaginado_medio": -379.2215925130928,
+      "control_reproduce_rollout_episode": true
+    }
+  },
+  "Transformer": {
+    "horizonte": 7,
+    "test_oficial_12": {
+      "n_episodios": 12,
+      "n_tramos": 456,
+      "pearson": 0.958375054786639,
+      "pearson_p_tramos_independientes": 2.787400469168548e-249,
+      "pearson_ic95_bootstrap_episodios": [
+        0.9005931469257592,
+        0.9869924692871954
+      ],
+      "sesgo_medio_imaginado_menos_real": -16.718288965065753,
+      "sesgo_ic95_bootstrap_episodios": [
+        -37.40860650522365,
+        1.2375836336919834
+      ],
+      "pearson_baseline_persistente": 0.3348405630137571,
+      "sesgo_baseline_persistente": 48.04166765589463,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5245451074872056,
+        0.7275922916845172
+      ],
+      "retorno_real_medio": -415.27456409085477,
+      "retorno_imaginado_medio": -431.99285305592053,
+      "control_reproduce_rollout_episode": true
+    },
+    "test_nuevos_36": {
+      "n_episodios": 36,
+      "n_tramos": 1368,
+      "pearson": 0.9590812518227882,
+      "pearson_p_tramos_independientes": 0.0,
+      "pearson_ic95_bootstrap_episodios": [
+        0.9063463734959791,
+        0.9811290337456907
+      ],
+      "sesgo_medio_imaginado_menos_real": -4.710023153970857,
+      "sesgo_ic95_bootstrap_episodios": [
+        -17.22118179264481,
+        7.150877255068036
+      ],
+      "pearson_baseline_persistente": 0.3714150883571958,
+      "sesgo_baseline_persistente": 18.655555456343013,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5380657761483548,
+        0.6531951330168236
+      ],
+      "retorno_real_medio": -396.9247087187662,
+      "retorno_imaginado_medio": -401.63473187273706,
+      "control_reproduce_rollout_episode": true
+    },
+    "test_48": {
+      "n_episodios": 48,
+      "n_tramos": 1824,
+      "pearson": 0.9581585750008362,
+      "pearson_p_tramos_independientes": 0.0,
+      "pearson_ic95_bootstrap_episodios": [
+        0.9222849027181241,
+        0.9785917319861199
+      ],
+      "sesgo_medio_imaginado_menos_real": -7.7120896067445805,
+      "sesgo_ic95_bootstrap_episodios": [
+        -18.46142884609902,
+        2.291192610348416
+      ],
+      "pearson_baseline_persistente": 0.36229109916319846,
+      "sesgo_baseline_persistente": 26.002083506230917,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5502595105289667,
+        0.65306138573035
+      ],
+      "retorno_real_medio": -401.51217256178836,
+      "retorno_imaginado_medio": -409.2242621685329,
+      "control_reproduce_rollout_episode": true
+    }
+  },
+  "TSMixer": {
+    "horizonte": 7,
+    "test_oficial_12": {
+      "n_episodios": 12,
+      "n_tramos": 456,
+      "pearson": 0.9441424316535352,
+      "pearson_p_tramos_independientes": 5.332283924896914e-221,
+      "pearson_ic95_bootstrap_episodios": [
+        0.8826663017976328,
+        0.9704744195130166
+      ],
+      "sesgo_medio_imaginado_menos_real": 77.21765621535872,
+      "sesgo_ic95_bootstrap_episodios": [
+        48.56232978728265,
+        107.89669136122858
+      ],
+      "pearson_baseline_persistente": 0.3348405630137571,
+      "sesgo_baseline_persistente": 48.04166765589463,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5125913680236684,
+        0.7066558268551393
+      ],
+      "retorno_real_medio": -415.27456409085477,
+      "retorno_imaginado_medio": -338.05690787549605,
+      "control_reproduce_rollout_episode": true
+    },
+    "test_nuevos_36": {
+      "n_episodios": 36,
+      "n_tramos": 1368,
+      "pearson": 0.9519394048717117,
+      "pearson_p_tramos_independientes": 0.0,
+      "pearson_ic95_bootstrap_episodios": [
+        0.9010192252585951,
+        0.9733018749776646
+      ],
+      "sesgo_medio_imaginado_menos_real": 70.33606701110604,
+      "sesgo_ic95_bootstrap_episodios": [
+        54.527548680795704,
+        87.2598832550562
+      ],
+      "pearson_baseline_persistente": 0.3714150883571958,
+      "sesgo_baseline_persistente": 18.655555456343013,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5357129723138079,
+        0.6425034722478251
+      ],
+      "retorno_real_medio": -396.9247087187662,
+      "retorno_imaginado_medio": -326.58864170766014,
+      "control_reproduce_rollout_episode": true
+    },
+    "test_48": {
+      "n_episodios": 48,
+      "n_tramos": 1824,
+      "pearson": 0.9499121216762278,
+      "pearson_p_tramos_independientes": 0.0,
+      "pearson_ic95_bootstrap_episodios": [
+        0.9132390184505366,
+        0.9694043877839591
+      ],
+      "sesgo_medio_imaginado_menos_real": 72.05646431216921,
+      "sesgo_ic95_bootstrap_episodios": [
+        57.72994235750725,
+        86.58718937697816
+      ],
+      "pearson_baseline_persistente": 0.36229109916319846,
+      "sesgo_baseline_persistente": 26.002083506230917,
+      "pearson_modelo_menos_baseline_ic95_bootstrap": [
+        0.5453879068551672,
+        0.640709725532868
+      ],
+      "retorno_real_medio": -401.51217256178836,
+      "retorno_imaginado_medio": -329.45570824961914,
+      "control_reproduce_rollout_episode": true
+    }
+  }
+}
