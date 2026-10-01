@@ -1,0 +1,135 @@
+{
+  "controller_10seeds/seed3": {
+    "train_steps": 50176,
+    "real_train_steps": 0,
+    "eval_steps": 3000,
+    "real_total": 3000,
+    "json_seed": 3
+  },
+  "controller_10seeds/seed4": {
+    "train_steps": 50176,
+    "real_train_steps": 0,
+    "eval_steps": 3000,
+    "real_total": 3000,
+    "json_seed": 4
+  },
+  "controller_10seeds/seed5": {
+    "train_steps": 50176,
+    "real_train_steps": 0,
+    "eval_steps": 3000,
+    "real_total": 3000,
+    "json_seed": 5
+  },
+  "controller_10seeds/seed6": {
+    "train_steps": 50176,
+    "real_train_steps": 0,
+    "eval_steps": 3000,
+    "real_total": 3000,
+    "json_seed": 6
+  },
+  "controller_10seeds/seed7": {
+    "train_steps": 50176,
+    "real_train_steps": 0,
+    "eval_steps": 3000,
+    "real_total": 3000,
+    "json_seed": 7
+  },
+  "controller_10seeds/seed8": {
+    "train_steps": 50176,
+    "real_train_steps": 0,
+    "eval_steps": 3000,
+    "real_total": 3000,
+    "json_seed": 8
+  },
+  "controller_10seeds/seed9": {
+    "train_steps": 50176,
+    "real_train_steps": 0,
+    "eval_steps": 3000,
+    "real_total": 3000,
+    "json_seed": 9
+  },
+  "controller_direct_10seeds/seed4": {
+    "train_steps": 10240,
+    "real_train_steps": 10240,
+    "eval_steps": 3000,
+    "real_total": 13240,
+    "json_seed": 4
+  },
+  "controller_direct_10seeds/seed5": {
+    "train_steps": 10240,
+    "real_train_steps": 10240,
+    "eval_steps": 3000,
+    "real_total": 13240,
+    "json_seed": 5
+  },
+  "controller_direct_10seeds/seed6": {
+    "train_steps": 10240,
+    "real_train_steps": 10240,
+    "eval_steps": 3000,
+    "real_total": 13240,
+    "json_seed": 6
+  },
+  "controller_direct_10seeds/seed7": {
+    "train_steps": 10240,
+    "real_train_steps": 10240,
+    "eval_steps": 3000,
+    "real_total": 13240,
+    "json_seed": 7
+  },
+  "controller_direct_10seeds/seed8": {
+    "train_steps": 10240,
+    "real_train_steps": 10240,
+    "eval_steps": 3000,
+    "real_total": 13240,
+    "json_seed": 8
+  },
+  "controller_direct_10seeds/seed9": {
+    "train_steps": 10240,
+    "real_train_steps": 10240,
+    "eval_steps": 3000,
+    "real_total": 13240,
+    "json_seed": 9
+  },
+  "controller_direct_30k_10seeds/seed4": {
+    "train_steps": 30208,
+    "real_train_steps": 30208,
+    "eval_steps": 9000,
+    "real_total": 39208,
+    "json_seed": 4
+  },
+  "controller_direct_30k_10seeds/seed5": {
+    "train_steps": 30208,
+    "real_train_steps": 30208,
+    "eval_steps": 9000,
+    "real_total": 39208,
+    "json_seed": 5
+  },
+  "controller_direct_30k_10seeds/seed6": {
+    "train_steps": 30208,
+    "real_train_steps": 30208,
+    "eval_steps": 9000,
+    "real_total": 39208,
+    "json_seed": 6
+  },
+  "controller_direct_30k_10seeds/seed7": {
+    "train_steps": 30208,
+    "real_train_steps": 30208,
+    "eval_steps": 9000,
+    "real_total": 39208,
+    "json_seed": 7
+  },
+  "controller_direct_30k_10seeds/seed8": {
+    "train_steps": 30208,
+    "real_train_steps": 30208,
+    "eval_steps": 9000,
+    "real_total": 39208,
+    "json_seed": 8
+  },
+  "controller_direct_30k_10seeds/seed9": {
+    "train_steps": 30208,
+    "real_train_steps": 30208,
+    "eval_steps": 9000,
+    "real_total": 39208,
+    "json_seed": 9
+  }
+}
