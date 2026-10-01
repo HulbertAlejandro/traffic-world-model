@@ -1,0 +1,4 @@
+official: 30k semilla 8 -> media -774.03, < -600 4/30, peor -10913.2 (escenario 3014)
+   sin la semilla 8 (9 semillas): media 30k -362.70, < -600 34/270; diff sueno - 30k +35.80; Welch semilla p 0.12; t pareada p 0.0995; Wilcoxon p 0.309
+fresh: 30k semilla 8 -> media -276.65, < -600 1/30, peor -646.0 (escenario 7006)
+   sin la semilla 8 (9 semillas): media 30k -306.49, < -600 18/270; diff sueno - 30k +0.96; Welch semilla p 0.926; t pareada p 0.959; Wilcoxon p 0.428

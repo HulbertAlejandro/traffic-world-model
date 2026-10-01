@@ -1,0 +1,57 @@
+Wilcoxon exacto validado: coincide con la enumeracion completa en n = 1..12 (240 casos) y con p = 50/1024 para n = 10, W+ = 8
+
+==================== Control 4: los episodios publicados reproducen lo publicado ====================
+official dream  media -326.79 (publicada -326.79) OK
+official d10k   media -454.51 (publicada -454.51) OK
+official d30k   media -402.13 (publicada -402.13) OK
+official fixed  media -411.27 (publicada -411.27) OK
+official dream vs d10k: semilla p = 0.003437 (publicado 0.003) OK; pareado p = 0.0001649 (publicado 0.0002) OK
+official dream vs d30k: semilla p = 0.02924 (publicado 0.029) OK; pareado p = 0.02 (publicado 0.020) OK
+fresh    dream  media -293.81 (publicada -293.81) OK
+fresh    d10k   media -439.73 (publicada -439.73) OK
+fresh    d30k   media -316.59 (publicada -316.59) OK
+fresh    fixed  media -391.70 (publicada -391.70) OK
+fresh    dream vs d10k: semilla p = 0.07656 (publicado 0.077) OK; pareado p = 4.473e-09 (publicado 4.5e-9) OK
+fresh    dream vs d30k: semilla p = 0.02138 (publicado 0.021) OK; pareado p = 0.543 (publicado 0.54) OK
+[control 4] OK
+
+==================== Control 3: los checkpoints existentes reproducen sus episodios publicados ====================
+official dream  3/3 checkpoints existentes identicos a un registro publicado (3 publicados) OK
+official d10k   4/4 checkpoints existentes identicos a un registro publicado (4 publicados) OK
+official d30k   4/4 checkpoints existentes identicos a un registro publicado (4 publicados) OK
+official fixed  1/1 checkpoints existentes identicos a un registro publicado (1 publicados) OK
+official rule   1/1 checkpoints existentes identicos a un registro publicado (1 publicados) OK
+fresh    dream  3/3 checkpoints existentes identicos a un registro publicado (3 publicados) OK
+fresh    d10k   4/4 checkpoints existentes identicos a un registro publicado (4 publicados) OK
+fresh    d30k   4/4 checkpoints existentes identicos a un registro publicado (4 publicados) OK
+fresh    fixed  1/1 checkpoints existentes identicos a un registro publicado (1 publicados) OK
+fresh    rule   1/1 checkpoints existentes identicos a un registro publicado (1 publicados) OK
+[control 3] OK
+
+==================== Tabla 3 con 10 semillas ====================
+Escenarios oficiales (3000-3014, 5000-5014)
+  PPO + World Model            semillas 10  media  -326.89  mediana  -285.40  < -600: 19/300  peor    -998.7  sd medias por semilla 23.3
+     medias por semilla: -345.42 / -328.13 / -306.82 / -324.23 / -323.83 / -315.70 / -287.10 / -341.05 / -323.01 / -373.65
+  PPO directo, 10.000 pasos    semillas 10  media  -455.02  mediana  -401.45  < -600: 57/300  peor   -1776.8  sd medias por semilla 56.1
+     medias por semilla: -398.10 / -456.84 / -475.00 / -488.11 / -485.14 / -490.30 / -468.09 / -441.97 / -325.74 / -520.93
+  PPO directo, 30.000 pasos    semillas 10  media  -403.83  mediana  -285.15  < -600: 38/300  peor  -10913.2  sd medias por semilla 141.6
+     medias por semilla: -398.10 / -347.07 / -416.58 / -446.74 / -408.84 / -284.75 / -283.62 / -363.13 / -774.03 / -315.43
+  Tiempo fijo                  semillas  1  media  -411.27  mediana  -399.70  < -600: 0/30  peor    -592.2  sd medias por semilla None
+  Regla fase contraria         semillas  1  media  -502.53  mediana  -511.10  < -600: 7/30  peor    -703.1  sd medias por semilla None
+Escenarios nuevos (7000-7029)
+  PPO + World Model            semillas 10  media  -305.53  mediana  -276.55  < -600: 13/300  peor    -910.9  sd medias por semilla 22.3
+     medias por semilla: -300.56 / -294.45 / -286.41 / -339.58 / -333.32 / -335.21 / -286.68 / -286.08 / -308.02 / -285.00
+  PPO directo, 10.000 pasos    semillas 10  media  -445.39  mediana  -399.30  < -600: 65/300  peor   -1808.8  sd medias por semilla 88.8
+     medias por semilla: -327.60 / -363.11 / -526.42 / -541.79 / -461.83 / -546.90 / -444.71 / -498.99 / -300.19 / -442.33
+  PPO directo, 30.000 pasos    semillas 10  media  -303.51  mediana  -255.80  < -600: 19/300  peor   -1861.1  sd medias por semilla 22.7
+     medias por semilla: -327.60 / -314.69 / -322.01 / -302.06 / -288.67 / -303.53 / -263.47 / -335.70 / -276.65 / -300.71
+  Tiempo fijo                  semillas  1  media  -391.70  mediana  -391.20  < -600: 0/30  peor    -470.2  sd medias por semilla None
+  Regla fase contraria         semillas  1  media  -558.83  mediana  -510.60  < -600: 12/30  peor    -846.1  sd medias por semilla None
+
+==================== Comparaciones: antes (3 / 4 semillas) y despues (10 / 10) ====================
+official sueno vs d10k  diff +127.72 -> +128.13 | semilla Welch p 0.0034 -> 2.3e-05 | t pareada p 1.6e-04 -> 2.0e-06 | Wilcoxon p 2.1e-04 -> 5.1e-06 (exacto) | gana 2238/3000
+official sueno vs d30k  diff  +75.34 ->  +76.94 | semilla Welch p 0.029 -> 0.12 | t pareada p 0.02 -> 0.068 | Wilcoxon p 0.096 -> 0.11 (exacto) | gana 1577/3000  <- CRUZA 0.05
+official sueno vs fixed diff  +84.48 ->  +84.37 | semilla Welch p n/a -> n/a | t pareada p 9.8e-04 -> 1.6e-04 | Wilcoxon p 8.7e-04 -> 2.6e-04 (exacto) | gana 236/300
+fresh    sueno vs d10k  diff +145.92 -> +139.86 | semilla Welch p 0.077 -> 6.7e-04 | t pareada p 4.5e-09 -> 5.0e-11 | Wilcoxon p 5.6e-09 -> 1.9e-09 (exacto) | gana 2231/3000
+fresh    sueno vs d30k  diff  +22.78 ->   -2.02 | semilla Welch p 0.021 -> 0.84 | t pareada p 0.54 -> 0.91 | Wilcoxon p 0.69 -> 0.33 (exacto) | gana 1334/3000
+fresh    sueno vs fixed diff  +97.89 ->  +86.17 | semilla Welch p n/a -> n/a | t pareada p 3.3e-07 -> 3.7e-06 | Wilcoxon p 2.0e-06 -> 9.2e-06 (exacto) | gana 245/300

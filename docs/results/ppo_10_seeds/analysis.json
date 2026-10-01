@@ -1,0 +1,563 @@
+{
+  "wilcoxon_validation": "Wilcoxon exacto validado: coincide con la enumeracion completa en n = 1..12 (240 casos) y con p = 50/1024 para n = 10, W+ = 8",
+  "control4_ok": true,
+  "control3_ok": true,
+  "table": {
+    "official": {
+      "dream": {
+        "n_seeds": 10,
+        "mean": -326.89266666666674,
+        "median": -285.4,
+        "catastrophic": 19,
+        "episodes": 300,
+        "worst": -998.7000000000003,
+        "seed_means": [
+          -345.4166666666667,
+          -328.1266666666667,
+          -306.81666666666666,
+          -324.2333333333333,
+          -323.8333333333333,
+          -315.69666666666666,
+          -287.09666666666664,
+          -341.04666666666674,
+          -323.0133333333333,
+          -373.64666666666665
+        ],
+        "sd_seed_means": 23.27261665404057
+      },
+      "d10k": {
+        "n_seeds": 10,
+        "mean": -455.0220000000001,
+        "median": -401.45000000000016,
+        "catastrophic": 57,
+        "episodes": 300,
+        "worst": -1776.7999999999993,
+        "seed_means": [
+          -398.10333333333347,
+          -456.83666666666676,
+          -474.9966666666668,
+          -488.10666666666674,
+          -485.1400000000001,
+          -490.3033333333334,
+          -468.08666666666676,
+          -441.9733333333334,
+          -325.7433333333334,
+          -520.9300000000001
+        ],
+        "sd_seed_means": 56.06173962584949
+      },
+      "d30k": {
+        "n_seeds": 10,
+        "mean": -403.8303333333334,
+        "median": -285.15,
+        "catastrophic": 38,
+        "episodes": 300,
+        "worst": -10913.200000000003,
+        "seed_means": [
+          -398.10333333333347,
+          -347.07333333333344,
+          -416.58333333333354,
+          -446.7433333333334,
+          -408.84,
+          -284.75,
+          -283.62333333333333,
+          -363.1300000000001,
+          -774.0266666666669,
+          -315.43000000000006
+        ],
+        "sd_seed_means": 141.59006824563113
+      },
+      "fixed": {
+        "n_seeds": 1,
+        "mean": -411.2666666666668,
+        "median": -399.70000000000005,
+        "catastrophic": 0,
+        "episodes": 30,
+        "worst": -592.2,
+        "seed_means": [
+          -411.2666666666668
+        ],
+        "sd_seed_means": null
+      },
+      "rule": {
+        "n_seeds": 1,
+        "mean": -502.5333333333336,
+        "median": -511.10000000000014,
+        "catastrophic": 7,
+        "episodes": 30,
+        "worst": -703.1000000000003,
+        "seed_means": [
+          -502.5333333333336
+        ],
+        "sd_seed_means": null
+      }
+    },
+    "fresh": {
+      "dream": {
+        "n_seeds": 10,
+        "mean": -305.5326666666667,
+        "median": -276.54999999999995,
+        "catastrophic": 13,
+        "episodes": 300,
+        "worst": -910.9000000000002,
+        "seed_means": [
+          -300.56,
+          -294.4533333333333,
+          -286.40666666666664,
+          -339.5799999999999,
+          -333.3233333333333,
+          -335.2133333333333,
+          -286.6833333333333,
+          -286.0833333333333,
+          -308.02000000000004,
+          -285.0033333333333
+        ],
+        "sd_seed_means": 22.328310977570855
+      },
+      "d10k": {
+        "n_seeds": 10,
+        "mean": -445.38833333333343,
+        "median": -399.3000000000001,
+        "catastrophic": 65,
+        "episodes": 300,
+        "worst": -1808.799999999999,
+        "seed_means": [
+          -327.5966666666667,
+          -363.1133333333334,
+          -526.4233333333335,
+          -541.7866666666669,
+          -461.83333333333354,
+          -546.9033333333334,
+          -444.71333333333325,
+          -498.99333333333357,
+          -300.1900000000001,
+          -442.33000000000004
+        ],
+        "sd_seed_means": 88.84753267449629
+      },
+      "d30k": {
+        "n_seeds": 10,
+        "mean": -303.50866666666667,
+        "median": -255.79999999999993,
+        "catastrophic": 19,
+        "episodes": 300,
+        "worst": -1861.0999999999985,
+        "seed_means": [
+          -327.5966666666667,
+          -314.68666666666667,
+          -322.0066666666667,
+          -302.0633333333333,
+          -288.66999999999996,
+          -303.53,
+          -263.46666666666664,
+          -335.70000000000005,
+          -276.65333333333336,
+          -300.71333333333337
+        ],
+        "sd_seed_means": 22.701682332830348
+      },
+      "fixed": {
+        "n_seeds": 1,
+        "mean": -391.70000000000016,
+        "median": -391.20000000000005,
+        "catastrophic": 0,
+        "episodes": 30,
+        "worst": -470.2000000000001,
+        "seed_means": [
+          -391.70000000000016
+        ],
+        "sd_seed_means": null
+      },
+      "rule": {
+        "n_seeds": 1,
+        "mean": -558.8333333333336,
+        "median": -510.6000000000002,
+        "catastrophic": 12,
+        "episodes": 30,
+        "worst": -846.1000000000004,
+        "seed_means": [
+          -558.8333333333336
+        ],
+        "sd_seed_means": null
+      }
+    }
+  },
+  "comparisons": {
+    "official:dream-vs-d10k": {
+      "before": {
+        "n_seeds": [
+          3,
+          4
+        ],
+        "mean_diff": 127.7241666666668,
+        "seed_level_welch": {
+          "t": 5.605158540261512,
+          "df": 4.518009371262551,
+          "p": 0.0034368258444666326
+        },
+        "paired_t_by_scenario": {
+          "t": 4.32406411040215,
+          "df": 29,
+          "p": 0.0001649306901981903,
+          "mean_diff": 127.72416666666678
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 403.0,
+          "n": 30,
+          "p": 0.00020912662148475647,
+          "method": "exacto"
+        },
+        "wins": [
+          272,
+          360
+        ]
+      },
+      "after": {
+        "n_seeds": [
+          10,
+          10
+        ],
+        "mean_diff": 128.12933333333336,
+        "seed_level_welch": {
+          "t": 6.675093008745824,
+          "df": 12.012453081576135,
+          "p": 2.2646813856139792e-05
+        },
+        "paired_t_by_scenario": {
+          "t": 5.920548845883464,
+          "df": 29,
+          "p": 1.9811576257572387e-06,
+          "mean_diff": 128.1293333333334
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 433.0,
+          "n": 30,
+          "p": 5.144625902175903e-06,
+          "method": "exacto"
+        },
+        "wins": [
+          2238,
+          3000
+        ]
+      },
+      "crosses_0.05": {
+        "paired_t_by_scenario": 0.0,
+        "wilcoxon_by_scenario": false
+      }
+    },
+    "official:dream-vs-d30k": {
+      "before": {
+        "n_seeds": [
+          3,
+          4
+        ],
+        "mean_diff": 75.33916666666676,
+        "seed_level_welch": {
+          "t": 3.178451507587346,
+          "df": 4.415704780811208,
+          "p": 0.029239460210749253
+        },
+        "paired_t_by_scenario": {
+          "t": 2.4621036809933483,
+          "df": 29,
+          "p": 0.019996222778214848,
+          "mean_diff": 75.3391666666667
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 314.0,
+          "n": 30,
+          "p": 0.09610157273709774,
+          "method": "exacto"
+        },
+        "wins": [
+          206,
+          360
+        ]
+      },
+      "after": {
+        "n_seeds": [
+          10,
+          10
+        ],
+        "mean_diff": 76.93766666666664,
+        "seed_level_welch": {
+          "t": 1.6955771886991493,
+          "df": 9.485937582478034,
+          "p": 0.12247372695547348
+        },
+        "paired_t_by_scenario": {
+          "t": 1.8976060137887245,
+          "df": 29,
+          "p": 0.0677443210913651,
+          "mean_diff": 76.93766666666669
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 311.0,
+          "n": 30,
+          "p": 0.10943205840885639,
+          "method": "exacto"
+        },
+        "wins": [
+          1577,
+          3000
+        ]
+      },
+      "crosses_0.05": {
+        "paired_t_by_scenario": 1.0,
+        "wilcoxon_by_scenario": false
+      }
+    },
+    "official:dream-vs-fixed": {
+      "before": {
+        "n_seeds": [
+          3,
+          1
+        ],
+        "mean_diff": 84.48000000000013,
+        "seed_level_welch": {
+          "t": null,
+          "df": null,
+          "p": null,
+          "note": "needs >= 2 values per group"
+        },
+        "paired_t_by_scenario": {
+          "t": 3.6661502724751673,
+          "df": 29,
+          "p": 0.0009822076236975412,
+          "mean_diff": 84.48000000000003
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 388.0,
+          "n": 30,
+          "p": 0.0008718203753232956,
+          "method": "exacto"
+        },
+        "wins": [
+          75,
+          90
+        ]
+      },
+      "after": {
+        "n_seeds": [
+          10,
+          1
+        ],
+        "mean_diff": 84.37400000000008,
+        "seed_level_welch": {
+          "t": null,
+          "df": null,
+          "p": null,
+          "note": "needs >= 2 values per group"
+        },
+        "paired_t_by_scenario": {
+          "t": 4.337262518157518,
+          "df": 29,
+          "p": 0.00015904934024648718,
+          "mean_diff": 84.374
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 401.0,
+          "n": 30,
+          "p": 0.0002562887966632843,
+          "method": "exacto"
+        },
+        "wins": [
+          236,
+          300
+        ]
+      },
+      "crosses_0.05": {
+        "paired_t_by_scenario": 0.0,
+        "wilcoxon_by_scenario": false
+      }
+    },
+    "fresh:dream-vs-d10k": {
+      "before": {
+        "n_seeds": [
+          3,
+          4
+        ],
+        "mean_diff": 145.92333333333346,
+        "seed_level_welch": {
+          "t": 2.643090994680852,
+          "df": 3.033201026572546,
+          "p": 0.07656065694666198
+        },
+        "paired_t_by_scenario": {
+          "t": 8.231756763244132,
+          "df": 29,
+          "p": 4.473069393074952e-09,
+          "mean_diff": 145.9233333333335
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 463.0,
+          "n": 30,
+          "p": 5.587935447692871e-09,
+          "method": "exacto"
+        },
+        "wins": [
+          271,
+          360
+        ]
+      },
+      "after": {
+        "n_seeds": [
+          10,
+          10
+        ],
+        "mean_diff": 139.8556666666667,
+        "seed_level_welch": {
+          "t": 4.827652584065051,
+          "df": 10.13230816443499,
+          "p": 0.0006687199710241175
+        },
+        "paired_t_by_scenario": {
+          "t": 10.125141186300972,
+          "df": 29,
+          "p": 4.973594771012808e-11,
+          "mean_diff": 139.85566666666674
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 465.0,
+          "n": 30,
+          "p": 1.862645149230957e-09,
+          "method": "exacto"
+        },
+        "wins": [
+          2231,
+          3000
+        ]
+      },
+      "crosses_0.05": {
+        "paired_t_by_scenario": 0.0,
+        "wilcoxon_by_scenario": false
+      }
+    },
+    "fresh:dream-vs-d30k": {
+      "before": {
+        "n_seeds": [
+          3,
+          4
+        ],
+        "mean_diff": 22.781666666666638,
+        "seed_level_welch": {
+          "t": 3.315107104395553,
+          "df": 4.959428394007458,
+          "p": 0.021380680963936808
+        },
+        "paired_t_by_scenario": {
+          "t": 0.6155978799437397,
+          "df": 29,
+          "p": 0.5429614851048483,
+          "mean_diff": 22.781666666666695
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 212.0,
+          "n": 30,
+          "p": 0.685047073289752,
+          "method": "exacto"
+        },
+        "wins": [
+          160,
+          360
+        ]
+      },
+      "after": {
+        "n_seeds": [
+          10,
+          10
+        ],
+        "mean_diff": -2.0240000000000578,
+        "seed_level_welch": {
+          "t": -0.20100584900716845,
+          "df": 17.995051978135535,
+          "p": 0.8429484810712606
+        },
+        "paired_t_by_scenario": {
+          "t": -0.11648046555473451,
+          "df": 29,
+          "p": 0.9080746805932131,
+          "mean_diff": -2.0240000000000085
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 184.0,
+          "n": 30,
+          "p": 0.3284698575735092,
+          "method": "exacto"
+        },
+        "wins": [
+          1334,
+          3000
+        ]
+      },
+      "crosses_0.05": {
+        "paired_t_by_scenario": 0.0,
+        "wilcoxon_by_scenario": false
+      }
+    },
+    "fresh:dream-vs-fixed": {
+      "before": {
+        "n_seeds": [
+          3,
+          1
+        ],
+        "mean_diff": 97.89333333333349,
+        "seed_level_welch": {
+          "t": null,
+          "df": null,
+          "p": null,
+          "note": "needs >= 2 values per group"
+        },
+        "paired_t_by_scenario": {
+          "t": 6.574928060056727,
+          "df": 29,
+          "p": 3.333439303429198e-07,
+          "mean_diff": 97.8933333333334
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 439.0,
+          "n": 30,
+          "p": 1.991167664527893e-06,
+          "method": "exacto"
+        },
+        "wins": [
+          79,
+          90
+        ]
+      },
+      "after": {
+        "n_seeds": [
+          10,
+          1
+        ],
+        "mean_diff": 86.16733333333343,
+        "seed_level_welch": {
+          "t": null,
+          "df": null,
+          "p": null,
+          "note": "needs >= 2 values per group"
+        },
+        "paired_t_by_scenario": {
+          "t": 5.69672093362061,
+          "df": 29,
+          "p": 3.6711798171124115e-06,
+          "mean_diff": 86.16733333333336
+        },
+        "wilcoxon_by_scenario": {
+          "W_plus": 429.0,
+          "n": 30,
+          "p": 9.220093488693237e-06,
+          "method": "exacto"
+        },
+        "wins": [
+          245,
+          300
+        ]
+      },
+      "crosses_0.05": {
+        "paired_t_by_scenario": 0.0,
+        "wilcoxon_by_scenario": false
+      }
+    }
+  }
+}
