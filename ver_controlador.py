@@ -6,7 +6,7 @@ import traci
 env = EncodedTrafficEnvironment(environment_config=EnvironmentConfig(use_gui=True))
 model = PPO.load('models/checkpoints/controller/best_model.zip')
 
-obs, info = env.reset(seed=7005)
+obs, info = env.reset(seed=7025)
 
 (xmin, ymin), (xmax, ymax) = traci.simulation.getNetBoundary()
 traci.gui.setBoundary('View #0', xmin, ymin, xmax, ymax)
