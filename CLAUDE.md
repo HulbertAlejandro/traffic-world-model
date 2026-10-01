@@ -52,11 +52,34 @@ en 10/10), 2 (control en SUMO real, ver el resultado central) y 3 (Transformer y
 ver abajo).
 
 Exploración posterior del Experimento 0, **sin cambios en lo oficial** (`latent_dim` sigue en 16
-y el estado en 26 dims): `docs/EXPLORACION_LATENT_DIM.md`, rama `exploratory/latent-dim-sweep`.
-Con 5 semillas de Autoencoder × 5 de LSTM no hay evidencia de que el Autoencoder mejore ni empeore
-la predicción de la recompensa; la varianza dominante es qué Autoencoder se entrena. Completada también
-con Transformer y TSMixer (5×5 a `latent_dim` = 16): el latente es neutro con la LSTM y empeora la
-predicción de la recompensa con el Transformer (+33%) y con TSMixer (+42%).
+y el estado en 26 dims): `docs/EXPLORACION_LATENT_DIM.md` y `docs/results/exploratory/latent_sweep/`
+(rama `exploratory/latent-dim-sweep`, ya fusionada en main).
+
+- **Autoencoder con la LSTM:** con 5 semillas de Autoencoder × 5 de LSTM no hay evidencia de que mejore
+  ni empeore la predicción de la recompensa. La varianza dominante es qué Autoencoder se entrena.
+- **Transformer y TSMixer** (5×5 a `latent_dim` = 16): el latente es neutro con la LSTM y empeora la
+  predicción de la recompensa con el Transformer (+33%) y con TSMixer (+42%).
+
+**Nota sobre el Experimento 0 (réplica con episodios de test nuevos, exploratoria).** El resultado
+oficial (+10.9%, 37/50) se midió sobre los 12 episodios del test oficial, y **depende de cuáles son
+esos 12**:
+
+- Se re-simularon los episodios de test 8 y 53, y SUMO 1.27.1 los reproduce bit a bit.
+- Después se generaron 36 episodios de test nuevos con el protocolo oficial (semillas de SUMO
+  9000–9035).
+- Las mismas 5 + 5 semillas del Experimento 0 pasan de Δ = −13.0% (z mejor) en los 12 originales a
+  **+3.6%** en los 36 nuevos. Sobre los 48, Δ = −0.7%, con IC conjunto [−14.6%, +15.4%].
+  - Esta Δ es la diferencia z − crudo de la media geométrica del `reward_mse` sobre h = 1..10, no la
+    reducción mediana del resultado oficial.
+- Lo mismo con las grillas de la exploración: −7% → −0.4% y −10% → −2.9% con 48 episodios.
+
+En cambio, sí se replican en los episodios nuevos el daño del latente al Transformer y a TSMixer y
+el orden LSTM > Transformer > TSMixer. Detalle en la sección 16 de
+`docs/results/exploratory/latent_sweep/REPORT.md`.
+
+El resultado oficial **no se reescribe**. Al citarlo, decir que se midió sobre 12 episodios de test
+y que en episodios independientes la ventaja del Autoencoder con la LSTM no se replica (efecto
+cercano a 0).
 
 Transformer y TSMixer (`models/world_model/transformer.py`, `tsmixer.py`) están
 **implementados y evaluados** como sustitutos intercambiables del LSTM (misma interfaz,

@@ -24,7 +24,9 @@ salieron de ella** (sección siguiente). Varias cifras publicadas antes cambian:
   convergencia igualada, el Autoencoder mejora la predicción de la recompensa de forma
   **moderada y mayoritaria** (37/50 pares semilla × horizonte, reducción mediana +10.9%),
   no en todas las semillas. La cifra publicada (9/10 horizontes, 14.7%) venía de una sola
-  semilla con un protocolo distinto entre ramas.
+  semilla con un protocolo distinto entre ramas. **Esa ventaja se midió sobre los 12 episodios
+  del test oficial y no se replica en 36 episodios de test nuevos**: es exploratorio y no cambia
+  el resultado oficial (ver el final del punto 5).
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
 
@@ -196,8 +198,8 @@ de todas las semillas.
 - **Experimento 3:** su umbral (7.3%) era la mitad del 14.7% publicado, que ya no se
   sostiene. Su conclusión no cambia: el LSTM gana en los 10 horizontes con reducciones del
   38–56%, muy por encima de la mitad del nuevo 10.9%.
-- **Exploración adicional, sin cambios en lo oficial** (rama `exploratory/latent-dim-sweep`;
-  resumen en [`docs/EXPLORACION_LATENT_DIM.md`](docs/EXPLORACION_LATENT_DIM.md)). Después de
+- **Exploración adicional, sin cambios en lo oficial** (rama `exploratory/latent-dim-sweep`, ya
+  fusionada en main; resumen en [`docs/EXPLORACION_LATENT_DIM.md`](docs/EXPLORACION_LATENT_DIM.md)). Después de
   este resultado se investigó más a fondo, con criterios fijados antes de cada ronda:
   - 10 semillas de LSTM;
   - un barrido de `latent_dim` sobre el estado sin sus 2 dimensiones siempre nulas;
@@ -206,6 +208,28 @@ de todas las semillas.
   Autoencoder mejore (ni empeore) la predicción de la recompensa frente al estado crudo. La
   varianza dominante es qué Autoencoder se entrena. Solo se probó con la LSTM. Lo anterior de
   este punto sigue siendo el resultado oficial documentado.
+- **Nota: el resultado depende de los 12 episodios de test.** Es exploratorio, con criterio fijado
+  antes de simular: sección 16 de `docs/results/exploratory/latent_sweep/REPORT.md` y
+  `ADDENDUM_test_expanded.md`.
+  - **El simulador es el mismo.** Primero se re-simularon los episodios de test 8 y 53 con sus
+    acciones registradas, y SUMO 1.27.1 los reproduce bit a bit.
+  - **Episodios nuevos.** Se generaron 36 episodios de test con el protocolo oficial: semillas de
+    SUMO 9000–9035, 60 pasos, `scaler.pkl` oficial. No se reentrenó nada.
+  - **Las mismas 5 + 5 semillas de este punto:** la diferencia z − crudo pasa de −13.0% (z mejor) en
+    los 12 originales a **+3.6%** en los 36 nuevos. Sobre los 48 es −0.7%, con IC del 95% por
+    semillas y episodios [−14.6%, +15.4%].
+    - La métrica es la media geométrica del `reward_mse` sobre h = 1..10, no la reducción mediana de
+      la tabla.
+  - **Las grillas de la exploración van en la misma dirección:** −7.1% → −0.4% y −10.0% → −2.9% con
+    48 episodios.
+  - **Lectura:** la ventaja moderada del Autoencoder con la LSTM **no se replica en episodios
+    independientes**; el efecto es cercano a 0.
+  - **En cambio, sí se replican** el daño del latente al Transformer (+33%) y a TSMixer (+44%) y el
+    orden LSTM > Transformer > TSMixer.
+  - El test original tampoco tenía episodios del régimen más congestionado del train: su peor
+    episodio suma −5343, frente a −8414 en train. Los 36 nuevos sí lo cubren (−8214).
+  - **El resultado oficial no se reescribe.** Al citarlo, indicar que se midió sobre 12 episodios de
+    test y que no se replica en episodios nuevos.
 
 ### 6. El LSTM oficial se entrenó hasta el tope de 100 épocas, no hasta converger
 
