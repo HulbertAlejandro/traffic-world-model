@@ -58,3 +58,13 @@ models/checkpoints/exp0_multiseed/**/*.png
 logs_directo.txt
 logs_sueno.txt
 models/checkpoints/exp0_multiseed_300ep/**/*.png
+# 10-seed PPO extension (docs/results/ppo_10_seeds/ADDENDUM.md): weights and EvalCallback logs not versioned
+models/checkpoints/controller_10seeds/**/*.zip
+models/checkpoints/controller_10seeds/**/*.npz
+models/checkpoints/controller_10seeds/**/*.pkl
+models/checkpoints/controller_direct_10seeds/**/*.zip
+models/checkpoints/controller_direct_10seeds/**/*.npz
+models/checkpoints/controller_direct_10seeds/**/*.pkl
+models/checkpoints/controller_direct_30k_10seeds/**/*.zip
+models/checkpoints/controller_direct_30k_10seeds/**/*.npz
+models/checkpoints/controller_direct_30k_10seeds/**/*.pkl
