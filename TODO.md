@@ -195,15 +195,16 @@
       **Resuelto**: actualizado con el Experimento 3, la verificación de presupuesto del
       RL directo, los 62 tests y la semántica de la acción.
 
-## Exploración (rama `exploratory/latent-dim-sweep`, sin fusionar)
+## Exploración (rama `exploratory/latent-dim-sweep`, fusionada en `main` en `2b9bd87`)
 
 - [x] Experimento 0 explorado a fondo con la LSTM (10 semillas, barrido de `latent_dim`, grilla
       de 5 semillas de Autoencoder × 5 de LSTM): no hay evidencia de que el Autoencoder mejore ni
       empeore la predicción de la recompensa. Ver `docs/EXPLORACION_LATENT_DIM.md`. No cambia nada
       oficial.
-- [ ] La misma evaluación con Transformer y TSMixer (`latent_dim` = 16, grilla de 5×5): en curso en la
-      misma rama.
-- [ ] Decidir si la rama se fusiona a `main` (lo decide el autor).
+- [x] La misma evaluación con Transformer y TSMixer (`latent_dim` = 16, grilla de 5×5): el latente
+      empeora la predicción de la recompensa con el Transformer (+33%) y con TSMixer (+42%). Ver
+      `docs/results/exploratory/latent_sweep/REPORT.md`. No cambia nada oficial.
+- [x] Decidir si la rama se fusiona a `main`: fusionada por decisión del autor (`2b9bd87`).
 
 ## Después (orden según la propuesta del proyecto)
 

@@ -1,6 +1,6 @@
 # Propuesta de Proyecto de Grado
 
-*Documento reescrito para reflejar el proyecto tal como fue ejecutado (estado del repositorio hasta el commit `42e5eb8`, incluida la auditoría técnica del 26 de septiembre), no solo como fue planteado originalmente.*
+*Documento reescrito para reflejar el proyecto tal como fue ejecutado (estado del repositorio hasta el commit `4ded5d0`, incluidas la auditoría técnica del 26 de septiembre y la extensión a 10 semillas por controlador del 30 de septiembre), no solo como fue planteado originalmente.*
 
 ---
 
@@ -446,4 +446,4 @@ SUMO (evaluación real; también existe un PPO entrenado directamente aquí, par
 
 La estrategia seguida fue, tal como se planteó, construir primero una versión mínima funcional y medirla antes de agregar componentes. El orden real de desarrollo (simulador → datos → representación con su experimento de necesidad → World Model → evaluación predictiva → imaginación/control → comparación) coincidió con el plan original. Lo que la experiencia real del proyecto añade a esta nota metodológica, para cualquier trabajo futuro que continúe esta línea: **la etapa más costosa en tiempo no fue construir cada componente, sino verificar que la conexión entre componentes fuera correcta** — cada uno de los cuatro problemas críticos descritos en la Sección 20 era, en esencia, una desconexión silenciosa entre dos piezas que individualmente funcionaban bien. Un plan de trabajo futuro sobre esta base debería reservar tiempo explícito para esa verificación de integración, no solo para la construcción de cada pieza por separado.
 
-*Propuesta de Proyecto de Grado — World Models + SUMO (versión final, post-ejecución, estado del repositorio hasta el commit `42e5eb8`)*
+*Propuesta de Proyecto de Grado — World Models + SUMO (versión final, post-ejecución, estado del repositorio hasta el commit `4ded5d0`)*

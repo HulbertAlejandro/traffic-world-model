@@ -89,7 +89,7 @@ SUMO → Estado del tráfico (26 dims) → Autoencoder → z (16 dims)
 | RL directo con 3x presupuesto (30,000 pasos) | ✅ Completo, 10 semillas | (compartidos) |
 | Demanda de tráfico variable en el tiempo | ⚪ No implementado | 0 |
 
-**81 tests automatizados, todos pasando**, distribuidos en 16 archivos dentro de `tests/`.
+**87 tests automatizados**, distribuidos en 17 archivos dentro de `tests/`.
 
 No existen `utils/`, `notebooks/`, `experiments/`, `papers/` ni ninguna carpeta `data/`: nunca se versionaron, y las carpetas vacías que quedaban en disco se eliminaron.
 
@@ -193,7 +193,7 @@ traffic-world-model/
 │   ├── test_environment.py               # prueba de humo manual
 │   └── visualize_dataset.py
 │
-├── tests/                           # Pruebas automatizadas (pytest) — 16 archivos, 81 tests
+├── tests/                           # Pruebas automatizadas (pytest) — 17 archivos, 87 tests
 │   ├── test_autoencoder.py
 │   ├── test_controller.py
 │   ├── test_dataset_pipeline.py
@@ -582,7 +582,7 @@ El LSTM tiene el menor error de predicción de recompensa (`reward_mse`) en los 
 
 ## 12. Tests
 
-**81 tests, en 16 archivos, todos pasando.** Cubren desde el entorno de SUMO hasta la pila completa de `VecNormalize` sincronizada entre entrenamiento y evaluación, y en particular las fronteras donde se encontraron bugs: dos simulaciones de SUMO abiertas a la vez, que el Dream Environment nunca llame a SUMO, las llegadas frente a un conteo independiente, que las dos ramas del Experimento 0 compartan el protocolo, y que los scripts de entrenamiento no sobrescriban resultados oficiales.
+**87 tests, en 17 archivos.** Cubren desde el entorno de SUMO hasta la pila completa de `VecNormalize` sincronizada entre entrenamiento y evaluación, y en particular las fronteras donde se encontraron bugs: dos simulaciones de SUMO abiertas a la vez, que el Dream Environment nunca llame a SUMO, las llegadas frente a un conteo independiente, que las dos ramas del Experimento 0 compartan el protocolo, y que los scripts de entrenamiento no sobrescriban resultados oficiales.
 
 ```powershell
 pytest -v
@@ -693,7 +693,7 @@ pytest -v
  Comparando, con el mismo modelo temporal y el mismo protocolo, el error de predicción de la recompensa usando `z` contra el estado crudo, con varias semillas por rama emparejadas y entrenadas hasta converger (Experimento 0; ver la pregunta 1).
 
 13. **¿Qué garantiza que el proyecto sea reproducible?**
- Semillas fijas en todo entrenamiento, hiperparámetros (incluidas la semilla y las épocas) junto a cada checkpoint, versiones exactas de las dependencias, 81 tests automatizados, y los resultados de cada episodio versionados en `docs/results/`. Salvedad: la recolección del dataset no fija la semilla de las acciones aleatorias, así que una recolección nueva daría otro dataset (el oficial está respaldado).
+ Semillas fijas en todo entrenamiento, hiperparámetros (incluidas la semilla y las épocas) junto a cada checkpoint, versiones exactas de las dependencias, 87 tests automatizados, y los resultados de cada episodio versionados en `docs/results/`. Salvedad: la recolección del dataset no fija la semilla de las acciones aleatorias, así que una recolección nueva daría otro dataset (el oficial está respaldado).
 
 14. **Entonces, ¿el World Model controla mejor que el RL directo?**
  Frente al RL directo de 10k, sí, en los dos conjuntos de escenarios, con 1.7 veces menos interacciones sin compartir el dataset (3.8 compartiéndolo entre las 10 semillas). Frente al de 30k no se detecta una diferencia de control: en los escenarios de evaluación hay una brecha numérica similar a la de 3 y 4 semillas, pero ya no significativa con 10 semillas, y en los nuevos no hay brecha. Lo que el World Model demuestra es eficiencia: llega a ese nivel de control con una fracción del contacto con el simulador, que es justo lo que pregunta la pregunta de investigación.
