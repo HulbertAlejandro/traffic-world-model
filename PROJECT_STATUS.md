@@ -40,6 +40,34 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
 
+## ⚠️ Verificación de tests al push del 2 de octubre: 5 tests de SUMO en vivo sin verificar
+
+Los 10 commits que se subieron el 2 de octubre (`82ccbe4` … `956127a`, incluido el merge
+`24001ac` de `demo/sumo-gui-comparison`) se verificaron con la suite completa: **82 passed,
+5 failed**. Los 82 que pasaron no dependen de una conexión viva a SUMO. Los 5 que fallaron sí
+dependen de ella:
+
+- `tests/test_concurrent_environments.py::test_two_concurrent_environments_each_read_their_own_simulation`
+- `tests/test_traffic_environment.py::test_environment`
+- `tests/test_traffic_environment.py::test_phase_switched_measures_actual_changes`
+- `tests/test_traffic_environment.py::test_reward_config_selects_the_phase_penalty`
+- `tests/test_traffic_environment.py::test_arrivals_total_matches_an_independent_per_second_count`
+
+Los 5 fallaron con `traci.exceptions.FatalTraCIError: Could not connect`. **La causa no es un
+fallo de los commits**: Smart App Control bloqueó DLLs sin firma de la instalación de SUMO
+(`arrow.dll`, `parquet.dll`, `libssl.dll` y `liblzma.dll` en `C:\Program Files (x86)\Eclipse\Sumo\bin\`),
+y `sumo.exe` moría al arrancar. Así se diagnosticó:
+
+- `sumo --version` salía en silencio con código 0xC0E90002 (`STATUS_SYSTEM_INTEGRITY_POLICY_VIOLATION`).
+- El registro `Microsoft-Windows-CodeIntegrity/Operational` tenía los eventos 3033/3077/3118
+  ("Smart App Control Block") de esas DLLs.
+- No quedaban procesos huérfanos. La RAM estaba baja (0.84 GB libres de 7.7 GB), pero no era la
+  causa: los 5 tests fallaron igual corriéndolos aislados.
+
+El bloqueo es intermitente: horas antes, con la misma instalación (SUMO reinstalado tras el
+bloqueo anterior de `fmt.dll`), los demos `ver_controlador.py` y `ver_tiempo_fijo.py` corrieron
+bien. Hay que volver a correr esos 5 tests cuando SUMO arranque de nuevo en esta máquina.
+
 ## ✅ Extensión del PPO a 10 semillas por controlador (30 de septiembre) — resultado de control vigente
 
 Extensión del resultado central (la tabla de "Auditoría técnica y correcciones", punto 2), no

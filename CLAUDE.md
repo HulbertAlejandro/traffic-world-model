@@ -305,10 +305,18 @@ No existen (a propósito): `utils/`, `notebooks/`, `experiments/`, `papers/`.
 - Nunca asumir que "corrió sin error" significa "está bien" — se exige inspeccionar los
   números reales de la salida (curvas de pérdida, métricas de evaluación), no solo que
   el script termine.
+- Nota operativa: si `sumo --version` sale en silencio con código 0xC0E90002
+  (`STATUS_SYSTEM_INTEGRITY_POLICY_VIOLATION`), es Smart App Control bloqueando una DLL de la
+  instalación de SUMO, no un problema de memoria ni del código. Confirmar con el registro de
+  eventos `Microsoft-Windows-CodeIntegrity/Operational`. En pytest se ve como
+  `FatalTraCIError: Could not connect` en los tests que usan SUMO, con unos 2 minutos por test.
+  No cambiar la configuración de seguridad de Windows sin aprobación del autor.
 
 ## Pendiente de verificar (no confirmado, no inventar)
 
-- Nada abierto en este momento.
+- Volver a correr los 5 tests de SUMO en vivo que no pudieron verificarse al push del 2 de
+  octubre por el bloqueo de Smart App Control (detalle en PROJECT_STATUS.md, "Verificación de
+  tests al push del 2 de octubre").
 
 Resuelto: la cuenta/app desconocida que apareció como colaborador en el repositorio de
 GitHub era Codex Connector; su acceso se revocó en ambas capas, y los colaboradores
