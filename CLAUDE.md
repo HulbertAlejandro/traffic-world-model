@@ -38,8 +38,8 @@ SUMO → TrafficEnvironment → CustomStateBuilder → TrafficState (vector de 2
        persistente, a 1 y varios pasos, con compounding error)                   [COMPLETO]
      → DreamEnvironment (imagina transiciones con el LSTM, sin SUMO)             [COMPLETO]
      → PPO del sueño (selección del checkpoint por evaluación en SUMO real,
-       vía EncodedTrafficEnvironment)                                            [COMPLETO, 3 semillas]
-     → PPO directo contra SUMO real (baseline de RL directo)                     [COMPLETO, 4 semillas
+       vía EncodedTrafficEnvironment)                                            [COMPLETO, 10 semillas]
+     → PPO directo contra SUMO real (baseline de RL directo)                     [COMPLETO, 10 semillas
                                                                                   × 10k y 30k pasos]
      → evaluate_multiseed_statistical.py (sueño vs. directo vs. tiempo fijo vs.
        regla trivial, N semillas, escenarios oficiales y nuevos, en SUMO real)   [COMPLETO]
@@ -89,31 +89,44 @@ y 56.1% frente a TSMixer).
 
 ## Resultado central (preciso)
 
-Medias de todas las semillas de entrenamiento (PPO del sueño 3, RL directo 4), en SUMO
-real, con el RL directo reentrenado tras el fix de C1 (conexión TraCI global):
+Medias de **10 semillas de entrenamiento por controlador**, en SUMO real, con el RL directo
+reentrenado tras el fix de C1 (conexión TraCI global). La extensión de 3 / 4 a 10 semillas se
+pre-registró antes de entrenar (`docs/results/ppo_10_seeds/ADDENDUM.md`):
 
 | | Escenarios oficiales (3000–3014, 5000–5014) | Escenarios nuevos (7000–7029) |
 |---|---|---|
-| PPO del sueño (World Model) | -326.79 | -293.81 |
-| RL directo, 10k pasos (13,240 interacciones por semilla) | -454.51 | -439.73 |
-| RL directo, 30k pasos (39,208 interacciones por semilla) | -402.13 | -316.59 |
+| PPO del sueño (World Model) | -326.89 | -305.53 |
+| RL directo, 10k pasos (13,240 interacciones por semilla) | -455.02 | -445.39 |
+| RL directo, 30k pasos (39,208 interacciones por semilla) | -403.83 | -303.51 |
 | Tiempo fijo | -411.27 | -391.70 |
 
-- **Frente al RL directo de 10k**, el World Model es mejor en los dos conjuntos (pareado
-  por escenario p = 0.0002 y p = 4.5e-9).
-- **Frente al de 30k no se detectó una diferencia consistente:** hay brecha a favor del
-  World Model en los escenarios oficiales (+75.34; semilla p = 0.029, pareado p = 0.020) y
-  ninguna detectable en los nuevos (pareado p = 0.54).
-- La ventaja demostrada es de **eficiencia en interacciones reales**: el World Model
-  (~4,600 por semilla, 7,800 sin amortizar el dataset) iguala o supera al RL directo con
-  entre 2.9x y 8.5x menos interacciones (1.7x a 5.0x sin amortizar). No es una ventaja de
-  control cuando el RL directo dispone de presupuesto de sobra, y el punto de equilibrio
-  exacto no se midió.
-- El World Model es el método con **menos episodios catastróficos** (< -600): 5/90 y 1/90,
-  frente a 25/120 y 29/120 (10k) y 24/120 y 9/120 (30k).
+- **Frente al RL directo de 10k**, el World Model es mejor en los dos conjuntos, y con 10
+  semillas la evidencia se refuerza (+128.13 y +139.86; t pareada por escenario p = 2.0e-6
+  y p = 5.0e-11; Welch por semilla p = 2.3e-5 y p = 6.7e-4).
+- **Frente al de 30k no se detecta una diferencia de control en ningún conjunto de
+  escenarios.** Hay que distinguir la brecha numérica de la significancia:
+  - En los oficiales hay una **brecha de magnitud similar a la publicada** (+76.94, antes
+    +75.34), pero con 10 semillas **ya no alcanza significancia estadística** (t pareada
+    p = 0.068, Wilcoxon p = 0.11, Welch por semilla p = 0.12; antes pareado p = 0.020).
+    Buena parte de esa brecha viene de la semilla 8 del 30k (media -774.03, un episodio de
+    -10,913); sin ella, +35.80 (t pareada p = 0.0995).
+  - En los nuevos no hay brecha (-2.02; t pareada p = 0.91).
+- La ventaja demostrada es de **eficiencia en interacciones reales**: el World Model iguala o
+  supera al RL directo con menos interacciones. La razón depende de cómo se cuente el dataset
+  de 4,800 transiciones:
+  - **Sin compartirlo (comparación conservadora, no cambió con 10 semillas):** 7,800 por
+    semilla, **1.7x a 5.0x** menos.
+  - **Compartiéndolo entre las 10 semillas:** 3,480 por semilla, **3.8x a 11.3x** menos. Esta
+    cifra mejora solo por entrenar más semillas (con 3 era 2.9x a 8.5x).
 
-Detalle completo, con todas las pruebas, en PROJECT_STATUS.md ("Auditoría técnica y
-correcciones").
+  No es una ventaja de control cuando el RL directo dispone de presupuesto de sobra, y el
+  punto de equilibrio exacto no se midió.
+- Entre los controladores aprendidos, el World Model es el que tiene **menos episodios
+  catastróficos** (< -600): 19/300 y 13/300, frente a 57/300 y 65/300 (10k) y 38/300 y
+  19/300 (30k). Tiempo fijo tiene 0/30 en los dos conjuntos.
+
+Detalle completo en PROJECT_STATUS.md ("Extensión del PPO a 10 semillas por controlador"), y
+el resultado anterior con 3 / 4 semillas en "Auditoría técnica y correcciones", punto 2.
 
 ## Decisiones de diseño ya tomadas
 
@@ -183,17 +196,22 @@ correcciones").
   a una rama. En horizontes largos se reporta también la mediana por episodio: con 12
   episodios de test, 2 o 3 congestionados dominan la media.
 - Contabilidad de interacciones reales: el dataset del World Model (4,800 transiciones)
-  se recolecta una vez y lo comparten las 3 semillas (~4,600 por semilla con la
-  selección en SUMO real; 7,800 si no se amortiza). La evaluación periódica del RL
-  directo cuenta como interacción real, y SB3 completa el último rollout: 13,240 por
-  semilla con 10k pasos y 39,208 con 30k. Reportar la razón como rango (2.9x a 8.5x, o
-  1.7x a 5.0x sin amortizar), nunca como un solo número. No describir la comparación con
-  10k como "a presupuesto comparable".
+  se recolecta una vez y lo comparten las 10 semillas del sueño (3,480 por semilla con
+  los 3,000 de selección en SUMO real; 7,800 si no se comparte). La evaluación periódica
+  del RL directo cuenta como interacción real, y SB3 completa el último rollout: 13,240
+  por semilla con 10k pasos y 39,208 con 30k. Reportar la razón como rango y con las dos
+  cifras: **1.7x a 5.0x sin compartir el dataset** (la comparación conservadora) y 3.8x a
+  11.3x compartiéndolo entre las 10 semillas (esta mejora solo por entrenar más semillas).
+  Nunca como un solo número. No describir la comparación con 10k como "a presupuesto
+  comparable".
 - Los resultados de controladores se reportan como media de **todas** las semillas de
-  entrenamiento (3 del sueño, 4 del RL directo), nunca con una sola, en los escenarios
-  oficiales **y** en los nuevos (7000–7029). Las comparaciones usan el Welch sobre las
-  medias por semilla y el pareado por escenario; los tests a nivel de episodio son
-  pseudorreplicación. Todo resultado por episodio queda versionado en `docs/results/`.
+  entrenamiento (10 del sueño, 10 de cada RL directo), nunca con una sola, en los
+  escenarios oficiales **y** en los nuevos (7000–7029). Las comparaciones usan el Welch
+  sobre las medias por semilla y la t pareada por escenario, y desde la extensión a 10
+  semillas también el Wilcoxon pareado por escenario. Los tests a nivel de episodio son
+  pseudorreplicación. Una diferencia numérica sin significancia se reporta como "brecha
+  no significativa", nunca como diferencia de control. Todo resultado por episodio queda
+  versionado en `docs/results/`.
 
 ## Decisiones que NO deben cambiarse sin consultar primero
 
@@ -209,9 +227,13 @@ correcciones").
 - Los checkpoints **oficiales** son `models/checkpoints/controller/best_model.zip` (PPO del
   sueño, semilla 2), `controller_direct/best_model.zip` (RL directo, 10,000 pasos,
   semilla 0) y `controller_direct_30k/best_model.zip` (RL directo, 30,000 pasos, semilla
-  1; verificación de presupuesto). En cada carpeta, el oficial es la semilla con mejor
-  media en los escenarios oficiales, una etiqueta descriptiva; las demás semillas
-  (`_seedN`) son evidencia de variabilidad. No cambiarlos sin una decisión explícita.
+  1; verificación de presupuesto). El oficial se eligió como la semilla con mejor media
+  en los escenarios oficiales **entre las semillas originales** (0–2 del sueño, 0–3 del
+  RL directo); es una etiqueta descriptiva. Con las 10 semillas ya no es la mejor de su
+  método (sueño: semilla 6, -287.10; 10k: semilla 8, -325.74; 30k: semilla 6, -283.62), y
+  por decisión pre-registrada **no se reetiqueta**: el resultado es la media de todas las
+  semillas. Las demás semillas (`_seedN` y las carpetas `*_10seeds/`) son evidencia de
+  variabilidad. No cambiarlos sin una decisión explícita.
 - No escribir en los archivos: `controller_direct_prefix_bug/` y
   `controller_direct_30k_prefix_bug/` (RL directo entrenado con el bug C1) y
   `raw_state_old_protocol/` (Experimento 0 con el protocolo viejo). Los scripts de
@@ -240,6 +262,8 @@ models/
   world_model/     base.py (Protocol TemporalModel), lstm.py (LatentDynamicsLSTM, el del sistema),
                    transformer.py, tsmixer.py (Experimento 3)
   checkpoints/     controller/, controller_direct/ y controller_direct_30k/ (oficiales + _seedN),
+                   controller_10seeds/ (sueño, semillas 3–9), controller_direct_10seeds/ y
+                   controller_direct_30k_10seeds/ (semillas 4–9) (extensión a 10 semillas),
                    *_prefix_bug/ (RL directo antes del fix de C1), exp0_multiseed/ y
                    exp0_multiseed_300ep/ (Experimento 0), raw_state_old_protocol/ (archivo);
                    pesos no versionados, sus .json sí
@@ -256,12 +280,16 @@ scripts/        datos: collect_dataset.py, split_dataset.py, merge_dataset.py, n
                   compare_experiment_0_multiseed.py
                 Exp. 3: evaluate_world_model_transformer.py, evaluate_world_model_tsmixer.py,
                   compare_experiment_3.py
+                Tablas 4a y 4b: benchmark_temporal_models.py (costo de inferencia de LSTM,
+                  Transformer y TSMixer), evaluate_model_fidelity.py (fidelidad del retorno
+                  imaginado de los tres modelos frente al real)
                 control: evaluate_controller.py, evaluate_controller_sumo.py,
                   evaluate_direct_vs_dream.py, evaluate_final_comparison.py,
                   evaluate_multiseed_statistical.py, analyze_controller_actions.py
 tests/          16 archivos, 81 tests (pytest -v)
-ver_controlador.py (demo del PPO del sueño en la GUI de SUMO), CLAUDE.md, PROJECT_STATUS.md,
-TODO.md, README.md, pytest.ini, requirements.txt, .gitignore, LICENSE
+ver_controlador.py (demo del PPO del sueño oficial en la GUI de SUMO, escenario nuevo 7025),
+ver_tiempo_fijo.py (el mismo demo con la política de tiempo fijo, para comparar a simple vista),
+CLAUDE.md, PROJECT_STATUS.md, TODO.md, README.md, pytest.ini, requirements.txt, .gitignore, LICENSE
 ```
 
 No existen (a propósito): `utils/`, `notebooks/`, `experiments/`, `papers/`.

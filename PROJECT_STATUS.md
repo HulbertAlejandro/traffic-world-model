@@ -1,24 +1,34 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `26465b4`, 81/81 tests en verde. **Lo más reciente: una auditoría
-técnica del repositorio (26 de septiembre), ejecutando el código, y las correcciones que
-salieron de ella** (sección siguiente). Varias cifras publicadas antes cambian:
+Última verificación: commit `26465b4`, 81/81 tests en verde. **Lo más reciente: la extensión
+del PPO a 10 semillas por controlador (30 de septiembre; sección siguiente)**, que actualiza el
+resultado de control. Antes, una auditoría técnica del repositorio (26 de septiembre),
+ejecutando el código, y las correcciones que salieron de ella. Estado actual:
 
 - **Bug C1, corregido:** `CustomStateBuilder` leía los carriles con la conexión TraCI
   *global*. El entrenamiento del RL directo, que abre dos simulaciones en el mismo proceso,
   observaba y recibía como recompensa la simulación de evaluación después de cada evaluación
-  periódica. El RL directo se reentrenó con el fix y 4 semillas. Nada más estaba afectado.
-- **Resultado de control (media de las semillas de cada método), escenarios oficiales:**
-  PPO del sueño -326.79 (3 semillas), RL directo 10k -454.51 (4), RL directo 30k -402.13 (4),
-  tiempo fijo -411.27. **Escenarios nuevos (7000–7029):** -293.81, -439.73, -316.59 y -391.70.
-- **Con 30k pasos, no se detectó una diferencia consistente con el World Model:** brecha a su
-  favor en los escenarios oficiales (+75.34; semilla p = 0.029, pareado p = 0.020) y ninguna
-  detectable en los nuevos (pareado p = 0.54). Ya no vale "el RL directo alcanza al World
-  Model con 3x presupuesto" (-335.24 antes del fix).
-- **Eficiencia:** el World Model iguala o supera al RL directo con entre 2.9x y 8.5x menos
-  interacciones reales (entre 1.7x y 5.0x si el dataset no se amortiza entre semillas).
-- **Robustez:** en escenarios nuevos, el World Model tiene 1 episodio catastrófico de 90,
-  frente a 29/120 (10k) y 9/120 (30k).
+  periódica. El RL directo se reentrenó con el fix (4 semillas en la auditoría, 10 desde la
+  extensión). Nada más estaba afectado.
+- **Resultado de control (media de 10 semillas por método), escenarios oficiales:**
+  PPO del sueño -326.89, RL directo 10k -455.02, RL directo 30k -403.83, tiempo fijo -411.27.
+  **Escenarios nuevos (7000–7029):** -305.53, -445.39, -303.51 y -391.70.
+- **Frente al RL directo de 10k**, el World Model es mejor en los dos conjuntos, con evidencia
+  más fuerte que con 3 / 4 semillas (t pareada p = 2.0e-6 y p = 5.0e-11).
+- **Frente al de 30k no se detecta una diferencia de control en ningún conjunto de
+  escenarios.** En los oficiales hay una brecha de magnitud similar a la publicada (+76.94,
+  antes +75.34), pero con 10 semillas ya no alcanza significancia estadística (t pareada
+  p = 0.068, Wilcoxon p = 0.11; antes pareado p = 0.020). En los nuevos no hay brecha (-2.02,
+  p = 0.91). Ya no vale "el RL directo alcanza al World Model con 3x presupuesto" en el
+  sentido de -335.24 antes del fix, ni "hay brecha significativa en los oficiales" con 4
+  semillas.
+- **Eficiencia:** el World Model iguala o supera al RL directo con entre **1.7x y 5.0x** menos
+  interacciones reales si el dataset no se comparte entre semillas (la comparación
+  conservadora, que no cambia con 10 semillas), o entre 3.8x y 11.3x si se comparte entre las
+  10 semillas.
+- **Robustez:** entre los controladores aprendidos, el World Model tiene menos episodios
+  catastróficos: 19/300 en los oficiales y 13/300 en los nuevos, frente a 57/300 y 65/300
+  (10k) y 38/300 y 19/300 (30k). Tiempo fijo, 0/30 en los dos.
 - **Checkpoint oficial del sueño: semilla 2** (antes 1), el mismo criterio que el RL directo.
 - **Experimento 0 rehecho:** con el mismo protocolo en las dos ramas, 5 semillas por rama y
   convergencia igualada, el Autoencoder mejora la predicción de la recompensa de forma
@@ -29,6 +39,100 @@ salieron de ella** (sección siguiente). Varias cifras publicadas antes cambian:
   el resultado oficial (ver el final del punto 5).
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
+
+## ✅ Extensión del PPO a 10 semillas por controlador (30 de septiembre) — resultado de control vigente
+
+Extensión del resultado central (la tabla de "Auditoría técnica y correcciones", punto 2), no
+una exploración. Todo se pre-registró y se commiteó antes de entrenar, en
+`docs/results/ppo_10_seeds/ADDENDUM.md`: semillas, protocolo idéntico al oficial, controles y
+pruebas estadísticas.
+
+- **Semillas nuevas, 19 entrenamientos:** sueño 3–9 (`controller_10seeds/`), RL directo 10k
+  4–9 (`controller_direct_10seeds/`) y 30k 4–9 (`controller_direct_30k_10seeds/`). Las
+  existentes se reutilizan sin tocarlas. Ninguna semilla se descartó.
+  - Un primer intento con 3 entrenamientos en paralelo falló por falta de memoria del sistema
+    (30k, semillas 4–6). Los 19 se repitieron con las mismas semillas, 2 en paralelo, y las
+    evaluaciones del intento fallido coinciden con las primeras de la repetición.
+- **Controles, todos superados:**
+  - Reentrenar la semilla 2 del sueño y la 3 del directo de 10k reproduce bit a bit su
+    `evaluations.npz` y los pesos de su `best_model.zip`.
+  - Cada checkpoint existente reproduce sus episodios publicados.
+  - El script de análisis reproduce los p publicados con 3 + 4 semillas.
+- **Evaluación:** `scripts/evaluate_multiseed_statistical.py` sin modificar, mismos escenarios
+  de siempre. Episodios en `docs/results/ppo_10_seeds/eval_*.{json,csv}`; análisis en
+  `analysis.{json,out}`.
+- md5 de `models/checkpoints/`, `datasets/`, `results/` y `docs/results/` verificado antes y
+  después: solo se agregaron archivos.
+
+**Escenarios oficiales** (`seed_base` 3000 y 5000, 15 episodios cada una):
+
+| Política | Semillas | Media | Mediana | Desv. medias por semilla | < -600 | Peor |
+|---|---|---|---|---|---|---|
+| PPO del sueño | 10 | **-326.89** | -285.40 | 23.3 | **19/300** | **-998.7** |
+| RL directo 10k | 10 | -455.02 | -401.45 | 56.1 | 57/300 | -1,776.8 |
+| RL directo 30k | 10 | -403.83 | -285.15 | 141.6 | 38/300 | -10,913.2 |
+| Tiempo fijo | — | -411.27 | -399.70 | — | 0/30 | -592.2 |
+| Regla "fase contraria" | — | -502.53 | -511.10 | — | 7/30 | -703.1 |
+
+**Escenarios nuevos** (7000–7029):
+
+| Política | Semillas | Media | Mediana | Desv. medias por semilla | < -600 | Peor |
+|---|---|---|---|---|---|---|
+| PPO del sueño | 10 | -305.53 | -276.55 | 22.3 | **13/300** | **-910.9** |
+| RL directo 10k | 10 | -445.39 | -399.30 | 88.8 | 65/300 | -1,808.8 |
+| RL directo 30k | 10 | **-303.51** | -255.80 | 22.7 | 19/300 | -1,861.1 |
+| Tiempo fijo | — | -391.70 | -391.20 | — | 0/30 | -470.2 |
+| Regla "fase contraria" | — | -558.83 | -510.60 | — | 12/30 | -846.1 |
+
+Medias por semilla, en `docs/results/ppo_10_seeds/analysis.out`.
+
+**Comparaciones, antes (3 / 4 semillas) → después (10 / 10).** Welch sobre las medias por
+semilla; t pareada y Wilcoxon de rangos con signo (exacto) sobre los 30 escenarios. El Wilcoxon
+es nuevo en esta extensión.
+
+| | Diferencia | Welch semilla p | t pareada p | Wilcoxon p |
+|---|---|---|---|---|
+| Oficiales, sueño vs 10k | +127.72 → +128.13 | 0.0034 → 2.3e-5 | 1.6e-4 → 2.0e-6 | 2.1e-4 → 5.1e-6 |
+| Oficiales, sueño vs 30k | +75.34 → +76.94 | 0.029 → 0.12 | **0.020 → 0.068** | 0.096 → 0.11 |
+| Oficiales, sueño vs tiempo fijo | +84.48 → +84.37 | — | 9.8e-4 → 1.6e-4 | 8.7e-4 → 2.6e-4 |
+| Nuevos, sueño vs 10k | +145.92 → +139.86 | 0.077 → 6.7e-4 | 4.5e-9 → 5.0e-11 | 5.6e-9 → 1.9e-9 |
+| Nuevos, sueño vs 30k | +22.78 → -2.02 | 0.021 → 0.84 | 0.54 → 0.91 | 0.69 → 0.33 |
+| Nuevos, sueño vs tiempo fijo | +97.89 → +86.17 | — | 3.3e-7 → 3.7e-6 | 2.0e-6 → 9.2e-6 |
+
+Sin corrección por comparaciones múltiples, igual que en lo publicado.
+
+**Lectura.**
+
+- **Frente al RL directo de 10k, el resultado se refuerza:** la diferencia se mantiene (~130 a
+  140 puntos) y todos los p bajan, incluido el Welch por semilla de los escenarios nuevos (0.077
+  → 6.7e-4).
+- **Frente al RL directo de 30k no se detecta una diferencia de control en ningún conjunto de
+  escenarios.** La brecha numérica y la significancia se separan:
+  - **Oficiales:** la brecha numérica sigue siendo de magnitud similar (+76.94 frente a
+    +75.34), pero ya no alcanza significancia (t pareada p = 0.068, Wilcoxon p = 0.11, Welch
+    p = 0.12). Es la única conclusión que cruza α = 0.05 respecto de lo publicado.
+  - **Buena parte de esa brecha la produce una sola semilla:** la semilla 8 del 30k tiene media
+    -774.03 y un episodio de -10,913.2 (escenario 3014). Sin ella, la brecha baja a +35.80
+    (t pareada p = 0.0995, Wilcoxon p = 0.31). Análisis post hoc, en `posthoc_d30k_seed8.out`.
+  - **Nuevos:** no hay brecha (-2.02; p = 0.91). El 30k tiene mejor mediana (-255.80 frente a
+    -276.55).
+- **Robustez:** entre los controladores aprendidos, el World Model sigue teniendo menos episodios
+  catastróficos y el mejor peor caso en los dos conjuntos. Tiempo fijo no tiene ninguno (0/30).
+- **Dispersión entre semillas:** el sueño es el más estable (23.3 y 22.3). El 30k lo iguala en
+  los nuevos (22.7), pero no en los oficiales (141.6, por la semilla 8).
+
+**Interacciones reales por semilla** (`interactions.json`; la contabilidad de siempre):
+
+- RL directo: 13,240 (10k) y 39,208 (30k), verificado con los `evaluations.npz` nuevos.
+- World Model: 3,000 de selección en SUMO real, más el dataset de 4,800 transiciones.
+  - **Sin compartir el dataset: 7,800 por semilla. Razones de 1.7x (10k) y 5.0x (30k).** Es la
+    comparación conservadora y no cambia con el número de semillas.
+  - **Compartiéndolo entre las 10 semillas:** 3,480 por semilla, con razones de 3.8x y 11.3x.
+    Mejora respecto de 2.9x y 8.5x solo porque se entrenaron más semillas.
+
+**Qué no cambia.** Los checkpoints oficiales (sueño semilla 2, directo 10k semilla 0, directo 30k
+semilla 1) **no se reetiquetan**, aunque con 10 semillas no sean los mejores de su método: el
+resultado es la media de todas las semillas. Ningún archivo existente se modificó.
 
 ## ✅ Auditoría técnica y correcciones (26 de septiembre)
 
@@ -60,6 +164,12 @@ corrección por fases, cada una verificada antes de pasar a la siguiente. Respal
   entre -2.0 y 0.6 al final del entrenamiento): C1 no era su causa.
 
 ### 2. RL directo reentrenado con el fix, 4 semillas por presupuesto
+
+> **Superado (30-sep) por el resultado de 10 semillas;** ver "Extensión del PPO a 10 semillas
+> por controlador". Frente al 10k, el resultado se refuerza. Frente al 30k, la brecha en los
+> escenarios oficiales es de magnitud similar (+76.94), pero ya no es significativa (t pareada
+> p = 0.068); no se detecta diferencia de control en ningún conjunto. Las tablas y la lectura
+> de este punto quedan como registro del resultado con 3 / 4 semillas.
 
 `train_controller_direct.py` acepta ahora semilla, presupuesto y carpeta por argumento, y se
 niega a escribir en las carpetas oficiales o archivadas sin una bandera explícita. También se
@@ -120,6 +230,9 @@ semilla declara significativa una diferencia de 22.78 puntos que el pareado no d
   inferencia, no algo demostrado como en 10k. Con 30k **no se detectó una diferencia
   consistente** con el World Model: sí hay brecha en los escenarios oficiales, no en los
   nuevos, donde el 30k tiene mejor mediana (-255.70 frente a -273.05) y peores colas.
+  *Superado (30-sep): con 10 semillas, la brecha en los oficiales es de magnitud similar
+  (+76.94) pero no significativa (t pareada p = 0.068); ver "Extensión del PPO a 10 semillas
+  por controlador".*
 - **El World Model es el método con menos episodios catastróficos** en los dos conjuntos
   (5/90 y 1/90, frente a 25/120 y 29/120 del 10k y 24/120 y 9/120 del 30k). En los
   escenarios nuevos tiene además el mejor peor caso (-656.3; 30k: -1,861.1); en los
@@ -128,6 +241,8 @@ semilla declara significativa una diferencia de 22.78 puntos que el pareado no d
 - **Tres semillas no bastan para el RL directo.** Una semilla más movió la media del 10k de
   -443.31 a -454.51, y reentrenar el 30k con el 4% de transiciones distintas la movió 52
   puntos. Para comparar métodos con el RL directo harían falta al menos 5 semillas.
+  **Completado (30-sep):** 10 semillas por controlador; ver "Extensión del PPO a 10 semillas
+  por controlador".
 
 **Interacciones reales por semilla:** World Model ~4,600 (dataset de 4,800 compartido por
 las 3 semillas + 3,000 de selección) o 7,800 sin amortizar; RL directo 10k 13,240 (10,240 de
@@ -338,6 +453,8 @@ la opción B altere los resultados. El valor por defecto no se cambió.
 ## ✅ Verificación: RL directo con 3x presupuesto (30,000 pasos) — sin diferencia significativa con el World Model, con ~8.5 veces sus interacciones reales (antes del fix de C1)
 
 > **Superado (26-sep):** estos modelos de 30k se entrenaron con el bug C1. Reentrenados con el fix y 4 semillas, no se detectó una diferencia consistente con el World Model (brecha en los escenarios oficiales, ninguna en los nuevos). Ver la sección "Auditoría técnica y correcciones". Esta sección queda como registro.
+>
+> **Superado a su vez (30-sep) por el resultado de 10 semillas:** la brecha en los escenarios oficiales es de magnitud similar (+76.94), pero ya no alcanza significancia (t pareada p = 0.068); no se detecta una diferencia de control frente al 30k en ningún conjunto de escenarios. Ver "Extensión del PPO a 10 semillas por controlador".
 
 ### 1. Motivación y protocolo
 
@@ -911,7 +1028,10 @@ de 10,000 pasos del RL directo):**
   semilla 2 deja de colapsar, a cambio de ~8.5 veces las interacciones del World Model
   (5.0x sin amortizar el dataset; sección "Verificación: RL directo con 3x presupuesto").
   Tras el fix de C1, con 4 semillas, ni siquiera eso es consistente entre conjuntos de
-  escenarios (ver "Auditoría técnica y correcciones").
+  escenarios (ver "Auditoría técnica y correcciones"). *Superado (30-sep) por el resultado
+  de 10 semillas: frente al 30k, brecha de magnitud similar en los oficiales (+76.94) pero
+  no significativa (p = 0.068), y ninguna en los nuevos; ver "Extensión del PPO a 10
+  semillas por controlador".*
 - **Throughput:** el PPO del sueño sigue algo por debajo de tiempo fijo (12.20–12.33
   frente a 13.27–13.73 con el checkpoint oficial), la misma salvedad de todo el proyecto.
   *Precisión 26-sep: esa métrica no mide llegadas. Con la correcta (`arrivals_total`), en 5
@@ -922,7 +1042,9 @@ de 10,000 pasos del RL directo):**
 
 - **Los episodios catastróficos se redujeron, pero no desaparecieron** en ninguno de los
   dos métodos (5/90 en el sueño, 23/90 en el directo). Su causa completa sigue sin
-  identificarse; ver la primera ronda para lo que ya se descartó.
+  identificarse; ver la primera ronda para lo que ya se descartó. *Con 10 semillas
+  (30-sep): 19/300 en el sueño, 57/300 en el directo de 10k y 38/300 en el de 30k, en los
+  escenarios oficiales (ver "Extensión del PPO a 10 semillas por controlador").*
 - **La función de valor del PPO directo sigue sin aprender** incluso con las dos
   normalizaciones: la media del último cuarto de `explained_variance` está entre -0.04 y
   0.21 según la semilla, con máximos puntuales de 0.81–0.85. Causa no identificada;
@@ -936,11 +1058,17 @@ de 10,000 pasos del RL directo):**
   World Model, con ~8.5 veces sus interacciones (5.0x sin amortizar el dataset; sección
   "Verificación: RL directo con 3x presupuesto"). Tras el fix de C1: brecha en los
   escenarios oficiales, ninguna en los nuevos (ver "Auditoría técnica y correcciones").
+  *Superado (30-sep) por el resultado de 10 semillas: la brecha en los oficiales sigue
+  siendo de magnitud similar (+76.94), pero ya no es significativa (p = 0.068); no se
+  detecta diferencia de control en ningún conjunto (ver "Extensión del PPO a 10 semillas
+  por controlador").*
 - **Solo 3 semillas por método:** suficiente para ver la diferencia de consistencia, no
   para afirmar significancia a nivel de semilla (punto 8). *Precisión (26-sep):* con el
   fix de C1 y una cuarta semilla, esa diferencia se redujo (desviación de las medias por
   semilla del directo de 10k: 39.7, frente a 19.3 del sueño); tres semillas tampoco
-  bastaban para estimarla con fiabilidad.
+  bastaban para estimarla con fiabilidad. **Completado (30-sep):** 10 semillas por
+  controlador; desviación de las medias por semilla en los oficiales: sueño 23.3, directo
+  10k 56.1 y 30k 141.6 (ver "Extensión del PPO a 10 semillas por controlador").
 - **Límite de 8 s en la fase 1:** medido con los PPO de la primera ronda; no se volvió a
   medir con los checkpoints actuales.
 
@@ -1531,7 +1659,7 @@ diagnosticado en (a)–(b), y lo único que cambia entre corridas es la normaliz
 
 ### (j) Decisión final
 
-> **Nota sobre los escenarios (26-sep):** la elección de `dream_max_steps=7` (v1) frente a 20 (v2) se tomó comparando las dos versiones en los escenarios oficiales (`seed_base` 3000 y 5000), que para esa decisión no eran un test virgen. Los escenarios que sí son un test virgen son las semillas 7000–7029, nunca usadas antes (ver "Auditoría técnica y correcciones", punto 3). v1 y v2 eran del escenario simétrico y no se evaluaron en ellos; los PPO del sueño actuales (escenario asimétrico), entrenados con la configuración elegida (`dream_max_steps=7`), obtienen -293.81 en los nuevos frente a -326.79 en los oficiales (media de 3 semillas). Eso respalda la configuración, pero no es una comparación directa entre 7 y 20.
+> **Nota sobre los escenarios (26-sep):** la elección de `dream_max_steps=7` (v1) frente a 20 (v2) se tomó comparando las dos versiones en los escenarios oficiales (`seed_base` 3000 y 5000), que para esa decisión no eran un test virgen. Los escenarios que sí son un test virgen son las semillas 7000–7029, nunca usadas antes (ver "Auditoría técnica y correcciones", punto 3). v1 y v2 eran del escenario simétrico y no se evaluaron en ellos; los PPO del sueño actuales (escenario asimétrico), entrenados con la configuración elegida (`dream_max_steps=7`), obtienen -293.81 en los nuevos frente a -326.79 en los oficiales (media de 3 semillas). Eso respalda la configuración, pero no es una comparación directa entre 7 y 20. *Con 10 semillas (30-sep): -305.53 en los nuevos y -326.89 en los oficiales; ver "Extensión del PPO a 10 semillas por controlador".*
 
 Se revierte `ControllerConfig.dream_max_steps` a 7 (commit posterior a `990c6e5`) y v1
 pasa a ser el checkpoint oficial (`models/checkpoints/controller/best_model.zip`). v2 se
@@ -1839,9 +1967,10 @@ handoff anterior.
 5. Ambos PPO de la primera ronda asimétrica nunca sostenían el verde de la fase 1 más
    de 8 s (la duración mínima posible). No se volvió a medir con los checkpoints
    actuales; no investigado a fondo.
-6. **Episodios catastróficos: reducidos pero no eliminados.** Escenarios oficiales: 5/90
-   en el PPO del sueño, 25/120 en el RL directo de 10k y 24/120 en el de 30k; escenarios
-   nuevos: 1/90, 29/120 y 9/120. Causa no identificada por completo.
+6. **Episodios catastróficos: reducidos pero no eliminados.** Con 10 semillas por
+   controlador, escenarios oficiales: 19/300 en el PPO del sueño, 57/300 en el RL directo
+   de 10k y 38/300 en el de 30k; escenarios nuevos: 13/300, 65/300 y 19/300. Tiempo fijo,
+   0/30 en los dos. Causa no identificada por completo.
 7. **Función de valor del PPO directo:** `explained_variance` sigue bajo e inestable
    incluso con `VecNormalize` de recompensa y observaciones, y también con el fix de C1
    (que se descartó como causa); causa no identificada.
@@ -1854,9 +1983,10 @@ handoff anterior.
 
 ## ⚪ No implementado todavía
 
-- Más semillas por método: 3 en el PPO del sueño y 4 en el RL directo. Para el RL directo
+- ~~Más semillas por método: 3 en el PPO del sueño y 4 en el RL directo. Para el RL directo
   harían falta al menos 5 antes de afirmar diferencias de método (ver "Auditoría técnica y
-  correcciones", punto 2).
+  correcciones", punto 2).~~ — **completado (30-sep):** 10 semillas por controlador (ver
+  "Extensión del PPO a 10 semillas por controlador").
 - Curva de desempeño frente a interacciones reales del RL directo (hoy solo hay dos
   puntos: 13,240 y 39,208 por semilla), para saber cuántas interacciones necesita para
   dejar de distinguirse del World Model.
@@ -1867,7 +1997,14 @@ handoff anterior.
 
 ## Qué se estaba haciendo justo antes de este handoff
 
-Auditoría técnica del repositorio y sus correcciones (ver "Auditoría técnica y
+Extensión del PPO a 10 semillas por controlador (ver "Extensión del PPO a 10 semillas por
+controlador"), las Tablas 4a y 4b (costo de inferencia y fidelidad del retorno imaginado de los
+tres modelos temporales: `docs/results/benchmark_temporal_models.json` y `model_fidelity.json`)
+y los demos en la GUI de SUMO (`ver_controlador.py` y `ver_tiempo_fijo.py`, en el escenario
+nuevo 7025). Ya se actualizaron CLAUDE.md y este archivo. **Siguen con las cifras de 3 / 4
+semillas** README.md, TODO.md, docs/PROPUESTA.md y docs/DOCUMENTACION_PROYECTO.md.
+
+Antes, la auditoría técnica del repositorio y sus correcciones (ver "Auditoría técnica y
 correcciones"): fix de C1 y reentrenamiento del RL directo con 4 semillas, evaluación en
 escenarios oficiales y nuevos con un script versionado, reorganización de los checkpoints
 oficiales con el mismo criterio para los tres métodos, Experimento 0 rehecho con 5 semillas
