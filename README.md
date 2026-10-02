@@ -23,22 +23,25 @@ SUMO → estado (26 dims) → Autoencoder → z (16 dims) → LSTM → (ẑ_{t+1
 | 3 | ¿Transformer o TSMixer mejoran al LSTM? | No: el LSTM gana en los 10 horizontes; se mantiene |
 
 **Resultado principal:** el World Model iguala o supera al RL directo usando muchas menos
-interacciones reales con SUMO. Media de todas las semillas de entrenamiento (sueño 3, RL
-directo 4), en SUMO real:
+interacciones reales con SUMO. Media de las 10 semillas de entrenamiento de cada controlador,
+en SUMO real:
 
 | | Escenarios oficiales | Escenarios nuevos (7000–7029) | Interacciones reales por semilla |
 |---|---|---|---|
-| PPO del sueño (World Model) | **-326.79** | **-293.81** | ~4,600 (7,800 sin amortizar el dataset) |
-| RL directo, 10k pasos | -454.51 | -439.73 | 13,240 |
-| RL directo, 30k pasos | -402.13 | -316.59 | 39,208 |
+| PPO del sueño (World Model) | **-326.89** | -305.53 | 7,800 sin compartir el dataset (3,480 compartiéndolo entre las 10 semillas) |
+| RL directo, 10k pasos | -455.02 | -445.39 | 13,240 |
+| RL directo, 30k pasos | -403.83 | **-303.51** | 39,208 |
 | Tiempo fijo | -411.27 | -391.70 | — |
 
 - **Frente al RL directo de 10k**, el World Model es mejor en los dos conjuntos de
-  escenarios.
-- **Frente al de 30k no se detectó una diferencia consistente:** hay brecha a favor del
-  World Model en los escenarios oficiales y ninguna detectable en los nuevos.
-- El World Model lo logra con entre 2.9x y 8.5x menos interacciones reales (1.7x a 5.0x
-  sin amortizar el dataset) y es el método con menos episodios catastróficos.
+  escenarios (t pareada por escenario p = 2.0e-6 y p = 5.0e-11).
+- **Frente al de 30k no se detecta una diferencia de control en ningún conjunto.** En los
+  escenarios oficiales hay una brecha numérica de magnitud similar a la publicada (+76.94),
+  pero con 10 semillas ya no alcanza significancia (t pareada p = 0.068); en los nuevos no hay
+  brecha (-2.02, p = 0.91).
+- El World Model lo logra con entre 1.7x y 5.0x menos interacciones reales sin compartir el
+  dataset (3.8x a 11.3x compartiéndolo entre las 10 semillas). Entre los controladores
+  aprendidos, es el que tiene menos episodios catastróficos.
 
 Detalle y pruebas estadísticas en [`PROJECT_STATUS.md`](PROJECT_STATUS.md); resultados
 por episodio en [`docs/results/`](docs/results/).
@@ -124,8 +127,9 @@ python scripts\evaluate_world_model_tsmixer.py
 python scripts\compare_experiment_3.py
 
 # 5. Controladores. PPO en el sueño (semilla oficial 2 por defecto; las semillas 0 y 1
-#    requieren cambiar ControllerConfig.seed). RL directo: 4 semillas × 10k y 30k pasos,
-#    cada una en su carpeta.
+#    requieren cambiar ControllerConfig.seed). RL directo: semillas 0-3 × 10k y 30k pasos,
+#    cada una en su carpeta. Las semillas 3-9 del sueño y 4-9 del RL directo (extensión a
+#    10 semillas) se entrenan con docs/results/ppo_10_seeds/run_training.sh.
 python training\train_controller.py
 foreach ($s in 0..3) {
   python training\train_controller_direct.py --seed $s --total-timesteps 10000 --output-dir models\checkpoints\direct_10k\seed$s

@@ -55,8 +55,8 @@ SUMO → Estado del tráfico (26 dims) → Autoencoder → z (16 dims)
 - El Autoencoder, entrenado y validado mediante un experimento controlado (Experimento 0), que mostró una mejora moderada y mayoritaria de la predicción de la recompensa frente al estado crudo.
 - El modelo temporal `LatentDynamicsLSTM`, que predice tanto el siguiente estado latente como la recompensa.
 - El `DreamEnvironment`, que permite entrenar un controlador sin tocar SUMO.
-- Un controlador PPO entrenado en el sueño, verificado con 3 semillas de entrenamiento y evaluado en SUMO real.
-- Un baseline de RL directo (PPO entrenado sin pasar por el World Model), con 4 semillas y dos presupuestos (10,000 y 30,000 pasos).
+- Un controlador PPO entrenado en el sueño, verificado con 10 semillas de entrenamiento y evaluado en SUMO real.
+- Un baseline de RL directo (PPO entrenado sin pasar por el World Model), con 10 semillas y dos presupuestos (10,000 y 30,000 pasos).
 - Un escenario de demanda de tráfico asimétrica, diseñado específicamente para que la solución trivial del problema deje de ser óptima y así poder comparar los métodos por calidad de control real.
 - La comparación final entre los dos métodos y dos baselines clásicos (tiempo fijo, regla trivial), en SUMO real.
 - Transformer y TSMixer como alternativas al LSTM (Experimento 3): implementados, entrenados con el mismo protocolo y evaluados; ninguno mejora al LSTM, que se mantiene.
@@ -82,11 +82,11 @@ SUMO → Estado del tráfico (26 dims) → Autoencoder → z (16 dims)
 | Experimento 1 (LSTM vs. baseline persistente, horizontes 1-10) | ✅ Completo | 9 (incluye 3 del selector `build_world_model`) |
 | Experimento 0 (Autoencoder vs. estado crudo), 5 semillas por rama | ✅ Completo | 2 |
 | Dream Environment | ✅ Completo | 10 |
-| Controlador PPO entrenado en el sueño | ✅ Completo, 3 semillas | 9 (compartidos) |
-| Baseline de RL directo | ✅ Completo, 4 semillas × 10k y 30k pasos | 12 |
+| Controlador PPO entrenado en el sueño | ✅ Completo, 10 semillas | 9 (compartidos) |
+| Baseline de RL directo | ✅ Completo, 10 semillas × 10k y 30k pasos | 12 |
 | Evaluación final comparativa (SUMO real) | ✅ Completo | — |
 | Transformer / TSMixer (Experimento 3) | ✅ Completo; se mantiene la LSTM | 14 |
-| RL directo con 3x presupuesto (30,000 pasos) | ✅ Completo, 4 semillas | (compartidos) |
+| RL directo con 3x presupuesto (30,000 pasos) | ✅ Completo, 10 semillas | (compartidos) |
 | Demanda de tráfico variable en el tiempo | ⚪ No implementado | 0 |
 
 **81 tests automatizados, todos pasando**, distribuidos en 16 archivos dentro de `tests/`.
@@ -148,6 +148,7 @@ traffic-world-model/
 │       ├── controller/              # PPO del sueño (oficial: best_model, semilla 2; _seed0_worse, _seed1)
 │       ├── controller_direct/       # PPO directo, 10,000 pasos (oficial: best_model, semilla 0; _seed1.._seed3)
 │       ├── controller_direct_30k/   # PPO directo, 30,000 pasos (oficial: best_model, semilla 1; _seed0, _seed2, _seed3)
+│       ├── controller_10seeds/, controller_direct_10seeds/, controller_direct_30k_10seeds/   # extensión a 10 semillas (sueño 3–9, directo 4–9)
 │       ├── controller_direct_prefix_bug/, controller_direct_30k_prefix_bug/   # RL directo antes del fix de C1 (archivo)
 │       ├── exp0_multiseed/, exp0_multiseed_300ep/   # Experimento 0: 5 semillas por rama (100 y 300 épocas)
 │       └── raw_state_old_protocol/  # Experimento 0 con el protocolo viejo (archivo)
@@ -361,7 +362,7 @@ traffic-world-model/
 ### `training/train_controller_direct.py`
 **Responsabilidad:** entrena PPO directamente contra `TrafficEnvironment` (SUMO real), sin Autoencoder ni Dream Environment — el baseline de RL directo que pide la Sección 18 de la propuesta.
 **Detalle importante:** usa `VecNormalize` para la recompensa **y** para las observaciones — el estado crudo de 26 dimensiones tiene una escala muy desigual entre variables (hasta ~1764 veces de diferencia entre la dimensión más y menos variable), algo que `z` no tiene porque ya viene normalizado por el Autoencoder. Acepta `--seed`, `--total-timesteps` y `--output-dir`, y se niega a escribir en las carpetas oficiales o archivadas sin una bandera explícita.
-**Presupuesto:** 10,000 pasos reales por defecto; también se entrenó con 30,000. Es el único entrenamiento que abre dos simulaciones de SUMO en el mismo proceso (entrenamiento y evaluación periódica), y por eso fue el único afectado por el bug C1. Se reentrenó con el fix, con 4 semillas para cada presupuesto (Sección 11).
+**Presupuesto:** 10,000 pasos reales por defecto; también se entrenó con 30,000. Es el único entrenamiento que abre dos simulaciones de SUMO en el mismo proceso (entrenamiento y evaluación periódica), y por eso fue el único afectado por el bug C1. Se reentrenó con el fix, con 4 semillas para cada presupuesto, y después se extendió a 10 semillas por presupuesto (Sección 11).
 
 ### `evaluation/autoencoder_evaluation.py`
 **Responsabilidad:** funciones reutilizables para medir y visualizar un Autoencoder ya entrenado.
@@ -544,25 +545,26 @@ Los demás bucles (`train_world_model.py` y sus variantes de Transformer y TSMix
 
 ### Resultado final del control en SUMO real
 
-Media de todas las semillas de entrenamiento de cada método (PPO del sueño 3, RL directo 4), con el RL directo reentrenado tras corregir el bug C1 (Sección 19). Se evaluó en los 30 escenarios usados durante el desarrollo (semillas 3000–3014 y 5000–5014) y en 30 escenarios nuevos (7000–7029). Estos últimos son la validación más confiable, porque los primeros se usaron para tomar decisiones de diseño.
+Media de las 10 semillas de entrenamiento de cada controlador (extensión pre-registrada en `docs/results/ppo_10_seeds/ADDENDUM.md`), con el RL directo reentrenado tras corregir el bug C1 (Sección 19). Se evaluó en los 30 escenarios usados durante el desarrollo (semillas 3000–3014 y 5000–5014) y en 30 escenarios nuevos (7000–7029). Estos últimos son la validación más confiable, porque los primeros se usaron para tomar decisiones de diseño.
 
 | Política | Escenarios de evaluación | Escenarios nuevos | Episodios catastróficos (< -600) | Interacciones reales por semilla |
 |---|---|---|---|---|
-| **PPO del sueño (World Model)** | **-326.79** | **-293.81** | 5/90 y 1/90 | **~4,600** (dataset de 4,800 compartido por 3 semillas + 3,000 de selección); 7,800 sin amortizar |
-| PPO directo, 10,000 pasos | -454.51 | -439.73 | 25/120 y 29/120 | 13,240 |
-| PPO directo, 30,000 pasos | -402.13 | -316.59 | 24/120 y 9/120 | 39,208 |
+| **PPO del sueño (World Model)** | **-326.89** | -305.53 | **19/300 y 13/300** | **7,800** sin compartir el dataset (4,800 de dataset + 3,000 de selección); 3,480 compartiéndolo entre las 10 semillas |
+| PPO directo, 10,000 pasos | -455.02 | -445.39 | 57/300 y 65/300 | 13,240 |
+| PPO directo, 30,000 pasos | -403.83 | **-303.51** | 38/300 y 19/300 | 39,208 |
 | Tiempo fijo | -411.27 | -391.70 | 0/30 y 0/30 | — |
 | Regla "pedir fase contraria" | -502.53 | -558.83 | 7/30 y 12/30 | — |
 
-**Pruebas estadísticas** (Welch sobre las medias por semilla; t pareada sobre los 30 escenarios, compartidos por todas las políticas):
-- **Sueño vs. directo 10k:** el World Model es mejor en los dos conjuntos (+127.72 y +145.92; pareado p = 0.0002 y p = 4.5e-9; semilla p = 0.003 y p = 0.077).
-- **Sueño vs. directo 30k:** **no se detectó una diferencia consistente.** Hay brecha en los escenarios de evaluación (+75.34; semilla p = 0.029, pareado p = 0.020), pero no en los nuevos (+22.78; pareado p = 0.54), donde el directo tiene mejor mediana y peores colas.
-- **Directo 10k vs. tiempo fijo:** no lo supera (pareado p = 0.09 y p = 0.015, este último a favor de tiempo fijo).
-- Las pruebas a nivel de episodio (90 episodios de 3 políticas) son pseudorreplicación y solo se reportan como referencia en los archivos de `docs/results/`.
+**Pruebas estadísticas** (Welch sobre las medias por semilla; t pareada y Wilcoxon pareado sobre los 30 escenarios, compartidos por todas las políticas):
+- **Sueño vs. directo 10k:** el World Model es mejor en los dos conjuntos (+128.13 y +139.86; t pareada p = 2.0e-6 y p = 5.0e-11; Welch por semilla p = 2.3e-5 y p = 6.7e-4).
+- **Sueño vs. directo 30k:** **no se detecta una diferencia de control en ningún conjunto.** En los escenarios de evaluación hay una brecha numérica de magnitud similar a la de 3 y 4 semillas (+76.94, antes +75.34), pero ya no es significativa (t pareada p = 0.068, Wilcoxon p = 0.11, Welch p = 0.12). Buena parte la produce la semilla 8 del 30k (media -774.03, un episodio de -10,913); sin ella, +35.80 (t pareada p = 0.0995). En los nuevos no hay brecha (-2.02; t pareada p = 0.91), y el directo tiene mejor mediana.
+- **Sueño vs. tiempo fijo:** el World Model es mejor en los dos conjuntos (+84.37 y +86.17; t pareada p = 1.6e-4 y p = 3.7e-6).
+- **Directo 10k vs. tiempo fijo:** con 10 semillas su media sigue por debajo de tiempo fijo en los dos conjuntos (-455.02 frente a -411.27, y -445.39 frente a -391.70). La prueba pareada de esta comparación no se repitió con 10 semillas; con 4 semillas era p = 0.09 y p = 0.015, este último a favor de tiempo fijo.
+- Las pruebas a nivel de episodio (300 episodios de 10 políticas) son pseudorreplicación y solo se reportan como referencia en los archivos de `docs/results/`.
 
-**Lectura:** el World Model iguala o supera al RL directo con entre 2.9 y 8.5 veces menos interacciones reales (1.7x a 5.0x sin amortizar el dataset), y es el método con menos episodios catastróficos. Su ventaja es de **eficiencia**, no de control cuando el RL directo dispone de presupuesto de sobra. Con 4 semillas, los resultados del RL directo todavía cambian de forma apreciable entre reentrenamientos. El checkpoint "oficial" de cada método es la semilla con mejor media en los escenarios de evaluación (sueño: semilla 2; directo 10k: 0; directo 30k: 1), una etiqueta para los scripts que evalúan un único checkpoint.
+**Lectura:** el World Model iguala o supera al RL directo con entre 1.7 y 5.0 veces menos interacciones reales sin compartir el dataset (la comparación conservadora), o entre 3.8 y 11.3 veces menos compartiéndolo entre las 10 semillas. Entre los controladores aprendidos, es el que tiene menos episodios catastróficos y el más estable entre semillas. Su ventaja es de **eficiencia**, no de control cuando el RL directo dispone de presupuesto de sobra. El checkpoint "oficial" de cada método es la semilla con mejor media en los escenarios de evaluación entre las semillas originales (sueño: semilla 2; directo 10k: 0; directo 30k: 1), una etiqueta para los scripts que evalúan un único checkpoint. Con 10 semillas ya no es la mejor de su método, y por decisión pre-registrada no se reetiqueta.
 
-**Historia de estas cifras, en breve:** con 3 semillas del RL directo entrenadas con el bug C1, el resultado publicado era -326.79 frente a -453.74 (10k) y -335.24 (30k), y se leía como "con el triple de presupuesto el RL directo alcanza al World Model". Con el fix, 4 semillas y escenarios nuevos, esa lectura se precisó: con 30k no hay una diferencia consistente en ningún sentido.
+**Historia de estas cifras, en breve:** con 3 semillas del RL directo entrenadas con el bug C1, el resultado publicado era -326.79 frente a -453.74 (10k) y -335.24 (30k), y se leía como "con el triple de presupuesto el RL directo alcanza al World Model". Con el fix, 4 semillas y escenarios nuevos, esa lectura se precisó: con 30k no hay una diferencia consistente en ningún sentido (brecha significativa en los escenarios de evaluación, p = 0.020, y ninguna en los nuevos). Con 10 semillas por controlador, la brecha en los escenarios de evaluación sigue siendo de magnitud similar, pero ya no es significativa (p = 0.068).
 
 ### Resultado del Experimento 1 (LSTM vs. baseline persistente)
 
@@ -642,9 +644,9 @@ pytest -v
 ## 14. Qué mostrar en la sustentación
 
 1. **La pregunta de investigación y la arquitectura completa** (diagrama de la Sección 5).
-2. **La tabla de la Sección 11**: el World Model supera al RL directo de 10k en los dos conjuntos de escenarios con entre 2.9 y 8.5 veces menos interacciones reales, y frente al de 30k no hay una diferencia consistente. Es una ventaja de eficiencia, dicha con sus matices.
+2. **La tabla de la Sección 11**: el World Model supera al RL directo de 10k en los dos conjuntos de escenarios, y frente al de 30k no se detecta una diferencia de control (brecha numérica similar en los escenarios de evaluación, pero ya no significativa con 10 semillas; ninguna en los nuevos). Lo hace con entre 1.7 y 5.0 veces menos interacciones reales sin compartir el dataset (3.8 a 11.3 compartiéndolo). Es una ventaja de eficiencia, dicha con sus matices.
 3. **La historia de cómo se llegó ahí, no solo el número final** (Secciones 19 y 20): bugs reales encontrados y corregidos con evidencia, incluida una auditoría final que cambió cifras publicadas (el RL directo reentrenado, el Experimento 0 rehecho) y cuyas correcciones se verificaron bit a bit. Eso demuestra rigor metodológico, no solo un resultado.
-4. **La honestidad sobre las limitaciones**: episodios catastróficos que persisten, pocas semillas (3 y 4) con resultados del RL directo que cambian entre reentrenamientos, que con presupuesto de sobra el RL directo deja de distinguirse del World Model, la ventaja moderada (no universal) del Autoencoder, y por qué se mantuvo el LSTM frente a Transformer y TSMixer.
+4. **La honestidad sobre las limitaciones**: episodios catastróficos que persisten, una brecha frente al 30k que depende en buena parte de una sola semilla y no es significativa aun con 10 semillas, que con presupuesto de sobra el RL directo deja de distinguirse del World Model, la ventaja moderada (no universal) del Autoencoder, y por qué se mantuvo el LSTM frente a Transformer y TSMixer.
 
 ---
 
@@ -670,13 +672,13 @@ pytest -v
 **Sobre el modelo y el resultado final:**
 
 6. **¿Qué tan firme es la evidencia estadística?**
- Frente al RL directo de 10k es firme: el World Model es mejor en los dos conjuntos de escenarios, pareado por escenario (p = 0.0002 y p = 4.5e-9) y a nivel de semilla en los escenarios de evaluación (p = 0.003). Frente al de 30k no se detectó una diferencia consistente (p = 0.020 pareado en unos escenarios, p = 0.54 en los nuevos). La prueba que dice algo sobre el método es la de nivel de semilla, con solo 3 y 4 semillas y por tanto poca potencia; las de nivel de episodio son pseudorreplicación, porque 90 episodios de 3 políticas no son 90 observaciones independientes del método.
+ Frente al RL directo de 10k es firme: con 10 semillas por controlador, el World Model es mejor en los dos conjuntos de escenarios, pareado por escenario (t pareada p = 2.0e-6 y p = 5.0e-11) y a nivel de semilla (Welch p = 2.3e-5 y p = 6.7e-4). Frente al de 30k no se detecta una diferencia de control: en los escenarios de evaluación hay una brecha numérica (+76.94), pero no significativa (t pareada p = 0.068), y en los nuevos no hay brecha (p = 0.91). Las pruebas de nivel de episodio son pseudorreplicación, porque 300 episodios de 10 políticas no son 300 observaciones independientes del método.
 
 7. **¿Por qué el PPO directo varía tanto entre semillas?**
- Con 10,000 pasos, algunas semillas se quedan cerca de un óptimo local temprano, la regla "pedir siempre la fase contraria", y su mejor checkpoint se queda en esa meseta. Pasó antes y después del fix de C1 (en la semilla 2 y en la semilla 3, añadida después). Por eso una sola semilla más movió su media de -443.31 a -454.51, y harían falta al menos 5 semillas para comparaciones más firmes. El World Model es mucho más estable entre semillas que el RL directo de 10k (desviación de las medias por semilla de 19.3 frente a 39.7 en los escenarios de evaluación, y 7.1 frente a 110.1 en los nuevos).
+ Con 10,000 pasos, algunas semillas se quedan cerca de un óptimo local temprano, la regla "pedir siempre la fase contraria", y su mejor checkpoint se queda en esa meseta. Pasó antes y después del fix de C1 (en la semilla 2 y en la semilla 3, añadida después). Por eso, con 4 semillas, una sola semilla más movió su media de -443.31 a -454.51, y el resultado se extendió a 10 semillas por controlador. Con 10 semillas, el World Model sigue siendo mucho más estable entre semillas que el RL directo de 10k (desviación de las medias por semilla de 23.3 frente a 56.1 en los escenarios de evaluación, y 22.3 frente a 88.8 en los nuevos). El de 30k también puede colapsar: su semilla 8 tiene un episodio de -10,913, y su desviación es 141.6 en los escenarios de evaluación (22.7 en los nuevos).
 
 8. **¿Cuántas interacciones reales con SUMO usó cada método?**
- El World Model usa ~4,600 por semilla: el dataset de 4,800, recolectado una vez y compartido por las 3 semillas, más 3,000 de la selección del checkpoint en SUMO real (7,800 si el dataset no se amortiza). El RL directo usa 13,240 con 10,000 pasos y 39,208 con 30,000, contando la evaluación periódica que elige su mejor checkpoint. Las razones son 2.9x y 8.5x (1.7x y 5.0x sin amortizar). Con 2.9x el RL directo queda por debajo del World Model; con 8.5x ya no hay una diferencia consistente. El punto exacto en que deja de distinguirse no se midió.
+ El World Model usa 3,000 por semilla en la selección del checkpoint en SUMO real, más el dataset de 4,800, recolectado una vez. Sin compartir el dataset, son 7,800 por semilla (la comparación conservadora); compartiéndolo entre las 10 semillas, 3,480. El RL directo usa 13,240 con 10,000 pasos y 39,208 con 30,000, contando la evaluación periódica que elige su mejor checkpoint. Las razones son 1.7x y 5.0x sin compartir el dataset, o 3.8x y 11.3x compartiéndolo. Con 1.7x el RL directo queda por debajo del World Model; con 5.0x ya no se detecta una diferencia de control. El punto exacto en que deja de distinguirse no se midió.
 
 9. **¿Por qué se mantuvo el LSTM y no Transformer o TSMixer?**
  Porque se probaron (Experimento 3) y el LSTM predice mejor la recompensa en los 10 horizontes. Se pospusieron hasta estabilizar el núcleo, y se ejecutaron después sobre la misma interfaz (`TemporalModel`), sin rediseñar el sistema.
@@ -694,7 +696,7 @@ pytest -v
  Semillas fijas en todo entrenamiento, hiperparámetros (incluidas la semilla y las épocas) junto a cada checkpoint, versiones exactas de las dependencias, 81 tests automatizados, y los resultados de cada episodio versionados en `docs/results/`. Salvedad: la recolección del dataset no fija la semilla de las acciones aleatorias, así que una recolección nueva daría otro dataset (el oficial está respaldado).
 
 14. **Entonces, ¿el World Model controla mejor que el RL directo?**
- Frente al RL directo de 10k, sí, en los dos conjuntos de escenarios y con entre 2.9 y 8.5 veces menos interacciones. Frente al de 30k no se detectó una diferencia consistente. Lo que el World Model demuestra es eficiencia: llega a ese nivel de control con una fracción del contacto con el simulador, que es justo lo que pregunta la pregunta de investigación.
+ Frente al RL directo de 10k, sí, en los dos conjuntos de escenarios, con 1.7 veces menos interacciones sin compartir el dataset (3.8 compartiéndolo entre las 10 semillas). Frente al de 30k no se detecta una diferencia de control: en los escenarios de evaluación hay una brecha numérica similar a la de 3 y 4 semillas, pero ya no significativa con 10 semillas, y en los nuevos no hay brecha. Lo que el World Model demuestra es eficiencia: llega a ese nivel de control con una fracción del contacto con el simulador, que es justo lo que pregunta la pregunta de investigación.
 
 15. **¿Por qué cambiaron algunas cifras al final del proyecto?**
  Una auditoría técnica del repositorio, ejecutando el código, encontró tres problemas: (1) el entrenamiento del RL directo, que abre dos simulaciones a la vez, leía parte de sus estados y recompensas de la simulación equivocada (3.7–4.0% de las transiciones); (2) las dos ramas del Experimento 0 no compartían el protocolo de entrenamiento; (3) la métrica de flujo no medía llegadas. Se corrigieron, se verificó bit a bit que el resto del sistema no cambiaba, y se rehicieron los resultados afectados.
@@ -741,7 +743,7 @@ pytest -v
 
 Este proyecto construyó, de punta a punta, un sistema de World Models para control de semáforos: un Autoencoder que comprime el estado del tráfico, un LSTM que aprende a predecir cómo evoluciona ese estado comprimido, un entorno imaginado (Dream Environment) que permite entrenar un controlador PPO sin tocar el simulador, y un baseline de RL directo para comparar. En el camino se encontraron y corrigieron varios bugs reales — una lectura incorrecta de la fase del semáforo, un puente entre SUMO y PPO que no normalizaba los datos correctamente, y un criterio de selección de "mejor modelo" que no tenía relación con el desempeño real — cada uno diagnosticado con evidencia antes de aplicar el arreglo.
 
-El resultado final, evaluado en SUMO real con todas las semillas de cada método (3 en el sueño, 4 en el RL directo) y en dos conjuntos de escenarios: frente al RL directo con 10,000 pasos, el controlador entrenado en el sueño es mejor, usando entre 2.9 y 8.5 veces menos interacciones reales; frente al RL directo con el triple de presupuesto, no se detectó una diferencia consistente. La ventaja del World Model es de eficiencia, y además es el método con menos episodios catastróficos. El Experimento 0 mostró que el Autoencoder mejora la predicción de forma moderada y mayoritaria, y el Experimento 3 confirmó que el LSTM predice mejor que un Transformer y que un TSMixer. Una auditoría técnica final encontró y corrigió tres problemas que cambiaron cifras publicadas. Es un resultado honesto: no perfecto, pero real, medido con rigor, y con sus límites declarados explícitamente.
+El resultado final, evaluado en SUMO real con las 10 semillas de entrenamiento de cada controlador y en dos conjuntos de escenarios: frente al RL directo con 10,000 pasos, el controlador entrenado en el sueño es mejor, usando 1.7 veces menos interacciones reales sin compartir el dataset (3.8 compartiéndolo); frente al RL directo con el triple de presupuesto, no se detecta una diferencia de control (brecha numérica similar en los escenarios de evaluación, pero ya no significativa; ninguna en los nuevos). La ventaja del World Model es de eficiencia, y además, entre los controladores aprendidos, es el que tiene menos episodios catastróficos. El Experimento 0 mostró que el Autoencoder mejora la predicción de forma moderada y mayoritaria, y el Experimento 3 confirmó que el LSTM predice mejor que un Transformer y que un TSMixer. Una auditoría técnica final encontró y corrigió tres problemas que cambiaron cifras publicadas. Es un resultado honesto: no perfecto, pero real, medido con rigor, y con sus límites declarados explícitamente.
 
 ---
 
@@ -781,5 +783,6 @@ Un resumen cronológico de los hitos más importantes, útil para entender *por 
 14. **Experimento 3**: Transformer y TSMixer implementados sobre la interfaz `TemporalModel`, entrenados con el mismo protocolo que el LSTM y evaluados en el mismo conjunto de prueba. El LSTM gana en los 10 horizontes y se mantiene; el Transformer dejó el hallazgo de que una mejor pérdida de validación no garantiza una mejor predicción de la recompensa.
 15. **Verificación del presupuesto del RL directo**: se reentrenó con el triple de pasos de entrenamiento para ver si más presupuesto cerraba la brecha.
 16. **Auditoría técnica final**: una revisión del repositorio completo ejecutando el código encontró el bug C1 (conexión TraCI global en el entrenamiento del RL directo), el protocolo desigual del Experimento 0 y la métrica de flujo mal medida. Tras corregirlos, el RL directo se reentrenó con 4 semillas y se evaluó también en escenarios nuevos: el World Model supera al RL directo de 10k con entre 2.9 y 8.5 veces menos interacciones, frente al de 30k no hay una diferencia consistente, y el Autoencoder mejora la predicción de forma moderada y mayoritaria.
+17. **Extensión a 10 semillas por controlador (30-sep)**: pre-registrada antes de entrenar (`docs/results/ppo_10_seeds/ADDENDUM.md`), con 19 entrenamientos nuevos y el protocolo oficial sin cambios. Frente al RL directo de 10k, la ventaja del World Model se refuerza. Frente al de 30k, la brecha en los escenarios de evaluación sigue siendo de magnitud similar (+76.94), pero ya no es significativa (t pareada p = 0.068), y en los nuevos no hay brecha: no se detecta una diferencia de control en ningún conjunto. Las razones de interacciones vigentes son 1.7x a 5.0x sin compartir el dataset, o 3.8x a 11.3x compartiéndolo entre las 10 semillas.
 
 Cada uno de estos hitos se investigó con evidencia real (no se aceptó ningún resultado "porque parecía razonable"), y cada corrección se verificó comparando antes/después — es la razón por la que el resultado final, aunque no perfecto, es defendible con confianza.

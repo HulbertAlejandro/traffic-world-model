@@ -82,7 +82,9 @@
       en el directo; verificación con 3 semillas por método. **Resultado: PPO del sueño
       -326.79, PPO directo -453.74, tiempo fijo -411.27 (90/90/30 episodios)**; ventaja
       clara a nivel de episodio, no significativa a nivel de semilla. Ver PROJECT_STATUS.md,
-      sección "Escenario asimétrico, segunda ronda".
+      sección "Escenario asimétrico, segunda ronda". *Superado (26-sep y 30-sep): el
+      resultado vigente es el de 10 semillas por controlador, ítem "Más semillas por método"
+      en "Después".*
 - [x] Más presupuesto de entrenamiento real para el RL directo: verificado con 30,000
       pasos (3x) en las 3 semillas, fuera del repositorio y sin tocar los checkpoints
       oficiales. **Superado el 26-sep**: esos modelos tenían el bug C1; los resultados
@@ -104,6 +106,10 @@
         `docs/results/`. Evaluación adicional en escenarios nuevos (7000–7029).
       - Resultado: frente al RL directo de 10k el World Model es mejor en los dos conjuntos;
         frente al de 30k no se detectó una diferencia consistente.
+        *Superado (30-sep) por el resultado de 10 semillas:* frente al 10k se refuerza;
+        frente al 30k, la brecha en los escenarios oficiales es de magnitud similar
+        (+76.94), pero ya no es significativa (t pareada p = 0.068), y en los nuevos no hay
+        brecha. Ver el ítem "Más semillas por método", en "Después".
       - Checkpoints oficiales con un mismo criterio: sueño semilla 2, RL directo 10k semilla
         0, 30k semilla 1. Los anteriores al fix están archivados en `*_prefix_bug/`.
       - Experimento 0 rehecho con el protocolo compartido, 5 semillas y convergencia
@@ -173,7 +179,10 @@
       conclusión, incluido el ~8.5x. No mide qué aprenderían los PPO reentrenados con
       `"actual_switch"`; con `delta = 0.1` es poco probable que cambie algo, así que la
       opción B no es prioritaria. Ver PROJECT_STATUS.md, sección "Medición: impacto de
-      `phase_penalty="actual_switch"`".
+      `phase_penalty="actual_switch"`". *Nota (30-sep): esa medición se hizo sobre las
+      trayectorias de entonces (3 semillas del sueño, RL directo antes del fix de C1) y no
+      se repitió con 10 semillas. Las razones de interacciones vigentes son 1.7x a 5.0x sin
+      compartir el dataset, o 3.8x a 11.3x compartiéndolo.*
 - [ ] Entender por qué ambos PPO de la primera ronda asimétrica nunca sostenían el verde de
       la fase 1 más de 8 s (la duración mínima posible de una fase); volver a medirlo con los
       checkpoints actuales.
@@ -198,13 +207,19 @@
 
 ## Después (orden según la propuesta del proyecto)
 
-- [ ] Más semillas por método: 3 en el PPO del sueño y 4 en el RL directo, cuyos
-      resultados cambian bastante entre semillas; harían falta al menos 5 para comparar
-      métodos.
+- [x] Más semillas por método: **resuelto el 30-sep, 10 semillas por controlador**
+      (pre-registrado en `docs/results/ppo_10_seeds/ADDENDUM.md`). Medias en los escenarios
+      oficiales y en los nuevos: sueño -326.89 y -305.53, RL directo 10k -455.02 y -445.39,
+      30k -403.83 y -303.51. Frente al 10k, el World Model es mejor en los dos conjuntos
+      (t pareada p = 2.0e-6 y p = 5.0e-11). Frente al 30k no se detecta una diferencia de
+      control en ningún conjunto: en los oficiales hay una brecha numérica similar a la
+      publicada (+76.94), pero ya no significativa (t pareada p = 0.068); en los nuevos no
+      hay brecha (-2.02, p = 0.91). Ver PROJECT_STATUS.md, "Extensión del PPO a 10 semillas
+      por controlador".
 - [ ] Curva de desempeño frente a interacciones reales del RL directo (hoy solo dos
       puntos: 13,240 y 39,208 por semilla).
 - [ ] Medir el momento de los cambios de fase respecto a las colas de cada brazo, comparando
-      episodios catastróficos con buenos (escenarios oficiales: 5/90 en el sueño, 25/120 y
-      24/120 en el RL directo de 10k y 30k).
+      episodios catastróficos con buenos (escenarios oficiales, 10 semillas: 19/300 en el
+      sueño, 57/300 y 38/300 en el RL directo de 10k y 30k).
 - [ ] Demanda variable en el tiempo (la asimetría ya está implementada; la variación
       temporal no).
