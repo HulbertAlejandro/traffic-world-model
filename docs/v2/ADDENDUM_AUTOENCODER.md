@@ -279,3 +279,39 @@ Autoencoder fue neutro con la LSTM, pero empeoró la predicción de la recompens
   Transformer frente al de la LSTM.
 - Ninguna corrida se repite ni se descarta por su resultado. Si alguna llega al tope de épocas,
   se reporta.
+
+### 9.1 Resultado
+
+`docs/results/v2/autoencoder/selection_transformer.json` y `selection_transformer_analysis.json`.
+Los 57 Transformers terminaron por early stopping (épocas 35–117); ninguno llegó al tope. La
+corrida se interrumpió una vez por falta de memoria del sistema y se reanudó: las 18 corridas que
+ya tenían `evaluation.json` no se reentrenaron, y las 4 que estaban a medias se entrenaron de
+cero.
+
+Δ de cada arquitectura frente a ella misma sin comprimir (Δ < 0: la compresión ayuda):
+
+| k | LSTM: Δ, IC 95% | Transformer: Δ, IC 95% | Transformer: varianza entre / dentro de AE |
+|---|---|---|---|
+| 16 | +124.9% [+100.5, +151.8] | +111.6% [+77.1, +151.2] | 0.0079 / 0.026 |
+| 32 | +88.9% [+67.1, +109.5] | +68.2% [+41.2, +99.6] | 0.0077 / 0.025 |
+| 48 | +40.1% [+16.1, +64.3] | +47.1% [+25.5, +70.2] | 0.0005 / 0.024 |
+| 64 | +27.8% [+19.3, +36.9] | +25.5% [+3.9, +52.3] | 0.0129 / 0.031 |
+| 80 | −3.0% [−15.6, +9.5] | +16.9% [−1.0, +37.6] | 0.0012 / 0.034 |
+| 96 | −0.1% [−9.7, +11.0] | +19.3% [+0.1, +41.8] | 0.0004 / 0.047 |
+
+- **Con el Transformer la compresión empeora en todos los tamaños.** El daño baja con k, pero se
+  estabiliza en +17–19% en 80 y 96, en lugar de llegar a 0 como con la LSTM. En k = 80 el IC
+  apenas incluye el 0; en k = 96 apenas lo excluye. El Δ es positivo en los 10 horizontes para
+  los dos tamaños, y los tres Autoencoders lo empeoran por separado (k = 80: +13%, +21%, +17%;
+  k = 96: +18%, +18%, +22%). La varianza está casi toda dentro de cada Autoencoder (entre las
+  semillas del Transformer), no entre Autoencoders.
+- **Replica lo visto en la v1** (exploración del `latent_dim`, Fase 2): el latente es neutro con
+  la LSTM y perjudica al Transformer.
+- Tamaño de menor media de log GM con el Transformer: **k = 80** (7.4105, frente a 7.4309 en 96).
+  Es descriptivo: no cambia el candidato de la LSTM.
+- **Sin comprimir, el Transformer tuvo menor error que la LSTM** (media de log GM 7.2542 frente a
+  7.4247; Δ = −15.7%; log GM por semilla 7.13, 7.40 y 7.22 frente a 7.40, 7.45 y 7.42). Es la
+  inversa del orden de la v1. Con 3 semillas por lado y una semilla del Transformer casi al nivel
+  de la LSTM, es una **brecha no significativa** (Welch sobre los log GM por semilla: t = −2.11,
+  gl ≈ 2.1, p = 0.16). Esta selección no se diseñó para comparar arquitecturas; afirmarlo exigiría
+  una comparación propia, preregistrada y con más semillas.

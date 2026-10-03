@@ -4,13 +4,14 @@
     python scripts/v2/analyze_compression_experiment.py --phase confirmation
 
 Per model, the score is log GM: the log of the geometric mean over horizons 1..10 of the test
-reward_mse. For a latent size, the score is the mean log GM over its (Autoencoder, LSTM) models;
-for the raw branch, the mean over its LSTM seeds.
+reward_mse. For a latent size, the score is the mean log GM over its (Autoencoder, temporal model) models;
+for the raw branch, the mean over its temporal-model seeds. The temporal model is the LSTM, or the
+Transformer of the addendum's section 9 (the results file says which).
 
     delta = exp(mean log GM (z) - mean log GM (raw)) - 1        (< 0: compression helps)
 
 95% CI of delta: two-level cluster bootstrap, 10,000 resamples, numpy seed 0. Each resample draws
-Autoencoders with replacement and, inside each drawn Autoencoder, its LSTM seeds with replacement;
+Autoencoders with replacement and, inside each drawn Autoencoder, its temporal-model seeds with replacement;
 the raw branch draws its seeds with replacement.
 """
 
@@ -133,11 +134,12 @@ def main() -> None:
         out["selected_latent_dim"] = int(min(out["sizes"], key=lambda k: out["sizes"][k]["mean_log_gm_z"]))
     (RESULTS / f"{name}_analysis.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
 
+    arch = data.get("architecture", "lstm")  # LSTM results files predate the field
     print(f"== {args.phase}: raw GM reward_mse {np.round(out['raw']['gm_reward_mse'], 1).tolist()}, "
           f"persistence {out['raw']['persistence_gm_reward_mse']:.1f}")
     for k, s in out["sizes"].items():
         print(f"k={k:>3s}: delta {s['delta']:+.1%} CI95 [{s['ci95'][0]:+.1%}, {s['ci95'][1]:+.1%}] "
-              f"({s['n_ae']} AE x {s['n_z_models'] // s['n_ae']} LSTM vs {s['n_raw']} raw) | "
+              f"({s['n_ae']} AE x {s['n_z_models'] // s['n_ae']} {arch} vs {s['n_raw']} raw) | "
               f"var between AE {s['variance_between_ae']:.4f}, within {s['variance_within_ae']}, "
               f"raw {s['variance_raw_seeds']:.4f} | AE val mse {np.mean(s['ae_validation_mse']):.4f}")
     if "selected_latent_dim" in out:

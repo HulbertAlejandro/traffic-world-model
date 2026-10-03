@@ -1,0 +1,28 @@
+{
+  "architecture": "transformer",
+  "latent_dim": 32,
+  "action_dim": 8,
+  "sequence_length": 16,
+  "d_model": 128,
+  "nhead": 4,
+  "num_layers": 2,
+  "dim_feedforward": 256,
+  "dropout": 0.0,
+  "seed": 2,
+  "protocol": {
+    "optimizer": "adam",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 32,
+    "max_epochs": 300,
+    "early_stopping_patience": 15,
+    "reward_loss_weight": 1.0,
+    "sequence_length": 16,
+    "hidden_dim": 128,
+    "action_dim": 8
+  },
+  "best_epoch": 40,
+  "stopped_epoch": 55,
+  "best_validation_loss": 0.6563397089640299,
+  "hit_max_epochs": false
+}
