@@ -1,0 +1,14 @@
+{
+  "input_dim": 104,
+  "latent_dim": 80,
+  "seed": 0,
+  "best_epoch": 92,
+  "best_validation_mse": 0.002446287285743488,
+  "protocol": {
+    "hidden_dim": 104,
+    "activation": "relu",
+    "learning_rate": 0.001,
+    "batch_size": 32,
+    "epochs": 100
+  }
+}

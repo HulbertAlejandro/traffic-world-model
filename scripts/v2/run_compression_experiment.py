@@ -76,7 +76,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--phase", required=True, choices=sorted(PHASES))
     parser.add_argument("--latent-dim", type=int, help="confirmation only: the size selected in the selection phase")
-    parser.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 1))
+    # 4 by default: 8 PyTorch processes ran this 7.7 GB machine out of memory (CLAUDE.md).
+    parser.add_argument("--workers", type=int, default=4)
     args = parser.parse_args()
     if (args.phase == "confirmation") != (args.latent_dim is not None):
         parser.error("--latent-dim is required for confirmation and not allowed for selection")

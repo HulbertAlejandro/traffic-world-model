@@ -311,6 +311,12 @@ No existen (a propósito): `utils/`, `notebooks/`, `experiments/`, `papers/`.
   eventos `Microsoft-Windows-CodeIntegrity/Operational`. En pytest se ve como
   `FatalTraCIError: Could not connect` en los tests que usan SUMO, con unos 2 minutos por test.
   No cambiar la configuración de seguridad de Windows sin aprobación del autor.
+- Nota operativa (memoria): esta máquina tiene 7.7 GB de RAM. Para entrenamientos de PyTorch en
+  paralelo, el valor por defecto es **4 procesos**, en cualquier script nuevo de este tipo. Se
+  sube a 6–8 solo si se confirma explícitamente que no hay otras aplicaciones pesadas abiertas.
+  Con 8 procesos, la fase de selección de la Fase 2 de la v2 dejó el sistema sin memoria y Claude
+  Code la detuvo (observado una vez, con Edge, VS Code y Steam abiertos). Las simulaciones de
+  SUMO sin PyTorch (validaciones de las Fases 0 y 1) corrieron sin problemas con 10 procesos.
 
 ## Pendiente de verificar (no confirmado, no inventar)
 
