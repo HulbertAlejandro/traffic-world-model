@@ -19,7 +19,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from environments.corridor_environment import CorridorTrafficEnvironment
 
-SEED_A, SEED_B = 20001, 20002
+SEED_A, SEED_B = 19900, 19901
 _rng = np.random.default_rng(0)
 ACTIONS_A = _rng.integers(0, 2, size=(14, 4))
 ACTIONS_B = _rng.integers(0, 2, size=(14, 4))

@@ -118,7 +118,7 @@ asignación de crédito por intersección si una fase posterior la necesita.
 ## 4. Conexiones concurrentes
 
 `tests/test_corridor_concurrent_environments.py` abre dos `CorridorTrafficEnvironment` en el
-mismo proceso, con semillas y offsets de pulso distintos (20001 y 20002), y los avanza
+mismo proceso, con semillas y offsets de pulso distintos (19900 y 19901), y los avanza
 intercalados 14 pasos con acciones distintas. Los estados y las recompensas de cada uno son
 idénticos, bit a bit, a los de correrlo solo. Como el segundo entorno arranca al final, el módulo
 `traci` global apunta a él: si algún componente leyera por el módulo global (el bug C1), el

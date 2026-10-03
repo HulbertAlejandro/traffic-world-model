@@ -115,11 +115,11 @@ def test_state_columns_follow_v1_layout_per_signal():
 def test_pulse_offset_comes_from_the_episode_seed():
     env = CorridorTrafficEnvironment()
     try:
-        first, info_a = env.reset(seed=20001)
+        first, info_a = env.reset(seed=19900)
         steps_a = [env.step([KEEP] * 4)[0] for _ in range(12)]
-        again, info_b = env.reset(seed=20001)
+        again, info_b = env.reset(seed=19900)
         steps_b = [env.step([KEEP] * 4)[0] for _ in range(12)]
-        _, info_c = env.reset(seed=20002)
+        _, info_c = env.reset(seed=19901)
     finally:
         env.close()
     assert info_a["pulse_offset"] == info_b["pulse_offset"] != info_c["pulse_offset"]

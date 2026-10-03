@@ -68,3 +68,6 @@ models/checkpoints/controller_direct_10seeds/**/*.pkl
 models/checkpoints/controller_direct_30k_10seeds/**/*.zip
 models/checkpoints/controller_direct_30k_10seeds/**/*.npz
 models/checkpoints/controller_direct_30k_10seeds/**/*.pkl
+
+# v2 dataset (docs/v2/ADDENDUM_DATASET.md): only the manifest in docs/results/v2/dataset/ is versioned
+datasets/v2/
