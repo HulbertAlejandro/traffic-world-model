@@ -212,3 +212,29 @@ reconstruir el estado sin pérdida: es una compresión solo nominal, que quita l
 {16, 32, 48, 64, 80, 96}, el de menor media de log GM, con la misma regla de empate. Ese tamaño
 pasa a la fase de confirmación, que sigue igual que en 3.2, **sujeto a la aprobación explícita del
 autor**. Se reportan los resultados de 80 y de 96 lado a lado.
+
+### 8.1 Resultado de k = 96
+
+`docs/results/v2/autoencoder/selection_k96.json` y `selection_k96_analysis.json`. Las 3 LSTM sin
+comprimir son las mismas de la selección (no se reentrenaron), así que el Δ es directamente
+comparable con el de los otros cinco tamaños.
+
+| | k = 80 | k = 96 |
+|---|---|---|
+| Δ (h = 1..10) | −3.0%, IC [−15.6%, +9.5%] | −0.1%, IC [−9.7%, +11.0%] |
+| Media de log GM (z); sin comprimir: 7.4247 | 7.3938 | 7.4238 |
+| Δ por Autoencoder (semillas 0, 1, 2) | −14.2%, +9.6%, −3.0% | −6.2%, +0.1%, +6.3% |
+| Varianza entre / dentro de Autoencoders | 0.015 / 0.014 | 0.004 / 0.023 |
+| MSE de reconstrucción en validación | 0.0024–0.0031 | 0.0023–0.0026 |
+
+- **k = 96 no mejora sobre k = 80.** Los dos IC incluyen el 0: ninguno muestra que la compresión
+  ayude ni que empeore, y la diferencia entre ellos (0.03 en log GM) es mucho menor que los IC.
+- **La tendencia se aplana entre 80 y 96**: Δ = +125%, +89%, +40%, +28%, −3.0% y −0.1% para
+  16, 32, 48, 64, 80 y 96. Comprimir mucho (k ≤ 64) empeora; con poca compresión, el efecto es
+  cercano a 0.
+- k = 96 no reconstruye sin pérdida: su error de reconstrucción es del orden del de k = 80, y
+  ningún Autoencoder llegó al tope de épocas. Ninguna LSTM llegó al tope (pararon entre las
+  épocas 99 y 206).
+- **Bajo la regla enmendada, el candidato para la confirmación sigue siendo k = 80** (menor media
+  de log GM entre los seis tamaños, sin empate). El "selected latent_dim: 96" de
+  `selection_k96_analysis.json` es un artefacto del script: ese archivo solo contiene k = 96.
