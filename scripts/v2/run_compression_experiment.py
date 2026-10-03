@@ -8,8 +8,9 @@ Selection:    latent sizes 16/32/48/64/80 x Autoencoder seeds 0-2 x LSTM seeds 0
 Confirmation: the selected size x Autoencoder seeds 100-104 x LSTM seeds 100-104 (25 z models),
               raw branch LSTM seeds 100-109 (fresh seeds: the selection runs are not reused).
 
-Transformer repeat of the selection (addendum section 9): --architecture transformer reuses the
-selection Autoencoders and encoded splits and trains Transformers in tf_* folders:
+Transformer / TSMixer repeats of the selection (addendum sections 9 and 10): --architecture
+transformer|tsmixer reuses the selection Autoencoders and encoded splits and trains the models in
+tf_* / tsm_* folders:
 
     python scripts/v2/run_compression_experiment.py --phase selection --architecture transformer         --sizes 16 32 48 64 80 96 --tag transformer
 
@@ -89,8 +90,8 @@ def main() -> None:
                         help="selection only: run only these latent sizes (post-hoc amendment, "
                              "ADDENDUM_AUTOENCODER.md section 8); results go to <phase>_<tag>.json")
     parser.add_argument("--tag", help="suffix of the results file, required with --sizes or a non-LSTM architecture")
-    parser.add_argument("--architecture", choices=("lstm", "transformer"), default="lstm",
-                        help="temporal model; non-LSTM runs go to <prefix>_* folders (addendum section 9)")
+    parser.add_argument("--architecture", choices=("lstm", "transformer", "tsmixer"), default="lstm",
+                        help="temporal model; non-LSTM runs go to <prefix>_* folders (addendum sections 9-10)")
     args = parser.parse_args()
     if args.architecture != "lstm" and not args.tag:
         parser.error("a non-LSTM architecture needs --tag (do not overwrite the LSTM results)")
@@ -114,7 +115,7 @@ def main() -> None:
         ae_keys = [(k, a) for k in sizes for a in plan["ae_seeds"]]
         ae_meta = dict(zip(ae_keys, pool.map(_ae_job, *zip(*[(k, a, str(root / f"ae_k{k}_s{a}")) for k, a in ae_keys]))))
         print(f"{len(ae_keys)} autoencoders ready ({time.perf_counter() - t0:.0f} s)", flush=True)
-        arch, prefix = args.architecture, {"lstm": "", "transformer": "tf_"}[args.architecture]
+        arch, prefix = args.architecture, {"lstm": "", "transformer": "tf_", "tsmixer": "tsm_"}[args.architecture]
         jobs = [("z", str(root / f"ae_k{k}_s{a}"), s, str(root / f"{prefix}z_k{k}_ae{a}_s{s}"), k, arch)
                 for k in sizes for a in plan["ae_seeds"] for s in plan["lstm_seeds"]]
         jobs += [("raw", str(raw_dir), s, str(root / f"{prefix}raw_s{s}"), None, arch) for s in plan["raw_seeds"]]

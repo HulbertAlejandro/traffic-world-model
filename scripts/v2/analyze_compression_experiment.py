@@ -6,7 +6,7 @@
 Per model, the score is log GM: the log of the geometric mean over horizons 1..10 of the test
 reward_mse. For a latent size, the score is the mean log GM over its (Autoencoder, temporal model) models;
 for the raw branch, the mean over its temporal-model seeds. The temporal model is the LSTM, or the
-Transformer of the addendum's section 9 (the results file says which).
+Transformer / TSMixer of the addendum's sections 9-10 (the results file says which).
 
     delta = exp(mean log GM (z) - mean log GM (raw)) - 1        (< 0: compression helps)
 

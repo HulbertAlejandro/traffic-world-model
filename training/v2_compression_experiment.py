@@ -7,9 +7,10 @@ Pre-registered in docs/v2/ADDENDUM_AUTOENCODER.md. Two branches, ONE training pa
 
 Both branches train the temporal model through the same function, ``train_temporal_model``,
 with the same ``LSTM_PROTOCOL`` object; the only thing that differs is the input dimension
-(k or 104). The temporal model is the LSTM, or the Transformer for the repeat of the
-selection phase in section 9 of the addendum: same optimizer, epochs and early stopping,
-its own architecture hyperparameters (``TRANSFORMER_HPARAMS``, v1's Experimento 3 values).
+(k or 104). The temporal model is the LSTM, or the Transformer / TSMixer for the repeats of
+the selection phase in sections 9 and 10 of the addendum: same optimizer, epochs and early
+stopping, their own architecture hyperparameters (``TRANSFORMER_HPARAMS``, ``TSMIXER_HPARAMS``,
+v1's Experimento 3 values).
 tests/test_v2_compression_protocol.py checks this. The per-epoch loop, the validation
 loss, the reward scaler (train split only) and the seeding are v1's own functions from
 training/train_world_model.py, imported, not copied (the v1 raw branch once lost weight
@@ -31,10 +32,11 @@ from datasets.latent_sequence_dataset import LatentSequenceDataset
 from datasets.transition_dataset import TransitionDataset
 from evaluation.world_model_evaluation import load_episodes, rollout_episode
 from models.representation import Autoencoder
-from models.world_model import LatentDynamicsLSTM, LatentDynamicsTransformer
+from models.world_model import LatentDynamicsLSTM, LatentDynamicsTransformer, LatentDynamicsTSMixer
 from training import train_autoencoder as v1_ae
 from training import train_world_model as v1_lstm
 from training import train_world_model_transformer as v1_tf
+from training import train_world_model_tsmixer as v1_tsm
 
 STATE_DIM = 104
 ACTION_DIM = 8          # per-signal one-hot of the 4 keep/switch decisions (encode_actions)
@@ -67,6 +69,14 @@ class TransformerHParams:
 
 
 @dataclass(frozen=True)
+class TSMixerHParams:
+    """Architecture only; training is LSTM_PROTOCOL. hidden_dim is v1's WorldModelConfig default."""
+    hidden_dim: int = 128
+    num_blocks: int = v1_tsm.NUM_BLOCKS            # 2
+    dropout: float = v1_tsm.DROPOUT                # 0.0
+
+
+@dataclass(frozen=True)
 class AutoencoderProtocol:
     hidden_dim: int = STATE_DIM        # as wide as the input: the latent layer is the only bottleneck
     activation: str = "relu"
@@ -77,7 +87,8 @@ class AutoencoderProtocol:
 
 LSTM_PROTOCOL = LSTMProtocol()
 TRANSFORMER_HPARAMS = TransformerHParams()
-ARCHITECTURES = ("lstm", "transformer")
+TSMIXER_HPARAMS = TSMixerHParams()
+ARCHITECTURES = ("lstm", "transformer", "tsmixer")
 AE_PROTOCOL = AutoencoderProtocol()
 
 
@@ -144,6 +155,8 @@ def _architecture_hparams(architecture: str, protocol: LSTMProtocol) -> dict:
         return {"hidden_dim": protocol.hidden_dim}
     if architecture == "transformer":
         return asdict(TRANSFORMER_HPARAMS)
+    if architecture == "tsmixer":
+        return asdict(TSMIXER_HPARAMS)
     raise ValueError(f"unknown architecture {architecture!r}")
 
 
@@ -155,6 +168,9 @@ def build_temporal_model(hp: dict) -> nn.Module:
     if hp["architecture"] == "transformer":
         return LatentDynamicsTransformer(d_model=hp["d_model"], nhead=hp["nhead"], num_layers=hp["num_layers"],
                                          dim_feedforward=hp["dim_feedforward"], dropout=hp["dropout"], **common)
+    if hp["architecture"] == "tsmixer":
+        return LatentDynamicsTSMixer(hidden_dim=hp["hidden_dim"], num_blocks=hp["num_blocks"], dropout=hp["dropout"],
+                                     **common)
     raise ValueError(f"unknown architecture {hp['architecture']!r}")
 
 

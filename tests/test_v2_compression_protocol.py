@@ -4,7 +4,7 @@ SAME protocol, differing only in the input dimension (docs/v2/ADDENDUM_AUTOENCOD
 In v1 the raw branch once trained without weight decay and early stopping because its loop was a
 copy of the z branch's. Here both branches go through
 training.v2_compression_experiment.train_temporal_model with the same LSTMProtocol object; these tests
-keep it that way, for the LSTM and for the Transformer of the addendum's section 9.
+keep it that way, for the LSTM and for the Transformer / TSMixer of the addendum's sections 9-10.
 """
 
 import dataclasses
@@ -43,6 +43,13 @@ def test_transformer_hparams_are_v1_experiment_3():
     import training.train_world_model_transformer as v1_tf
     assert dataclasses.astuple(exp.TRANSFORMER_HPARAMS) == (
         v1_tf.D_MODEL, v1_tf.NHEAD, v1_tf.NUM_LAYERS, v1_tf.DIM_FEEDFORWARD, v1_tf.DROPOUT)
+
+
+def test_tsmixer_hparams_are_v1_experiment_3():
+    import training.train_world_model_tsmixer as v1_tsm
+    from configs import WorldModelConfig
+    hidden_default = {f.name: f.default for f in dataclasses.fields(WorldModelConfig)}["hidden_dim"]
+    assert dataclasses.astuple(exp.TSMIXER_HPARAMS) == (hidden_default, v1_tsm.NUM_BLOCKS, v1_tsm.DROPOUT)
 
 
 def test_train_temporal_model_applies_weight_decay_and_early_stopping_from_the_protocol():

@@ -315,3 +315,44 @@ cero.
   de la LSTM, es una **brecha no significativa** (Welch sobre los log GM por semilla: t = −2.11,
   gl ≈ 2.1, p = 0.16). Esta selección no se diseñó para comparar arquitecturas; afirmarlo exigiría
   una comparación propia, preregistrada y con más semillas.
+
+## 10. Repetición de la fase de selección con TSMixer
+
+**Escrita antes de entrenar ningún TSMixer de la v2.** A pedido del autor, después de la sección 9
+y antes de las decisiones pendientes sobre el Transformer y de la confirmación de k = 80 con la
+LSTM. Es **descriptiva**, como la sección 9: no cambia el candidato de la LSTM ni decide nada por
+sí sola, y no compara arquitecturas.
+
+**Motivo.** Completar las tres arquitecturas de la v1. En la exploración del `latent_dim` de la
+v1 (Fase 2), el latente empeoró la predicción de la recompensa con TSMixer (+42%), más que con el
+Transformer (+33%).
+
+**Diseño.**
+
+| Rama | Diseño | Modelos nuevos |
+|---|---|---|
+| Comprimida | 6 tamaños (16, 32, 48, 64, 80, 96) × 3 Autoencoders (semillas 0–2) × 3 TSMixer (semillas 0–2) | 54 |
+| Sin comprimir | 3 TSMixer (semillas 0–2) | 3 |
+
+- **Se reutilizan** los 18 Autoencoders de la selección y sus splits codificados, y los splits sin
+  comprimir (`raw_data/`). **No se reutilizan** los modelos sin comprimir de la LSTM ni del
+  Transformer: la referencia de TSMixer es TSMixer sobre el estado de 104.
+- **Protocolo de entrenamiento idéntico al de la LSTM y el Transformer** (`LSTM_PROTOCOL`, el
+  mismo objeto): Adam, lr 1e-3, weight decay 1e-4, lotes de 32, ventana de 16, tope de 300 épocas,
+  paciencia 15, la misma pérdida y el mismo `reward_scaler` (solo con el split de entrenamiento).
+  Mismo camino de entrenamiento (`train_temporal_model`); entre las dos ramas solo cambia la
+  dimensión de entrada. Lo verifica `tests/test_v2_compression_protocol.py`.
+- **Hiperparámetros propios de TSMixer:** los del Experimento 3 de la v1
+  (`training/train_world_model_tsmixer.py`): dimensión oculta 128 (el valor por defecto de
+  `WorldModelConfig`), 2 bloques, dropout 0. No se ajustan para la v2. El tope de 300 importa
+  aquí: en la v1, TSMixer no convergía en 100 épocas.
+- **Evaluación y análisis:** los mismos de la sección 3 (`reward_mse` en rollouts de h = 1..10
+  con las acciones reales sobre el test, log GM, Δ, IC por bootstrap en dos niveles, varianza
+  entre y dentro de Autoencoders). Resultados en `selection_tsmixer.json` y
+  `selection_tsmixer_analysis.json`. Pesos en `tsm_*` dentro de la carpeta de la selección.
+- **Se reporta además, como descripción:** el tamaño de menor media de log GM con TSMixer (misma
+  regla de empate) y la comparación de Δ por tamaño con la LSTM y el Transformer. No se compara
+  el error absoluto entre arquitecturas: eso queda para una comparación propia, si se decide.
+- Ninguna corrida se repite ni se descarta por su resultado. Si alguna llega al tope de épocas,
+  se reporta. Si la corrida se interrumpe (por ejemplo, por memoria), se reanuda sin reentrenar
+  las corridas que ya tengan `evaluation.json`, y se reporta.
