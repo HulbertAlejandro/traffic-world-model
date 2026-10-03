@@ -2,11 +2,14 @@
 
 Pre-registered in docs/v2/ADDENDUM_AUTOENCODER.md. Two branches, ONE training path:
 
-- branch "z":   Autoencoder (seed a, latent size k) -> z -> LSTM (seed s)
-- branch "raw": normalized 104-dim state            -> LSTM (seed s)
+- branch "z":   Autoencoder (seed a, latent size k) -> z -> temporal model (seed s)
+- branch "raw": normalized 104-dim state            -> temporal model (seed s)
 
-Both branches train the LSTM through the same function, ``train_lstm``, with the same
-``LSTM_PROTOCOL`` object; the only thing that differs is the input dimension (k or 104).
+Both branches train the temporal model through the same function, ``train_temporal_model``,
+with the same ``LSTM_PROTOCOL`` object; the only thing that differs is the input dimension
+(k or 104). The temporal model is the LSTM, or the Transformer for the repeat of the
+selection phase in section 9 of the addendum: same optimizer, epochs and early stopping,
+its own architecture hyperparameters (``TRANSFORMER_HPARAMS``, v1's Experimento 3 values).
 tests/test_v2_compression_protocol.py checks this. The per-epoch loop, the validation
 loss, the reward scaler (train split only) and the seeding are v1's own functions from
 training/train_world_model.py, imported, not copied (the v1 raw branch once lost weight
@@ -28,9 +31,10 @@ from datasets.latent_sequence_dataset import LatentSequenceDataset
 from datasets.transition_dataset import TransitionDataset
 from evaluation.world_model_evaluation import load_episodes, rollout_episode
 from models.representation import Autoencoder
-from models.world_model import LatentDynamicsLSTM
+from models.world_model import LatentDynamicsLSTM, LatentDynamicsTransformer
 from training import train_autoencoder as v1_ae
 from training import train_world_model as v1_lstm
+from training import train_world_model_transformer as v1_tf
 
 STATE_DIM = 104
 ACTION_DIM = 8          # per-signal one-hot of the 4 keep/switch decisions (encode_actions)
@@ -53,6 +57,16 @@ class LSTMProtocol:
 
 
 @dataclass(frozen=True)
+class TransformerHParams:
+    """Architecture only; training (optimizer, epochs, early stopping, ...) is LSTM_PROTOCOL."""
+    d_model: int = v1_tf.D_MODEL                   # 128
+    nhead: int = v1_tf.NHEAD                       # 4
+    num_layers: int = v1_tf.NUM_LAYERS             # 2
+    dim_feedforward: int = v1_tf.DIM_FEEDFORWARD   # 256
+    dropout: float = v1_tf.DROPOUT                 # 0.0
+
+
+@dataclass(frozen=True)
 class AutoencoderProtocol:
     hidden_dim: int = STATE_DIM        # as wide as the input: the latent layer is the only bottleneck
     activation: str = "relu"
@@ -62,6 +76,8 @@ class AutoencoderProtocol:
 
 
 LSTM_PROTOCOL = LSTMProtocol()
+TRANSFORMER_HPARAMS = TransformerHParams()
+ARCHITECTURES = ("lstm", "transformer")
 AE_PROTOCOL = AutoencoderProtocol()
 
 
@@ -122,10 +138,29 @@ def reconstruction_report(ae: Autoencoder, val_npz: Path) -> dict:
     return {"mse": float(per_col.mean()), "per_column": per_col.round(6).tolist()}
 
 
-# --------------------------------------------------------------------------- LSTM (both branches)
-def train_lstm(train_seq: Path, val_seq: Path, input_dim: int, seed: int, out_dir: Path,
-               protocol: LSTMProtocol = LSTM_PROTOCOL) -> dict:
-    """The single LSTM training path of both branches. ``input_dim`` is k (branch z) or 104 (raw)."""
+# --------------------------------------------------------------------------- temporal model (both branches)
+def _architecture_hparams(architecture: str, protocol: LSTMProtocol) -> dict:
+    if architecture == "lstm":
+        return {"hidden_dim": protocol.hidden_dim}
+    if architecture == "transformer":
+        return asdict(TRANSFORMER_HPARAMS)
+    raise ValueError(f"unknown architecture {architecture!r}")
+
+
+def build_temporal_model(hp: dict) -> nn.Module:
+    """Rebuild the model a world_model_best.json describes (training and evaluation share it)."""
+    common = {"latent_dim": hp["latent_dim"], "action_dim": hp["action_dim"], "sequence_length": hp["sequence_length"]}
+    if hp["architecture"] == "lstm":
+        return LatentDynamicsLSTM(hidden_dim=hp["hidden_dim"], **common)
+    if hp["architecture"] == "transformer":
+        return LatentDynamicsTransformer(d_model=hp["d_model"], nhead=hp["nhead"], num_layers=hp["num_layers"],
+                                         dim_feedforward=hp["dim_feedforward"], dropout=hp["dropout"], **common)
+    raise ValueError(f"unknown architecture {hp['architecture']!r}")
+
+
+def train_temporal_model(train_seq: Path, val_seq: Path, input_dim: int, seed: int, out_dir: Path,
+                         protocol: LSTMProtocol = LSTM_PROTOCOL, architecture: str = "lstm") -> dict:
+    """The single training path of both branches. ``input_dim`` is k (branch z) or 104 (raw)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     v1_lstm._set_seeds(seed)
     device = torch.device("cpu")
@@ -136,14 +171,13 @@ def train_lstm(train_seq: Path, val_seq: Path, input_dim: int, seed: int, out_di
                               batch_size=protocol.batch_size, shuffle=True)
     val_loader = DataLoader(LatentSequenceDataset(val_seq, protocol.sequence_length, protocol.action_dim),
                             batch_size=protocol.batch_size, shuffle=False)
-    model = LatentDynamicsLSTM(latent_dim=input_dim, action_dim=protocol.action_dim, hidden_dim=protocol.hidden_dim,
-                               sequence_length=protocol.sequence_length)
+    hparams = {"architecture": architecture, "latent_dim": input_dim, "action_dim": protocol.action_dim,
+               "sequence_length": protocol.sequence_length, **_architecture_hparams(architecture, protocol),
+               "seed": seed, "protocol": asdict(protocol)}
+    model = build_temporal_model(hparams)
     if protocol.optimizer != "adam":
         raise ValueError(f"unsupported optimizer {protocol.optimizer!r}")
     optimizer = optim.Adam(model.parameters(), lr=protocol.learning_rate, weight_decay=protocol.weight_decay)
-    hparams = {"architecture": "lstm", "latent_dim": input_dim, "action_dim": protocol.action_dim,
-               "sequence_length": protocol.sequence_length, "hidden_dim": protocol.hidden_dim, "seed": seed,
-               "protocol": asdict(protocol)}
     best, best_epoch, since, history = float("inf"), 0, 0, []
     for epoch in range(1, protocol.max_epochs + 1):
         train_loss = v1_lstm.train_one_epoch(model, train_loader, optimizer, device, reward_mean, reward_std)
@@ -164,7 +198,8 @@ def train_lstm(train_seq: Path, val_seq: Path, input_dim: int, seed: int, out_di
 
 
 def train_branch(branch: str, train_seq: Path, val_seq: Path, seed: int, out_dir: Path,
-                 latent_dim: int | None = None, protocol: LSTMProtocol = LSTM_PROTOCOL) -> dict:
+                 latent_dim: int | None = None, protocol: LSTMProtocol = LSTM_PROTOCOL,
+                 architecture: str = "lstm") -> dict:
     """Entry point of each branch. The ONLY difference between branches is input_dim."""
     if branch == "z":
         if latent_dim is None:
@@ -176,7 +211,7 @@ def train_branch(branch: str, train_seq: Path, val_seq: Path, seed: int, out_dir
         input_dim = STATE_DIM
     else:
         raise ValueError(f"unknown branch {branch!r}")
-    return train_lstm(train_seq, val_seq, input_dim, seed, out_dir, protocol)
+    return train_temporal_model(train_seq, val_seq, input_dim, seed, out_dir, protocol, architecture)
 
 
 # --------------------------------------------------------------------------- evaluation
@@ -187,8 +222,7 @@ def evaluate(model_dir: Path, test_seq: Path) -> dict:
     per-episode reward MSE at every horizon, and the persistence baseline."""
     hp = json.loads((model_dir / "world_model_best.json").read_text(encoding="utf-8"))
     scaler = json.loads((model_dir / "reward_scaler.json").read_text(encoding="utf-8"))
-    model = LatentDynamicsLSTM(latent_dim=hp["latent_dim"], action_dim=hp["action_dim"], hidden_dim=hp["hidden_dim"],
-                               sequence_length=hp["sequence_length"])
+    model = build_temporal_model(hp)
     model.load_state_dict(torch.load(model_dir / "world_model_best.pt", map_location="cpu", weights_only=True))
     model.eval()
     per_episode, pooled = {}, {h: [] for h in range(1, MAX_HORIZON + 1)}

@@ -238,3 +238,44 @@ comparable con el de los otros cinco tamaños.
 - **Bajo la regla enmendada, el candidato para la confirmación sigue siendo k = 80** (menor media
   de log GM entre los seis tamaños, sin empate). El "selected latent_dim: 96" de
   `selection_k96_analysis.json` es un artefacto del script: ese archivo solo contiene k = 96.
+
+## 9. Repetición de la fase de selección con el Transformer
+
+**Escrita antes de entrenar ningún Transformer de la v2.** A pedido del autor, antes de la
+confirmación de k = 80 con la LSTM. Es **descriptiva**: no cambia el candidato de la LSTM ni decide
+nada por sí sola. Su resultado se compara con el de la LSTM antes de decidir el paso siguiente.
+
+**Motivo.** En la v1 (exploración del `latent_dim`, `docs/EXPLORACION_LATENT_DIM.md`, Fase 2) el
+Autoencoder fue neutro con la LSTM, pero empeoró la predicción de la recompensa con el Transformer
+(+33%). Esta repetición pregunta si en el estado de 104 columnas pasa lo mismo.
+
+**Diseño.**
+
+| Rama | Diseño | Modelos nuevos |
+|---|---|---|
+| Comprimida | 6 tamaños (16, 32, 48, 64, 80, 96) × 3 Autoencoders (semillas 0–2) × 3 Transformers (semillas 0–2) | 54 |
+| Sin comprimir | 3 Transformers (semillas 0–2) | 3 |
+
+- **Se reutilizan** los 18 Autoencoders de la selección y sus splits codificados, y los splits sin
+  comprimir (`raw_data/`). El Autoencoder se entrena sin mirar al modelo temporal, así que es el
+  mismo para los dos.
+- **No se reutilizan** las LSTM sin comprimir: la referencia de cada arquitectura es la misma
+  arquitectura sobre el estado de 104. Se entrenan 3 Transformers sin comprimir nuevos.
+- **Protocolo de entrenamiento idéntico al de la LSTM** (`LSTM_PROTOCOL`, el mismo objeto): Adam,
+  lr 1e-3, weight decay 1e-4, lotes de 32, ventana de 16, tope de 300 épocas, paciencia 15, la
+  misma pérdida y el mismo `reward_scaler` (solo con el split de entrenamiento). El único camino de
+  entrenamiento es `train_temporal_model`, y entre las dos ramas solo cambia la dimensión de
+  entrada. Lo verifica `tests/test_v2_compression_protocol.py`.
+- **Hiperparámetros propios del Transformer:** los del Experimento 3 de la v1
+  (`training/train_world_model_transformer.py`): d_model 128, 4 cabezas, 2 capas, feedforward
+  256, dropout 0. Son los mismos que en la Fase 2 de la exploración de la v1, que también usó el
+  tope de 300 y la paciencia 15. No se ajustan para la v2.
+- **Evaluación y análisis:** los mismos de la sección 3 (`reward_mse` en rollouts de h = 1..10
+  con las acciones reales sobre el test, log GM, Δ, IC por bootstrap en dos niveles, varianza
+  entre y dentro de Autoencoders). Resultados en `selection_transformer.json` y
+  `selection_transformer_analysis.json`. Pesos en `tf_*` dentro de la carpeta de la selección.
+- **Se reporta además, como descripción:** el tamaño de menor media de log GM con el Transformer
+  (misma regla de empate), la comparación de Δ por tamaño con la LSTM, y el log GM sin comprimir del
+  Transformer frente al de la LSTM.
+- Ninguna corrida se repite ni se descarta por su resultado. Si alguna llega al tope de épocas,
+  se reporta.

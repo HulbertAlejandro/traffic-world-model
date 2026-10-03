@@ -2,8 +2,9 @@
 SAME protocol, differing only in the input dimension (docs/v2/ADDENDUM_AUTOENCODER.md, section 1).
 
 In v1 the raw branch once trained without weight decay and early stopping because its loop was a
-copy of the z branch's. Here both branches go through training.v2_compression_experiment.train_lstm
-with the same LSTMProtocol object; these tests keep it that way.
+copy of the z branch's. Here both branches go through
+training.v2_compression_experiment.train_temporal_model with the same LSTMProtocol object; these tests
+keep it that way, for the LSTM and for the Transformer of the addendum's section 9.
 """
 
 import dataclasses
@@ -13,6 +14,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
@@ -24,18 +26,27 @@ import training.v2_compression_experiment as exp
 
 def test_both_branches_call_the_same_training_function_with_the_same_protocol(monkeypatch, tmp_path):
     calls = []
-    monkeypatch.setattr(exp, "train_lstm", lambda *args, **kwargs: calls.append((args, kwargs)) or {})
-    exp.train_branch("z", Path("t"), Path("v"), 3, tmp_path / "z", latent_dim=32)
-    exp.train_branch("raw", Path("t"), Path("v"), 3, tmp_path / "raw")
-    (z_args, z_kwargs), (raw_args, raw_kwargs) = calls
-    # (train_seq, val_seq, input_dim, seed, out_dir, protocol)
-    assert z_args[2] == 32 and raw_args[2] == exp.STATE_DIM
-    assert z_args[5] is raw_args[5] is exp.LSTM_PROTOCOL
-    assert z_args[0] == raw_args[0] and z_args[1] == raw_args[1] and z_args[3] == raw_args[3]
+    monkeypatch.setattr(exp, "train_temporal_model", lambda *args, **kwargs: calls.append((args, kwargs)) or {})
+    for arch in exp.ARCHITECTURES:
+        calls.clear()
+        exp.train_branch("z", Path("t"), Path("v"), 3, tmp_path / "z", latent_dim=32, architecture=arch)
+        exp.train_branch("raw", Path("t"), Path("v"), 3, tmp_path / "raw", architecture=arch)
+        (z_args, z_kwargs), (raw_args, raw_kwargs) = calls
+        # (train_seq, val_seq, input_dim, seed, out_dir, protocol, architecture)
+        assert z_args[2] == 32 and raw_args[2] == exp.STATE_DIM
+        assert z_args[5] is raw_args[5] is exp.LSTM_PROTOCOL
+        assert z_args[6] == raw_args[6] == arch
+        assert z_args[0] == raw_args[0] and z_args[1] == raw_args[1] and z_args[3] == raw_args[3]
 
 
-def test_train_lstm_applies_weight_decay_and_early_stopping_from_the_protocol():
-    source = inspect.getsource(exp.train_lstm)
+def test_transformer_hparams_are_v1_experiment_3():
+    import training.train_world_model_transformer as v1_tf
+    assert dataclasses.astuple(exp.TRANSFORMER_HPARAMS) == (
+        v1_tf.D_MODEL, v1_tf.NHEAD, v1_tf.NUM_LAYERS, v1_tf.DIM_FEEDFORWARD, v1_tf.DROPOUT)
+
+
+def test_train_temporal_model_applies_weight_decay_and_early_stopping_from_the_protocol():
+    source = inspect.getsource(exp.train_temporal_model)
     assert "weight_decay=protocol.weight_decay" in source
     assert "since >= protocol.early_stopping_patience" in source
     assert "v1_lstm.train_one_epoch" in source and "v1_lstm.validate" in source
@@ -58,7 +69,8 @@ def _synthetic_split(path: Path, dim: int, episodes: int, rng) -> None:
              episode_id=np.repeat(np.arange(episodes), n), time_step=np.tile(np.arange(n), episodes))
 
 
-def test_tiny_real_runs_of_both_branches_record_identical_protocols(tmp_path):
+@pytest.mark.parametrize("architecture", exp.ARCHITECTURES)
+def test_tiny_real_runs_of_both_branches_record_identical_protocols(tmp_path, architecture):
     rng = np.random.default_rng(0)
     tiny = dataclasses.replace(exp.LSTM_PROTOCOL, max_epochs=40, early_stopping_patience=2, hidden_dim=8,
                                sequence_length=4)
@@ -68,7 +80,7 @@ def test_tiny_real_runs_of_both_branches_record_identical_protocols(tmp_path):
         _synthetic_split(tmp_path / f"{branch}_val.npz", dim, 2, rng)
         runs[branch] = exp.train_branch(branch, tmp_path / f"{branch}_train.npz", tmp_path / f"{branch}_val.npz",
                                         0, tmp_path / branch, latent_dim=16 if branch == "z" else None,
-                                        protocol=tiny)
+                                        protocol=tiny, architecture=architecture)
         saved = json.loads((tmp_path / branch / "world_model_best.json").read_text(encoding="utf-8"))
         assert saved["protocol"] == dataclasses.asdict(tiny)
         # Noise targets: validation stops improving quickly, so early stopping must end the run.
@@ -78,3 +90,9 @@ def test_tiny_real_runs_of_both_branches_record_identical_protocols(tmp_path):
     differing = {k for k in z if k in raw and z[k] != raw[k]}
     assert differing <= {"latent_dim", "best_epoch", "stopped_epoch", "best_validation_loss"}
     assert z["latent_dim"] == 16 and raw["latent_dim"] == exp.STATE_DIM
+    assert z["architecture"] == raw["architecture"] == architecture
+    # evaluate() rebuilds the model from the saved .json: it must load the saved weights.
+    import torch
+    for branch in ("z", "raw"):
+        model = exp.build_temporal_model(runs[branch])
+        model.load_state_dict(torch.load(tmp_path / branch / "world_model_best.pt", weights_only=True))
