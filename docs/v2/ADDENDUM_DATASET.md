@@ -141,3 +141,43 @@ episodio (1.5 veces la estimación), se reporta como sustancialmente mayor.**
 - Usar `ood` para cualquier decisión antes de la evaluación final.
 - Descartar episodios del dataset completo. Si alguno falla un chequeo, se reporta y se decide
   aparte, no en silencio.
+
+---
+
+## Apéndice (posterior a la recolección; no modifica nada de lo anterior)
+
+**Muestra piloto** (`docs/results/v2/dataset/pilot_checks.json`): pasa los 7 chequeos.
+
+| Chequeo | Piloto | Fase 0 |
+|---|---|---|
+| Retorno medio de `fijo_2_3` | −1,671 | −1,715 |
+| Retorno medio de `cola_mas_larga` | −1,181 | −1,317 |
+| Pendientes de inserción después de 30 s con `cola_mas_larga` (máx.) | 3 | — |
+
+Son constantes las 8 columnas amarillas de `phase_one_hot`, las esperadas.
+
+**Dataset completo** (`manifest.json` y `checks.json`): 190 episodios (112 de `train`, 24 de
+`validation`, 24 de `test` y 30 de `ood`). Pasan todos los chequeos, y ningún episodio se
+descartó.
+
+| Política | Episodios | Retorno medio | Retorno mínimo | Retorno máximo |
+|---|---|---|---|---|
+| `aleatoria` | 64 | −5,383 | −12,475 | −2,168 |
+| `fijo_2_3` | 63 | −1,620 | −3,593 | −827 |
+| `cola_mas_larga` | 63 | −1,119 | −2,147 | −467 |
+
+Pendientes de inserción después de 30 s: como máximo 5, en todas las políticas. Son constantes
+las mismas 8 columnas. Los retornos muy negativos de `aleatoria` no se analizaron en detalle: son
+consistentes con verdes que se mantienen o se interrumpen al azar, pero no se verificó.
+
+**Costo: supera el umbral de la sección 6, y se reporta.** La media de la recolección completa fue
+de **3.93 s por episodio**, frente a 1.71 s estimados y un umbral de 2.6 s; la piloto había dado
+1.98 s.
+
+La máquina no corrió siempre a la misma velocidad. Una re-medición posterior en reposo dio 5.40 s
+por episodio de la v2, y en las mismas condiciones el episodio de la v1 tardó 2.67 s (0.98 s en la
+Fase 0): la máquina estaba unas 2.7 veces más lenta, con el procesador a 2,000 MHz. **La medida
+comparable es la razón entre la v2 y la v1 en las mismas condiciones: ≈ 2.0 veces**, frente a 1.75
+estimado en la Fase 0, que no incluía la generación de rutas por episodio ni las lecturas de
+`info`. Para planificar las fases siguientes conviene usar esa razón aplicada al costo de la v1
+medido en el momento, no los segundos absolutos.

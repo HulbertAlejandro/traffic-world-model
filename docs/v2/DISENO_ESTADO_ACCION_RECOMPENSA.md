@@ -40,7 +40,19 @@ memorizar el patrón de demanda.
 
 ### Columnas constantes
 
-COLUMNAS_CONSTANTES
+Se verificó en los datos reales. En los 18 episodios de la muestra piloto y en los 190 del
+dataset (`docs/results/v2/dataset/pilot_checks.json` y `checks.json`), las **únicas 8 columnas
+constantes** son `phase_one_hot[2]` y `phase_one_hot[3]` de cada semáforo, las dos posiciones
+amarillas, siempre en 0. Pasa lo mismo que en la v1: sumo-rl arma 2 fases verdes y 2 amarillas, y
+el estado registra siempre la verde.
+
+`remaining_phase_time` no es constante, pero vale `max(0, min_green − elapsed)` y solo es distinta
+de 0 al inicio del episodio (5), igual que en la v1.
+
+**Decisión:** se mantienen las 104 columnas. Así el formato es el de la v1 por bloque, y
+`normalize_dataset` ya trata las columnas de desviación cero. Las 8 columnas constantes y
+`remaining_phase_time` quedan anotadas como posible redundancia para revisar al diseñar el
+Autoencoder de la v2. No se excluyen ahora.
 
 ## 2. Acción conjunta: mantener/cambiar por semáforo (decisión deliberada)
 
