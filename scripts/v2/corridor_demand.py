@@ -23,6 +23,19 @@ Demand model (veh/h):
   ``{"length": seconds, **overrides}`` played one after the other and repeated
   until the end of the route file; each override replaces that key of the base
   spec during its segment.
+
+Pulse offset (Phase 1 decision). With ``segments``, the pattern would always start
+with the first segment at t=0, so the time since the episode started would tell a
+controller which half of the pattern it is in. Each episode therefore starts the
+pattern at a phase drawn from the episode's own SUMO seed (no separate seed):
+
+    offset = numpy.random.default_rng(seed).integers(0, P)     # P = sum of segment lengths
+
+and the demand at simulated time t is the pattern's demand at time (t + offset) mod P.
+For it5, P = 300 s (east-peak half + west/C0-peak half), so offset is in [0, 300):
+the episode can start anywhere in either half. A range of only one half (0-150 s)
+would always start the episode inside the east-peak half. ``offset=0`` reproduces
+the static official route file byte for byte.
 """
 
 from __future__ import annotations
@@ -30,6 +43,8 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+
+import numpy as np
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
@@ -103,6 +118,74 @@ CANDIDATES: dict[str, dict] = {
              "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (500, 350), "D0": (40, 30)}},
         ],
     },
+    # Phase 1: it5 with the pulse offset drawn from the episode seed fails the
+    # v1-style-reward criterion (+5.5%, p = 0.44 vs min_verde_y_cambiar;
+    # docs/results/v2/demand_calibration/it5_offset_300s.json). From here on every
+    # candidate is validated with --random-offset. Iterations 6 and 7 sharpen the
+    # contrast between the two halves of the pulse, keeping it5's time-averaged
+    # demand (arterial 600/400, C0 350/250, A0/B0/D0 unchanged): a stronger pulse,
+    # not more total load (it3 showed more load does not help).
+    "it6": {
+        "arrivals": "poisson",
+        "arterial_west": 600,
+        "arterial_east": 400,
+        "arterial_turn_off": 0.0375,
+        "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (350, 250), "D0": (40, 30)},
+        "cross_straight": 0.6,
+        "segments": [
+            {"length": 150, "arterial_west": 850, "arterial_east": 200,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (150, 100), "D0": (40, 30)}},
+            {"length": 150, "arterial_west": 350, "arterial_east": 600,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (550, 400), "D0": (40, 30)}},
+        ],
+    },
+    "it7": {
+        "arrivals": "poisson",
+        "arterial_west": 600,
+        "arterial_east": 400,
+        "arterial_turn_off": 0.0375,
+        "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (350, 250), "D0": (40, 30)},
+        "cross_straight": 0.6,
+        "segments": [
+            {"length": 150, "arterial_west": 950, "arterial_east": 150,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (100, 80), "D0": (40, 30)}},
+            {"length": 150, "arterial_west": 250, "arterial_east": 650,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (600, 420), "D0": (40, 30)}},
+        ],
+    },
+    # Iterations 8 and 9: it6 (+3.5%, p = 0.67) and it7 (+10.3%, p = 0.076) still
+    # fail the v1-style-reward criterion. The reference wins the median episode but
+    # has isolated bad ones (it5 with offset: -1223; it7: -509), and a sharper pulse
+    # shrinks them. it8 sharpens both levers; it9 keeps it7's arterial and pushes
+    # only C0's contrast, to tell the two apart. Same time-averaged demand as it5.
+    "it8": {
+        "arrivals": "poisson",
+        "arterial_west": 600,
+        "arterial_east": 400,
+        "arterial_turn_off": 0.0375,
+        "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (350, 250), "D0": (40, 30)},
+        "cross_straight": 0.6,
+        "segments": [
+            {"length": 150, "arterial_west": 1050, "arterial_east": 100,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (50, 40), "D0": (40, 30)}},
+            {"length": 150, "arterial_west": 150, "arterial_east": 700,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (650, 460), "D0": (40, 30)}},
+        ],
+    },
+    "it9": {
+        "arrivals": "poisson",
+        "arterial_west": 600,
+        "arterial_east": 400,
+        "arterial_turn_off": 0.0375,
+        "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (350, 250), "D0": (40, 30)},
+        "cross_straight": 0.6,
+        "segments": [
+            {"length": 150, "arterial_west": 950, "arterial_east": 150,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (50, 40), "D0": (40, 30)}},
+            {"length": 150, "arterial_west": 250, "arterial_east": 650,
+             "cross": {"A0": (200, 120), "B0": (40, 30), "C0": (650, 460), "D0": (40, 30)}},
+        ],
+    },
 }
 
 FINAL_CANDIDATE = "it5"
@@ -157,21 +240,38 @@ def _routes(spec: dict) -> list[tuple[str, list[str], float]]:
     return [r for r in routes if r[2] > 0]
 
 
-def _segments(spec: dict, end: int) -> list[tuple[int, int, dict]]:
-    """(begin, end, effective spec) for each demand segment up to ``end``."""
+def pattern_period(spec: dict) -> int:
+    """Length of one full demand pattern, in seconds (0 for stationary demand)."""
+    return sum(seg["length"] for seg in spec.get("segments", []))
+
+
+def pulse_offset(spec: dict, seed: int) -> int:
+    """Phase of the demand pattern at t=0 for the episode with this SUMO seed."""
+    period = pattern_period(spec)
+    return int(np.random.default_rng(seed).integers(0, period)) if period else 0
+
+
+def _segments(spec: dict, end: int, offset: int = 0) -> list[tuple[int, int, dict]]:
+    """(begin, end, effective spec) for each demand segment up to ``end``, with the
+    pattern shifted so that simulated time t plays pattern time (t + offset) mod period."""
     if "segments" not in spec:
         return [(0, end, spec)]
     base = {k: v for k, v in spec.items() if k != "segments"}
-    out, t, i = [], 0, 0
+    segs = spec["segments"]
+    i, pos = 0, offset % pattern_period(spec)
+    while pos >= segs[i]["length"]:
+        pos -= segs[i]["length"]
+        i += 1
+    out, t, first = [], 0, True
     while t < end:
-        seg = spec["segments"][i % len(spec["segments"])]
-        stop = min(end, t + seg["length"])
+        seg = segs[i % len(segs)]
+        stop = min(end, t + seg["length"] - (pos if first else 0))
         out.append((t, stop, base | {k: v for k, v in seg.items() if k != "length"}))
-        t, i = stop, i + 1
+        t, i, first = stop, i + 1, False
     return out
 
 
-def build_routes_xml(spec: dict, name: str, end: int = 3600) -> str:
+def build_routes_xml(spec: dict, name: str, end: int = 3600, offset: int = 0) -> str:
     if spec["arrivals"] not in ("uniform", "poisson"):
         raise ValueError(f"arrivals must be 'uniform' or 'poisson', got {spec['arrivals']!r}")
     lines = [
@@ -182,9 +282,12 @@ def build_routes_xml(spec: dict, name: str, end: int = 3600) -> str:
         "",
         f"    <!-- Generated by scripts/v2/corridor_demand.py, candidate {name!r}. Do not edit by hand:",
         f"         change the candidate there and regenerate. Spec: {spec} -->",
-        "",
     ]
-    segments = _segments(spec, end)
+    if offset:
+        lines.append(f"    <!-- Pulse offset {offset} s: t plays pattern time (t + {offset}) mod "
+                     f"{pattern_period(spec)}. -->")
+    lines.append("")
+    segments = _segments(spec, end, offset)
     route_edges: dict[str, list[str]] = {}
     for _, _, seg_spec in segments:
         for route_id, edges, _ in _routes(seg_spec):
@@ -208,10 +311,16 @@ def build_routes_xml(spec: dict, name: str, end: int = 3600) -> str:
     return "\n".join(lines) + "\n"
 
 
-def write_routes(name: str, out: Path) -> Path:
+def write_routes(name: str, out: Path, offset: int = 0) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(build_routes_xml(CANDIDATES[name], name), encoding="utf-8")
+    out.write_text(build_routes_xml(CANDIDATES[name], name, offset=offset), encoding="utf-8")
     return out
+
+
+def write_episode_routes(seed: int, out: Path, name: str = FINAL_CANDIDATE) -> tuple[Path, int]:
+    """Route file for one episode: the candidate with the pulse offset drawn from ``seed``."""
+    offset = pulse_offset(CANDIDATES[name], seed)
+    return write_routes(name, out, offset), offset
 
 
 def total_demand(spec: dict, horizon: int = 300) -> float:

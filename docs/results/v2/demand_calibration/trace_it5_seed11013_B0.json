@@ -1,0 +1,6764 @@
+{
+ "candidate": "it5",
+ "seed": 11013,
+ "pulse_offset": 29,
+ "signal": "B0",
+ "traces": [
+  {
+   "policy": "cola_mas_larga",
+   "seed": 11013,
+   "signal": "B0",
+   "phase_lanes": [
+    [
+     "top1B0_0",
+     "bottom1B0_0"
+    ],
+    [
+     "C0B0_0",
+     "A0B0_0"
+    ]
+   ],
+   "reward_v1_style_total": -3107.0,
+   "steps": [
+    {
+     "step": 0,
+     "t_end": 5.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 1,
+     "t_end": 10.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 2,
+     "t_end": 15.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 3,
+     "t_end": 20.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 4,
+     "t_end": 25.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 5,
+     "t_end": 30.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 6,
+     "t_end": 35.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 7,
+     "t_end": 40.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 8,
+     "t_end": 45.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 9,
+     "t_end": 50.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 10,
+     "t_end": 55.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 11,
+     "t_end": 60.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -10.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 12,
+     "t_end": 65.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 2,
+       "vehicles": 7,
+       "waiting": 8.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      10.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 13,
+     "t_end": 70.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 9,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 14,
+     "t_end": 75.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 9,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -4.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.8"
+      }
+     }
+    },
+    {
+     "step": 15,
+     "t_end": 80.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 2,
+       "waiting": 3.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      0
+     ],
+     "score_espera": [
+      4.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -3.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "west_through_flow_s0.4"
+      }
+     }
+    },
+    {
+     "step": 16,
+     "t_end": 85.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 1,
+       "vehicles": 6,
+       "waiting": 2.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      3.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -24.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "west_through_flow_s0.4"
+      }
+     }
+    },
+    {
+     "step": 17,
+     "t_end": 90.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 5,
+       "vehicles": 9,
+       "waiting": 19.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      24.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -24.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "west_through_flow_s0.7"
+      }
+     }
+    },
+    {
+     "step": 18,
+     "t_end": 95.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 3.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 3,
+       "vehicles": 8,
+       "waiting": 17.0
+      }
+     },
+     "score_cola": [
+      1,
+      3
+     ],
+     "score_espera": [
+      4.0,
+      20.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -9.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 8.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.9"
+      }
+     }
+    },
+    {
+     "step": 19,
+     "t_end": 100.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 8.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      0
+     ],
+     "score_espera": [
+      9.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -3.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "west_through_flow_s0.8"
+      }
+     }
+    },
+    {
+     "step": 20,
+     "t_end": 105.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 1,
+       "vehicles": 5,
+       "waiting": 2.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      3.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -16.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "west_through_flow_s0.8"
+      }
+     }
+    },
+    {
+     "step": 21,
+     "t_end": 110.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 3,
+       "vehicles": 7,
+       "waiting": 13.0
+      }
+     },
+     "score_cola": [
+      0,
+      3
+     ],
+     "score_espera": [
+      0.0,
+      16.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -9.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "west_through_flow_s0.10"
+      }
+     }
+    },
+    {
+     "step": 22,
+     "t_end": 115.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 2,
+       "vehicles": 8,
+       "waiting": 7.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      9.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "C0_north_to_west_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.1"
+      }
+     }
+    },
+    {
+     "step": 23,
+     "t_end": 120.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 7,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.1"
+      }
+     }
+    },
+    {
+     "step": 24,
+     "t_end": 125.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.17"
+      }
+     }
+    },
+    {
+     "step": 25,
+     "t_end": 130.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.17"
+      }
+     }
+    },
+    {
+     "step": 26,
+     "t_end": 135.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "C0_south_to_west_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_north_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 27,
+     "t_end": 140.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_north_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 28,
+     "t_end": 145.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_north_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 29,
+     "t_end": 150.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.20"
+      }
+     }
+    },
+    {
+     "step": 30,
+     "t_end": 155.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.2"
+      }
+     }
+    },
+    {
+     "step": 31,
+     "t_end": 160.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s0.4"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.2"
+      }
+     }
+    },
+    {
+     "step": 32,
+     "t_end": 165.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -3.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.2"
+      }
+     }
+    },
+    {
+     "step": 33,
+     "t_end": 170.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 1,
+       "vehicles": 3,
+       "waiting": 2.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      3.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -14.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.22"
+      }
+     }
+    },
+    {
+     "step": 34,
+     "t_end": 175.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 6,
+       "waiting": 12.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      14.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -30.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 12.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 35,
+     "t_end": 180.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 5.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 7,
+       "waiting": 22.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      2
+     ],
+     "score_espera": [
+      6.0,
+      24.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -45.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 10.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 17.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 36,
+     "t_end": 185.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 10.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 7,
+       "waiting": 32.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      2
+     ],
+     "score_espera": [
+      11.0,
+      34.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -72.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 15.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 22.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 37,
+     "t_end": 190.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 15.0
+      },
+      "C0B0_0": {
+       "halted": 6,
+       "vehicles": 7,
+       "waiting": 50.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      6
+     ],
+     "score_espera": [
+      16.0,
+      56.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -117.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 20.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 27.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 38,
+     "t_end": 195.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 5.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 20.0
+      },
+      "C0B0_0": {
+       "halted": 7,
+       "vehicles": 10,
+       "waiting": 83.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      2,
+      7
+     ],
+     "score_espera": [
+      27.0,
+      90.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -98.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 10.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 25.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 14.0,
+       "vehicle": "east_through_flow_s0.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 39,
+     "t_end": 200.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 10.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 25.0
+      },
+      "C0B0_0": {
+       "halted": 5,
+       "vehicles": 10,
+       "waiting": 56.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      2,
+      5
+     ],
+     "score_espera": [
+      37.0,
+      61.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -49.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 15.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 30.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 1.0,
+       "vehicle": "east_to_B0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.4"
+      }
+     }
+    },
+    {
+     "step": 40,
+     "t_end": 205.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 15.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 30.0
+      },
+      "C0B0_0": {
+       "halted": 1,
+       "vehicles": 9,
+       "waiting": 1.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      2,
+      1
+     ],
+     "score_espera": [
+      47.0,
+      2.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -8.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "east_through_flow_s0.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 41,
+     "t_end": 210.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 10,
+       "waiting": 6.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 7,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      8.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -33.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 9.0,
+       "vehicle": "east_through_flow_s0.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 42,
+     "t_end": 215.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 5,
+       "vehicles": 12,
+       "waiting": 28.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 9,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      33.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -31.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 9.0,
+       "vehicle": "east_through_flow_s1.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 43,
+     "t_end": 220.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 5,
+       "vehicles": 12,
+       "waiting": 26.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 8,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      31.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -17.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_through_flow_s1.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 44,
+     "t_end": 225.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 2,
+       "waiting": 3.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 12,
+       "waiting": 10.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      3
+     ],
+     "score_espera": [
+      4.0,
+      13.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -36.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 8.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_through_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.7"
+      }
+     }
+    },
+    {
+     "step": 45,
+     "t_end": 230.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 4.0
+      },
+      "bottom1B0_0": {
+       "halted": 2,
+       "vehicles": 2,
+       "waiting": 13.0
+      },
+      "C0B0_0": {
+       "halted": 4,
+       "vehicles": 13,
+       "waiting": 12.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      3,
+      4
+     ],
+     "score_espera": [
+      20.0,
+      16.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -76.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 9.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 13.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 10.0,
+       "vehicle": "east_through_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "A0_north_to_east_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 46,
+     "t_end": 235.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 9.0
+      },
+      "bottom1B0_0": {
+       "halted": 2,
+       "vehicles": 2,
+       "waiting": 23.0
+      },
+      "C0B0_0": {
+       "halted": 6,
+       "vehicles": 13,
+       "waiting": 35.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      3,
+      6
+     ],
+     "score_espera": [
+      35.0,
+      41.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -103.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 14.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 18.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 12.0,
+       "vehicle": "east_through_flow_s1.2"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "A0_north_to_east_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 47,
+     "t_end": 240.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 14.0
+      },
+      "bottom1B0_0": {
+       "halted": 2,
+       "vehicles": 2,
+       "waiting": 33.0
+      },
+      "C0B0_0": {
+       "halted": 7,
+       "vehicles": 12,
+       "waiting": 46.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      3,
+      7
+     ],
+     "score_espera": [
+      50.0,
+      53.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -97.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 19.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 23.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 8.0,
+       "vehicle": "C0_south_to_west_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 48,
+     "t_end": 245.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 19.0
+      },
+      "bottom1B0_0": {
+       "halted": 2,
+       "vehicles": 2,
+       "waiting": 43.0
+      },
+      "C0B0_0": {
+       "halted": 6,
+       "vehicles": 10,
+       "waiting": 26.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      3,
+      6
+     ],
+     "score_espera": [
+      65.0,
+      32.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -95.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 24.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 28.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "C0_north_to_west_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 49,
+     "t_end": 250.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 24.0
+      },
+      "bottom1B0_0": {
+       "halted": 2,
+       "vehicles": 2,
+       "waiting": 53.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 8,
+       "waiting": 13.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      3,
+      2
+     ],
+     "score_espera": [
+      80.0,
+      15.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s1.9"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 50,
+     "t_end": 255.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 10,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -19.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_through_flow_s1.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 51,
+     "t_end": 260.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 4,
+       "vehicles": 12,
+       "waiting": 15.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      4
+     ],
+     "score_espera": [
+      0.0,
+      19.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -23.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "D0_south_to_west_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 52,
+     "t_end": 265.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 5,
+       "vehicles": 14,
+       "waiting": 18.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      23.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -11.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "east_through_flow_s1.8"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 53,
+     "t_end": 270.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 13,
+       "waiting": 8.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      3
+     ],
+     "score_espera": [
+      0.0,
+      11.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.8"
+      }
+     }
+    },
+    {
+     "step": 54,
+     "t_end": 275.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 14,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.9"
+      }
+     }
+    },
+    {
+     "step": 55,
+     "t_end": 280.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 11,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -5.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 56,
+     "t_end": 285.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 4.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 10,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      0
+     ],
+     "score_espera": [
+      5.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -2.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 1.0,
+       "vehicle": "east_to_A0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 57,
+     "t_end": 290.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 1,
+       "vehicles": 9,
+       "waiting": 1.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      2.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -15.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s2.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 6.0,
+       "vehicle": "east_to_A0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 58,
+     "t_end": 295.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 9,
+       "waiting": 12.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      3
+     ],
+     "score_espera": [
+      0.0,
+      15.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -13.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s2.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_to_B0_south_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 59,
+     "t_end": 300.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 10,
+       "waiting": 10.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      3
+     ],
+     "score_espera": [
+      0.0,
+      13.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -2.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s2.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 1.0,
+       "vehicle": "east_through_flow_s1.16"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.1"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "policy": "espera_mas_larga",
+   "seed": 11013,
+   "signal": "B0",
+   "phase_lanes": [
+    [
+     "top1B0_0",
+     "bottom1B0_0"
+    ],
+    [
+     "C0B0_0",
+     "A0B0_0"
+    ]
+   ],
+   "reward_v1_style_total": -2100.0,
+   "steps": [
+    {
+     "step": 0,
+     "t_end": 5.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 1,
+     "t_end": 10.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 2,
+     "t_end": 15.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 3,
+     "t_end": 20.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 4,
+     "t_end": 25.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 5,
+     "t_end": 30.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 6,
+     "t_end": 35.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 7,
+     "t_end": 40.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 8,
+     "t_end": 45.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 9,
+     "t_end": 50.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 10,
+     "t_end": 55.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 11,
+     "t_end": 60.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -10.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "west_to_B0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 12,
+     "t_end": 65.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 2,
+       "vehicles": 7,
+       "waiting": 8.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      10.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 13,
+     "t_end": 70.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 9,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 14,
+     "t_end": 75.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 9,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -4.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "B0_north_to_west_flow_s0.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_to_west_flow_s0.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.8"
+      }
+     }
+    },
+    {
+     "step": 15,
+     "t_end": 80.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 2,
+       "waiting": 3.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      0
+     ],
+     "score_espera": [
+      4.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -3.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "west_through_flow_s0.4"
+      }
+     }
+    },
+    {
+     "step": 16,
+     "t_end": 85.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 1,
+       "vehicles": 6,
+       "waiting": 2.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      3.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -24.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "west_through_flow_s0.4"
+      }
+     }
+    },
+    {
+     "step": 17,
+     "t_end": 90.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 5,
+       "vehicles": 9,
+       "waiting": 19.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      24.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -24.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "A0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "west_through_flow_s0.7"
+      }
+     }
+    },
+    {
+     "step": 18,
+     "t_end": 95.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 3.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 3,
+       "vehicles": 8,
+       "waiting": 17.0
+      }
+     },
+     "score_cola": [
+      1,
+      3
+     ],
+     "score_espera": [
+      4.0,
+      20.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -9.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 8.0,
+       "vehicle": "B0_north_straight_flow_s0.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.9"
+      }
+     }
+    },
+    {
+     "step": 19,
+     "t_end": 100.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 8.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      0
+     ],
+     "score_espera": [
+      9.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -3.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "west_through_flow_s0.8"
+      }
+     }
+    },
+    {
+     "step": 20,
+     "t_end": 105.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 1,
+       "vehicles": 5,
+       "waiting": 2.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      3.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -16.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "west_through_flow_s0.8"
+      }
+     }
+    },
+    {
+     "step": 21,
+     "t_end": 110.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 3,
+       "vehicles": 7,
+       "waiting": 13.0
+      }
+     },
+     "score_cola": [
+      0,
+      3
+     ],
+     "score_espera": [
+      0.0,
+      16.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -9.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "west_through_flow_s0.10"
+      }
+     }
+    },
+    {
+     "step": 22,
+     "t_end": 115.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 2,
+       "vehicles": 8,
+       "waiting": 7.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      9.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "C0_north_to_west_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.1"
+      }
+     }
+    },
+    {
+     "step": 23,
+     "t_end": 120.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 7,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.1"
+      }
+     }
+    },
+    {
+     "step": 24,
+     "t_end": 125.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.17"
+      }
+     }
+    },
+    {
+     "step": 25,
+     "t_end": 130.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.17"
+      }
+     }
+    },
+    {
+     "step": 26,
+     "t_end": 135.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "C0_south_to_west_flow_s0.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_north_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 27,
+     "t_end": 140.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_north_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 28,
+     "t_end": 145.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_north_flow_s0.0"
+      }
+     }
+    },
+    {
+     "step": 29,
+     "t_end": 150.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.20"
+      }
+     }
+    },
+    {
+     "step": 30,
+     "t_end": 155.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s0.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.2"
+      }
+     }
+    },
+    {
+     "step": 31,
+     "t_end": 160.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s0.4"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.2"
+      }
+     }
+    },
+    {
+     "step": 32,
+     "t_end": 165.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -3.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s0.2"
+      }
+     }
+    },
+    {
+     "step": 33,
+     "t_end": 170.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 1,
+       "vehicles": 3,
+       "waiting": 2.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      3.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -14.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s0.22"
+      }
+     }
+    },
+    {
+     "step": 34,
+     "t_end": 175.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 6,
+       "waiting": 12.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      14.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -30.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 12.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 35,
+     "t_end": 180.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 5.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 7,
+       "waiting": 22.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      2
+     ],
+     "score_espera": [
+      6.0,
+      24.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -45.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 10.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 17.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 36,
+     "t_end": 185.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 10.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 7,
+       "waiting": 32.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      2
+     ],
+     "score_espera": [
+      11.0,
+      34.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -72.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 15.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 22.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 37,
+     "t_end": 190.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 15.0
+      },
+      "C0B0_0": {
+       "halted": 6,
+       "vehicles": 7,
+       "waiting": 50.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      6
+     ],
+     "score_espera": [
+      16.0,
+      56.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -117.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 20.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 27.0,
+       "vehicle": "east_through_flow_s0.3"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_C0_north_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 38,
+     "t_end": 195.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 5.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 20.0
+      },
+      "C0B0_0": {
+       "halted": 7,
+       "vehicles": 10,
+       "waiting": 83.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      2,
+      7
+     ],
+     "score_espera": [
+      27.0,
+      90.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -98.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 10.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 25.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 14.0,
+       "vehicle": "east_through_flow_s0.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 39,
+     "t_end": 200.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 10.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 25.0
+      },
+      "C0B0_0": {
+       "halted": 5,
+       "vehicles": 10,
+       "waiting": 56.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      2,
+      5
+     ],
+     "score_espera": [
+      37.0,
+      61.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -49.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 15.0,
+       "vehicle": "B0_north_to_west_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 30.0,
+       "vehicle": "B0_south_straight_flow_s1.0"
+      },
+      "C0B0_0": {
+       "stop_s": 1.0,
+       "vehicle": "east_to_B0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.4"
+      }
+     }
+    },
+    {
+     "step": 40,
+     "t_end": 205.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 15.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 30.0
+      },
+      "C0B0_0": {
+       "halted": 1,
+       "vehicles": 9,
+       "waiting": 1.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      2,
+      1
+     ],
+     "score_espera": [
+      47.0,
+      2.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -8.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "east_through_flow_s0.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 41,
+     "t_end": 210.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 10,
+       "waiting": 6.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 7,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      8.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -33.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 9.0,
+       "vehicle": "east_through_flow_s0.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 42,
+     "t_end": 215.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 5,
+       "vehicles": 12,
+       "waiting": 28.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 9,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      33.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -31.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 9.0,
+       "vehicle": "east_through_flow_s1.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 43,
+     "t_end": 220.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 5,
+       "vehicles": 12,
+       "waiting": 26.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 8,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      31.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -17.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_through_flow_s1.5"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 44,
+     "t_end": 225.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 1,
+       "vehicles": 2,
+       "waiting": 3.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 12,
+       "waiting": 10.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      3
+     ],
+     "score_espera": [
+      4.0,
+      13.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -36.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 4.0,
+       "vehicle": "B0_north_straight_flow_s1.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 8.0,
+       "vehicle": "B0_south_straight_flow_s1.1"
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_through_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.7"
+      }
+     }
+    },
+    {
+     "step": 45,
+     "t_end": 230.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 4.0
+      },
+      "bottom1B0_0": {
+       "halted": 2,
+       "vehicles": 2,
+       "waiting": 13.0
+      },
+      "C0B0_0": {
+       "halted": 4,
+       "vehicles": 13,
+       "waiting": 12.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      3,
+      4
+     ],
+     "score_espera": [
+      20.0,
+      16.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -18.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_south_straight_flow_s1.2"
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_to_B0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "west_through_flow_s1.5"
+      }
+     }
+    },
+    {
+     "step": 46,
+     "t_end": 235.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 13,
+       "waiting": 10.0
+      },
+      "A0B0_0": {
+       "halted": 2,
+       "vehicles": 4,
+       "waiting": 3.0
+      }
+     },
+     "score_cola": [
+      0,
+      5
+     ],
+     "score_espera": [
+      0.0,
+      18.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 0,
+     "signal_reward": -42.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "east_through_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 7.0,
+       "vehicle": "west_through_flow_s1.5"
+      }
+     }
+    },
+    {
+     "step": 47,
+     "t_end": 240.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 6,
+       "vehicles": 13,
+       "waiting": 18.0
+      },
+      "A0B0_0": {
+       "halted": 3,
+       "vehicles": 4,
+       "waiting": 15.0
+      }
+     },
+     "score_cola": [
+      0,
+      9
+     ],
+     "score_espera": [
+      0.0,
+      42.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -30.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 6.0,
+       "vehicle": "east_to_B0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "A0_north_to_east_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 48,
+     "t_end": 245.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 7,
+       "vehicles": 12,
+       "waiting": 20.0
+      },
+      "A0B0_0": {
+       "halted": 1,
+       "vehicles": 3,
+       "waiting": 2.0
+      }
+     },
+     "score_cola": [
+      0,
+      8
+     ],
+     "score_espera": [
+      0.0,
+      30.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -9.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "D0_south_to_west_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "A0_north_to_east_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 49,
+     "t_end": 250.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 10,
+       "waiting": 6.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      3
+     ],
+     "score_espera": [
+      0.0,
+      9.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -3.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 2.0,
+       "vehicle": "C0_north_to_west_flow_s1.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 50,
+     "t_end": 255.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 1,
+       "vehicles": 10,
+       "waiting": 2.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      1
+     ],
+     "score_espera": [
+      0.0,
+      3.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s1.9"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 51,
+     "t_end": 260.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 7,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s1.9"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 52,
+     "t_end": 265.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_through_flow_s1.9"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.0"
+      }
+     }
+    },
+    {
+     "step": 53,
+     "t_end": 270.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      }
+     }
+    },
+    {
+     "step": 54,
+     "t_end": 275.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_A0_north_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_through_flow_s1.9"
+      }
+     }
+    },
+    {
+     "step": 55,
+     "t_end": 280.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 5,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -6.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "B0_north_straight_flow_s1.1"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 56,
+     "t_end": 285.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 1,
+       "vehicles": 1,
+       "waiting": 5.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 6,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      1,
+      0
+     ],
+     "score_espera": [
+      6.0,
+      0.0
+     ],
+     "phase_before": 1,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 57,
+     "t_end": 290.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 0,
+       "vehicles": 7,
+       "waiting": 0.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 2,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      0
+     ],
+     "score_espera": [
+      0.0,
+      0.0
+     ],
+     "phase_before": 0,
+     "target": 0,
+     "phase_after": 0,
+     "signal_reward": -12.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s2.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 5.0,
+       "vehicle": "D0_south_to_west_flow_s1.1"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 58,
+     "t_end": 295.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 3,
+       "vehicles": 7,
+       "waiting": 9.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 3,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      3
+     ],
+     "score_espera": [
+      0.0,
+      12.0
+     ],
+     "phase_before": 0,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -7.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s2.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 3.0,
+       "vehicle": "east_through_flow_s1.12"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_D0_south_flow_s1.1"
+      }
+     }
+    },
+    {
+     "step": 59,
+     "t_end": 300.0,
+     "seen": {
+      "top1B0_0": {
+       "halted": 0,
+       "vehicles": 1,
+       "waiting": 0.0
+      },
+      "bottom1B0_0": {
+       "halted": 0,
+       "vehicles": 0,
+       "waiting": 0.0
+      },
+      "C0B0_0": {
+       "halted": 2,
+       "vehicles": 9,
+       "waiting": 5.0
+      },
+      "A0B0_0": {
+       "halted": 0,
+       "vehicles": 4,
+       "waiting": 0.0
+      }
+     },
+     "score_cola": [
+      0,
+      2
+     ],
+     "score_espera": [
+      0.0,
+      7.0
+     ],
+     "phase_before": 1,
+     "target": 1,
+     "phase_after": 1,
+     "signal_reward": -0.0,
+     "longest_stop": {
+      "top1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "B0_north_to_west_flow_s2.0"
+      },
+      "bottom1B0_0": {
+       "stop_s": 0.0,
+       "vehicle": null
+      },
+      "C0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "east_to_B0_south_flow_s1.0"
+      },
+      "A0B0_0": {
+       "stop_s": 0.0,
+       "vehicle": "west_to_B0_south_flow_s1.1"
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

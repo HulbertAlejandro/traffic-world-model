@@ -55,7 +55,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from environments.four_intersections import TRAFFIC_SIGNAL_IDS, make_corridor_env  # noqa: E402
 from scripts.evaluate_multiseed_statistical import paired_t  # noqa: E402
-from scripts.v2.corridor_demand import CANDIDATES, total_demand, write_routes  # noqa: E402
+from scripts.v2.corridor_demand import CANDIDATES, pulse_offset, total_demand, write_routes  # noqa: E402
 
 # The project's paired Wilcoxon (exact without ties; validated against brute force there).
 _spec = importlib.util.spec_from_file_location(
@@ -79,14 +79,22 @@ MAX_PENDING_BEST = 5   # vehicles waiting outside the network under the best ref
 WARMUP_SECONDS = 30
 
 
-def policy_names() -> list[str]:
+# State-dependent references. espera_mas_larga was added in Phase 1 under the
+# pre-registration of docs/v2/DISENO_RED_4_INTERSECCIONES.md, section 7.5, and only
+# runs with --reward-aligned-reference, so the default run is still the Phase 0 protocol.
+REFERENCES = ("max_presion", "cola_mas_larga", "espera_mas_larga")
+
+
+def policy_names(reward_aligned_reference: bool = False) -> list[str]:
     names = ["min_verde_y_cambiar", "fijo_v1", "siempre_arterial", "max_presion", "cola_mas_larga"]
+    if reward_aligned_reference:
+        names.append("espera_mas_larga")
     names += [f"fijo_{a}_{b}" for a in FIXED_GRID for b in FIXED_GRID]
     return names
 
 
 def is_trivial(name: str) -> bool:
-    return name not in ("max_presion", "cola_mas_larga")
+    return name not in REFERENCES
 
 
 class _Topology:
@@ -145,6 +153,24 @@ def make_policy(name: str):
                 actions[ts] = _choose(scores, env.traffic_signals[ts].green_phase)
             return actions
         return longest_queue
+    if name == "espera_mas_larga":
+        # Pre-registered in docs/v2/DISENO_RED_4_INTERSECCIONES.md, section 7.5: per signal, the
+        # green phase whose incoming lanes carry more alpha * waiting time + beta * halted
+        # vehicles (the v2 reward's own terms and weights, CorridorRewardConfig), each lane once;
+        # a tie with the current phase keeps it (_choose, as in the other references).
+        from configs.corridor_reward import CorridorRewardConfig
+
+        config = CorridorRewardConfig()
+
+        def longest_wait(env, topo, k):
+            waiting, halted = env.sumo.lane.getWaitingTime, env.sumo.lane.getLastStepHaltingNumber
+            actions = {}
+            for ts in TRAFFIC_SIGNAL_IDS:
+                scores = [sum(config.alpha * waiting(lane) + config.beta * halted(lane) for lane in lanes)
+                          for lanes in topo.green_in_lanes[ts]]
+                actions[ts] = _choose(scores, env.traffic_signals[ts].green_phase)
+            return actions
+        return longest_wait
     raise ValueError(f"unknown policy {name!r}")
 
 
@@ -208,7 +234,7 @@ def _paired(ref: np.ndarray, other: np.ndarray, lower_is_better: bool) -> dict:
     return {"reduction": rel, "t_p": t_p, "wilcoxon_p": w_p, "ref_wins": int((diff > 0).sum())}
 
 
-def analyze(episodes: list[dict], seeds: list[int]) -> dict:
+def _arrays(episodes: list[dict], seeds: list[int]) -> tuple[dict, dict, dict]:
     by = {}
     for ep in episodes:
         by.setdefault(ep["policy"], {})[ep["seed"]] = ep
@@ -219,6 +245,73 @@ def analyze(episodes: list[dict], seeds: list[int]) -> dict:
     summary = {p: {m: float(v.mean()) for m, v in d.items()}
                | {"max_pending_after_warmup_max": float(d["max_pending_after_warmup"].max())}
                for p, d in arr.items()}
+    return by, arr, summary
+
+
+def analyze_per_metric(episodes: list[dict], seeds: list[int]) -> dict:
+    """Protocol of section 7.5: each criterion with the best reference for its own metric."""
+    by, arr, summary = _arrays(episodes, seeds)
+    trivial = [p for p in by if is_trivial(p)]
+    refs = [p for p in by if not is_trivial(p)]
+    best_ref_delay = min(refs, key=lambda p: summary[p]["delay"])
+    best_ref_reward = max(refs, key=lambda p: summary[p]["reward_v1_style"])
+
+    def checks_for(ref_delay: str, ref_reward: str) -> tuple[dict, dict]:
+        comps = {p: {"delay": _paired(arr[ref_delay]["delay"], arr[p]["delay"], True),
+                     "reward_v1_style": _paired(arr[ref_reward]["reward_v1_style"],
+                                                arr[p]["reward_v1_style"], False)}
+                 for p in trivial}
+        checks = {
+            "no_invisible_queue": all(summary[r]["max_pending_after_warmup_max"] <= MAX_PENDING_BEST
+                                      for r in {ref_delay, ref_reward}),
+            "beats_every_trivial_delay": all(
+                c["delay"]["reduction"] >= MIN_REDUCTION and c["delay"]["t_p"] < MAX_P_VALUE
+                and c["delay"]["wilcoxon_p"] < MAX_P_VALUE for c in comps.values()),
+            "beats_every_trivial_reward_v1_style": all(
+                c["reward_v1_style"]["reduction"] > 0 and c["reward_v1_style"]["t_p"] < MAX_P_VALUE
+                for c in comps.values()),
+        }
+        return comps, checks
+
+    comparisons, checks = checks_for(best_ref_delay, best_ref_reward)
+    alone_comparisons, alone_checks = (checks_for("espera_mas_larga", "espera_mas_larga")
+                                       if "espera_mas_larga" in by else (None, None))
+    return {
+        "protocol": "per-metric best reference (docs/v2/DISENO_RED_4_INTERSECCIONES.md, 7.5)",
+        "summary": summary,
+        "best_trivial_by_delay": min(trivial, key=lambda p: summary[p]["delay"]),
+        "best_trivial_by_reward_v1_style": max(trivial, key=lambda p: summary[p]["reward_v1_style"]),
+        "best_reference_by_delay": best_ref_delay, "best_reference_by_reward_v1_style": best_ref_reward,
+        "comparisons": comparisons, "checks": checks, "accepted": all(checks.values()),
+        "informative_espera_mas_larga_alone": {
+            "checks": alone_checks, "passes_all": bool(alone_checks and all(alone_checks.values())),
+            "comparisons": alone_comparisons},
+    }
+
+
+def _print_per_metric_report(name: str, seconds: int, a: dict, seeds: list[int]) -> None:
+    s = a["summary"]
+    print(f"\n=== {name}, {seconds} s, {len(seeds)} seeds, per-metric reference (7.5) ===")
+    print(f"{'policy':22s} {'delay veh-s':>12s} {'reward_v1':>11s} {'arrived':>8s} {'pend>30s':>9s} {'switches':>9s}")
+    for p in sorted(s, key=lambda p: -s[p]["reward_v1_style"])[:12]:
+        print(f"{p:22s} {s[p]['delay']:12.0f} {s[p]['reward_v1_style']:11.0f} {s[p]['arrived']:8.1f} "
+              f"{s[p]['max_pending_after_warmup_max']:9.0f} {s[p]['switches']:9.1f}")
+    print(f"best reference by delay: {a['best_reference_by_delay']}; by reward_v1: "
+          f"{a['best_reference_by_reward_v1_style']}")
+    for metric, trivial in (("delay", a["best_trivial_by_delay"]),
+                            ("reward_v1_style", a["best_trivial_by_reward_v1_style"])):
+        worst = min(a["comparisons"].items(), key=lambda kv: kv[1][metric]["reduction"])
+        c = a["comparisons"][trivial][metric]
+        print(f"  {metric}: vs best trivial {trivial} {c['reduction']:+.1%} (t p={c['t_p']:.2g}, "
+              f"W p={c['wilcoxon_p']:.2g}, wins {c['ref_wins']}/{len(seeds)}); hardest trivial {worst[0]} "
+              f"{worst[1][metric]['reduction']:+.1%} (t p={worst[1][metric]['t_p']:.2g})")
+    print(f"  checks: {a['checks']} -> accepted={a['accepted']}")
+    alone = a["informative_espera_mas_larga_alone"]
+    print(f"  informative, espera_mas_larga alone: {alone['checks']} -> passes_all={alone['passes_all']}")
+
+
+def analyze(episodes: list[dict], seeds: list[int]) -> dict:
+    by, arr, summary = _arrays(episodes, seeds)
     trivial = [p for p in by if is_trivial(p)]
     refs = [p for p in by if not is_trivial(p)]
     best_trivial = min(trivial, key=lambda p: summary[p]["delay"])
@@ -277,25 +370,38 @@ def main() -> None:
     parser.add_argument("--seconds", type=int, default=300)
     parser.add_argument("--num-seeds", type=int, default=len(CALIBRATION_SEEDS))
     parser.add_argument("--workers", type=int, default=10)
+    parser.add_argument("--reward-aligned-reference", action="store_true",
+                        help="add espera_mas_larga and evaluate each criterion with its best reference "
+                             "(pre-registered protocol, design doc section 7.5)")
+    parser.add_argument("--random-offset", action="store_true",
+                        help="one route file per seed, with the pulse offset drawn from that seed")
     args = parser.parse_args()
 
     seeds = CALIBRATION_SEEDS[: args.num_seeds]
     with tempfile.TemporaryDirectory() as tmp:
-        route_file = str(write_routes(args.candidate, Path(tmp) / f"{args.candidate}.rou.xml"))
-        tasks = [(route_file, p, s, args.seconds) for p in policy_names() for s in seeds]
+        offsets = {s: pulse_offset(CANDIDATES[args.candidate], s) if args.random_offset else 0 for s in seeds}
+        route_files = {s: str(write_routes(args.candidate, Path(tmp) / f"{args.candidate}_{s}.rou.xml", offsets[s]))
+                       for s in seeds}
+        tasks = [(route_files[s], p, s, args.seconds)
+                 for p in policy_names(args.reward_aligned_reference) for s in seeds]
         t0 = time.perf_counter()
         with ProcessPoolExecutor(max_workers=args.workers) as pool:
             episodes = list(pool.map(run_episode, *zip(*tasks)))
         elapsed = time.perf_counter() - t0
 
-    analysis = analyze(episodes, seeds)
-    _print_report(args.candidate, args.seconds, analysis, seeds)
+    if args.reward_aligned_reference:
+        analysis = analyze_per_metric(episodes, seeds)
+        _print_per_metric_report(args.candidate, args.seconds, analysis, seeds)
+    else:
+        analysis = analyze(episodes, seeds)
+        _print_report(args.candidate, args.seconds, analysis, seeds)
     print(f"{len(tasks)} episodes in {elapsed:.0f} s with {args.workers} workers")
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    out = RESULTS_DIR / f"{args.candidate}_{args.seconds}s.json"
+    tag = ("_offset" if args.random_offset else "") + ("_espera" if args.reward_aligned_reference else "")
+    out = RESULTS_DIR / f"{args.candidate}{tag}_{args.seconds}s.json"
     out.write_text(json.dumps({
-        "candidate": args.candidate, "spec": CANDIDATES[args.candidate],
+        "candidate": args.candidate, "spec": CANDIDATES[args.candidate], "pulse_offsets": offsets,
         "total_demand_veh_h": total_demand(CANDIDATES[args.candidate]), "seconds": args.seconds,
         "seeds": seeds, "criteria": {"min_reduction": MIN_REDUCTION, "max_p_value": MAX_P_VALUE,
                                      "max_pending_best": MAX_PENDING_BEST},
