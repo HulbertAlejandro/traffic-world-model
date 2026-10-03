@@ -181,3 +181,39 @@ comparable es la razón entre la v2 y la v1 en las mismas condiciones: ≈ 2.0 v
 estimado en la Fase 0, que no incluía la generación de rutas por episodio ni las lecturas de
 `info`. Para planificar las fases siguientes conviene usar esa razón aplicada al costo de la v1
 medido en el momento, no los segundos absolutos.
+
+### Verificaciones finales y cierre de la Fase 1
+
+**1. Retornos muy negativos de `aleatoria`: ruido esperado, sin error de implementación.**
+
+- La recompensa recalculada a partir de `next_states` (espera + detenidos de los 4 semáforos)
+  coincide **exactamente** con la guardada en los 190 episodios (error 0).
+- En los peores episodios de `aleatoria` (semillas 23006, 22018 y 20048, con retornos de −12,475,
+  −10,891 y −9,366), la pérdida se concentra en los carriles arteriales hacia el Este de B0 y C0 y
+  en la entrada oeste de A0. Por ejemplo, en 23006 la espera acumulada pico del carril A0→B0 llega
+  a 618; ese episodio arranca con offset 9, en el pico hacia el Este.
+- Esas esperas coinciden con el verde más largo del episodio en ese semáforo, que fue para la
+  **transversal** (fase 0): 9 a 12 pasos, es decir 45 a 60 s, sobre calles casi vacías.
+- Es el mecanismo esperado: al pedir cambio con probabilidad 1/2 en cada paso, la política
+  aleatoria a veces mantiene por azar un verde equivocado durante 45–60 s, con la arterial cargada
+  en rojo. La probabilidad de un verde de 10 pasos o más es de 1/256 por tanda, y con unas 2,500
+  tandas en los 64 episodios se esperan alrededor de 10. Es consistente con lo observado.
+
+**2. Frenado de emergencia: aislado, y no viene de la política aleatoria.** Se re-corrieron los
+208 episodios (190 del dataset y 18 de la piloto) con las advertencias de SUMO a un archivo
+(`docs/results/v2/dataset/warnings_check.py` y `.json`):
+
+- **Los 208 retornos coinciden exactamente con los manifiestos:** la recolección es reproducible.
+- **Hay 2 frenadas de emergencia en 208 episodios (1%), las dos con `fijo_2_3`** y ninguna con
+  `aleatoria`: semilla 19010 (piloto, D0, t = 153 s) y 22013 (`test`, C0, t = 178 s). No hay
+  ninguna otra advertencia de SUMO.
+- **Causa probable, no verificada.** En los dos casos es un vehículo de la transversal, 1 a 3 s
+  después de que `fijo_2_3` cambió a la fase transversal: sus cambios caen en t = 150 y 175 s, con
+  2 s de amarillo. Con `yellow_time = 2` y sin fase de todo-rojo (parámetros heredados de la v1),
+  un vehículo que entró en amarillo puede seguir dentro del cruce cuando la transversal ya tiene
+  verde. Es un evento poco frecuente del modelo de conducción, no un problema estructural del
+  dataset.
+
+**Cierre.** Ninguna de las dos verificaciones muestra algo estructuralmente mal. **La Fase 1 queda
+cerrada:** estado, acción y recompensa definidos y probados, la demanda it5 con offset aleatorio
+adoptada, el dataset recolectado según este pre-registro y verificado.

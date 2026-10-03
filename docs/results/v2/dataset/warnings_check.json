@@ -1,0 +1,39 @@
+{
+ "episodes": 208,
+ "return_mismatches": [],
+ "episodes_with_emergency_braking": 2,
+ "emergency_braking_events": 2,
+ "by_policy": {
+  "fijo_2_3": 2
+ },
+ "by_signal": {
+  "bottom2C0": 1,
+  "D0": 1
+ },
+ "other_warning_episodes": 0,
+ "details": [
+  {
+   "seed": 22013,
+   "policy": "fijo_2_3",
+   "events": [
+    {
+     "vehicle": "C0_south_straight_flow_s2.0",
+     "lane": "bottom2C0_0",
+     "time": 178.0
+    }
+   ]
+  },
+  {
+   "seed": 19010,
+   "policy": "fijo_2_3",
+   "events": [
+    {
+     "vehicle": "D0_north_straight_flow_s1.0",
+     "lane": ":D0_1_0",
+     "time": 153.0
+    }
+   ]
+  }
+ ],
+ "other_warnings_sample": []
+}
