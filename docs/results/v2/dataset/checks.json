@@ -1,0 +1,74 @@
+{
+ "manifest": "docs/results/v2/dataset/manifest.json",
+ "episodes": 190,
+ "failures": [],
+ "passed": true,
+ "reward_scale": {
+  "fijo_2_3": {
+   "mean_return": -1619.5555555555557,
+   "phase0_mean": -1715.0,
+   "ok": true
+  },
+  "cola_mas_larga": {
+   "mean_return": -1118.7142857142858,
+   "phase0_mean": -1317.05,
+   "ok": true
+  }
+ },
+ "max_pending_after_warmup_cola": 3.0,
+ "constant_columns": [
+  "A0.phase_one_hot[2]",
+  "A0.phase_one_hot[3]",
+  "B0.phase_one_hot[2]",
+  "B0.phase_one_hot[3]",
+  "C0.phase_one_hot[2]",
+  "C0.phase_one_hot[3]",
+  "D0.phase_one_hot[2]",
+  "D0.phase_one_hot[3]"
+ ],
+ "per_policy": {
+  "aleatoria": {
+   "episodes": 64,
+   "return_mean": -5383.390625,
+   "return_min": -12475.0,
+   "return_max": -2168.0,
+   "switches_per_signal_mean": [
+    19.2,
+    19.7,
+    19.4,
+    19.7
+   ],
+   "max_pending_after_warmup": 5.0,
+   "seconds_mean": 4.100894178125003
+  },
+  "fijo_2_3": {
+   "episodes": 63,
+   "return_mean": -1619.5555555555557,
+   "return_min": -3593.0,
+   "return_max": -827.0,
+   "switches_per_signal_mean": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "max_pending_after_warmup": 5.0,
+   "seconds_mean": 3.8898860698413738
+  },
+  "cola_mas_larga": {
+   "episodes": 63,
+   "return_mean": -1118.7142857142858,
+   "return_min": -2147.0,
+   "return_max": -467.0,
+   "switches_per_signal_mean": [
+    18.6,
+    7.7,
+    20.1,
+    8.1
+   ],
+   "max_pending_after_warmup": 3.0,
+   "seconds_mean": 3.792596685714295
+  }
+ },
+ "mean_episode_seconds": 3.928703373684249
+}

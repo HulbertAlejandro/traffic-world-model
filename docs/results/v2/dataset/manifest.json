@@ -1,0 +1,3826 @@
+{
+ "pre_registration": "docs/v2/ADDENDUM_DATASET.md",
+ "splits": {
+  "train": [
+   20000,
+   20111
+  ],
+  "validation": [
+   21000,
+   21023
+  ],
+  "test": [
+   22000,
+   22023
+  ],
+  "ood": [
+   23000,
+   23029
+  ]
+ },
+ "environment_creation_seconds": 0.6439472000001842,
+ "total_seconds": 750.5014608999991,
+ "mean_episode_seconds": 3.928703373684249,
+ "episodes": [
+  {
+   "seed": 20000,
+   "policy": "aleatoria",
+   "pulse_offset": 228,
+   "transitions": 60,
+   "return": -5334.0,
+   "switches_per_signal": [
+    15.0,
+    22.0,
+    17.0,
+    18.0
+   ],
+   "arrivals": 119.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.9976791999997658,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20000.npz",
+   "sha256": "357821a62f01b2df5da5e50103429f5f81fa0da08f4b93507c9c0f495f1eb120"
+  },
+  {
+   "seed": 20001,
+   "policy": "fijo_2_3",
+   "pulse_offset": 204,
+   "transitions": 60,
+   "return": -1026.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 0.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 1.8055223999999725,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20001.npz",
+   "sha256": "586f67560dc04a40d4053309be017c8656bf362607fcd19f1a729499f16bc569"
+  },
+  {
+   "seed": 20002,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 147,
+   "transitions": 60,
+   "return": -1252.0,
+   "switches_per_signal": [
+    17.0,
+    5.0,
+    21.0,
+    9.0
+   ],
+   "arrivals": 144.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.979127900000094,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20002.npz",
+   "sha256": "28e1c7abe9c8eca1de2d648c4ba18e626ea7d27f205e4c41356315cb72fda278"
+  },
+  {
+   "seed": 20003,
+   "policy": "aleatoria",
+   "pulse_offset": 137,
+   "transitions": 60,
+   "return": -9140.0,
+   "switches_per_signal": [
+    20.0,
+    22.0,
+    17.0,
+    20.0
+   ],
+   "arrivals": 110.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.3231513000009727,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20003.npz",
+   "sha256": "7bf8cfbe9897e192060c649967db507032c379f889a488681b7726ad93c984d9"
+  },
+  {
+   "seed": 20004,
+   "policy": "fijo_2_3",
+   "pulse_offset": 93,
+   "transitions": 60,
+   "return": -2042.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 105.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.9207755999996152,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20004.npz",
+   "sha256": "4cee9c1d079d3f5d3e85d8ed9c8afcc1c6dcc4a8c932d35607b36e0a7ee15227"
+  },
+  {
+   "seed": 20005,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 70,
+   "transitions": 60,
+   "return": -1141.0,
+   "switches_per_signal": [
+    18.0,
+    9.0,
+    22.0,
+    7.0
+   ],
+   "arrivals": 113.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.7959831999996823,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20005.npz",
+   "sha256": "9cab4860609ff03e42e9745ff381372dc9e289b29df25223f72e0ec558607bd3"
+  },
+  {
+   "seed": 20006,
+   "policy": "aleatoria",
+   "pulse_offset": 77,
+   "transitions": 60,
+   "return": -4963.0,
+   "switches_per_signal": [
+    18.0,
+    17.0,
+    19.0,
+    19.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.9485316000009334,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20006.npz",
+   "sha256": "0af0ed293af65b1c0620ef231cfa95b2b2d7c67f1fc3fdfa6068585e1e8c3e13"
+  },
+  {
+   "seed": 20007,
+   "policy": "fijo_2_3",
+   "pulse_offset": 141,
+   "transitions": 60,
+   "return": -1585.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 129.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.9038812999988295,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20007.npz",
+   "sha256": "de0555c4475f2eb46517f0df20dd0cdc7526d09fbcb5820001ea60c4ee5c48d0"
+  },
+  {
+   "seed": 20008,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 81,
+   "transitions": 60,
+   "return": -817.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    19.0,
+    7.0
+   ],
+   "arrivals": 126.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.842815399999381,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20008.npz",
+   "sha256": "d575999778a8c00bc8f110905326a607246ccd37ccb9f0d9cc5f271911f3b521"
+  },
+  {
+   "seed": 20009,
+   "policy": "aleatoria",
+   "pulse_offset": 21,
+   "transitions": 60,
+   "return": -3693.0,
+   "switches_per_signal": [
+    22.0,
+    22.0,
+    19.0,
+    18.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.0581590000001597,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20009.npz",
+   "sha256": "de98fd1d5441767ed25c21d7a02e780d0493f56856d5adc4c6b5e7637a26add9"
+  },
+  {
+   "seed": 20010,
+   "policy": "fijo_2_3",
+   "pulse_offset": 275,
+   "transitions": 60,
+   "return": -1748.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 112.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.9306314999994356,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20010.npz",
+   "sha256": "20a3919901c634f380cfefc1333ee9c624442d0f2d70fce84b470d0965c44e83"
+  },
+  {
+   "seed": 20011,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 145,
+   "transitions": 60,
+   "return": -1667.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    16.0,
+    15.0
+   ],
+   "arrivals": 135.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.9992301000002044,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20011.npz",
+   "sha256": "2a51438c6140e4d0bd9a643b193f648e5fb376e10722e21a984cddf163ca9c46"
+  },
+  {
+   "seed": 20012,
+   "policy": "aleatoria",
+   "pulse_offset": 205,
+   "transitions": 60,
+   "return": -5062.0,
+   "switches_per_signal": [
+    18.0,
+    21.0,
+    21.0,
+    17.0
+   ],
+   "arrivals": 96.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 2.054816900001242,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20012.npz",
+   "sha256": "fa0d82e47ec1d4107d000b04b2b8a84ae3620c5fdfd100668f02b014cd05bc5b"
+  },
+  {
+   "seed": 20013,
+   "policy": "fijo_2_3",
+   "pulse_offset": 130,
+   "transitions": 60,
+   "return": -1521.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.8754841999998462,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20013.npz",
+   "sha256": "4427ef4789ad94e3d9106d803dcd1ea04161e324da45102e5e5fc75e0afd50ae"
+  },
+  {
+   "seed": 20014,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 192,
+   "transitions": 60,
+   "return": -1196.0,
+   "switches_per_signal": [
+    19.0,
+    7.0,
+    16.0,
+    9.0
+   ],
+   "arrivals": 109.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.8207067999992432,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20014.npz",
+   "sha256": "191d2bed02a411e854476bf0f19720582cd87c3fa0e6dcc4d74fb9cc8b3d87ad"
+  },
+  {
+   "seed": 20015,
+   "policy": "aleatoria",
+   "pulse_offset": 22,
+   "transitions": 60,
+   "return": -4133.0,
+   "switches_per_signal": [
+    19.0,
+    20.0,
+    20.0,
+    21.0
+   ],
+   "arrivals": 101.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 2.0882715999996435,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20015.npz",
+   "sha256": "dbc1bb63396ea43083facf876e4dd53b500e545a3e7b1f3265d2b98f9412cd46"
+  },
+  {
+   "seed": 20016,
+   "policy": "fijo_2_3",
+   "pulse_offset": 111,
+   "transitions": 60,
+   "return": -2259.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 143.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.9988553000002867,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20016.npz",
+   "sha256": "a31c0b63f5541aed1ba209811f28d35bb7a1c4b9c5e0d2db6003f32e85b9ee9d"
+  },
+  {
+   "seed": 20017,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 85,
+   "transitions": 60,
+   "return": -577.0,
+   "switches_per_signal": [
+    16.0,
+    5.0,
+    15.0,
+    3.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.80153479999899,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20017.npz",
+   "sha256": "bc9d73369817ec599cca343cc418664e05eed4dcb048bc93d556dcafa9a5d616"
+  },
+  {
+   "seed": 20018,
+   "policy": "aleatoria",
+   "pulse_offset": 1,
+   "transitions": 60,
+   "return": -2572.0,
+   "switches_per_signal": [
+    23.0,
+    18.0,
+    22.0,
+    19.0
+   ],
+   "arrivals": 94.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.826601999999184,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20018.npz",
+   "sha256": "9a2fbc11ffbf3e0d6aed3d3418f91e6437d304bb99a298a46d916ae46a10a7c1"
+  },
+  {
+   "seed": 20019,
+   "policy": "fijo_2_3",
+   "pulse_offset": 16,
+   "transitions": 60,
+   "return": -879.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 105.0,
+   "max_pending": 5.0,
+   "max_pending_after_warmup": 5.0,
+   "seconds": 1.8234370000009221,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20019.npz",
+   "sha256": "3c1c3efbecae100409d664fdf657f85d3d3c00710fbfaefcf46f1e5338974936"
+  },
+  {
+   "seed": 20020,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 288,
+   "transitions": 60,
+   "return": -818.0,
+   "switches_per_signal": [
+    17.0,
+    7.0,
+    18.0,
+    9.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.8418342000004486,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20020.npz",
+   "sha256": "5e094ac0850b9ed7af060105af5633ec3993927739eb292143ac2363fc1a5e2f"
+  },
+  {
+   "seed": 20021,
+   "policy": "aleatoria",
+   "pulse_offset": 12,
+   "transitions": 60,
+   "return": -4789.0,
+   "switches_per_signal": [
+    21.0,
+    20.0,
+    21.0,
+    19.0
+   ],
+   "arrivals": 119.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.135095800000272,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20021.npz",
+   "sha256": "27475f2944af229ed4ae012eddeca7ee26cdc94c945fdc44e8952ed600ad6c78"
+  },
+  {
+   "seed": 20022,
+   "policy": "fijo_2_3",
+   "pulse_offset": 139,
+   "transitions": 60,
+   "return": -2157.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 128.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.9223555999997188,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20022.npz",
+   "sha256": "61077b050b850b7f3cac72b1f78c111542354348a85bd9741784e9c92416bd3f"
+  },
+  {
+   "seed": 20023,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 159,
+   "transitions": 60,
+   "return": -1587.0,
+   "switches_per_signal": [
+    19.0,
+    5.0,
+    21.0,
+    7.0
+   ],
+   "arrivals": 139.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.0075310000011086,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20023.npz",
+   "sha256": "5988816baf9abb9547d83f5dcf09bc4c3b8caf85bf7e13ee16025efa87bff480"
+  },
+  {
+   "seed": 20024,
+   "policy": "aleatoria",
+   "pulse_offset": 24,
+   "transitions": 60,
+   "return": -8133.0,
+   "switches_per_signal": [
+    20.0,
+    19.0,
+    18.0,
+    21.0
+   ],
+   "arrivals": 105.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.1303177999998297,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20024.npz",
+   "sha256": "86014f5590002f54249bdd39c413d7481b0096211d1658913256d851cf3645cb"
+  },
+  {
+   "seed": 20025,
+   "policy": "fijo_2_3",
+   "pulse_offset": 294,
+   "transitions": 60,
+   "return": -1201.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 102.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.9045752000001812,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20025.npz",
+   "sha256": "7e7a5894b55a34e3c4a8beb557b6fea411f77ebe7e1a7c503bd3b2e21626a68b"
+  },
+  {
+   "seed": 20026,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 74,
+   "transitions": 60,
+   "return": -1345.0,
+   "switches_per_signal": [
+    21.0,
+    3.0,
+    22.0,
+    5.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.9127327000005607,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20026.npz",
+   "sha256": "b957f27d705acf11cdbba09c9ac8a160759a5eade7dfcc516b72f0cc381a5ae6"
+  },
+  {
+   "seed": 20027,
+   "policy": "aleatoria",
+   "pulse_offset": 160,
+   "transitions": 60,
+   "return": -7398.0,
+   "switches_per_signal": [
+    21.0,
+    17.0,
+    21.0,
+    19.0
+   ],
+   "arrivals": 111.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.2120820000000094,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20027.npz",
+   "sha256": "13fa3884c9f442b981dcf675932766602e5c8c95bb26b376305d4d682a57c24c"
+  },
+  {
+   "seed": 20028,
+   "policy": "fijo_2_3",
+   "pulse_offset": 105,
+   "transitions": 60,
+   "return": -1646.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.9841010999989521,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20028.npz",
+   "sha256": "8860aa3813dcca67994c5bf352de3a00f93d564cf400a22aa8f890e38c85c754"
+  },
+  {
+   "seed": 20029,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 69,
+   "transitions": 60,
+   "return": -918.0,
+   "switches_per_signal": [
+    16.0,
+    7.0,
+    17.0,
+    5.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.8471872999998595,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20029.npz",
+   "sha256": "b7e097f15f1497e57bf742eb41e8948ccb921e0cf59f74acf69c43029bd0d9d9"
+  },
+  {
+   "seed": 20030,
+   "policy": "aleatoria",
+   "pulse_offset": 261,
+   "transitions": 60,
+   "return": -5577.0,
+   "switches_per_signal": [
+    19.0,
+    21.0,
+    17.0,
+    17.0
+   ],
+   "arrivals": 104.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.052172599998812,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20030.npz",
+   "sha256": "af50a5dab4115897390a39c620b8d4a2a2e418762fdc5f84d810cb23056221dc"
+  },
+  {
+   "seed": 20031,
+   "policy": "fijo_2_3",
+   "pulse_offset": 196,
+   "transitions": 60,
+   "return": -1115.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 106.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.8561771000004228,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20031.npz",
+   "sha256": "f07cb170ae971121800c0dfa36f85aa8943757c46b8194524aa89016ec996c85"
+  },
+  {
+   "seed": 20032,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 16,
+   "transitions": 60,
+   "return": -633.0,
+   "switches_per_signal": [
+    21.0,
+    4.0,
+    19.0,
+    5.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.782505900000615,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20032.npz",
+   "sha256": "cf5399d4aedb73f45a5ff71c35503149d7705761b998e9cce1aa02210360d708"
+  },
+  {
+   "seed": 20033,
+   "policy": "aleatoria",
+   "pulse_offset": 219,
+   "transitions": 60,
+   "return": -5417.0,
+   "switches_per_signal": [
+    18.0,
+    19.0,
+    22.0,
+    22.0
+   ],
+   "arrivals": 114.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 1.964913499999966,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20033.npz",
+   "sha256": "da7e589b0f8c376159d5f2c2b9d9913c702f6c0d5cb836d3710d8124f3a26cf0"
+  },
+  {
+   "seed": 20034,
+   "policy": "fijo_2_3",
+   "pulse_offset": 298,
+   "transitions": 60,
+   "return": -1176.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.7533405000012863,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20034.npz",
+   "sha256": "e54fe1e1832338544f54e4e240180546edc281c60ac2519221ce58767f74655c"
+  },
+  {
+   "seed": 20035,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 200,
+   "transitions": 60,
+   "return": -818.0,
+   "switches_per_signal": [
+    11.0,
+    9.0,
+    21.0,
+    9.0
+   ],
+   "arrivals": 119.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.958738600000288,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20035.npz",
+   "sha256": "ae146842a88dd9d2bb98e84d65b35cfdacded8c5815de23c43a4625ec623c75d"
+  },
+  {
+   "seed": 20036,
+   "policy": "aleatoria",
+   "pulse_offset": 222,
+   "transitions": 60,
+   "return": -3017.0,
+   "switches_per_signal": [
+    21.0,
+    21.0,
+    20.0,
+    21.0
+   ],
+   "arrivals": 110.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.7518538999993325,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20036.npz",
+   "sha256": "af6ed5529533eccc88fe072ee831e5c773a4c33b9498b39b8336df9f5498ff21"
+  },
+  {
+   "seed": 20037,
+   "policy": "fijo_2_3",
+   "pulse_offset": 140,
+   "transitions": 60,
+   "return": -3305.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 130.0,
+   "max_pending": 4.0,
+   "max_pending_after_warmup": 4.0,
+   "seconds": 5.971272900000258,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20037.npz",
+   "sha256": "b63864efb01d53ba0c67a62d54de68144161245f2bf8d86323c3dae74406a231"
+  },
+  {
+   "seed": 20038,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 222,
+   "transitions": 60,
+   "return": -1353.0,
+   "switches_per_signal": [
+    16.0,
+    9.0,
+    21.0,
+    7.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.38476350000019,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20038.npz",
+   "sha256": "208e99589a31c1b7325077d41af1c6dd3fe27c3b1fc1fc2a60966a3b55977a84"
+  },
+  {
+   "seed": 20039,
+   "policy": "aleatoria",
+   "pulse_offset": 33,
+   "transitions": 60,
+   "return": -5303.0,
+   "switches_per_signal": [
+    14.0,
+    18.0,
+    21.0,
+    22.0
+   ],
+   "arrivals": 99.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 5.3950595000005706,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20039.npz",
+   "sha256": "9b0583df7f308fbca24f1e33a3b6198cdc3bc047f7de8766e894c7433d543655"
+  },
+  {
+   "seed": 20040,
+   "policy": "fijo_2_3",
+   "pulse_offset": 131,
+   "transitions": 60,
+   "return": -2159.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 134.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.793644700001096,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20040.npz",
+   "sha256": "ee63a0c7eb50ea1a96bca91295067b707942d55dd74668851043fd40a46b2c53"
+  },
+  {
+   "seed": 20041,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 98,
+   "transitions": 60,
+   "return": -1887.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    25.0,
+    7.0
+   ],
+   "arrivals": 133.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 6.156293699999878,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20041.npz",
+   "sha256": "7238ec81a581216be132caa9c17348822a29dd8bcb8e95d46460e5e601fbf696"
+  },
+  {
+   "seed": 20042,
+   "policy": "aleatoria",
+   "pulse_offset": 3,
+   "transitions": 60,
+   "return": -2646.0,
+   "switches_per_signal": [
+    20.0,
+    20.0,
+    22.0,
+    20.0
+   ],
+   "arrivals": 85.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.460170800000924,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20042.npz",
+   "sha256": "d8e3651a432e948be53e4513ade80375d1718e6329606605ac62e3a51cc687c7"
+  },
+  {
+   "seed": 20043,
+   "policy": "fijo_2_3",
+   "pulse_offset": 278,
+   "transitions": 60,
+   "return": -1562.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 6.114489500001582,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20043.npz",
+   "sha256": "838f1a51e0d57a9306faffbd85f1aee7de76130b6595f255e5f52008e5e00cdb"
+  },
+  {
+   "seed": 20044,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 195,
+   "transitions": 60,
+   "return": -629.0,
+   "switches_per_signal": [
+    20.0,
+    9.0,
+    17.0,
+    7.0
+   ],
+   "arrivals": 121.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.966017599999759,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20044.npz",
+   "sha256": "0fffc0e5fbad351b4fe003ba158069f5a95201771b72265b7932d4f82cb14b29"
+  },
+  {
+   "seed": 20045,
+   "policy": "aleatoria",
+   "pulse_offset": 271,
+   "transitions": 60,
+   "return": -8313.0,
+   "switches_per_signal": [
+    16.0,
+    16.0,
+    20.0,
+    17.0
+   ],
+   "arrivals": 101.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.957451399999627,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20045.npz",
+   "sha256": "6a619798d5fb27b3070df9becd4eb3f05f22a62dd4a4d4c67098126e0fc2e5d9"
+  },
+  {
+   "seed": 20046,
+   "policy": "fijo_2_3",
+   "pulse_offset": 179,
+   "transitions": 60,
+   "return": -1295.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 5.342060799999672,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20046.npz",
+   "sha256": "62d5c6f3962fe6e51d26cffd93052b799d13d6d673bf7a89389426b026938d1d"
+  },
+  {
+   "seed": 20047,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 120,
+   "transitions": 60,
+   "return": -1199.0,
+   "switches_per_signal": [
+    19.0,
+    7.0,
+    15.0,
+    6.0
+   ],
+   "arrivals": 121.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 5.130245399999694,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20047.npz",
+   "sha256": "1b9b9e9838c6609348b8fe2c4a65cf1ac9d0c4cf5dd0b949e74bdb0da6e84b06"
+  },
+  {
+   "seed": 20048,
+   "policy": "aleatoria",
+   "pulse_offset": 161,
+   "transitions": 60,
+   "return": -9366.0,
+   "switches_per_signal": [
+    18.0,
+    18.0,
+    20.0,
+    19.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 6.506353900000249,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20048.npz",
+   "sha256": "214243a9061182ccb4f8283b51f1bc50e39a95a60fad6495c2ecd35fad9d55c4"
+  },
+  {
+   "seed": 20049,
+   "policy": "fijo_2_3",
+   "pulse_offset": 134,
+   "transitions": 60,
+   "return": -1179.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 135.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.124394000000393,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20049.npz",
+   "sha256": "2fec6eb6adb308d75eedd55e0ee770bf334c73ee3a824e89cec96d3ab1490bc8"
+  },
+  {
+   "seed": 20050,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 167,
+   "transitions": 60,
+   "return": -1198.0,
+   "switches_per_signal": [
+    19.0,
+    7.0,
+    23.0,
+    13.0
+   ],
+   "arrivals": 147.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.596307599998909,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20050.npz",
+   "sha256": "4a0dacac8aee3ff43fc1a6f2a3f2f7ba594b6374a9c380f72c755fc027eddbc3"
+  },
+  {
+   "seed": 20051,
+   "policy": "aleatoria",
+   "pulse_offset": 209,
+   "transitions": 60,
+   "return": -4361.0,
+   "switches_per_signal": [
+    19.0,
+    23.0,
+    15.0,
+    22.0
+   ],
+   "arrivals": 108.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.848729499999536,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20051.npz",
+   "sha256": "9258e1ec1edaeb0509b897e1a5af5ffaecff6bcfbbd719de03c43b6140291403"
+  },
+  {
+   "seed": 20052,
+   "policy": "fijo_2_3",
+   "pulse_offset": 39,
+   "transitions": 60,
+   "return": -1932.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 127.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.849154400000771,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20052.npz",
+   "sha256": "7e62c671019195f3e6046e7672cedd9549f48dc83df37a60d6727b539f1ae5b9"
+  },
+  {
+   "seed": 20053,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 187,
+   "transitions": 60,
+   "return": -971.0,
+   "switches_per_signal": [
+    17.0,
+    7.0,
+    22.0,
+    1.0
+   ],
+   "arrivals": 133.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.51137000000017,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20053.npz",
+   "sha256": "45a8f9abdde4e6d01fdbb9de168b1ad10ac5a6ea9f02766817dcfa971bdce791"
+  },
+  {
+   "seed": 20054,
+   "policy": "aleatoria",
+   "pulse_offset": 93,
+   "transitions": 60,
+   "return": -3218.0,
+   "switches_per_signal": [
+    19.0,
+    22.0,
+    19.0,
+    19.0
+   ],
+   "arrivals": 125.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.615335700000287,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20054.npz",
+   "sha256": "9e3a5662b04c2dbe701d5c026918d3bd8bd1682a59561730f503aa98781eff76"
+  },
+  {
+   "seed": 20055,
+   "policy": "fijo_2_3",
+   "pulse_offset": 222,
+   "transitions": 60,
+   "return": -1129.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 123.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.594558700000562,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20055.npz",
+   "sha256": "4dff02e55e6e54f1341dc04bc1a0d74623b897f07ebc8f4ceeb880f68401b403"
+  },
+  {
+   "seed": 20056,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 122,
+   "transitions": 60,
+   "return": -1194.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    19.0,
+    13.0
+   ],
+   "arrivals": 133.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.507127999999284,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20056.npz",
+   "sha256": "fbbc27418d04f0e5abefa6399678c70ffa7c528e1a3314ae57851c650a8fa593"
+  },
+  {
+   "seed": 20057,
+   "policy": "aleatoria",
+   "pulse_offset": 121,
+   "transitions": 60,
+   "return": -5057.0,
+   "switches_per_signal": [
+    18.0,
+    20.0,
+    19.0,
+    21.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.605650000001333,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20057.npz",
+   "sha256": "7223775e7f07f8847c5f30fee202221ec0fc671c0d6bad450bb604e029e5a064"
+  },
+  {
+   "seed": 20058,
+   "policy": "fijo_2_3",
+   "pulse_offset": 106,
+   "transitions": 60,
+   "return": -1885.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 135.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.629456500000742,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20058.npz",
+   "sha256": "4681ed6d0ea2bd10acf74602acca3aea6c8b228cd36c88dc2cfbe35068941a9b"
+  },
+  {
+   "seed": 20059,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 288,
+   "transitions": 60,
+   "return": -985.0,
+   "switches_per_signal": [
+    20.0,
+    7.0,
+    21.0,
+    13.0
+   ],
+   "arrivals": 127.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.184646199999406,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20059.npz",
+   "sha256": "5e9db7dfc169e04c5a9d2b1f44c21743e80f191ea9081360f6ffa1342ff91fbc"
+  },
+  {
+   "seed": 20060,
+   "policy": "aleatoria",
+   "pulse_offset": 226,
+   "transitions": 60,
+   "return": -5841.0,
+   "switches_per_signal": [
+    19.0,
+    20.0,
+    17.0,
+    17.0
+   ],
+   "arrivals": 103.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.441011599999911,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20060.npz",
+   "sha256": "1e2b86047e7d03820b9e72ebdfc7000edcaf9d1b22b4902c187249f36fa2c9dc"
+  },
+  {
+   "seed": 20061,
+   "policy": "fijo_2_3",
+   "pulse_offset": 200,
+   "transitions": 60,
+   "return": -1702.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 111.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.251422600000296,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20061.npz",
+   "sha256": "b38eb813daad3ed3eff106e9324c7f14613454f3c5d39c0f179afd082fdf2b46"
+  },
+  {
+   "seed": 20062,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 137,
+   "transitions": 60,
+   "return": -1272.0,
+   "switches_per_signal": [
+    21.0,
+    7.0,
+    19.0,
+    7.0
+   ],
+   "arrivals": 123.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.327695799998764,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20062.npz",
+   "sha256": "df897fbb183fdafe524711249272ca733206956f927cc22c642a190fba35ec87"
+  },
+  {
+   "seed": 20063,
+   "policy": "aleatoria",
+   "pulse_offset": 33,
+   "transitions": 60,
+   "return": -6009.0,
+   "switches_per_signal": [
+    19.0,
+    19.0,
+    19.0,
+    20.0
+   ],
+   "arrivals": 111.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.765657299998566,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20063.npz",
+   "sha256": "fe74297c75f8e8bb25e7043c94d5f72722ff99eda21bf483d3bb1f8119c74c03"
+  },
+  {
+   "seed": 20064,
+   "policy": "fijo_2_3",
+   "pulse_offset": 179,
+   "transitions": 60,
+   "return": -1247.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.188995299999078,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20064.npz",
+   "sha256": "3d1dd085625a3781b5fb39b8b5dc1a0ca470ca075030c469565a6ae2a744ae35"
+  },
+  {
+   "seed": 20065,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 266,
+   "transitions": 60,
+   "return": -858.0,
+   "switches_per_signal": [
+    19.0,
+    11.0,
+    20.0,
+    9.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.255958800000371,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20065.npz",
+   "sha256": "9a253a126e7fe07148a623238548e618b87cc427d7df4f274ec81e966960c29d"
+  },
+  {
+   "seed": 20066,
+   "policy": "aleatoria",
+   "pulse_offset": 43,
+   "transitions": 60,
+   "return": -4067.0,
+   "switches_per_signal": [
+    19.0,
+    23.0,
+    20.0,
+    21.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.431566699999166,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20066.npz",
+   "sha256": "7c6060736e723d91ae14c2456eb1eb829f2c13926c92f02ab2cfe34f2dfb8143"
+  },
+  {
+   "seed": 20067,
+   "policy": "fijo_2_3",
+   "pulse_offset": 286,
+   "transitions": 60,
+   "return": -827.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 111.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.366288899998835,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20067.npz",
+   "sha256": "d0bb2861a069feb647208bb32de8191527918c95df9574cc26c2c777c2cd4079"
+  },
+  {
+   "seed": 20068,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 108,
+   "transitions": 60,
+   "return": -679.0,
+   "switches_per_signal": [
+    20.0,
+    14.0,
+    21.0,
+    7.0
+   ],
+   "arrivals": 132.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.827365200000713,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20068.npz",
+   "sha256": "00a3610a13d7dfa64f8e77951bc6c770acba55471bab6c9608f76cbad9d85b8e"
+  },
+  {
+   "seed": 20069,
+   "policy": "aleatoria",
+   "pulse_offset": 137,
+   "transitions": 60,
+   "return": -3301.0,
+   "switches_per_signal": [
+    18.0,
+    19.0,
+    17.0,
+    20.0
+   ],
+   "arrivals": 111.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 4.918382200001361,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20069.npz",
+   "sha256": "1523d90257d2921ec6c88d9065578510701b4c37bcb45e360026060c0c6bed8f"
+  },
+  {
+   "seed": 20070,
+   "policy": "fijo_2_3",
+   "pulse_offset": 52,
+   "transitions": 60,
+   "return": -1229.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 121.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.9641510999990714,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20070.npz",
+   "sha256": "d383a152c4c1f23a4b54c7ddad808ac245f93cb0e4c877ab49988876d3dfa698"
+  },
+  {
+   "seed": 20071,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 46,
+   "transitions": 60,
+   "return": -1102.0,
+   "switches_per_signal": [
+    23.0,
+    10.0,
+    20.0,
+    3.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.781708900000012,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20071.npz",
+   "sha256": "b377fb5fc97911f94a5b013970720888d3cba5d5963e2b1375ad0bb268624955"
+  },
+  {
+   "seed": 20072,
+   "policy": "aleatoria",
+   "pulse_offset": 175,
+   "transitions": 60,
+   "return": -6593.0,
+   "switches_per_signal": [
+    17.0,
+    18.0,
+    20.0,
+    17.0
+   ],
+   "arrivals": 108.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.178045999999085,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20072.npz",
+   "sha256": "6e6b88e0594dbefd90bfe85d42b3f45f465158ea83e8861948cca217d9c625a7"
+  },
+  {
+   "seed": 20073,
+   "policy": "fijo_2_3",
+   "pulse_offset": 214,
+   "transitions": 60,
+   "return": -1774.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.195113800000399,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20073.npz",
+   "sha256": "7d78ddecbf9a7beb196d5834713bd44463a67d1f71816efee4b4f9886b891245"
+  },
+  {
+   "seed": 20074,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 53,
+   "transitions": 60,
+   "return": -1433.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    20.0,
+    5.0
+   ],
+   "arrivals": 139.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 5.794100199998866,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20074.npz",
+   "sha256": "018ac407c6947c5d5b43ac50b24e194555fc13ceefc56fe9c3445ad536ab78af"
+  },
+  {
+   "seed": 20075,
+   "policy": "aleatoria",
+   "pulse_offset": 123,
+   "transitions": 60,
+   "return": -6444.0,
+   "switches_per_signal": [
+    23.0,
+    15.0,
+    19.0,
+    20.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.399963599998955,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20075.npz",
+   "sha256": "1acb7c94e241f65d08a033b91b43974c830b5c24974f748fb130aafcec9511a2"
+  },
+  {
+   "seed": 20076,
+   "policy": "fijo_2_3",
+   "pulse_offset": 153,
+   "transitions": 60,
+   "return": -1878.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 125.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.699580500000593,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20076.npz",
+   "sha256": "62292b937fd5777ad7c2d43227314d95b41775da09291fc7993b18a391dfb9ff"
+  },
+  {
+   "seed": 20077,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 245,
+   "transitions": 60,
+   "return": -638.0,
+   "switches_per_signal": [
+    21.0,
+    7.0,
+    13.0,
+    8.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 4.821269100000791,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20077.npz",
+   "sha256": "80c660fe5e1b15a0a299df6351316d16d82db43404ad1a864d2b085791f33f47"
+  },
+  {
+   "seed": 20078,
+   "policy": "aleatoria",
+   "pulse_offset": 51,
+   "transitions": 60,
+   "return": -7104.0,
+   "switches_per_signal": [
+    21.0,
+    22.0,
+    19.0,
+    17.0
+   ],
+   "arrivals": 100.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.6709253000008175,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20078.npz",
+   "sha256": "4f2723cd3dde86fd7ae3a7e283997e56a5b3a7fe4f1da059a3b8ce7bee9e7ad1"
+  },
+  {
+   "seed": 20079,
+   "policy": "fijo_2_3",
+   "pulse_offset": 119,
+   "transitions": 60,
+   "return": -3593.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 142.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 6.572767100000419,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20079.npz",
+   "sha256": "543c08094988888925b51908532504e9b81a46ef9bd395ed9fbfc9d3175f14f8"
+  },
+  {
+   "seed": 20080,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 278,
+   "transitions": 60,
+   "return": -866.0,
+   "switches_per_signal": [
+    19.0,
+    11.0,
+    21.0,
+    9.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.26801180000075,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20080.npz",
+   "sha256": "cabcd8e0cc1b02fe842f5d7dc68ac201918e34c6f8b5b3701fec3d073bb1d43c"
+  },
+  {
+   "seed": 20081,
+   "policy": "aleatoria",
+   "pulse_offset": 293,
+   "transitions": 60,
+   "return": -3793.0,
+   "switches_per_signal": [
+    18.0,
+    20.0,
+    22.0,
+    23.0
+   ],
+   "arrivals": 100.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.681857699999455,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20081.npz",
+   "sha256": "243120a7c281fc3fc4c78290705c9b00ef8b8f4f6f67894e9f39d7954da6fe23"
+  },
+  {
+   "seed": 20082,
+   "policy": "fijo_2_3",
+   "pulse_offset": 44,
+   "transitions": 60,
+   "return": -1472.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.62847789999978,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20082.npz",
+   "sha256": "0bdb633e47d68a7c4515dff5a546d8844dea0f21357a99d6cb0dd35c7a36c456"
+  },
+  {
+   "seed": 20083,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 74,
+   "transitions": 60,
+   "return": -1462.0,
+   "switches_per_signal": [
+    19.0,
+    15.0,
+    18.0,
+    7.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 4.849346000000878,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20083.npz",
+   "sha256": "aa2c279aa2668444d5fa7ea9b892c43077c9715dad454c5a87181e9070d687b5"
+  },
+  {
+   "seed": 20084,
+   "policy": "aleatoria",
+   "pulse_offset": 222,
+   "transitions": 60,
+   "return": -3498.0,
+   "switches_per_signal": [
+    22.0,
+    18.0,
+    18.0,
+    20.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.686828599998989,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20084.npz",
+   "sha256": "32f08fd19f8cec4a9fa2f5b5e1b9f304079b851d64321bffeafc386724cbf73b"
+  },
+  {
+   "seed": 20085,
+   "policy": "fijo_2_3",
+   "pulse_offset": 233,
+   "transitions": 60,
+   "return": -1699.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.444701200000054,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20085.npz",
+   "sha256": "525e3abea902abb2390aef94000503f2d0116ed9a73abd807730c05422797c5d"
+  },
+  {
+   "seed": 20086,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 97,
+   "transitions": 60,
+   "return": -919.0,
+   "switches_per_signal": [
+    19.0,
+    12.0,
+    18.0,
+    7.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.359225399999559,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20086.npz",
+   "sha256": "295ceb2081cc84c53660fe9c2008e76f0a063c9a489b356ddab18bf80ddb121e"
+  },
+  {
+   "seed": 20087,
+   "policy": "aleatoria",
+   "pulse_offset": 264,
+   "transitions": 60,
+   "return": -5888.0,
+   "switches_per_signal": [
+    19.0,
+    18.0,
+    22.0,
+    20.0
+   ],
+   "arrivals": 119.0,
+   "max_pending": 4.0,
+   "max_pending_after_warmup": 4.0,
+   "seconds": 6.195937399999821,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20087.npz",
+   "sha256": "c7ad53e16c809df678caa8b9cd43aa80c9aada340547f524afbb3012ba04e1e9"
+  },
+  {
+   "seed": 20088,
+   "policy": "fijo_2_3",
+   "pulse_offset": 113,
+   "transitions": 60,
+   "return": -2034.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 112.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.313140199999907,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20088.npz",
+   "sha256": "59ea2339ad15c77329922196f1cc74e5338657fbfa232521c14871b9578c75bd"
+  },
+  {
+   "seed": 20089,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 126,
+   "transitions": 60,
+   "return": -1285.0,
+   "switches_per_signal": [
+    20.0,
+    7.0,
+    23.0,
+    7.0
+   ],
+   "arrivals": 125.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.520400999999765,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20089.npz",
+   "sha256": "7f0a50689205460acdf0b29adb230cdc22c5419985a248fbeaa62b8a386df604"
+  },
+  {
+   "seed": 20090,
+   "policy": "aleatoria",
+   "pulse_offset": 214,
+   "transitions": 60,
+   "return": -5537.0,
+   "switches_per_signal": [
+    21.0,
+    20.0,
+    22.0,
+    23.0
+   ],
+   "arrivals": 113.0,
+   "max_pending": 5.0,
+   "max_pending_after_warmup": 5.0,
+   "seconds": 6.637907300000734,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20090.npz",
+   "sha256": "0422d664900a92c87dcb462de90ffe4c903884197b9eddbb554696d85e05f00f"
+  },
+  {
+   "seed": 20091,
+   "policy": "fijo_2_3",
+   "pulse_offset": 109,
+   "transitions": 60,
+   "return": -1936.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 128.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.714883599999666,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20091.npz",
+   "sha256": "c7e4bf076d19de7ebdda75987ff7d7cd450ba09baa4a7397fba40d5f0976076a"
+  },
+  {
+   "seed": 20092,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 276,
+   "transitions": 60,
+   "return": -538.0,
+   "switches_per_signal": [
+    15.0,
+    9.0,
+    20.0,
+    7.0
+   ],
+   "arrivals": 94.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.904883400000472,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20092.npz",
+   "sha256": "3c2736e40ecbd522c690f564a49b9697ebc474c4a1943822302a53b088456843"
+  },
+  {
+   "seed": 20093,
+   "policy": "aleatoria",
+   "pulse_offset": 45,
+   "transitions": 60,
+   "return": -3395.0,
+   "switches_per_signal": [
+    22.0,
+    21.0,
+    20.0,
+    21.0
+   ],
+   "arrivals": 112.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 5.896375799999078,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20093.npz",
+   "sha256": "6f5956bcb199ea5cd2ebefe3672bfc3ce41a34a44067b161d253e903783f6601"
+  },
+  {
+   "seed": 20094,
+   "policy": "fijo_2_3",
+   "pulse_offset": 135,
+   "transitions": 60,
+   "return": -1612.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 0.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 5.658166200000778,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20094.npz",
+   "sha256": "17582ed2f6eb02103ccbc76b6eb570211dd0f6bb120dc8cfae5cb4bb50d70993"
+  },
+  {
+   "seed": 20095,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 189,
+   "transitions": 60,
+   "return": -1201.0,
+   "switches_per_signal": [
+    15.0,
+    7.0,
+    22.0,
+    10.0
+   ],
+   "arrivals": 126.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.4692788000011205,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20095.npz",
+   "sha256": "b2b9b079617eae578c1660a7313b3e21a1f5cf3622e1bb20900cd3a72ada28c2"
+  },
+  {
+   "seed": 20096,
+   "policy": "aleatoria",
+   "pulse_offset": 124,
+   "transitions": 60,
+   "return": -5647.0,
+   "switches_per_signal": [
+    18.0,
+    22.0,
+    21.0,
+    18.0
+   ],
+   "arrivals": 113.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 6.0386385999991035,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20096.npz",
+   "sha256": "876bbee5084dd8cfc27618db879fa1b5cc572edc532f2b83f8e75784238ba8d8"
+  },
+  {
+   "seed": 20097,
+   "policy": "fijo_2_3",
+   "pulse_offset": 265,
+   "transitions": 60,
+   "return": -1595.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.2883542999989,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20097.npz",
+   "sha256": "03942c8c2b23f4fb583958e03d2d59cf73a6d6265140bd53512305798663ddad"
+  },
+  {
+   "seed": 20098,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 211,
+   "transitions": 60,
+   "return": -2147.0,
+   "switches_per_signal": [
+    16.0,
+    7.0,
+    17.0,
+    10.0
+   ],
+   "arrivals": 125.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 6.005096900000353,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20098.npz",
+   "sha256": "84ff5aa89af51fa56572876a31579543e8b2a37c6e11a9886dcb800d5e724489"
+  },
+  {
+   "seed": 20099,
+   "policy": "aleatoria",
+   "pulse_offset": 141,
+   "transitions": 60,
+   "return": -6070.0,
+   "switches_per_signal": [
+    18.0,
+    21.0,
+    18.0,
+    23.0
+   ],
+   "arrivals": 102.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 5.797547000000122,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20099.npz",
+   "sha256": "9afdb88aa9ecade05124a494fca7ed7556915cfefb9f3ff421340c74d9146bae"
+  },
+  {
+   "seed": 20100,
+   "policy": "fijo_2_3",
+   "pulse_offset": 133,
+   "transitions": 60,
+   "return": -1860.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 128.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.797328599999673,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20100.npz",
+   "sha256": "3ee08318d1587026049c59b8b8105174a83709caa06758075a4ae65e85c7c2a7"
+  },
+  {
+   "seed": 20101,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 104,
+   "transitions": 60,
+   "return": -1718.0,
+   "switches_per_signal": [
+    18.0,
+    8.0,
+    22.0,
+    5.0
+   ],
+   "arrivals": 136.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.7601510000004055,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20101.npz",
+   "sha256": "c9d54785e74dbdbefa6f10bd605e0713af4e608dc9499c4a0f4f847a068b8033"
+  },
+  {
+   "seed": 20102,
+   "policy": "aleatoria",
+   "pulse_offset": 72,
+   "transitions": 60,
+   "return": -3924.0,
+   "switches_per_signal": [
+    17.0,
+    14.0,
+    19.0,
+    19.0
+   ],
+   "arrivals": 105.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.53977230000055,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20102.npz",
+   "sha256": "171ebc9da4719836e9d90f01b65aceaab4701f84710474b040491d46d3fbf7fb"
+  },
+  {
+   "seed": 20103,
+   "policy": "fijo_2_3",
+   "pulse_offset": 143,
+   "transitions": 60,
+   "return": -2392.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.684434900000269,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20103.npz",
+   "sha256": "7e7a40fd755250eed47dedc7703343ae80f41da9a0e529aff6aa765e9eec6bab"
+  },
+  {
+   "seed": 20104,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 257,
+   "transitions": 60,
+   "return": -688.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    21.0,
+    9.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 0.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 4.86810449999939,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20104.npz",
+   "sha256": "c3427230262327e59f9aee4cbc5b18c1be3fadc59ea556fe6a65d376bf896739"
+  },
+  {
+   "seed": 20105,
+   "policy": "aleatoria",
+   "pulse_offset": 11,
+   "transitions": 60,
+   "return": -4638.0,
+   "switches_per_signal": [
+    20.0,
+    19.0,
+    18.0,
+    22.0
+   ],
+   "arrivals": 106.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.975569899999755,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20105.npz",
+   "sha256": "3af4ea4b1b40711491f389d3f2c0e9eb82940c1145ee57e6a8282637ca71a26e"
+  },
+  {
+   "seed": 20106,
+   "policy": "fijo_2_3",
+   "pulse_offset": 235,
+   "transitions": 60,
+   "return": -1107.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 112.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.775806499999817,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20106.npz",
+   "sha256": "f14875146e3963702c7dbe845c54937fbcdab501cd81059777043a07e071e062"
+  },
+  {
+   "seed": 20107,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 286,
+   "transitions": 60,
+   "return": -467.0,
+   "switches_per_signal": [
+    15.0,
+    3.0,
+    19.0,
+    5.0
+   ],
+   "arrivals": 90.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.7752784000003885,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20107.npz",
+   "sha256": "30ef0ec0d22dd933ae2084c3f62df8450fb9f1b9c4861e79e030b66a603eb289"
+  },
+  {
+   "seed": 20108,
+   "policy": "aleatoria",
+   "pulse_offset": 0,
+   "transitions": 60,
+   "return": -8687.0,
+   "switches_per_signal": [
+    21.0,
+    18.0,
+    19.0,
+    20.0
+   ],
+   "arrivals": 104.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 5.832413300000553,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20108.npz",
+   "sha256": "1727d702de804a0a5e81010c37207359d6d29710aa40cb74d6eb97edaa9c1040"
+  },
+  {
+   "seed": 20109,
+   "policy": "fijo_2_3",
+   "pulse_offset": 266,
+   "transitions": 60,
+   "return": -1573.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 114.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.741813500000717,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20109.npz",
+   "sha256": "5eb7a78ae713ae3fdf085a32a60301675cb3357bbadb5e3d99cadded84f7a0d0"
+  },
+  {
+   "seed": 20110,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 230,
+   "transitions": 60,
+   "return": -1030.0,
+   "switches_per_signal": [
+    18.0,
+    5.0,
+    21.0,
+    4.0
+   ],
+   "arrivals": 128.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.2210635999999795,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20110.npz",
+   "sha256": "cf690f68066f21a948d83167ead68fb1f04cb6a4a60c634f30168e043ed6d43c"
+  },
+  {
+   "seed": 20111,
+   "policy": "aleatoria",
+   "pulse_offset": 113,
+   "transitions": 60,
+   "return": -6014.0,
+   "switches_per_signal": [
+    22.0,
+    25.0,
+    20.0,
+    18.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 6.258225800000218,
+   "split": "train",
+   "file": "datasets/v2/raw/train/episode_20111.npz",
+   "sha256": "6d0251e27ab548d7b1e95d67cf57a88f7859a4d6465a7e581808fc93c629fc35"
+  },
+  {
+   "seed": 21000,
+   "policy": "aleatoria",
+   "pulse_offset": 177,
+   "transitions": 60,
+   "return": -4468.0,
+   "switches_per_signal": [
+    22.0,
+    21.0,
+    22.0,
+    23.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.727952799998093,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21000.npz",
+   "sha256": "e68851c1eccc17164ff568ec39922937ef9ac41790ce90271b68ad2ee2782f4f"
+  },
+  {
+   "seed": 21001,
+   "policy": "fijo_2_3",
+   "pulse_offset": 38,
+   "transitions": 60,
+   "return": -1921.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 125.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.152004899999156,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21001.npz",
+   "sha256": "32f8dba947d16d1edf3df1ae1cb9e3bf976c719ea13b0aa6ee1fd63f17c537e1"
+  },
+  {
+   "seed": 21002,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 72,
+   "transitions": 60,
+   "return": -1147.0,
+   "switches_per_signal": [
+    18.0,
+    9.0,
+    25.0,
+    11.0
+   ],
+   "arrivals": 133.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.725785200000246,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21002.npz",
+   "sha256": "ecdd28f414c0c49318af589d4ff85b11928190156d8594b9d58b2a05feefc9c1"
+  },
+  {
+   "seed": 21003,
+   "policy": "aleatoria",
+   "pulse_offset": 70,
+   "transitions": 60,
+   "return": -7275.0,
+   "switches_per_signal": [
+    19.0,
+    21.0,
+    20.0,
+    21.0
+   ],
+   "arrivals": 97.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 5.789316000002145,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21003.npz",
+   "sha256": "a414d15816f50ef4f99837649dec7677eb6e0a46ebf729d3b461f43584ae907c"
+  },
+  {
+   "seed": 21004,
+   "policy": "fijo_2_3",
+   "pulse_offset": 213,
+   "transitions": 60,
+   "return": -1383.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.721516199999314,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21004.npz",
+   "sha256": "89d39d395d326727c5ae672fa13518472309218c0bdb32e17692525ba59931b9"
+  },
+  {
+   "seed": 21005,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 147,
+   "transitions": 60,
+   "return": -1105.0,
+   "switches_per_signal": [
+    18.0,
+    4.0,
+    19.0,
+    9.0
+   ],
+   "arrivals": 123.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 4.5523630999996385,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21005.npz",
+   "sha256": "18e758ad417f2ba5ab7fabfa94d9fa270c3c31ffb08ed552c8119c9a6c14f7df"
+  },
+  {
+   "seed": 21006,
+   "policy": "aleatoria",
+   "pulse_offset": 100,
+   "transitions": 60,
+   "return": -4419.0,
+   "switches_per_signal": [
+    19.0,
+    25.0,
+    19.0,
+    19.0
+   ],
+   "arrivals": 128.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 6.626103999999032,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21006.npz",
+   "sha256": "aa5450261876b2adabf4e3931c3c0e6900f205360a14ea17a34295cef598e05a"
+  },
+  {
+   "seed": 21007,
+   "policy": "fijo_2_3",
+   "pulse_offset": 217,
+   "transitions": 60,
+   "return": -1035.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 109.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 6.517625799999223,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21007.npz",
+   "sha256": "d171268b89b7c0cc94cbb80391ce28d64de88521423f1634c6e09584ee312e7b"
+  },
+  {
+   "seed": 21008,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 287,
+   "transitions": 60,
+   "return": -1870.0,
+   "switches_per_signal": [
+    21.0,
+    4.0,
+    23.0,
+    10.0
+   ],
+   "arrivals": 131.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 7.492886600000929,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21008.npz",
+   "sha256": "aa7e2ad42d04e4effbc7e070cc814bbe29529f5a9d8d57b54f299b3de99a0aad"
+  },
+  {
+   "seed": 21009,
+   "policy": "aleatoria",
+   "pulse_offset": 120,
+   "transitions": 60,
+   "return": -3669.0,
+   "switches_per_signal": [
+    18.0,
+    20.0,
+    20.0,
+    23.0
+   ],
+   "arrivals": 108.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.124673399997846,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21009.npz",
+   "sha256": "3cb106f46dcae09a26d27a0efd95836406e335317fa7b14293e523c8ef41d737"
+  },
+  {
+   "seed": 21010,
+   "policy": "fijo_2_3",
+   "pulse_offset": 151,
+   "transitions": 60,
+   "return": -1983.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 5.29023750000124,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21010.npz",
+   "sha256": "e491556a75ba430aa053d7821bf46359745435a962048093a8928858543d87c7"
+  },
+  {
+   "seed": 21011,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 32,
+   "transitions": 60,
+   "return": -733.0,
+   "switches_per_signal": [
+    15.0,
+    1.0,
+    19.0,
+    6.0
+   ],
+   "arrivals": 99.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.372536200000468,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21011.npz",
+   "sha256": "41ea9b623113e432fb9757f64996eb884315dea08dcf1b11a4642fb16eff66d5"
+  },
+  {
+   "seed": 21012,
+   "policy": "aleatoria",
+   "pulse_offset": 73,
+   "transitions": 60,
+   "return": -2769.0,
+   "switches_per_signal": [
+    18.0,
+    19.0,
+    20.0,
+    21.0
+   ],
+   "arrivals": 114.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 4.027480300002935,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21012.npz",
+   "sha256": "f9d3e46661579b196d88c716f714aacc969ed680e35213fd4e1e0f461b17b5fc"
+  },
+  {
+   "seed": 21013,
+   "policy": "fijo_2_3",
+   "pulse_offset": 81,
+   "transitions": 60,
+   "return": -1231.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.0572240999972564,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21013.npz",
+   "sha256": "6d9c500dc6deccdcaf4201d974932b9692bbc9151509d84c51adb7f472b65d34"
+  },
+  {
+   "seed": 21014,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 47,
+   "transitions": 60,
+   "return": -877.0,
+   "switches_per_signal": [
+    25.0,
+    11.0,
+    19.0,
+    13.0
+   ],
+   "arrivals": 125.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.262506899998698,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21014.npz",
+   "sha256": "3508075d7708953902c5fd2e4e350789a091f6b32b565d02009e380030114539"
+  },
+  {
+   "seed": 21015,
+   "policy": "aleatoria",
+   "pulse_offset": 103,
+   "transitions": 60,
+   "return": -5136.0,
+   "switches_per_signal": [
+    19.0,
+    16.0,
+    16.0,
+    17.0
+   ],
+   "arrivals": 100.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.2901468999989447,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21015.npz",
+   "sha256": "39aeecd2932991127aa4b1214f4fc238315fb78a0892339a82075d7a00de86e7"
+  },
+  {
+   "seed": 21016,
+   "policy": "fijo_2_3",
+   "pulse_offset": 199,
+   "transitions": 60,
+   "return": -1338.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.9649065000012342,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21016.npz",
+   "sha256": "a9a75f6b0173617d135f8e83221565272b7697a522f4e856fb4e0ce3412c59b5"
+  },
+  {
+   "seed": 21017,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 33,
+   "transitions": 60,
+   "return": -1229.0,
+   "switches_per_signal": [
+    19.0,
+    5.0,
+    21.0,
+    9.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.1020129999997152,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21017.npz",
+   "sha256": "14c93fb4a136f0307fa532e3b1b1f06fc6242f2977452280d441325af0a48cd3"
+  },
+  {
+   "seed": 21018,
+   "policy": "aleatoria",
+   "pulse_offset": 257,
+   "transitions": 60,
+   "return": -7122.0,
+   "switches_per_signal": [
+    18.0,
+    16.0,
+    18.0,
+    21.0
+   ],
+   "arrivals": 93.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.4665377999990596,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21018.npz",
+   "sha256": "a512472c38f1178eed629668a7c7f150d0fb979c4dc940d91baa2370d7212c6c"
+  },
+  {
+   "seed": 21019,
+   "policy": "fijo_2_3",
+   "pulse_offset": 136,
+   "transitions": 60,
+   "return": -1515.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 141.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 3.0356315999997605,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21019.npz",
+   "sha256": "1108b34c008466e7066b99e87343d6b8db5d227f5b39b0f2755d72122a90468b"
+  },
+  {
+   "seed": 21020,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 269,
+   "transitions": 60,
+   "return": -725.0,
+   "switches_per_signal": [
+    12.0,
+    13.0,
+    20.0,
+    9.0
+   ],
+   "arrivals": 97.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.83301930000016,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21020.npz",
+   "sha256": "385519e0642605ec269ccc85e587764408e3def7ef8c9af158091f28aead03f0"
+  },
+  {
+   "seed": 21021,
+   "policy": "aleatoria",
+   "pulse_offset": 201,
+   "transitions": 60,
+   "return": -3746.0,
+   "switches_per_signal": [
+    22.0,
+    19.0,
+    21.0,
+    22.0
+   ],
+   "arrivals": 105.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.269714100002602,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21021.npz",
+   "sha256": "f9ea3cd1dfbef27c1e9e2a9e890facd5d2465d0f7d6609135c52901b70f36343"
+  },
+  {
+   "seed": 21022,
+   "policy": "fijo_2_3",
+   "pulse_offset": 205,
+   "transitions": 60,
+   "return": -1088.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 115.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.385026399999333,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21022.npz",
+   "sha256": "8b6864e2427be1f7973db798e8b3b7f85a3903eaae64972778b3dc890d32a1cc"
+  },
+  {
+   "seed": 21023,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 26,
+   "transitions": 60,
+   "return": -1035.0,
+   "switches_per_signal": [
+    20.0,
+    8.0,
+    21.0,
+    10.0
+   ],
+   "arrivals": 127.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.879268400000001,
+   "split": "validation",
+   "file": "datasets/v2/raw/validation/episode_21023.npz",
+   "sha256": "a4ba133afd649d1a3cadff02a06aeb7400e17876989ae3ca3687236133a4dc30"
+  },
+  {
+   "seed": 22000,
+   "policy": "aleatoria",
+   "pulse_offset": 81,
+   "transitions": 60,
+   "return": -2950.0,
+   "switches_per_signal": [
+    23.0,
+    22.0,
+    20.0,
+    16.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.1829515999997966,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22000.npz",
+   "sha256": "6be84b9ddf1eedaa17cd7fadcf7476795e6008c84b801b44cc01cf023957393c"
+  },
+  {
+   "seed": 22001,
+   "policy": "fijo_2_3",
+   "pulse_offset": 123,
+   "transitions": 60,
+   "return": -1915.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 115.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.3255529000016395,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22001.npz",
+   "sha256": "a20e6ae03c6089593687fd9305cc207eba79d9bae5eeb872d01140b17699db53"
+  },
+  {
+   "seed": 22002,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 178,
+   "transitions": 60,
+   "return": -1604.0,
+   "switches_per_signal": [
+    18.0,
+    7.0,
+    21.0,
+    3.0
+   ],
+   "arrivals": 137.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.438547400000971,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22002.npz",
+   "sha256": "ca827a94bd125feb1fbdc12530866d4ac056f82ea92a9ce78da1a2de1bd014f6"
+  },
+  {
+   "seed": 22003,
+   "policy": "aleatoria",
+   "pulse_offset": 212,
+   "transitions": 60,
+   "return": -4263.0,
+   "switches_per_signal": [
+    23.0,
+    22.0,
+    20.0,
+    17.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.2591551000004984,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22003.npz",
+   "sha256": "4dda366e4864e1c08e2dcade7bc15a421f05bc317a82a511fbe0e35cad7fcd7f"
+  },
+  {
+   "seed": 22004,
+   "policy": "fijo_2_3",
+   "pulse_offset": 44,
+   "transitions": 60,
+   "return": -1624.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 121.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 3.349884999999631,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22004.npz",
+   "sha256": "c71886ca47b2a8fa4cd78912d8e2a20db224a935b7e0fea3501ee0f6bc3fd0da"
+  },
+  {
+   "seed": 22005,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 230,
+   "transitions": 60,
+   "return": -730.0,
+   "switches_per_signal": [
+    15.0,
+    5.0,
+    23.0,
+    10.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.366832300001988,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22005.npz",
+   "sha256": "eb7ba3ae1737cd9cabe3453331b6e3ebaae528d761a40abd2b5fa14db4b1d799"
+  },
+  {
+   "seed": 22006,
+   "policy": "aleatoria",
+   "pulse_offset": 236,
+   "transitions": 60,
+   "return": -6507.0,
+   "switches_per_signal": [
+    18.0,
+    18.0,
+    21.0,
+    19.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.360154900001362,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22006.npz",
+   "sha256": "11fdfeb586bef739788d85e5349a5453498ff17772818bafd31178e16c642812"
+  },
+  {
+   "seed": 22007,
+   "policy": "fijo_2_3",
+   "pulse_offset": 151,
+   "transitions": 60,
+   "return": -1334.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.0262146000022767,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22007.npz",
+   "sha256": "d3677e3832eb4c07b7d0e22e1bc5a19bb23e866d4fb70e51b304699f602d0daa"
+  },
+  {
+   "seed": 22008,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 186,
+   "transitions": 60,
+   "return": -493.0,
+   "switches_per_signal": [
+    17.0,
+    5.0,
+    17.0,
+    7.0
+   ],
+   "arrivals": 114.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.6176640999983647,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22008.npz",
+   "sha256": "eaecacf99a27cce95ef35b7f3e051e3a35f0061f120294b31766fa1ea741061e"
+  },
+  {
+   "seed": 22009,
+   "policy": "aleatoria",
+   "pulse_offset": 216,
+   "transitions": 60,
+   "return": -2168.0,
+   "switches_per_signal": [
+    21.0,
+    19.0,
+    19.0,
+    20.0
+   ],
+   "arrivals": 106.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.082249999999476,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22009.npz",
+   "sha256": "427663fe2f7cda21d1a088c347a5e8cb3a5742a8bd9f09855a2676e10b3bc39b"
+  },
+  {
+   "seed": 22010,
+   "policy": "fijo_2_3",
+   "pulse_offset": 210,
+   "transitions": 60,
+   "return": -2304.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 126.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.1464004999979807,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22010.npz",
+   "sha256": "bcf4332478cd9e3e93ccc8b8fbb7ba78b8a773374eb47792e883fd527d275335"
+  },
+  {
+   "seed": 22011,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 27,
+   "transitions": 60,
+   "return": -1261.0,
+   "switches_per_signal": [
+    21.0,
+    11.0,
+    19.0,
+    7.0
+   ],
+   "arrivals": 101.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.73361599999771,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22011.npz",
+   "sha256": "13bb93eb86396e2f494a22708443efa6a5232502457401caf230da064ceb21fb"
+  },
+  {
+   "seed": 22012,
+   "policy": "aleatoria",
+   "pulse_offset": 69,
+   "transitions": 60,
+   "return": -4933.0,
+   "switches_per_signal": [
+    21.0,
+    18.0,
+    18.0,
+    18.0
+   ],
+   "arrivals": 99.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.2257843000006687,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22012.npz",
+   "sha256": "0c5be0725cb7016f19277dc8e366b99e5aba4de9e38480201868d39ad56ab891"
+  },
+  {
+   "seed": 22013,
+   "policy": "fijo_2_3",
+   "pulse_offset": 290,
+   "transitions": 60,
+   "return": -1610.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.6865190000025905,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22013.npz",
+   "sha256": "44fc6ca2174bbf5c152795f44f9fc71d90ee1f58b789d092a3d8cf9c1251cc10"
+  },
+  {
+   "seed": 22014,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 216,
+   "transitions": 60,
+   "return": -2037.0,
+   "switches_per_signal": [
+    20.0,
+    9.0,
+    24.0,
+    12.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.979759499998181,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22014.npz",
+   "sha256": "0f9002defeb97957d776ebb18c952025f0fa2a91994dda004b32c6b64396a51d"
+  },
+  {
+   "seed": 22015,
+   "policy": "aleatoria",
+   "pulse_offset": 227,
+   "transitions": 60,
+   "return": -4157.0,
+   "switches_per_signal": [
+    20.0,
+    19.0,
+    21.0,
+    19.0
+   ],
+   "arrivals": 99.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.6174327000007906,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22015.npz",
+   "sha256": "4447f0a971aa6bef9df706194792227d59d845b222cf2efdae493c5dcb7544b1"
+  },
+  {
+   "seed": 22016,
+   "policy": "fijo_2_3",
+   "pulse_offset": 251,
+   "transitions": 60,
+   "return": -1646.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.7109460000028776,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22016.npz",
+   "sha256": "b8c4e2603605ac6caa4e2e3cca913470cbfb419795d02e724388b8c8c62a31da"
+  },
+  {
+   "seed": 22017,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 81,
+   "transitions": 60,
+   "return": -1446.0,
+   "switches_per_signal": [
+    20.0,
+    5.0,
+    21.0,
+    11.0
+   ],
+   "arrivals": 123.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.5152636999991955,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22017.npz",
+   "sha256": "b58e07715b01770a25b52c63dcaff8ca92bbe05194d9902df0cd546d9f3f7d0b"
+  },
+  {
+   "seed": 22018,
+   "policy": "aleatoria",
+   "pulse_offset": 293,
+   "transitions": 60,
+   "return": -10891.0,
+   "switches_per_signal": [
+    21.0,
+    17.0,
+    22.0,
+    20.0
+   ],
+   "arrivals": 103.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.257914300000266,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22018.npz",
+   "sha256": "bc23e7dc622edb3b3bf12436cbf37861de339a4cdf55e167078bbc09d1ec8891"
+  },
+  {
+   "seed": 22019,
+   "policy": "fijo_2_3",
+   "pulse_offset": 32,
+   "transitions": 60,
+   "return": -952.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 117.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.839204799998697,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22019.npz",
+   "sha256": "960656e2b09ad664a4b31f87699062d881e0074c76109522c31f554543f38c0d"
+  },
+  {
+   "seed": 22020,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 157,
+   "transitions": 60,
+   "return": -749.0,
+   "switches_per_signal": [
+    19.0,
+    6.0,
+    23.0,
+    6.0
+   ],
+   "arrivals": 119.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.678812800000742,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22020.npz",
+   "sha256": "affd7bb15c77814491ed680ead585e3e1161abec899287447a0cd8a1a816099f"
+  },
+  {
+   "seed": 22021,
+   "policy": "aleatoria",
+   "pulse_offset": 29,
+   "transitions": 60,
+   "return": -4738.0,
+   "switches_per_signal": [
+    20.0,
+    20.0,
+    20.0,
+    22.0
+   ],
+   "arrivals": 94.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.210852200001682,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22021.npz",
+   "sha256": "c84e9172a32033a30c8caafce4bbbda396d13a92315cdf3ff5c6d91e5edb7cc3"
+  },
+  {
+   "seed": 22022,
+   "policy": "fijo_2_3",
+   "pulse_offset": 182,
+   "transitions": 60,
+   "return": -958.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.7725186999996367,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22022.npz",
+   "sha256": "a9a7dfeb3b344a7f45dd38858cee5398eaedc122478cba0747d57c35d981db30"
+  },
+  {
+   "seed": 22023,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 205,
+   "transitions": 60,
+   "return": -752.0,
+   "switches_per_signal": [
+    16.0,
+    11.0,
+    22.0,
+    13.0
+   ],
+   "arrivals": 125.0,
+   "max_pending": 0.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 2.9466527000004135,
+   "split": "test",
+   "file": "datasets/v2/raw/test/episode_22023.npz",
+   "sha256": "4357522af5ffaf5dd02ca0821638d7cb6653b6076f9a3da5d75ad911650d4725"
+  },
+  {
+   "seed": 23000,
+   "policy": "aleatoria",
+   "pulse_offset": 96,
+   "transitions": 60,
+   "return": -5374.0,
+   "switches_per_signal": [
+    21.0,
+    22.0,
+    20.0,
+    18.0
+   ],
+   "arrivals": 102.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.603832100001455,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23000.npz",
+   "sha256": "7548f96cd0511978192a4f1285de352a15b7f95e07ba6fe0bb665cb8cdef404b"
+  },
+  {
+   "seed": 23001,
+   "policy": "fijo_2_3",
+   "pulse_offset": 115,
+   "transitions": 60,
+   "return": -2461.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 114.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 1.8391203000028327,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23001.npz",
+   "sha256": "4a606fb0a142c2d7aeb41ad2163b4e7f02102b16a454d2b776fbdb1ed17b9a71"
+  },
+  {
+   "seed": 23002,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 277,
+   "transitions": 60,
+   "return": -1029.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    22.0,
+    9.0
+   ],
+   "arrivals": 112.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 1.9772324999976263,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23002.npz",
+   "sha256": "9b888dc1d73772877c82a434742e2cf01af8ace518a114b3e5db2795efa570fa"
+  },
+  {
+   "seed": 23003,
+   "policy": "aleatoria",
+   "pulse_offset": 134,
+   "transitions": 60,
+   "return": -7765.0,
+   "switches_per_signal": [
+    18.0,
+    21.0,
+    19.0,
+    19.0
+   ],
+   "arrivals": 110.0,
+   "max_pending": 0.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 3.13892610000039,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23003.npz",
+   "sha256": "1a836b035bc3c9c4080dc9de08568866a500b5e661f995d13da2f721d7cbb6a2"
+  },
+  {
+   "seed": 23004,
+   "policy": "fijo_2_3",
+   "pulse_offset": 186,
+   "transitions": 60,
+   "return": -999.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.8330965999994078,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23004.npz",
+   "sha256": "ffdd97efcb568768c20068893ae7674a76febeaad2e062985df1657a63693692"
+  },
+  {
+   "seed": 23005,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 184,
+   "transitions": 60,
+   "return": -786.0,
+   "switches_per_signal": [
+    21.0,
+    7.0,
+    21.0,
+    10.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 2.668155300001672,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23005.npz",
+   "sha256": "22bf9ab16d4d2c445e995f4ef86a846db1a102e00a8eff4839160544b46febf7"
+  },
+  {
+   "seed": 23006,
+   "policy": "aleatoria",
+   "pulse_offset": 9,
+   "transitions": 60,
+   "return": -12475.0,
+   "switches_per_signal": [
+    17.0,
+    17.0,
+    16.0,
+    22.0
+   ],
+   "arrivals": 86.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 3.4922243999972125,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23006.npz",
+   "sha256": "7ed6b0f1c2193d56215d705771bbd0749e292c0d3f099012ce067abe48379280"
+  },
+  {
+   "seed": 23007,
+   "policy": "fijo_2_3",
+   "pulse_offset": 281,
+   "transitions": 60,
+   "return": -1388.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 109.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.8803743999997096,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23007.npz",
+   "sha256": "3a4167a1aabe5669adfca7529bff968f231e8ed694f523e5e503bcdb49919237"
+  },
+  {
+   "seed": 23008,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 83,
+   "transitions": 60,
+   "return": -931.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    23.0,
+    12.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 2.744380899999669,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23008.npz",
+   "sha256": "78e971858c119c39caff60850cae2423f9e177b48d4fcda164336df77d9d7e2d"
+  },
+  {
+   "seed": 23009,
+   "policy": "aleatoria",
+   "pulse_offset": 111,
+   "transitions": 60,
+   "return": -5524.0,
+   "switches_per_signal": [
+    17.0,
+    20.0,
+    18.0,
+    22.0
+   ],
+   "arrivals": 109.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.78380389999802,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23009.npz",
+   "sha256": "78da2157aaccff8f9d14038cf8035909f04ea76ea4cfcb2be78b3ee468131658"
+  },
+  {
+   "seed": 23010,
+   "policy": "fijo_2_3",
+   "pulse_offset": 296,
+   "transitions": 60,
+   "return": -1689.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 111.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.8365675999993982,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23010.npz",
+   "sha256": "4d63fb716cae10208a8c55c1f83d9c3a9c313f3869758f1c59fff51d5e3b4db7"
+  },
+  {
+   "seed": 23011,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 264,
+   "transitions": 60,
+   "return": -1240.0,
+   "switches_per_signal": [
+    21.0,
+    5.0,
+    20.0,
+    3.0
+   ],
+   "arrivals": 109.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.6465219000019715,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23011.npz",
+   "sha256": "ec7c5462b8459bcc608e8f1e6fa0f206c3bb81ce911630d9faa8d6bb5ac8d095"
+  },
+  {
+   "seed": 23012,
+   "policy": "aleatoria",
+   "pulse_offset": 288,
+   "transitions": 60,
+   "return": -5419.0,
+   "switches_per_signal": [
+    20.0,
+    17.0,
+    18.0,
+    20.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 3.2589674000009836,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23012.npz",
+   "sha256": "148f810e38d1fe2328be1d9c73509053f4cd76ac1ff28519ba6bb099ed452cd1"
+  },
+  {
+   "seed": 23013,
+   "policy": "fijo_2_3",
+   "pulse_offset": 89,
+   "transitions": 60,
+   "return": -1630.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.6499976000013703,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23013.npz",
+   "sha256": "eafb7e06a3cfdb776b6f5b43cf212f8610ca9198245169370ebeefd0231e1a82"
+  },
+  {
+   "seed": 23014,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 67,
+   "transitions": 60,
+   "return": -1259.0,
+   "switches_per_signal": [
+    20.0,
+    5.0,
+    21.0,
+    11.0
+   ],
+   "arrivals": 128.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.185969699999987,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23014.npz",
+   "sha256": "0155208ddb654595a70eaf80e6db80a70fa8a2ee5668cdc03f3042d5b3ca9b36"
+  },
+  {
+   "seed": 23015,
+   "policy": "aleatoria",
+   "pulse_offset": 232,
+   "transitions": 60,
+   "return": -6370.0,
+   "switches_per_signal": [
+    16.0,
+    21.0,
+    19.0,
+    16.0
+   ],
+   "arrivals": 104.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.948642399998789,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23015.npz",
+   "sha256": "246a857e517384d93ad262b838d422de2e016ec8eb5ecfbf5fd86c37ed6e44c7"
+  },
+  {
+   "seed": 23016,
+   "policy": "fijo_2_3",
+   "pulse_offset": 221,
+   "transitions": 60,
+   "return": -1207.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.8504332000011345,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23016.npz",
+   "sha256": "2b39f8c49e29bec1dbb16e89a93b94c6fd552e37caa7314e9d7fa1de7467484c"
+  },
+  {
+   "seed": 23017,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 88,
+   "transitions": 60,
+   "return": -1109.0,
+   "switches_per_signal": [
+    20.0,
+    12.0,
+    17.0,
+    5.0
+   ],
+   "arrivals": 122.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.6437001999984204,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23017.npz",
+   "sha256": "87a7d62796b5aa0853c90a37990cd1a67187768dc3fd6e7c6494c5574d93782a"
+  },
+  {
+   "seed": 23018,
+   "policy": "aleatoria",
+   "pulse_offset": 261,
+   "transitions": 60,
+   "return": -4608.0,
+   "switches_per_signal": [
+    20.0,
+    22.0,
+    18.0,
+    18.0
+   ],
+   "arrivals": 101.0,
+   "max_pending": 4.0,
+   "max_pending_after_warmup": 4.0,
+   "seconds": 2.957579000001715,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23018.npz",
+   "sha256": "6b4da8c3ede63e6b5cd61ea95e6ce8babafd8e1e7c2121e2aeb96fa4ed75f095"
+  },
+  {
+   "seed": 23019,
+   "policy": "fijo_2_3",
+   "pulse_offset": 190,
+   "transitions": 60,
+   "return": -1369.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 107.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.6252206999997725,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23019.npz",
+   "sha256": "306900158d36551771f58db9bf8487a8e40b7a8e84ab8d8e0875d105d433ceb6"
+  },
+  {
+   "seed": 23020,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 183,
+   "transitions": 60,
+   "return": -1555.0,
+   "switches_per_signal": [
+    20.0,
+    7.0,
+    20.0,
+    7.0
+   ],
+   "arrivals": 137.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.847574399998848,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23020.npz",
+   "sha256": "75d9ce3c6031eba8498191d4e82f392eb7386e5d6e432499a1311523b1d2b95d"
+  },
+  {
+   "seed": 23021,
+   "policy": "aleatoria",
+   "pulse_offset": 78,
+   "transitions": 60,
+   "return": -3919.0,
+   "switches_per_signal": [
+    17.0,
+    23.0,
+    21.0,
+    16.0
+   ],
+   "arrivals": 100.0,
+   "max_pending": 0.0,
+   "max_pending_after_warmup": 0.0,
+   "seconds": 2.719639399998414,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23021.npz",
+   "sha256": "b8ad8815e8559bfdfd3634b4c6efdf2d576fd05f1311cbf50745edced40cea20"
+  },
+  {
+   "seed": 23022,
+   "policy": "fijo_2_3",
+   "pulse_offset": 277,
+   "transitions": 60,
+   "return": -1233.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 118.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.8009834999975283,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23022.npz",
+   "sha256": "491cd8e09db8b02a1baad5e4ac1782f6643690fb3a9f36c6e172aa5cd8ff2c12"
+  },
+  {
+   "seed": 23023,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 217,
+   "transitions": 60,
+   "return": -1496.0,
+   "switches_per_signal": [
+    20.0,
+    7.0,
+    18.0,
+    9.0
+   ],
+   "arrivals": 113.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 2.8872459000012896,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23023.npz",
+   "sha256": "d188794b9c790121334fa6c7d1d1f5f4599b5ebdcb700013dadb2be45ee7ff4c"
+  },
+  {
+   "seed": 23024,
+   "policy": "aleatoria",
+   "pulse_offset": 101,
+   "transitions": 60,
+   "return": -6389.0,
+   "switches_per_signal": [
+    17.0,
+    20.0,
+    18.0,
+    19.0
+   ],
+   "arrivals": 116.0,
+   "max_pending": 1.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.036099100001593,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23024.npz",
+   "sha256": "8e3840c19936cecfc5b852ad4197c2020277afc90a89e70e8774a67e4556172b"
+  },
+  {
+   "seed": 23025,
+   "policy": "fijo_2_3",
+   "pulse_offset": 97,
+   "transitions": 60,
+   "return": -2596.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 112.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.313002000002598,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23025.npz",
+   "sha256": "7820aee790ab924ea61e3e39db22bada03eecaf0fd48e0371f3e6d00fd6a96a6"
+  },
+  {
+   "seed": 23026,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 139,
+   "transitions": 60,
+   "return": -857.0,
+   "switches_per_signal": [
+    19.0,
+    7.0,
+    19.0,
+    9.0
+   ],
+   "arrivals": 120.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 1.0,
+   "seconds": 3.0576131000016176,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23026.npz",
+   "sha256": "b01c06599336f0d71d0f3f59bd73de66ae08c17aff5beda8081f77e26cef6a4d"
+  },
+  {
+   "seed": 23027,
+   "policy": "aleatoria",
+   "pulse_offset": 61,
+   "transitions": 60,
+   "return": -3541.0,
+   "switches_per_signal": [
+    14.0,
+    18.0,
+    20.0,
+    20.0
+   ],
+   "arrivals": 115.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 2.7200687999975344,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23027.npz",
+   "sha256": "9ef0bf5810c449290ca09e55bd97bf5a2c99df7cda1c33186fead871030b3665"
+  },
+  {
+   "seed": 23028,
+   "policy": "fijo_2_3",
+   "pulse_offset": 257,
+   "transitions": 60,
+   "return": -1292.0,
+   "switches_per_signal": [
+    23.0,
+    23.0,
+    23.0,
+    23.0
+   ],
+   "arrivals": 124.0,
+   "max_pending": 2.0,
+   "max_pending_after_warmup": 2.0,
+   "seconds": 3.0690174999981537,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23028.npz",
+   "sha256": "e5d13c6b8fdc36df40db803cf3389840cf303713362da0406db1b76294f03d8f"
+  },
+  {
+   "seed": 23029,
+   "policy": "cola_mas_larga",
+   "pulse_offset": 190,
+   "transitions": 60,
+   "return": -1936.0,
+   "switches_per_signal": [
+    19.0,
+    9.0,
+    22.0,
+    13.0
+   ],
+   "arrivals": 143.0,
+   "max_pending": 3.0,
+   "max_pending_after_warmup": 3.0,
+   "seconds": 2.9420314000017243,
+   "split": "ood",
+   "file": "datasets/v2/raw/ood/episode_23029.npz",
+   "sha256": "1d5488a2946dc6581dd9250374d0d29ae873ed247cf1f1eb68ab1cdf0f0992db"
+  }
+ ]
+}
