@@ -103,8 +103,10 @@ def worst_episodes(models: list[dict], h: int = 10, k: int = 3) -> list[int]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--phase", required=True, choices=("selection", "confirmation"))
+    parser.add_argument("--tag", help="analyze <phase>_<tag>.json (post-hoc amendment, section 8)")
     args = parser.parse_args()
-    data = json.loads((RESULTS / f"{args.phase}.json").read_text(encoding="utf-8"))
+    name = f"{args.phase}_{args.tag}" if args.tag else args.phase
+    data = json.loads((RESULTS / f"{name}.json").read_text(encoding="utf-8"))
     raw = [m for m in data["models"] if m["branch"] == "raw"]
     out = {"phase": args.phase, "sizes": {}, "raw": {
         "gm_reward_mse": [m["evaluation"]["gm_reward_mse"] for m in raw],
@@ -129,7 +131,7 @@ def main() -> None:
     out["raw"]["worst_episodes_h10"] = worst_episodes(raw)
     if args.phase == "selection":
         out["selected_latent_dim"] = int(min(out["sizes"], key=lambda k: out["sizes"][k]["mean_log_gm_z"]))
-    (RESULTS / f"{args.phase}_analysis.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
+    (RESULTS / f"{name}_analysis.json").write_text(json.dumps(out, indent=1), encoding="utf-8")
 
     print(f"== {args.phase}: raw GM reward_mse {np.round(out['raw']['gm_reward_mse'], 1).tolist()}, "
           f"persistence {out['raw']['persistence_gm_reward_mse']:.1f}")

@@ -186,3 +186,29 @@ reporta el error de reconstrucción de cada Autoencoder en esas 8 columnas.
 - Descartar modelos. Si alguno termina en un estado anómalo (por ejemplo, llega al tope de
   épocas), se reporta.
 - Transformer y TSMixer quedan fuera de esta fase.
+
+## 8. Enmienda posterior a la fase de selección: candidato k = 96
+
+**Escrita después de ver los resultados de la selección y antes de entrenar k = 96.** Se aparta del
+pre-registro (sección 7: no cambiar los candidatos después de ver resultados), a pedido explícito
+del autor, y se deja escrito.
+
+**Qué se vio** (`docs/results/v2/autoencoder/selection_analysis.json`): Δ decrece de forma
+monótona con k (+125%, +89%, +40% y +28% para 16, 32, 48 y 64), y 80 queda en −3.0%, con un IC
+de [−15.6%, +9.5%]. 80 es el borde superior de la grilla, así que la tendencia podría seguir
+mejorando hasta no comprimir.
+
+**Qué se agrega:** **k = 96**, con el diseño de selección sin cambios: 3 Autoencoders (semillas
+0–2) × 3 LSTM (semillas 0–2), y las mismas 3 LSTM sin comprimir de la selección, que no se
+reentrenan. Se corre con `--sizes 96 --tag k96` y el resultado va a `selection_k96.json`, sin
+tocar los resultados ya commiteados.
+
+**Nota para leerlo.** 96 es exactamente el número de columnas no constantes del estado (104 − 8),
+y el Autoencoder tiene una capa oculta de 104. Un Autoencoder con k = 96 podría, en principio,
+reconstruir el estado sin pérdida: es una compresión solo nominal, que quita la redundancia de las
+8 columnas constantes. Sirve como sonda de "casi no comprimir".
+
+**Regla de selección enmendada** (fijada antes de correr k = 96): entre los seis tamaños
+{16, 32, 48, 64, 80, 96}, el de menor media de log GM, con la misma regla de empate. Ese tamaño
+pasa a la fase de confirmación, que sigue igual que en 3.2, **sujeto a la aprobación explícita del
+autor**. Se reportan los resultados de 80 y de 96 lado a lado.

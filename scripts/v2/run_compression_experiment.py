@@ -78,11 +78,17 @@ def main() -> None:
     parser.add_argument("--latent-dim", type=int, help="confirmation only: the size selected in the selection phase")
     # 4 by default: 8 PyTorch processes ran this 7.7 GB machine out of memory (CLAUDE.md).
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--sizes", type=int, nargs="+",
+                        help="selection only: run only these latent sizes (post-hoc amendment, "
+                             "ADDENDUM_AUTOENCODER.md section 8); results go to <phase>_<tag>.json")
+    parser.add_argument("--tag", help="suffix of the results file, required with --sizes")
     args = parser.parse_args()
     if (args.phase == "confirmation") != (args.latent_dim is not None):
         parser.error("--latent-dim is required for confirmation and not allowed for selection")
     plan = PHASES[args.phase]
-    sizes = CANDIDATES if args.phase == "selection" else (args.latent_dim,)
+    if args.sizes and (args.phase != "selection" or not args.tag):
+        parser.error("--sizes is for the selection phase and needs --tag")
+    sizes = (tuple(args.sizes) if args.sizes else CANDIDATES) if args.phase == "selection" else (args.latent_dim,)
     root = CKPT_ROOT / args.phase
     from training import v2_compression_experiment as exp
 
@@ -107,7 +113,7 @@ def main() -> None:
                 print(f"{i}/{len(jobs)} LSTMs done ({time.perf_counter() - t0:.0f} s)", flush=True)
 
     RESULTS.mkdir(parents=True, exist_ok=True)
-    out = RESULTS / f"{args.phase}.json"
+    out = RESULTS / (f"{args.phase}_{args.tag}.json" if args.tag else f"{args.phase}.json")
     out.write_text(json.dumps({
         "phase": args.phase, "plan": plan, "sizes": list(sizes),
         "autoencoders": [{"latent_dim": k, "seed": a, **m} for (k, a), m in ae_meta.items()],
