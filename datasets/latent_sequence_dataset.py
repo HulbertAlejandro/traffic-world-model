@@ -17,6 +17,27 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset
 
 
+def encode_actions(actions: torch.Tensor, action_dim: int) -> torch.Tensor:
+    """One-hot action encoding shared by training windows and evaluation rollouts.
+
+    v1 (one signal): ``actions`` has shape (T,) with the target-phase index, and the
+    result is ``F.one_hot(actions, action_dim)``, exactly as before.
+
+    v2 (several signals): ``actions`` has shape (T, n_signals) with one decision per
+    signal (keep/switch, 0/1). Each signal gets its own 2-class one-hot, concatenated
+    in signal order, so ``action_dim`` must be ``2 * n_signals`` (8 for the corridor).
+    """
+    if actions.ndim == 1:
+        return F.one_hot(actions, num_classes=action_dim).float()
+    if actions.ndim == 2:
+        n_signals = actions.shape[1]
+        if action_dim != 2 * n_signals:
+            raise ValueError(f"action_dim must be 2 * n_signals = {2 * n_signals} for per-signal "
+                             f"binary actions, got {action_dim}")
+        return F.one_hot(actions, num_classes=2).float().reshape(actions.shape[0], action_dim)
+    raise ValueError(f"actions must have shape (T,) or (T, n_signals), got {tuple(actions.shape)}")
+
+
 class LatentSequenceDataset(Dataset):
     """Yields (latent_window, action_window, target_latent, target_reward)."""
 
@@ -75,9 +96,7 @@ class LatentSequenceDataset(Dataset):
         latent_window, action_window, target_latent, target_reward, episode_id, start = self._windows[idx]
 
         latent_window = torch.from_numpy(latent_window)
-        action_window = F.one_hot(
-            torch.from_numpy(action_window), num_classes=self.action_dim
-        ).float()
+        action_window = encode_actions(torch.from_numpy(action_window), self.action_dim)
         target_latent = torch.from_numpy(target_latent)
         target_reward = torch.tensor(target_reward, dtype=torch.float32)
 

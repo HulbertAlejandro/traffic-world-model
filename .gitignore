@@ -71,3 +71,6 @@ models/checkpoints/controller_direct_30k_10seeds/**/*.pkl
 
 # v2 dataset (docs/v2/ADDENDUM_DATASET.md): only the manifest in docs/results/v2/dataset/ is versioned
 datasets/v2/
+
+# v2 Phase 2 (compression experiment): sequence datasets next to the checkpoints
+models/checkpoints/v2/**/*.npz

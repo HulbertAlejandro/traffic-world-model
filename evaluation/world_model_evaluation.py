@@ -40,6 +40,7 @@ import torch.nn.functional as F
 
 from torch import nn
 
+from datasets.latent_sequence_dataset import encode_actions
 from models.world_model import LatentDynamicsLSTM, LatentDynamicsTransformer, LatentDynamicsTSMixer
 
 
@@ -213,7 +214,7 @@ def rollout_episode(
     z = torch.from_numpy(episode["z"])
     actions = torch.from_numpy(episode["actions"])
     rewards = torch.from_numpy(episode["rewards"])
-    actions_onehot = F.one_hot(actions, num_classes=action_dim).float()
+    actions_onehot = encode_actions(actions, action_dim)  # (T,) one-hot as in v1, or per-signal for v2
 
     num_steps = z.shape[0]
     last_start = num_steps - sequence_length - max_horizon
