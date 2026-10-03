@@ -356,3 +356,43 @@ Transformer (+33%).
 - Ninguna corrida se repite ni se descarta por su resultado. Si alguna llega al tope de épocas,
   se reporta. Si la corrida se interrumpe (por ejemplo, por memoria), se reanuda sin reentrenar
   las corridas que ya tengan `evaluation.json`, y se reporta.
+
+### 10.1 Resultado
+
+`docs/results/v2/autoencoder/selection_tsmixer.json` y `selection_tsmixer_analysis.json`. Los 57
+TSMixer terminaron por early stopping (épocas 58–185); ninguno llegó al tope. La corrida no se
+interrumpió.
+
+Δ de cada arquitectura frente a ella misma sin comprimir (Δ < 0: la compresión ayuda):
+
+| k | LSTM: Δ, IC 95% | Transformer: Δ, IC 95% | TSMixer: Δ, IC 95% | TSMixer: varianza entre / dentro de AE |
+|---|---|---|---|---|
+| 16 | +124.9% [+100.5, +151.8] | +111.6% [+77.1, +151.2] | +32.0% [+6.4, +64.7] | 0.041 / 0.004 |
+| 32 | +88.9% [+67.1, +109.5] | +68.2% [+41.2, +99.6] | +27.1% [+7.8, +46.9] | 0.004 / 0.024 |
+| 48 | +40.1% [+16.1, +64.3] | +47.1% [+25.5, +70.2] | +34.6% [+13.7, +59.7] | 0.006 / 0.032 |
+| 64 | +27.8% [+19.3, +36.9] | +25.5% [+3.9, +52.3] | −6.5% [−23.2, +11.6] | 0.010 / 0.043 |
+| 80 | −3.0% [−15.6, +9.5] | +16.9% [−1.0, +37.6] | −4.7% [−18.5, +8.9] | 0.003 / 0.014 |
+| 96 | −0.1% [−9.7, +11.0] | +19.3% [+0.1, +41.8] | −23.2% [−38.4, −8.5] | 0.006 / 0.064 |
+
+- **Con TSMixer la compresión empeora en k ≤ 48** (+27% a +35%), no muestra efecto en 64 y 80 (IC
+  que incluyen el 0) y **ayuda en k = 96** (−23.2%, IC entero por debajo de 0).
+- En k = 96 la mejora no depende de un Autoencoder: los tres mejoran (−17%, −29%, −23%). Crece
+  con el horizonte: ≈ 0 en h = 1 (+1.1%), −14% en h = 4 y −37% a −38% en h = 7–8, donde z gana el
+  96% de los pares. La varianza dentro de los Autoencoders en k = 96 es la mayor de la tabla.
+- La tendencia con k no es monótona: 48 queda peor que 32, y hay un salto grande entre 80 y 96.
+- Tamaño de menor media de log GM con TSMixer: **k = 96** (7.6843). Es descriptivo: no cambia el
+  candidato de la LSTM.
+- **Es la inversa de la v1**, donde el latente empeoraba a TSMixer (+42% con `latent_dim` = 16).
+- Entre las tres arquitecturas de esta selección (3 × 3 cada una), si el Autoencoder ayuda depende
+  de la arquitectura: con poca compresión (k = 80–96) es neutro con la LSTM, empeora al
+  Transformer y ayuda a TSMixer en k = 96. Con mucha compresión (k ≤ 48) empeora a las tres.
+
+**Contexto fuera del pre-registro (no forma parte del resultado).** La sección 10 dejó fuera la
+comparación del error absoluto entre arquitecturas. Se anota solo porque cambia cómo leer el Δ de
+TSMixer: su referencia sin comprimir es débil. Su log GM sin comprimir por semilla es 7.85, 7.90 y
+8.10 (media 7.9485; GM `reward_mse` 2560, 2697 y 3287), frente a 7.42 de media para la LSTM y
+7.25 para el Transformer sin comprimir. Incluso en k = 96, TSMixer comprimido (7.6843) queda por
+encima de la LSTM sin comprimir. Una lectura posible, **no verificada**, es que la compresión
+compensa una limitación de TSMixer con la entrada cruda de 112 dimensiones (104 del estado + 8 de
+la acción; capa de mezcla de variables de 128), más que aportar información útil en el latente.
+Con 3 semillas sin comprimir y una de ellas en 8.10, la referencia además es ruidosa.

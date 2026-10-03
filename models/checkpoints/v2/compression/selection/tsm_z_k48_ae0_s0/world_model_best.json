@@ -1,0 +1,26 @@
+{
+  "architecture": "tsmixer",
+  "latent_dim": 48,
+  "action_dim": 8,
+  "sequence_length": 16,
+  "hidden_dim": 128,
+  "num_blocks": 2,
+  "dropout": 0.0,
+  "seed": 0,
+  "protocol": {
+    "optimizer": "adam",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "batch_size": 32,
+    "max_epochs": 300,
+    "early_stopping_patience": 15,
+    "reward_loss_weight": 1.0,
+    "sequence_length": 16,
+    "hidden_dim": 128,
+    "action_dim": 8
+  },
+  "best_epoch": 73,
+  "stopped_epoch": 88,
+  "best_validation_loss": 0.47579929850719593,
+  "hit_max_epochs": false
+}
