@@ -137,3 +137,66 @@ ayuda), que sigue pendiente de sus propias decisiones.
   épocas, se reporta.
 - Si el entrenamiento se interrumpe (por ejemplo, por memoria), se reanuda sin reentrenar las
   corridas que ya tengan `evaluation.json`, y se reporta.
+
+## 8. Resultado
+
+`docs/results/v2/arch_comparison/analysis.json`. Los 20 modelos se entrenaron sin interrupciones
+(92 minutos con 4 procesos). Todos terminaron por early stopping; ninguno llegó al tope de 300
+épocas. Las 20 corridas registran el mismo protocolo y los tamaños de la sección 2 (lo comprueba
+el análisis sobre los pesos guardados).
+
+### 8.1 Criterio de decisión
+
+| | LSTM h = 137 | Transformer d = 80 |
+|---|---|---|
+| Media de log GM (10 semillas) | 7.5022 | 7.3863 |
+| Desviación estándar del log GM | 0.182 | 0.145 |
+| GM `reward_mse` por semilla | 1545, 2394, 1756, 1822, 1816, 2333, 1321, 1998, 1827, 1577 | 1880, 1625, 1532, 1519, 1563, 1565, 2198, 1680, 1309, 1425 |
+
+- d = −0.116: el Transformer tiene un error **10.9% menor** como valor puntual.
+- **Welch:** t = −1.58, gl = 17.1, **p = 0.13**, IC del 95% [−23.7%, +4.0%].
+- **Bootstrap:** IC del 95% [−22.1%, +2.5%].
+- **Los dos IC incluyen el 0 → "sin evidencia suficiente".** Según el criterio de la sección 5,
+  no se adopta ninguna arquitectura como oficial de la v2. Es una brecha no significativa a favor
+  del Transformer, y queda como limitación.
+
+### 8.2 Por horizonte (descriptivo, sin corrección por comparaciones múltiples)
+
+| h | Transformer − LSTM | IC Welch | IC bootstrap | p (Welch) |
+|---|---|---|---|---|
+| 1 | −33.7% | [−38.9, −28.0] | [−38.2, −28.5] | 1.1e-8 |
+| 2 | −29.9% | [−36.3, −22.9] | [−35.6, −23.8] | 5.5e-7 |
+| 3 | −18.8% | [−28.6, −7.6] | [−27.3, −9.1] | 0.0034 |
+| 4 | −11.1% | [−25.1, +5.5] | [−23.3, +3.3] | 0.16 |
+| 5 | −3.3% | [−20.0, +17.0] | [−17.9, +14.3] | 0.71 |
+| 6 | −1.0% | [−18.5, +20.2] | [−16.3, +18.0] | 0.91 |
+| 7 | +0.2% | [−18.0, +22.4] | [−15.6, +20.8] | 0.98 |
+| 8 | +1.4% | [−18.4, +26.0] | [−15.5, +24.8] | 0.89 |
+| 9 | −0.4% | [−20.1, +24.3] | [−17.0, +23.1] | 0.97 |
+| 10 | −3.6% | [−21.9, +19.1] | [−19.3, +17.6] | 0.72 |
+
+La ventaja del Transformer **no es pareja: se concentra en los horizontes cortos.** En h = 1–3 es
+grande y clara (−34% a −19%, p ≤ 0.0034; sobreviviría a una corrección de Bonferroni por 10
+pruebas, 0.005). Desde h = 5 la diferencia es prácticamente 0. La métrica de decisión promedia los
+10 horizontes en log, así que la ventaja de los horizontes cortos se diluye en el promedio.
+
+### 8.3 Contexto (no forma parte del criterio)
+
+- **Convergencia:** el Transformer converge antes. Mejor época media 89 frente a 110; parada en
+  las épocas 79–142 (mediana 96) frente a 77–188 (mediana 116.5) de la LSTM. Las dos semillas de la
+  LSTM con más error (1: 2394; 5: 2333) son también las que pararon antes (épocas 78 y 77).
+- **Variabilidad entre semillas:** el Transformer varía algo menos (desviación estándar 0.145
+  frente a 0.182; cociente de varianzas 0.63). Con 10 semillas por lado, no es una diferencia
+  clara.
+- **Frente a los tamaños de la v1 (selección de la Fase 2, 3 semillas por lado):** media de log GM
+  7.4247 para la LSTM de 128 y 7.2542 para el Transformer de 128. Las dos arquitecturas quedan peor
+  con el tamaño igualado de este experimento (7.5022 y 7.3863). Para el Transformer, d = 80 tiene
+  la mitad de parámetros. Para la LSTM, h = 137 tiene un 11% más, y aun así su media es peor, lo
+  que sugiere que las 3 semillas de la selección cayeron del lado bajo de su variabilidad (sus
+  log GM, 7.40–7.45, quedan dentro del rango de las 10 de aquí, 7.19–7.78). Son diseños y tamaños
+  distintos: no se comparan formalmente.
+- **Integridad:** el md5 de los 314 archivos oficiales es igual antes y después
+  (`md5_lstm_vs_transformer_before.json` / `_after.json`). Los pesos y evaluaciones de las 6
+  corridas sin comprimir de la selección de la Fase 2 tampoco cambiaron. Tests: 107 passed. Los 12
+  de SUMO en vivo siguen sin poder correr por el bloqueo de Smart App Control (PROJECT_STATUS.md,
+  "Verificación de tests al commit del 3 de octubre").
