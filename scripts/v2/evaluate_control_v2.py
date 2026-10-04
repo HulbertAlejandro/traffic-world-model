@@ -49,8 +49,9 @@ HELD_OUT_SPLITS = ("test", "ood")
 TRAIN_SPLIT_SEEDS = range(20000, 20112)
 METRICS = ("total", *TRAFFIC_SIGNAL_IDS)
 # docs/v2/ADDENDUM_CONTROL.md, section 4.3: 1.5 x the worst fijo_2_3 return on the 24 validation
-# seeds, rounded down to the hundred. None until Paso 5 of stage 1 computes it.
-CATASTROPHIC_THRESHOLD: float | None = None
+# seeds, rounded down to the hundred: worst -2,354.0 (fijo_2_3, seed 21000)
+# -> 1.5 x -2,354.0 = -3,531 -> -3,600. Fixed on 4 October 2026 from references_validation.json.
+CATASTROPHIC_THRESHOLD: float | None = -3600.0
 
 
 @dataclass

@@ -206,4 +206,127 @@ como en la v1.
 
 ## 9. Valores fijados por la regla después del Paso 5
 
-(Se completa con el resultado de las referencias en validación, sin cambiar las reglas de arriba.)
+Escrito el 4 de octubre de 2026 con `docs/results/v2/control/references_validation.json` (las 5
+referencias en las 24 semillas de validación), aplicando las reglas de las secciones 4 y 5.1 sin
+cambiarlas:
+
+- **Umbral de catastróficos: −3,600.** Peor retorno de `fijo_2_3` en validación: −2,354.0
+  (semilla 21000); 1.5 × −2,354.0 = −3,531, redondeado hacia abajo a la centena. Queda en
+  `scripts/v2/evaluate_control_v2.py::CATASTROPHIC_THRESHOLD`.
+- **Mejor referencia en el total (P4): `espera_mas_larga`** (−1,081.0).
+- **Mejor referencia en B0 (P5): `espera_mas_larga`** (−95.0; `cola_mas_larga`, −98.9).
+- **Mejor referencia en C0 (P6): `min_verde_y_cambiar`** (−292.2).
+
+## 10. Registro de la etapa 1 (escrito después de los Pasos 4–6; no cambia nada de lo anterior)
+
+### 10.1 Tests
+
+`tests/test_v2_control.py`, 12 tests, todos en verde, y la suite completa en 135 passed. El test
+del puente reproduce el episodio 21001 en SUMO con sus acciones guardadas: las 61 observaciones
+coinciden con los estados normalizados del dataset (tolerancia 1e-5) y las 60 recompensas son
+idénticas. Con el escalador alterado un 0.1%, ese test falla.
+
+### 10.2 Fidelidad (validación; descriptivo)
+
+Retorno imaginado a 7 pasos, con las acciones registradas, frente al real. Son 936 ventanas por
+modelo (24 episodios × 39), con un retorno real medio de −350.9. IC al 95% por bootstrap de
+episodios.
+
+| Arquitectura | Pearson (media de 10) | Rango entre modelos | Sesgo imaginado − real (media) | Rango entre modelos |
+|---|---|---|---|---|
+| LSTM | **0.871** [0.827, 0.900] | 0.841 – 0.888 | **+6.2** [−13.1, +26.4] | −14.8 – +27.0 |
+| Transformer | **0.897** [0.861, 0.926] | 0.870 – 0.928 | **+25.0** [+5.4, +44.6] | −19.4 – +55.0 |
+
+Con la recompensa recortada, que es la que ve PPO. Sin recortar se obtiene casi lo mismo: LSTM
+0.874 y +6.8; Transformer 0.898 y +23.2. El recorte cambia entre el 5% y el 29% de los retornos
+de 7 pasos, según el modelo.
+
+**Matices:**
+
+- Mide la fidelidad **con las acciones del dataset**, no con las que elegirá PPO, así que no
+  garantiza la fidelidad fuera de esa distribución (ver 10.4).
+- No es comparable con el 0.08 de la v1, que correlacionaba la recompensa imaginada y la real
+  **entre checkpoints** de un mismo entrenamiento.
+- El Transformer es algo más preciso, pero optimista en promedio: imagina retornos unos 25 puntos
+  mejores que los reales en 7 pasos.
+
+### 10.3 Referencias en validación (24 semillas)
+
+| Referencia | Total | A0 | B0 | C0 | D0 | Peor episodio | < −3,600 |
+|---|---|---|---|---|---|---|---|
+| `fijo_2_3` | −1,482.8 | −347.1 | −177.1 | −805.2 | −153.3 | −2,354 | 0 |
+| `min_verde_y_cambiar` | −1,226.0 | −451.3 | −201.0 | **−292.2** | −281.6 | −1,727 | 0 |
+| `cola_mas_larga` | −1,105.2 | −375.4 | −98.9 | −534.1 | −96.7 | −2,149 | 0 |
+| `max_presion` | −7,162.2 | −1,408.2 | −2,375.8 | −1,168.9 | −2,209.3 | −13,010 | 22 |
+| `espera_mas_larga` | **−1,081.0** | −388.7 | **−95.0** | −495.4 | −101.9 | −2,149 | 0 |
+
+- **Reproducibilidad:** en los 16 episodios de validación donde el dataset usó la misma política
+  (`fijo_2_3` o `cola_mas_larga`), el retorno coincide exactamente con el del manifiesto
+  (diferencia máxima 0.0).
+- **`max_presion` es muy mala en esta red, y ya lo era.** En la calibración de la Fase 1
+  (`it5_offset_espera_300s.json`) su media fue −7,299. Es el mecanismo del giro a la izquierda
+  permisivo de `DISENO_RED_4_INTERSECCIONES.md`: mantiene el verde a una cola que no avanza. No es
+  un fallo del adaptador.
+- C0 repite lo de las fases 0 y 1: la mejor regla allí es alternar rápido
+  (`min_verde_y_cambiar`), no una referencia que mira el estado.
+
+### 10.4 Piloto de humo (no es un resultado)
+
+Semilla 0 de cada arquitectura, 10,240 pasos imaginados, 2 evaluaciones periódicas (600 pasos
+reales) y la evaluación en 21005–21007. Comprueba que el flujo completo funciona: entrenar en el
+sueño, seleccionar en SUMO real, guardar, cargar y evaluar por intersección. Lo que se observó **no
+se usa para decidir nada**; se registra porque es inesperado:
+
+- **El piloto de la LSTM bloquea el corredor.** Casi nunca cambia de fase en A0 y B0 (0 o 1
+  cambios en 60 pasos), las transversales se quedan sin verde y la espera acumulada explota:
+  retornos de −99,117 a −261,798. En el dataset de entrenamiento, A0 nunca mantuvo la fase más de
+  19 pasos seguidos (C0, 15). El sueño no puede mostrar las consecuencias de mantenerla 60 pasos:
+  cada episodio imaginado arranca de una ventana real (fases con poco tiempo acumulado) y dura 7
+  pasos, y la recompensa imaginada por paso está recortada en −345.43.
+- **El piloto del Transformer no se bloquea**: cambia de fase con regularidad en los 4 semáforos.
+- Con 10,240 pasos, ninguno de los dos dice cómo será el entrenamiento completo de 50,000. **Nada
+  de lo pre-registrado cambia** (horizonte 7, recorte, selección en SUMO real). Si el autor
+  decide cambiar algo antes de la etapa 2, se hará como enmienda fechada, antes de entrenar.
+
+**Tiempos medidos** (un proceso, sin otros entrenamientos):
+
+| Medida | LSTM | Transformer |
+|---|---|---|
+| Por paso imaginado, con las actualizaciones de PPO | 3.1 ms | 3.0 ms |
+| Por episodio real en la evaluación periódica (60 pasos) | 2.7 s | 2.3 s |
+| Por episodio real en `evaluate_control_v2.py` | 2.4 s | 2.2 s |
+| Referencias (sin PyTorch), por episodio | 2.0 s | |
+
+### 10.5 Estimación de las etapas 2 y 3
+
+Supuestos:
+
+- Episodio real ≈ 2.5 s.
+- Paso real de entrenamiento del RL directo ≈ 40 ms: unos 35 ms de SUMO más PPO, extrapolado de lo
+  anterior y **no medido**.
+- Con 4 procesos en paralelo, unas 3 veces más rápido que en serie.
+- Los episodios con mucha congestión pueden tardar más.
+
+**Etapa 2 (20 controladores del sueño):**
+
+| Tarea | Cálculo | En serie | Con 4 procesos |
+|---|---|---|---|
+| Entrenar cada controlador | 50,176 × 3.1 ms ≈ 2.6 min de entrenamiento + 50 episodios de selección ≈ 2.2 min | ≈ 5 min por controlador; 100 min en total | **≈ 35 min** |
+| Evaluar en test | 20 × 24 episodios ≈ 20 min, más las 5 referencias (120 episodios) ≈ 4 min | ≈ 25 min | |
+
+**Total de la etapa 2: ≈ 1 h.**
+
+**Etapa 3 (20 controladores del RL directo):**
+
+| Tarea | Cálculo | En serie | Con 4 procesos |
+|---|---|---|---|
+| 10k | 10,240 × 40 ms ≈ 7 min + 50 episodios ≈ 2 min | ≈ 9 min por semilla | |
+| 30k | 30,208 × 40 ms ≈ 20 min + 150 episodios ≈ 6 min | ≈ 26 min por semilla | |
+| Las 20 corridas | | ≈ 6 h | **≈ 2 h** |
+| Evaluar en test | 480 episodios | ≈ 20 min | |
+| OOD | 40 controladores × 30 + 5 × 30 = 1,350 episodios | ≈ 55 min | |
+
+**Total de la etapa 3: ≈ 3–3.5 h.**
+
+**Memoria:** al terminar la etapa 1 había **1.76 GB disponibles** (de 7.7). Es menos de los 2 GB de
+la sección 7: la etapa 2 no se lanza así.

@@ -1,0 +1,4 @@
+policy,kind,seed_label,scenario_seed,reward,reward_A0,reward_B0,reward_C0,reward_D0,waiting_mean,queue_mean,arrivals,switches_A0,switches_B0,switches_C0,switches_D0,pulse_offset,steps,seconds
+piloto_transformer,dream,models/checkpoints/v2/control_pilot/dream_transformer_s0/best_model.zip,21005,-1903.0,-608.0,-98.0,-966.0,-231.0,26.166666666666668,5.55,119.0,26,16,24,11,147,60,2.0601207999998223
+piloto_transformer,dream,models/checkpoints/v2/control_pilot/dream_transformer_s0/best_model.zip,21006,-5364.0,-700.0,-2327.0,-354.0,-1983.0,81.5,7.9,128.0,23,10,24,9,100,60,2.152419400000099
+piloto_transformer,dream,models/checkpoints/v2/control_pilot/dream_transformer_s0/best_model.zip,21007,-1617.0,-723.0,-169.0,-525.0,-200.0,21.55,5.4,104.0,23,17,23,13,217,60,2.239567999999963
