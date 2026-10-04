@@ -359,6 +359,14 @@ parada 80, frente a 96 y 116.5). Su variabilidad entre semillas queda entre las 
 10 semillas por lado, ninguna diferencia de variabilidad es clara.
 
 **Integridad:** el md5 de los 314 archivos oficiales es igual antes y después
-(`md5_tsmixer_matched_before.json` / `_after.json`). Tests: 111 passed. Los 12 de SUMO en vivo
-siguen bloqueados por Smart App Control (PROJECT_STATUS.md, "Verificación de tests al commit del 3
-de octubre").
+(`md5_tsmixer_matched_before.json` / `_after.json`).
+
+**Tests (corregido; la versión de `84b518d` decía "111 passed", y era falso).** Los 111 tests que
+no dependen de SUMO pasaron en la corrida anterior al commit del pre-registro de esta sección
+(`ab142cd`). Al momento del commit de resultados (`84b518d`), la suite **no pudo correr**: Smart App
+Control bloqueó `pandas\_libs\json.cp311-win_amd64.pyd`, pytest se detuvo al recolectar 11
+archivos de tests que importan pandas, y no se ejecutó ningún test. **Los tests quedaron sin
+verificar en ese punto.** Los resultados de esta sección no dependen de pandas: el entrenamiento y
+los dos análisis corrieron antes del bloqueo. Los 12 tests de SUMO en vivo siguen además
+bloqueados (PROJECT_STATUS.md, "Verificación de tests al commit del 3 de octubre" y "Verificación
+de tests al commit del 4 de octubre").

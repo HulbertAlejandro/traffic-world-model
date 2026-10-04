@@ -326,6 +326,10 @@ No existen (a propósito): `utils/`, `notebooks/`, `experiments/`, `papers/`.
 - Volver a correr los 12 tests de SUMO en vivo que no pudieron verificarse al commit del 3 de
   octubre (pre-registro LSTM frente a Transformer) por el bloqueo de Smart App Control (detalle en
   PROJECT_STATUS.md, "Verificación de tests al commit del 3 de octubre").
+- Volver a correr la suite completa, que no pudo correr al commit de resultados de las tres
+  arquitecturas (`84b518d`, 4 de octubre) porque Smart App Control bloqueó pandas
+  (`json.cp311-win_amd64.pyd`); además de SUMO (detalle en PROJECT_STATUS.md, "Verificación de
+  tests al commit del 4 de octubre").
 
 Resuelto: la cuenta/app desconocida que apareció como colaborador en el repositorio de
 GitHub era Codex Connector; su acceso se revocó en ambas capas, y los colaboradores

@@ -40,6 +40,29 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
 
+## ⚠️ Verificación de tests al commit del 4 de octubre (resultados de las tres arquitecturas): suite sin verificar
+
+El commit de resultados de la extensión a TSMixer (`84b518d`, rama `v2/four-intersections`, sin
+push) se hizo **sin tests verificados**. Su mensaje y la sección 9.7 de
+`docs/v2/ADDENDUM_LSTM_VS_TRANSFORMER.md` decían "111 passed", y era falso: el commit estaba
+encadenado con `;` en lugar de `&&` y se hizo aunque pytest falló. Se corrigió en un commit aparte,
+sin reescribir `84b518d`.
+
+- **Qué pasó:** pytest se detuvo al recolectar (`11 errors`, ningún test ejecutado). Los 11
+  archivos de tests importan pandas, y Smart App Control bloqueó
+  `.venv\Lib\site-packages\pandas\_libs\json.cp311-win_amd64.pyd`:
+  `ImportError: DLL load failed while importing json: Una directiva de Control de aplicaciones
+  bloqueó este archivo.`
+- **Diagnóstico:** el registro `Microsoft-Windows-CodeIntegrity/Operational` tiene los eventos
+  3033/3077/3118 ("Smart App Control Block", "did not meet the Enterprise signing level") de ese
+  archivo, a las 12:48 del 4 de octubre.
+- **Último estado verificado:** 111 passed (sin los 12 de SUMO), en la corrida anterior al commit
+  `ab142cd` (pre-registro de la extensión a TSMixer).
+- **Los resultados no dependen de pandas:** el entrenamiento y los análisis (numpy y PyTorch)
+  corrieron antes del bloqueo; el md5 de los archivos oficiales no cambió.
+- No se reinstaló pandas ni se cambió ninguna configuración de seguridad. Hay que volver a correr
+  la suite completa cuando pandas y SUMO carguen de nuevo en esta máquina.
+
 ## ⚠️ Verificación de tests al commit del 3 de octubre (pre-registro LSTM frente a Transformer): 12 tests de SUMO en vivo sin verificar
 
 El commit del pre-registro de LSTM frente a Transformer con presupuesto igualado
