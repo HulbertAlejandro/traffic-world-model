@@ -2,6 +2,7 @@
 (docs/v2/ADDENDUM_LSTM_VS_TRANSFORMER.md).
 
     python scripts/v2/run_lstm_vs_transformer.py [--workers 4]
+    python scripts/v2/run_lstm_vs_transformer.py --architectures tsmixer   # section 9 extension
 
 Both architectures on the uncompressed 104-dim state, no Autoencoder, seeds 0-9 each, all trained
 from scratch (the Phase 2 selection runs have other sizes and are not reused). Sizes matched to
@@ -9,6 +10,9 @@ from scratch (the Phase 2 selection runs have other sizes and are not reused). S
 Phase 2's LSTM_PROTOCOL object, through train_branch("raw", ...) -> train_temporal_model; only the
 architecture hyperparameters are overridden. Same encoded splits as Phase 2 (selection/raw_data).
 Runs whose evaluation.json already exists are skipped, so an interrupted run can be resumed.
+
+Section 9 of the addendum extends the comparison to TSMixer, hidden 308 (152,129 parameters), with
+the same protocol; --architectures tsmixer trains only those 10 and leaves the other 20 untouched.
 
 Weights: models/checkpoints/v2/arch_comparison/<arch>_raw_s<seed>/ (not committed; the .json are).
 """
@@ -33,8 +37,9 @@ SEEDS = tuple(range(10))
 ARCH_HPARAMS = {
     "lstm": {"hidden_dim": 137},
     "transformer": {"d_model": 80, "nhead": 4, "num_layers": 2, "dim_feedforward": 256, "dropout": 0.0},
+    "tsmixer": {"hidden_dim": 308, "num_blocks": 2, "dropout": 0.0},   # section 9
 }
-EXPECTED_PARAMS = {"lstm": 152_038, "transformer": 152_617}
+EXPECTED_PARAMS = {"lstm": 152_038, "transformer": 152_617, "tsmixer": 152_129}
 
 
 def _init_worker() -> None:
@@ -62,20 +67,22 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     # 4 by default: 8 PyTorch processes ran this 7.7 GB machine out of memory (CLAUDE.md).
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--architectures", nargs="+", choices=sorted(ARCH_HPARAMS), default=["transformer", "lstm"],
+                        help="which architectures to train (default: the original comparison, sections 1-8)")
     args = parser.parse_args()
     from training import v2_compression_experiment as exp
     for split in ("train", "validation", "test"):
         if not (RAW_DATA / f"{split}_seq.npz").exists():
             raise FileNotFoundError(f"{RAW_DATA / f'{split}_seq.npz'}: run the Phase 2 selection first")
-    for arch, hp in ARCH_HPARAMS.items():  # refuse to train anything but the pre-registered sizes
+    for arch, hp in ((a, ARCH_HPARAMS[a]) for a in args.architectures):  # refuse to train anything but the pre-registered sizes
         model = exp.build_temporal_model({"architecture": arch, "latent_dim": exp.STATE_DIM,
                                           "action_dim": exp.ACTION_DIM,
                                           "sequence_length": exp.LSTM_PROTOCOL.sequence_length, **hp})
         n = sum(p.numel() for p in model.parameters())
         if n != EXPECTED_PARAMS[arch]:
             raise RuntimeError(f"{arch}: {n} parameters, pre-registered {EXPECTED_PARAMS[arch]}")
-    # Transformers first: the larger processes, better while memory is freshest.
-    jobs = [(arch, s) for arch in ("transformer", "lstm") for s in SEEDS]
+    # In the given order (default: Transformers first, the larger processes, while memory is freshest).
+    jobs = [(arch, s) for arch in args.architectures for s in SEEDS]
     t0 = time.perf_counter()
     with ProcessPoolExecutor(max_workers=args.workers, initializer=_init_worker) as pool:
         for i, r in enumerate(pool.map(_job, *zip(*jobs)), 1):

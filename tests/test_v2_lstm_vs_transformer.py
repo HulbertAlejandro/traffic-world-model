@@ -71,3 +71,63 @@ def test_pre_registered_sizes_have_the_pre_registered_parameter_counts():
     assert EXPECTED_PARAMS["transformer"] == 8 * d * d + 1260 * d + 617
     # The training protocol is still Phase 2's, unchanged.
     assert exp.LSTM_PROTOCOL.hidden_dim == 128 and exp.TRANSFORMER_HPARAMS.d_model == 128
+
+
+# --------------------------------------------------------------------------- section 9: three architectures
+def test_corrected_level_intervals():
+    assert an.t_quantile(0.995, 10) == pytest.approx(3.169273, abs=2e-3)       # table value
+    for df in (5, 17.1):
+        q = 1 - (0.05 / 3) / 2
+        assert an.t_two_sided_p(an.t_quantile(q, df), df) == pytest.approx(0.05 / 3, abs=1e-6)
+    rng = np.random.default_rng(1)
+    x, y = rng.normal(0, 1, 10), rng.normal(0.5, 1, 10)
+    w95, w98 = an.welch(x, y), an.welch(x, y, 1 - 0.05 / 3)
+    assert w98["ci95"][0] < w95["ci95"][0] and w98["ci95"][1] > w95["ci95"][1]
+    assert an.welch(x, y, 0.95) == w95                                          # default unchanged
+    b95 = an.bootstrap_ci(x, y, np.random.default_rng(0))
+    b98 = an.bootstrap_ci(x, y, np.random.default_rng(0), 1 - 0.05 / 3)
+    assert b98[0] < b95[0] and b98[1] > b95[1]
+
+
+def test_three_architecture_decisions():
+    import analyze_three_architectures as a3
+    assert a3.LEVEL == pytest.approx(1 - 0.05 / 3)
+    c = lambda w, b: {"welch_ci": w, "bootstrap_ci": b}
+    assert a3.decide_pair(c([-0.3, -0.1], [-0.3, -0.05]), "tsmixer", "lstm") == "tsmixer"
+    assert a3.decide_pair(c([0.1, 0.3], [0.05, 0.3]), "tsmixer", "lstm") == "lstm"
+    assert a3.decide_pair(c([-0.3, 0.01], [-0.3, -0.05]), "tsmixer", "lstm") == "sin evidencia suficiente"
+    none = "sin evidencia suficiente"
+    # adopted only when it wins both of its pairs
+    assert a3.overall({("transformer", "lstm"): "transformer", ("tsmixer", "lstm"): "lstm",
+                       ("tsmixer", "transformer"): "transformer"}) == "transformer"
+    assert a3.overall({("transformer", "lstm"): none, ("tsmixer", "lstm"): "lstm",
+                       ("tsmixer", "transformer"): "transformer"}) == none
+    assert a3.overall({p: none for p in a3.PAIRS}) == none
+
+
+def test_tsmixer_matched_size():
+    import training.v2_compression_experiment as exp
+    from run_lstm_vs_transformer import ARCH_HPARAMS, EXPECTED_PARAMS
+    hp = ARCH_HPARAMS["tsmixer"]
+    model = exp.build_temporal_model({"architecture": "tsmixer", "latent_dim": exp.STATE_DIM,
+                                      "action_dim": exp.ACTION_DIM, "sequence_length": 16, **hp})
+    n = sum(p.numel() for p in model.parameters())
+    assert n == EXPECTED_PARAMS["tsmixer"] == 450 * hp["hidden_dim"] + 13529      # addendum section 9
+    assert hp["num_blocks"] == 2 and hp["dropout"] == 0.0
+    for other in ("lstm", "transformer"):
+        assert abs(n / EXPECTED_PARAMS[other] - 1) < 0.02
+
+
+def test_advance_to_control_rule():
+    import analyze_three_architectures as a3
+    none = "sin evidencia suficiente"
+    tl, ml, mt = a3.PAIRS  # (transformer, lstm), (tsmixer, lstm), (tsmixer, transformer)
+    assert a3.advancing({tl: none, ml: none, mt: none}) == ["lstm", "transformer", "tsmixer"]
+    # TSMixer worse than one other: out, even if tied with the third
+    assert a3.advancing({tl: none, ml: "lstm", mt: none}) == ["lstm", "transformer"]
+    # winning one pair only: the loser is out, the other two advance, nobody is adopted
+    w = {tl: "transformer", ml: none, mt: none}
+    assert a3.advancing(w) == ["transformer", "tsmixer"] and a3.overall(w) == none
+    # a winner of both of its pairs advances alone (consistent with the overall rule)
+    w = {tl: "transformer", ml: none, mt: "transformer"}
+    assert a3.advancing(w) == ["transformer"] and a3.overall(w) == "transformer"

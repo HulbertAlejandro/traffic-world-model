@@ -99,27 +99,29 @@ def t_quantile(q: float, df: float) -> float:
     return (lo + hi) / 2.0
 
 
-def welch(x: np.ndarray, y: np.ndarray) -> dict:
-    """Welch test of mean(x) - mean(y): t, df, two-sided p and 95% CI."""
+def welch(x: np.ndarray, y: np.ndarray, level: float = 0.95) -> dict:
+    """Welch test of mean(x) - mean(y): t, df, two-sided p and the ``level`` CI (key "ci95" kept for 0.95)."""
     vx, vy = x.var(ddof=1) / len(x), y.var(ddof=1) / len(y)
     se = math.sqrt(vx + vy)
     d = float(x.mean() - y.mean())
     df = (vx + vy) ** 2 / (vx ** 2 / (len(x) - 1) + vy ** 2 / (len(y) - 1))
     t = d / se
-    half = t_quantile(0.975, df) * se
+    half = t_quantile(round(1.0 - (1.0 - level) / 2.0, 12), df) * se
     return {"d": d, "t": t, "df": df, "p": t_two_sided_p(t, df), "ci95": [d - half, d + half]}
 
 
-def bootstrap_ci(x: np.ndarray, y: np.ndarray, rng: np.random.Generator) -> list[float]:
+def bootstrap_ci(x: np.ndarray, y: np.ndarray, rng: np.random.Generator, level: float = 0.95) -> list[float]:
     bx = x[rng.integers(0, len(x), (N_BOOT, len(x)))].mean(1)
     by = y[rng.integers(0, len(y), (N_BOOT, len(y)))].mean(1)
-    lo, hi = np.percentile(bx - by, [2.5, 97.5])
+    tail = round(100.0 * (1.0 - level) / 2.0, 10)  # exactly 2.5 at 0.95: analysis.json stays byte-identical
+    lo, hi = np.percentile(bx - by, [tail, 100.0 - tail])
     return [float(lo), float(hi)]
 
 
-def compare(tf: np.ndarray, lstm: np.ndarray) -> dict:
-    w = welch(tf, lstm)
-    boot = bootstrap_ci(tf, lstm, np.random.default_rng(0))
+def compare(tf: np.ndarray, lstm: np.ndarray, level: float = 0.95) -> dict:
+    """Difference mean(tf) - mean(lstm); the argument names are the original comparison's."""
+    w = welch(tf, lstm, level)
+    boot = bootstrap_ci(tf, lstm, np.random.default_rng(0), level)
     return {**w, "relative": math.exp(w["d"]) - 1, "relative_ci95_welch": [math.exp(v) - 1 for v in w["ci95"]],
             "bootstrap_ci95": boot, "relative_ci95_bootstrap": [math.exp(v) - 1 for v in boot]}
 
@@ -165,7 +167,8 @@ def main() -> None:
         "per_arch": {},
         "runs": {f"{a}_s{s}": {k: v for k, v in r.items() if k != "protocol"} for (a, s), r in runs.items()},
         "protocol": runs[("lstm", 0)]["protocol"],
-        "architecture_hparams": ARCH_HPARAMS, "n_params": EXPECTED_PARAMS,
+        "architecture_hparams": {a: ARCH_HPARAMS[a] for a in ("lstm", "transformer")},
+        "n_params": {a: EXPECTED_PARAMS[a] for a in ("lstm", "transformer")},
     }
     for arch in ("lstm", "transformer"):
         lg = log_gm(arch, SEEDS)

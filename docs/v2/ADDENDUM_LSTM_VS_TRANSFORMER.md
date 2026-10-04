@@ -200,3 +200,93 @@ pruebas, 0.005). Desde h = 5 la diferencia es prácticamente 0. La métrica de d
   corridas sin comprimir de la selección de la Fase 2 tampoco cambiaron. Tests: 107 passed. Los 12
   de SUMO en vivo siguen sin poder correr por el bloqueo de Smart App Control (PROJECT_STATUS.md,
   "Verificación de tests al commit del 3 de octubre").
+
+## 9. Extensión a TSMixer, con presupuesto igualado y corrección de Bonferroni
+
+**Escrita el 4 de octubre de 2026, antes de entrenar ningún TSMixer de este experimento.** Las
+secciones 1–8 y sus resultados (`analysis.json`) no se reescriben. `analysis.json` se regeneró con
+el código actualizado y salió idéntico byte a byte.
+
+### 9.1 Tamaño
+
+TSMixer (`LatentDynamicsTSMixer`) con 2 bloques y dropout 0, como en la v1; solo cambia la
+dimensión oculta H de la mezcla de variables. Entrada de 112 por paso (104 + 8), ventana L = 16:
+
+- Por bloque: dos LayerNorm (2 · 2 · 112 = 448), mezcla temporal L² + L = 272 y mezcla de variables
+  112H + H + 112H + 112 = 225H + 112. Total por bloque: 225H + 832.
+- Cabezas: 112 · 104 + 104 (latente) y 112 + 1 (recompensa) = 11,865.
+- **Total = 2(225H + 832) + 11,865 = 450H + 13,529.** Verificado contra `sum(p.numel())` del modelo
+  real (`tests/test_v2_lstm_vs_transformer.py`).
+
+| H | Parámetros | Frente a la LSTM (152,038) | Frente al Transformer (152,617) |
+|---|---|---|---|
+| 128 (v1) | 71,129 | −53.2% | −53.4% |
+| 307 | 151,679 | −0.24% | −0.61% |
+| **308** | **152,129** | **+0.06%** | **−0.32%** |
+| 309 | 152,579 | +0.36% | −0.02% |
+
+Cualquier H entre 303 y 314 queda a menos de 2% de los dos. Se elige **H = 308 (152,129
+parámetros)**: es el más cercano al punto medio de los otros dos (152,328), y su mayor distancia a
+cualquiera de ellos (488 parámetros) es la menor de todas las opciones. Como en la sección 2, el
+script se niega a entrenar si el conteo no es exactamente 152,129, y el análisis comprueba el
+conteo de los pesos guardados.
+
+### 9.2 Diseño
+
+- **10 semillas (0–9), todas desde cero**, en `models/checkpoints/v2/arch_comparison/tsmixer_raw_s{0..9}`.
+  Las 20 corridas de LSTM y Transformer no se reentrenan ni se tocan: el script solo entrena las
+  arquitecturas que se le piden (`--architectures tsmixer`) y salta toda corrida que ya tenga
+  `evaluation.json`.
+- **El mismo `LSTM_PROTOCOL`** por el mismo camino (`train_branch("raw", ...)` →
+  `train_temporal_model` con `architecture_hparams`), los mismos splits sin comprimir, la misma
+  métrica (log GM sobre h = 1..10 del test). El análisis comprueba que las 30 corridas registran el
+  mismo protocolo.
+
+### 9.3 Comparaciones, corrección y criterio
+
+Tres comparaciones por pares, sin emparejar por semilla (como en la sección 4):
+
+1. Transformer − LSTM (la de las secciones 1–8, reportada otra vez con la corrección).
+2. TSMixer − LSTM.
+3. TSMixer − Transformer.
+
+- **Corrección de Bonferroni desde el inicio:** cada IC es del **98.33%** (1 − 0.05/3), en Welch y
+  en el bootstrap percentil (10,000 remuestreos, semilla de numpy 0, cada arquitectura por separado).
+- **Criterio por par, igual al de la sección 5 con los IC corregidos:** si los dos IC del 98.33%
+  excluyen el 0 del mismo lado, gana el par la arquitectura de menor error. Si no, "sin evidencia
+  suficiente" en ese par.
+- **Criterio global:** una arquitectura se adopta como modelo temporal oficial de la v2 solo si
+  gana **sus dos** pares. Si ninguna gana sus dos pares, el resultado global es "sin evidencia
+  suficiente", y se reporta qué pares sí se resolvieron (por ejemplo, si una arquitectura queda
+  descartada por perder sus dos pares).
+- **La conclusión de las secciones 1–8 se mantiene como se registró** (al 95%). Con la corrección,
+  el IC de Transformer − LSTM solo puede ensancharse, así que ese par no puede pasar a resolverse.
+- La nota de la sección 1 aplica igual: el resultado responde "¿qué arquitectura es mejor con el
+  mismo número de parámetros?".
+
+### 9.4 Regla de avance a la fase de control (fijada ahora)
+
+- **Pasan a la fase de control todas las arquitecturas que no sean significativamente peores que
+  alguna otra**, con el mismo criterio por pares de 9.3: los dos IC del 98.33% (Welch y bootstrap)
+  excluyen el 0 del mismo lado.
+- Una arquitectura significativamente peor que otra (pierde al menos uno de sus pares) **queda
+  fuera de la fase de control**, y se reporta como tal.
+- Si ningún par muestra diferencia significativa, **pasan las tres**.
+- Esta regla decide **quién se prueba en control**. No declara a nadie arquitectura oficial: eso se
+  decide con el resultado de control real.
+- Relación con el criterio global de 9.3: si una arquitectura gana sus dos pares, las otras dos son
+  significativamente peores que ella, así que solo esa pasa a control. Las dos reglas coinciden.
+
+### 9.5 Reportes secundarios (no deciden)
+
+- Las tres arquitecturas lado a lado: media de log GM, GM por semilla, media de log `reward_mse`
+  por horizonte, y los tres pares por horizonte (h = 1..10, IC del 98.33%, sin corrección
+  adicional por los 10 horizontes: descriptivo).
+- Épocas de convergencia (mejor época y parada) y variabilidad entre semillas (desviación estándar
+  del log GM y cocientes de varianzas).
+- Integridad: md5 de los archivos oficiales antes y después (etiquetas `tsmixer_matched_before` /
+  `_after`), y md5 de los pesos y evaluaciones de las 20 corridas de LSTM y Transformer.
+- Análisis: `scripts/v2/analyze_three_architectures.py` → `docs/results/v2/arch_comparison/analysis_three_architectures.json`.
+- Ninguna corrida se repite ni se descarta por su resultado. Si alguna llega al tope de 300 épocas,
+  se reporta. Si el entrenamiento se interrumpe, se reanuda sin reentrenar lo que ya tenga
+  `evaluation.json`, y se reporta.
