@@ -401,3 +401,162 @@ con el autor.
 Los 20 entrenamientos terminaron sin fallos (40 min con 4 procesos). Cada uno hizo 50,176 pasos
 imaginados y 3,000 pasos reales de selección. Hasta este momento no se ha visto ningún resultado en
 test. Lo siguiente es la evaluación única de la sección 11.2.
+
+### 11.4 Resultados de la etapa 2 en test (escrito después de la evaluación única)
+
+Fuentes:
+
+- `docs/results/v2/control/test_stage2.json` / `.csv`: una sola evaluación, 20 controladores y 5
+  referencias × 24 semillas (22000–22023).
+- `test_stage2_analysis.json`, de `scripts/v2/analyze_control_stage2.py`, escrito antes de la
+  evaluación.
+
+No se repitió ni se reevaluó nada.
+
+**Retorno en test** (media de 24 escenarios; en los brazos aprendidos, media de 10 semillas):
+
+| | Total | Mediana | A0 | B0 | C0 | D0 | Catastróficos (< −3,600) |
+|---|---|---|---|---|---|---|---|
+| `sueno_lstm` | −16,168.1 | −3,225.0 | −3,394.4 | −2,247.3 | −5,432.6 | −5,093.7 | **118/240** |
+| `sueno_transformer` | −2,340.4 | −1,567.0 | −581.3 | −502.9 | −943.8 | −312.4 | **18/240** |
+| `fijo_2_3` | −1,591.7 | −1,617.0 | −347.9 | −209.5 | −864.2 | −170.2 | 0/24 |
+| `min_verde_y_cambiar` | −1,309.7 | −1,305.5 | −451.5 | −230.4 | **−365.3** | −262.5 | 0/24 |
+| `cola_mas_larga` | −1,260.0 | −1,049.5 | −565.8 | −107.0 | −485.0 | **−102.2** | 1/24 |
+| `max_presion` | −7,565.5 | −6,555.5 | −1,585.2 | −2,916.0 | −1,086.8 | −1,977.5 | 22/24 |
+| `espera_mas_larga` | −1,279.5 | **−1,010.0** | −556.5 | −107.9 | −486.4 | −128.8 | 1/24 |
+
+**Medias por semilla (total):**
+
+- LSTM: −25,000.8, −24,022.8, −3,220.3, −8,558.6, −1,826.5, −66,496.6, −16,734.8, −3,007.3,
+  −6,065.1 y −6,747.7.
+- Transformer: −1,515.0, −7,337.8, −1,367.9, −1,471.4, −1,220.2, −1,820.2, −2,609.8, −1,346.9,
+  −3,092.8 y −1,622.2.
+
+#### P1 y decisión de arquitectura
+
+| | Diferencia | Welch por semilla | IC al 99.17% | t pareada | Wilcoxon | Escenarios ganados |
+|---|---|---|---|---|---|---|
+| LSTM − Transformer | −13,827.6 | p = 0.053 | [−34,707.5, +7,052.2] | p = 4.0e-10 | p = 1.2e-7 | 0/24 |
+
+- **El IC incluye 0, así que por la regla pre-registrada (sección 5.2) se adopta la LSTM**, por
+  desempate.
+- **Esto hay que leerlo con cuidado:**
+  - El desempate se escribió para el caso de dos brazos parecidos. Aquí la LSTM es mucho peor en la
+    media y la mediana, y en los 24 escenarios.
+  - El IC es ancho por la enorme varianza entre semillas de la LSTM (una semilla en −66,497 y dos
+    en unos −25,000).
+  - Las pruebas pareadas por escenario son muy significativas, pero generalizan sobre escenarios
+    para estas 10 políticas, no sobre semillas de entrenamiento, y no son el test principal.
+- La regla se aplica tal como está escrita. Que el autor decida si la enmienda: sería una enmienda
+  **posterior a ver los datos de test** y tendría que registrarse así.
+
+#### P4–P6 (sueño adoptado = LSTM; α' = 0.00833)
+
+| # | Comparación | Diferencia | p por semilla | IC al 99.17% | t pareada | Wilcoxon | Gana | ¿Significativo? |
+|---|---|---|---|---|---|---|---|---|
+| P4 | LSTM − `espera_mas_larga`, total | −14,888.5 | 0.040 | [−35,772.6, +5,995.6] | 1.0e-10 | 1.2e-7 | 0/24 | no |
+| P5 | LSTM − `espera_mas_larga`, B0 | −2,139.5 | 0.028 | [−4,888.5, +609.6] | 5.2e-6 | 1.2e-7 | 0/24 | no |
+| P6 | LSTM − `min_verde_y_cambiar`, C0 | −5,067.3 | 0.245 | [−18,771.3, +8,636.7] | 1.1e-4 | 1.2e-7 | 0/24 | no |
+
+- **Ninguna alcanza α' en el test principal: son brechas no significativas.** Todas van en contra
+  del sueño: la LSTM no gana en ningún escenario.
+- **H1 no tiene apoyo:** en B0 y C0 el aprendido no supera a la mejor regla, con ninguna de las dos
+  arquitecturas.
+- P2 y P3 (frente al RL directo) quedan para la etapa 3.
+
+**Transformer, descriptivo (las mismas comparaciones):**
+
+| Comparación | Diferencia | p por semilla | t pareada | Gana |
+|---|---|---|---|---|
+| Total, frente a `espera_mas_larga` | −1,060.9 | 0.10 | 2.7e-3 | 1/24 |
+| B0, frente a `espera_mas_larga` | −395.0 | 0.071 | 3.2e-5 | 1/24 |
+| C0, frente a `min_verde_y_cambiar` | −578.5 | 0.018 | 6.3e-4 | 1/24 |
+
+El Transformer tampoco supera a la mejor referencia. Su mediana (−1,567) queda entre `fijo_2_3` y
+`min_verde_y_cambiar`.
+
+#### Cambios de fase y bloqueo
+
+**Con la regla fijada en 11.2** (media por episodio < 3 en algún semáforo), la LSTM tiene **1/10
+controladores bloqueados** (semilla 1, D0: 1.2 cambios por episodio) y el Transformer **0/10**.
+
+**Agregado después de ver los datos, descriptivo.** La media por episodio esconde bloqueos de
+episodios sueltos. Contando los episodios con menos de 3 cambios en algún semáforo:
+
+| | Episodios | Por semáforo | Retorno medio de esos episodios | Retorno medio del resto |
+|---|---|---|---|---|
+| LSTM | 75/240 | D0 56, B0 17, C0 8, A0 4 | −40,463 | −5,125 |
+| Transformer | 2/240 | B0 2, C0 1 | −40,404 | −2,021 |
+
+- Por controlador de la LSTM: s1 24, s5 22, s0 11, s6 9, s3 7, s8 1, s9 1, y s2, s4 y s7 ninguno.
+- **El bloqueo de una fase explica la mayor parte de lo catastrófico**, el mismo mecanismo del
+  piloto (sección 10.4).
+
+Cambios medios por episodio, por controlador (A0 / B0 / C0 / D0):
+
+| Controlador | Cambios | Controlador | Cambios |
+|---|---|---|---|
+| lstm s0 | 15.3 / 22.2 / 22.2 / 5.4 | transformer s0 | 23.4 / 23.0 / 24.9 / 17.3 |
+| lstm s1 | 23.1 / 24.2 / 26.8 / **1.2** | transformer s1 | 19.8 / 18.5 / 19.1 / 16.2 |
+| lstm s2 | 25.3 / 16.6 / 25.2 / 14.7 | transformer s2 | 21.3 / 20.8 / 25.1 / 13.5 |
+| lstm s3 | 22.8 / 3.6 / 23.6 / 21.8 | transformer s3 | 21.6 / 22.8 / 26.6 / 19.5 |
+| lstm s4 | 18.3 / 14.0 / 21.3 / 27.6 | transformer s4 | 20.3 / 8.5 / 24.4 / 16.4 |
+| lstm s5 | 19.0 / 12.5 / 11.2 / 10.6 | transformer s5 | 22.0 / 23.5 / 24.2 / 23.2 |
+| lstm s6 | 10.8 / 18.7 / 20.6 / 3.2 | transformer s6 | 16.9 / 12.4 / 21.8 / 14.5 |
+| lstm s7 | 26.4 / 26.8 / 22.3 / 24.0 | transformer s7 | 19.9 / 13.1 / 26.3 / 23.7 |
+| lstm s8 | 13.7 / 20.2 / 22.6 / 22.0 | transformer s8 | 24.5 / 25.9 / 25.2 / 23.3 |
+| lstm s9 | 18.4 / 17.1 / 22.0 / 17.1 | transformer s9 | 19.2 / 15.2 / 22.3 / 17.8 |
+
+Referencias, todas iguales en los 4 semáforos: `fijo_2_3` 23 y `min_verde_y_cambiar` 29.
+`espera_mas_larga` y `cola_mas_larga` hacen ≈ 18 / 8 / 21 / 8.5, y `max_presion` 13 / 4 / 17 / 5.
+
+#### Selección del checkpoint (validación 21000–21004)
+
+Mejor evaluación (número de 10) y su retorno real medio en validación:
+
+| Semilla | LSTM | Transformer |
+|---|---|---|
+| s0 | 8: −11,712 | 8: −1,581 |
+| s1 | 10: −15,508 | **1: −3,902** |
+| s2 | 10: −2,214 | 10: −1,491 |
+| s3 | 6: −3,734 | 10: −1,511 |
+| s4 | 8: −1,783 | 8: −1,421 |
+| s5 | **1: −19,585** | 10: −1,701 |
+| s6 | 10: −19,513 | 5: −1,506 |
+| s7 | 7: −1,865 | 10: −1,504 |
+| s8 | 5: −2,246 | 10: −1,748 |
+| s9 | **1: −2,891** | 10: −1,691 |
+
+- En 4 controladores de la LSTM (s0, s1, s5, s6), **el mejor de los 10 checkpoints ya era
+  catastrófico en validación**. La selección en SUMO real no puede rescatar un entrenamiento cuyos
+  checkpoints son todos malos; sí lo mostró antes de test.
+- En 3 casos (LSTM s5 y s9, Transformer s1) el mejor checkpoint es el primero (5,000 pasos): seguir
+  entrenando en el sueño empeoró el control real.
+
+#### Parecido con las referencias, en los mismos estados
+
+Fracción de pasos en que la referencia elegiría la misma acción que el controlador, media de los 10
+controladores. Con decisiones binarias, 0.5 es lo que daría el azar.
+
+| Referencia | LSTM: A0 / B0 / C0 / D0 | Transformer: A0 / B0 / C0 / D0 |
+|---|---|---|
+| `fijo_2_3` | 0.53 / 0.54 / 0.50 / 0.55 | 0.55 / 0.54 / 0.50 / 0.55 |
+| `min_verde_y_cambiar` | 0.57 / 0.54 / **0.68** / 0.46 | 0.57 / 0.56 / **0.73** / 0.55 |
+| `cola_mas_larga` | 0.52 / 0.55 / 0.58 / 0.43 | 0.64 / 0.61 / 0.60 / 0.62 |
+| `max_presion` | 0.54 / **0.66** / 0.54 / **0.61** | **0.68** / **0.67** / 0.56 / **0.70** |
+| `espera_mas_larga` | 0.52 / 0.55 / 0.59 / 0.43 | 0.64 / 0.62 / 0.61 / 0.62 |
+
+- La LSTM se parece poco a todas las referencias (0.43–0.68).
+- El Transformer se parece más a `max_presion` en A0, B0 y D0, y a `min_verde_y_cambiar` en C0.
+- Limitación: el acuerdo se mide en los estados que visita cada controlador.
+- El acuerdo por controlador está en `test_stage2_analysis.json`.
+
+#### Interacciones reales
+
+**3,000 pasos reales de selección por semilla en los 20 controladores** (`run_info.json`), con
+50,176 pasos imaginados. Por semilla: **12,600 sin compartir el dataset y 3,960 compartiéndolo
+entre las 10 semillas del brazo**. La razón frente al RL directo se calcula en la etapa 3.
+
+#### Lo que no se hizo
+
+No se cambió nada del sueño, del dataset ni de las reglas. El RL directo y OOD son la etapa 3.
