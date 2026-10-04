@@ -303,3 +303,62 @@ correr el análisis de las tres arquitecturas** (ningún TSMixer había terminad
   resultado de la fase de control real, entre las arquitecturas que avancen según 9.4.
 - Lo demás no cambia: los IC del 98.33%, el criterio por pares, el criterio global (ahora con este
   alcance) y la regla de avance.
+
+### 9.7 Resultado
+
+`docs/results/v2/arch_comparison/analysis_three_architectures.json`. Los 10 TSMixer se entrenaron
+sin interrupciones (21 minutos con 4 procesos). Todos terminaron por early stopping; ninguno llegó
+al tope. Las 30 corridas registran el mismo protocolo y los tamaños pre-registrados (comprobado
+sobre los pesos guardados). Los pesos y evaluaciones de las 20 corridas de LSTM y Transformer no
+cambiaron (md5).
+
+**Las tres arquitecturas** (≈ 152,000 parámetros cada una, 10 semillas):
+
+| | LSTM h = 137 | Transformer d = 80 | TSMixer H = 308 |
+|---|---|---|---|
+| Media de log GM | 7.5022 | 7.3863 | 7.8696 |
+| Desviación estándar del log GM | 0.182 | 0.145 | 0.157 |
+| GM `reward_mse` por semilla | 1545–2394 | 1309–2198 | 2114–3179 |
+| Mejor época (media) | 110 | 89 | 71 |
+| Época de parada (mediana; rango) | 116.5 (77–188) | 96 (79–142) | 80 (61–119) |
+
+**Pares, IC del 98.33% (Bonferroni):**
+
+| Par | Diferencia | p (Welch) | IC Welch | IC bootstrap | Decisión |
+|---|---|---|---|---|---|
+| Transformer − LSTM | −10.9% | 0.13 | [−26.7%, +8.2%] | [−24.4%, +6.0%] | sin evidencia suficiente |
+| TSMixer − LSTM | +44.4% | 1.4e-4 | [+18.1%, +76.5%] | [+21.2%, +71.2%] | **gana la LSTM** |
+| TSMixer − Transformer | +62.1% | 1.2e-6 | [+35.7%, +93.8%] | [+38.2%, +87.6%] | **gana el Transformer** |
+
+- **Criterio global (9.3, con el alcance de 9.6):** ninguna arquitectura gana sus dos pares →
+  **"sin evidencia suficiente"** para declarar un ganador de la predicción. El Transformer gana a
+  TSMixer, pero no a la LSTM.
+- **Regla de avance (9.4):** TSMixer es significativamente peor que las otras dos → **queda fuera
+  de la fase de control.** **Pasan a control la LSTM y el Transformer.**
+- El par Transformer − LSTM coincide con las secciones 1–8: sin evidencia suficiente al 95% y, con
+  la corrección, también al 98.33%.
+
+**Por horizonte** (media geométrica del `reward_mse` sobre las 10 semillas; descriptivo):
+
+| h | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| LSTM | 391 | 926 | 1490 | 1886 | 2076 | 2294 | 2510 | 2783 | 3157 | 3566 |
+| Transformer | 260 | 649 | 1211 | 1677 | 2008 | 2270 | 2515 | 2823 | 3146 | 3439 |
+| TSMixer | 270 | 764 | 1613 | 2537 | 3371 | 4143 | 5083 | 5934 | 6395 | 6620 |
+
+- **TSMixer predice bien a un paso y se degrada al encadenar pasos.** En h = 1 queda al nivel del
+  Transformer (+4%, IC [−6%, +15%]) y por debajo de la LSTM (−31%, IC [−39%, −23%]). Desde h = 4 es
+  peor que las dos, y en h = 7–9 su error duplica el de ellas (+102% a +113%). Su desventaja global
+  viene del error acumulado en los rollouts, no de la predicción de un paso.
+- Transformer − LSTM por horizonte, con IC del 98.33%: la ventaja del Transformer en h = 1–3 sigue
+  excluyendo el 0 (−34%, −30%, −19%); desde h = 4 el IC incluye el 0. Es lo mismo que en 8.2.
+
+**Contexto (no forma parte del criterio):** TSMixer converge antes que las otras dos (mediana de
+parada 80, frente a 96 y 116.5). Su variabilidad entre semillas queda entre las de las otras dos
+(cocientes de varianzas: LSTM/Transformer 1.58, LSTM/TSMixer 1.33, Transformer/TSMixer 0.85); con
+10 semillas por lado, ninguna diferencia de variabilidad es clara.
+
+**Integridad:** el md5 de los 314 archivos oficiales es igual antes y después
+(`md5_tsmixer_matched_before.json` / `_after.json`). Tests: 111 passed. Los 12 de SUMO en vivo
+siguen bloqueados por Smart App Control (PROJECT_STATUS.md, "Verificación de tests al commit del 3
+de octubre").
