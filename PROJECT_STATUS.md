@@ -1,6 +1,7 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `26465b4`, 81/81 tests en verde. **Lo más reciente: la extensión
+Última verificación: commit `7ecd337` (rama `v2/four-intersections`), 123/123 tests en verde,
+incluidos los de SUMO en vivo (ver la sección siguiente). **Lo más reciente: la extensión
 del PPO a 10 semillas por controlador (30 de septiembre; sección siguiente)**, que actualiza el
 resultado de control. Antes, una auditoría técnica del repositorio (26 de septiembre),
 ejecutando el código, y las correcciones que salieron de ella. Estado actual:
@@ -40,7 +41,24 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
 
-## ⚠️ Verificación de tests al commit del 4 de octubre (resultados de las tres arquitecturas): suite sin verificar
+## ✅ Suite completa verificada el 4 de octubre, tras reiniciar: 123 passed
+
+Resuelve las tres verificaciones pendientes de abajo (2, 3 y 4 de octubre). Después de reiniciar
+el equipo, sin cambiar ninguna configuración de seguridad ni reinstalar nada, se probó por
+separado, fuera de pytest:
+
+- `import torch` → 2.14.0+cpu (antes Smart App Control bloqueaba `torch_cpu.dll`, incluso tras
+  reinstalarlo).
+- `import pandas` → 3.0.5.
+- `sumo --version` → Eclipse SUMO 1.27.1, código de salida 0.
+
+Con los tres cargando, `pytest -v` sobre el commit `7ecd337`: **123 passed en 44 s**, ningún
+fallo, error ni skip. Pasan los 12 tests de SUMO en vivo listados en la sección del 3 de octubre,
+que incluyen los 5 de la sección del 2 de octubre. La suite que no pudo correr al commit `84b518d`
+queda verificada con este resultado (`7ecd337` solo cambia documentación respecto a `84b518d`).
+Las secciones de abajo se conservan como registro de lo que pasó.
+
+## ⚠️ (Resuelto) Verificación de tests al commit del 4 de octubre (resultados de las tres arquitecturas): suite sin verificar
 
 El commit de resultados de la extensión a TSMixer (`84b518d`, rama `v2/four-intersections`, sin
 push) se hizo **sin tests verificados**. Su mensaje y la sección 9.7 de
@@ -63,7 +81,7 @@ sin reescribir `84b518d`.
 - No se reinstaló pandas ni se cambió ninguna configuración de seguridad. Hay que volver a correr
   la suite completa cuando pandas y SUMO carguen de nuevo en esta máquina.
 
-## ⚠️ Verificación de tests al commit del 3 de octubre (pre-registro LSTM frente a Transformer): 12 tests de SUMO en vivo sin verificar
+## ⚠️ (Resuelto) Verificación de tests al commit del 3 de octubre (pre-registro LSTM frente a Transformer): 12 tests de SUMO en vivo sin verificar
 
 El commit del pre-registro de LSTM frente a Transformer con presupuesto igualado
 (`docs/v2/ADDENDUM_LSTM_VS_TRANSFORMER.md`), en la rama `v2/four-intersections` y sin push, se
@@ -98,7 +116,7 @@ No se cambió ninguna configuración de seguridad. Los commits anteriores del mi
 de SUMO. El experimento LSTM frente a Transformer no usa SUMO (solo PyTorch sobre el dataset ya
 recolectado). Hay que volver a correr esos 12 tests cuando SUMO arranque de nuevo en esta máquina.
 
-## ⚠️ Verificación de tests al push del 2 de octubre: 5 tests de SUMO en vivo sin verificar
+## ⚠️ (Resuelto) Verificación de tests al push del 2 de octubre: 5 tests de SUMO en vivo sin verificar
 
 Los 10 commits que se subieron el 2 de octubre (`82ccbe4` … `956127a`, incluido el merge
 `24001ac` de `demo/sumo-gui-comparison`) se verificaron con la suite completa: **82 passed,

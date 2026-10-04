@@ -320,17 +320,14 @@ No existen (a propósito): `utils/`, `notebooks/`, `experiments/`, `papers/`.
 
 ## Pendiente de verificar (no confirmado, no inventar)
 
-- Volver a correr los 5 tests de SUMO en vivo que no pudieron verificarse al push del 2 de
-  octubre por el bloqueo de Smart App Control (detalle en PROJECT_STATUS.md, "Verificación de
-  tests al push del 2 de octubre").
-- Volver a correr los 12 tests de SUMO en vivo que no pudieron verificarse al commit del 3 de
-  octubre (pre-registro LSTM frente a Transformer) por el bloqueo de Smart App Control (detalle en
-  PROJECT_STATUS.md, "Verificación de tests al commit del 3 de octubre").
-- Volver a correr la suite completa, que no pudo correr al commit de resultados de las tres
-  arquitecturas (`84b518d`, 4 de octubre) porque Smart App Control bloqueó pandas
-  (`json.cp311-win_amd64.pyd`); además de SUMO (detalle en PROJECT_STATUS.md, "Verificación de
-  tests al commit del 4 de octubre").
+Nada pendiente por ahora.
 
-Resuelto: la cuenta/app desconocida que apareció como colaborador en el repositorio de
+Resuelto: las verificaciones de tests pendientes del 2, 3 y 4 de octubre (5 y 12 tests de SUMO en
+vivo, y la suite completa del commit `84b518d`, bloqueadas por Smart App Control). Tras reiniciar
+el equipo, sin cambiar configuración de seguridad, torch, pandas y SUMO cargaron, y `pytest -v`
+sobre `7ecd337` dio **123 passed**, incluidos los 12 de SUMO (detalle en PROJECT_STATUS.md, "Suite
+completa verificada el 4 de octubre, tras reiniciar").
+
+Resuelto también: la cuenta/app desconocida que apareció como colaborador en el repositorio de
 GitHub era Codex Connector; su acceso se revocó en ambas capas, y los colaboradores
 humanos son legítimos (investigado y confirmado por el autor directamente en GitHub).
