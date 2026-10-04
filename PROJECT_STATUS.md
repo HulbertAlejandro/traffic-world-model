@@ -40,6 +40,41 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
 
+## ⚠️ Verificación de tests al commit del 3 de octubre (pre-registro LSTM frente a Transformer): 12 tests de SUMO en vivo sin verificar
+
+El commit del pre-registro de LSTM frente a Transformer con presupuesto igualado
+(`docs/v2/ADDENDUM_LSTM_VS_TRANSFORMER.md`), en la rama `v2/four-intersections` y sin push, se
+verificó con la suite completa: **107 passed, 12 failed**. Los 107 que pasaron no dependen de una
+conexión viva a SUMO. Los 12 que fallaron sí dependen de ella:
+
+- `tests/test_concurrent_environments.py::test_two_concurrent_environments_each_read_their_own_simulation`
+- `tests/test_corridor_concurrent_environments.py::test_two_concurrent_corridor_environments_each_read_their_own_simulation`
+- `tests/test_corridor_environment.py::test_full_episode_state_size_and_reward_sign`
+- `tests/test_corridor_environment.py::test_reward_reproduces_phase0_measurement[fijo_2_3]`
+- `tests/test_corridor_environment.py::test_reward_reproduces_phase0_measurement[cola_mas_larga]`
+- `tests/test_corridor_environment.py::test_keep_and_switch_actions`
+- `tests/test_corridor_environment.py::test_pulse_offset_comes_from_the_episode_seed`
+- `tests/test_four_intersections.py::test_corridor_runs_full_episode_and_closes`
+- `tests/test_traffic_environment.py::test_environment`
+- `tests/test_traffic_environment.py::test_phase_switched_measures_actual_changes`
+- `tests/test_traffic_environment.py::test_reward_config_selects_the_phase_penalty`
+- `tests/test_traffic_environment.py::test_arrivals_total_matches_an_independent_per_second_count`
+
+Los 12 fallaron con `traci.exceptions.FatalTraCIError: Could not connect`, unos 124 s cada uno
+(la suite tardó 25 minutos). **La causa no es un fallo del commit**, que no toca código de SUMO:
+Smart App Control bloqueó `proj_9.dll` de la instalación de SUMO
+(`C:\Program Files (x86)\Eclipse\Sumoin\`), y `sumo.exe` moría al arrancar. Así se diagnosticó:
+
+- `sumo --version` salía en silencio con código 0xC0E90002 (`STATUS_SYSTEM_INTEGRITY_POLICY_VIOLATION`).
+- El registro `Microsoft-Windows-CodeIntegrity/Operational` tenía los eventos 3033/3077/3118
+  ("Smart App Control Block") de esa DLL, a las 18:50.
+- No quedaban procesos de `sumo.exe` vivos.
+
+No se cambió ninguna configuración de seguridad. Los commits anteriores del mismo día
+(`ff4469a` … `82516a9`) se verificaron antes del bloqueo con la suite completa, incluidos los tests
+de SUMO. El experimento LSTM frente a Transformer no usa SUMO (solo PyTorch sobre el dataset ya
+recolectado). Hay que volver a correr esos 12 tests cuando SUMO arranque de nuevo en esta máquina.
+
 ## ⚠️ Verificación de tests al push del 2 de octubre: 5 tests de SUMO en vivo sin verificar
 
 Los 10 commits que se subieron el 2 de octubre (`82ccbe4` … `956127a`, incluido el merge
