@@ -1,0 +1,25 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 10ms, vehicles TOT 0 ACT 0 BUF 0)                     
+dream_lstm seed 6: 50000 steps -> C:\Users\hulbe\VisualProjects\traffic-world-model\models\checkpoints\v2\control\dream_lstm_s6
+Eval num_timesteps=5000, episode_reward=-35403.60 +/- 58701.81
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=10000, episode_reward=-37859.80 +/- 29234.81
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=15000, episode_reward=-41149.00 +/- 20931.59
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=20000, episode_reward=-64872.40 +/- 53013.85
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=25000, episode_reward=-43059.40 +/- 21394.38
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=30000, episode_reward=-47617.20 +/- 36973.52
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=35000, episode_reward=-69914.60 +/- 50942.66
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=40000, episode_reward=-42820.00 +/- 47150.72
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=45000, episode_reward=-35647.20 +/- 39929.98
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=50000, episode_reward=-19512.80 +/- 16241.25
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+done in 491 s; real steps 3000; best real eval -19512.8

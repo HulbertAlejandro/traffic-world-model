@@ -395,3 +395,9 @@ escribió y se probó con datos sintéticos antes de la evaluación, y aplica:
 
 Si los resultados salen malos, no se cambia nada del sueño ni del dataset: se reporta y se decide
 con el autor.
+
+### 11.3 Evaluación en test iniciada: 2026-10-04 14:38 (hora local)
+
+Los 20 entrenamientos terminaron sin fallos (40 min con 4 procesos). Cada uno hizo 50,176 pasos
+imaginados y 3,000 pasos reales de selección. Hasta este momento no se ha visto ningún resultado en
+test. Lo siguiente es la evaluación única de la sección 11.2.
