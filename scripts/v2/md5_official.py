@@ -2,6 +2,7 @@
 
     python scripts/v2/md5_official.py --tag before
     python scripts/v2/md5_official.py --tag after --compare before
+    python scripts/v2/md5_official.py --control --tag control_before    # Phase 3 (docs/v2/ADDENDUM_CONTROL.md)
 
 Covers v1's network, dataset (raw and processed), official checkpoints (Autoencoder, LSTM,
 Transformer/TSMixer, the three PPO controllers) and the v2 network, route file and raw dataset.
@@ -28,10 +29,19 @@ PATTERNS = (
     "environments/four-intersection-corridor/*",
     "datasets/v2/raw/*/*.npz",
 )
+# --control adds what Phase 3 (control) reads and must not modify: the v2 state scaler and
+# processed splits, the sequence data the world models were trained on, and the 20 world models
+# that go to control (weights, hyperparameters and reward scalers).
+CONTROL_PATTERNS = (
+    "datasets/v2/processed/*",
+    "models/checkpoints/v2/compression/selection/raw_data/*.npz",
+    "models/checkpoints/v2/arch_comparison/lstm_raw_s*/*",
+    "models/checkpoints/v2/arch_comparison/transformer_raw_s*/*",
+)
 
 
-def snapshot() -> dict[str, str]:
-    files = sorted({p for pat in PATTERNS for p in ROOT.glob(pat) if p.is_file()})
+def snapshot(patterns: tuple[str, ...] = PATTERNS) -> dict[str, str]:
+    files = sorted({p for pat in patterns for p in ROOT.glob(pat) if p.is_file()})
     return {p.relative_to(ROOT).as_posix(): hashlib.md5(p.read_bytes()).hexdigest() for p in files}
 
 
@@ -39,8 +49,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--tag", required=True)
     parser.add_argument("--compare")
+    parser.add_argument("--control", action="store_true", help="also cover the Phase 3 inputs (CONTROL_PATTERNS)")
     args = parser.parse_args()
-    snap = snapshot()
+    snap = snapshot(PATTERNS + CONTROL_PATTERNS if args.control else PATTERNS)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"md5_{args.tag}.json").write_text(json.dumps(snap, indent=1), encoding="utf-8")
     print(f"{len(snap)} files -> md5_{args.tag}.json")
