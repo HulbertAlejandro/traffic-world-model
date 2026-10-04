@@ -330,3 +330,68 @@ Supuestos:
 
 **Memoria:** al terminar la etapa 1 había **1.76 GB disponibles** (de 7.7). Es menos de los 2 GB de
 la sección 7: la etapa 2 no se lanza así.
+
+## 11. Etapa 2: plan (escrito el 4 de octubre de 2026, antes de lanzar los entrenamientos)
+
+Lo de esta sección se escribe antes de entrenar ninguno de los 20 controladores y no cambia
+ningún diseño, hiperparámetro ni regla de las secciones 1–9.
+
+### 11.1 Entrenamiento
+
+- `python scripts/v2/run_control_stage2.py --workers 4` lanza `training/train_controller_v2.py`
+  para `dream_lstm` y `dream_transformer`, semillas 0–9, intercaladas por semilla. Cada uno usa los
+  valores por defecto: 50,000 pasos imaginados, el modelo del mundo de su misma semilla y la
+  selección en validación 21000–21004.
+- **4 procesos.** Cada proceso hijo usa un solo hilo de PyTorch/BLAS, para no saturar los 12 hilos
+  de la CPU. No cambia lo que se entrena.
+- **Salidas:** `models/checkpoints/v2/control/dream_<arq>_s<i>/`, con `train.log` en cada carpeta.
+- **Reanudable:** una corrida con `run_info.json` se salta; una carpeta a medio escribir se
+  reentrena desde cero con la misma semilla.
+- **Memoria:** había 1.99 GB disponibles. Con la autorización del autor se cerraron Steam, Edge y
+  Copilot, y quedaron **3.12 GB**. El lanzador se niega a arrancar con 2 GB o menos.
+
+### 11.2 Evaluación en test (una sola vez, cuando terminen los 20)
+
+Antes de la evaluación se agrega aquí la nota "evaluación en test iniciada" con la hora. Después
+se corre una sola vez:
+
+```
+python scripts/v2/evaluate_control_v2.py --split test --confirm-held-out --reference-agreement \
+  --policy sueno_lstm=dream:<las 10 carpetas dream_lstm_s0..s9> \
+  --policy sueno_transformer=dream:<las 10 carpetas dream_transformer_s0..s9> \
+  --policy fijo_2_3=ref:fijo_2_3 --policy min_verde_y_cambiar=ref:min_verde_y_cambiar \
+  --policy cola_mas_larga=ref:cola_mas_larga --policy max_presion=ref:max_presion \
+  --policy espera_mas_larga=ref:espera_mas_larga --level 0.9916666667 \
+  --compare sueno_lstm:sueno_transformer \
+  --compare <cada brazo>:espera_mas_larga --compare <cada brazo>:espera_mas_larga:B0 \
+  --compare <cada brazo>:min_verde_y_cambiar:C0 \
+  --output docs/results/v2/control/test_stage2
+```
+
+`python scripts/v2/analyze_control_stage2.py` lee ese resultado sin simular nada. El script se
+escribió y se probó con datos sintéticos antes de la evaluación, y aplica:
+
+- **P1:** IC de Welch al 99.17% sobre las medias por semilla. Si excluye 0, se adopta el brazo
+  mejor; si no, la LSTM, por el desempate pre-registrado.
+- **P4–P6:** sueño adoptado frente a `espera_mas_larga` (total y B0) y a `min_verde_y_cambiar`
+  (C0), significativas solo con p < 0.05/6 en el test de nivel de semilla. Las mismas
+  comparaciones del otro brazo son descriptivas.
+- **P2–P3:** se calculan en la etapa 3. Bonferroni sigue siendo sobre 6.
+
+**Además, descriptivo, por controlador:**
+
+- Retorno total y por intersección, y catastróficos (< −3,600).
+- **Cambios de fase reales por semáforo** (media por episodio). Un controlador es **"bloqueado"**
+  si hace, en promedio, **menos de 3 cambios por episodio en algún semáforo**; se cuentan por
+  arquitectura.
+- **Mejor evaluación de la selección:** su número (de 10), el paso en que ocurrió y el retorno
+  real medio en validación 21000–21004 (`evaluations.npz`).
+- Pasos reales consumidos (`run_info.json`) y las dos contabilidades de interacciones.
+- **Acuerdo con cada referencia por intersección, en los mismos estados.** En cada paso de la
+  trayectoria del controlador se pregunta a las 5 referencias qué harían en cada semáforo, sin
+  ejecutarlo, y se registra la fracción de pasos en que coinciden. Un test comprueba que esto no
+  altera la trayectoria. Limitación: mide el parecido en los estados que visita el controlador, no
+  en los que visitaría la referencia.
+
+Si los resultados salen malos, no se cambia nada del sueño ni del dataset: se reporta y se decide
+con el autor.

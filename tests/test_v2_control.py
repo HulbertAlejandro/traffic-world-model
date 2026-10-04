@@ -269,3 +269,26 @@ def test_evaluation_refuses_train_seeds_and_unconfirmed_held_out_splits():
         with pytest.raises(SystemExit):
             ev.scenario_seeds(split, None, False)
     assert ev.scenario_seeds("test", None, True) == list(range(22000, 22024))
+
+
+def test_reference_agreement_only_reads_the_simulation():
+    """Asking the five references for their action at every step must not change the trajectory,
+    and a reference must agree with itself on every step and signal."""
+    from environments.scaled_corridor_environment import ScaledCorridorEnvironment
+    from scripts.v2 import evaluate_control_v2 as ev
+    from scripts.v2.corridor_policies import REFERENCE_POLICIES, make_reference_policy
+
+    env = ScaledCorridorEnvironment()
+    try:
+        drive = make_reference_policy("espera_mas_larga")
+        act = lambda state, step: drive(env.env, step)  # noqa: E731
+        plain = ev.run_episode(env.env, act, 21005)
+        shadow = {name: make_reference_policy(name) for name in REFERENCE_POLICIES}
+        with_shadow = ev.run_episode(env.env, act, 21005, shadow)
+    finally:
+        env.close()
+    for key in ("reward", "reward_A0", "reward_B0", "reward_C0", "reward_D0", "switches_A0", "switches_C0"):
+        assert with_shadow[key] == plain[key]
+    assert all(with_shadow[f"agree_espera_mas_larga_{ts}"] == 1.0 for ts in ("A0", "B0", "C0", "D0"))
+    assert "agree_espera_mas_larga_A0" not in plain
+    assert any(with_shadow[f"agree_max_presion_{ts}"] < 1.0 for ts in ("A0", "B0", "C0", "D0"))

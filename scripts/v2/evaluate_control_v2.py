@@ -16,6 +16,12 @@ real phase switches per signal) to <output>.json and .csv, and prints per-policy
 signal id: seed-level Welch (one-sample t against a deterministic reference), paired t and paired
 Wilcoxon by scenario, with the CI at --level.
 
+--reference-agreement: at every step of every episode, also asks the five references which
+keep/switch they WOULD choose for each signal from that same state, without executing it, and
+records the fraction of steps each one agrees with the evaluated policy (agree_<ref>_<signal>).
+It only reads the simulation, so the trajectory is the evaluated policy's own
+(tests/test_v2_control.py checks that returns do not change with it on).
+
     python scripts/v2/evaluate_control_v2.py --split validation --policy fijo_2_3=ref:fijo_2_3 --output <path>
 """
 
@@ -124,15 +130,20 @@ def build_action_functions(policy: Policy, scaled_env) -> list[tuple[str, callab
     return functions
 
 
-def run_episode(raw_env, action_fn, scenario_seed: int) -> dict:
+def run_episode(raw_env, action_fn, scenario_seed: int, shadow_references: dict | None = None) -> dict:
     t0 = time.perf_counter()
+    shadow_references = shadow_references or {}
+    agree = {name: np.zeros(len(TRAFFIC_SIGNAL_IDS)) for name in shadow_references}
     state, info = raw_env.reset(seed=scenario_seed)
     per_signal = dict.fromkeys(TRAFFIC_SIGNAL_IDS, 0.0)
     switches = np.zeros(len(TRAFFIC_SIGNAL_IDS))
     total = waiting = queue = arrivals = 0.0
     step, done = 0, False
     while not done:
-        state, reward, terminated, truncated, step_info = raw_env.step(action_fn(state, step))
+        action = np.asarray(action_fn(state, step), dtype=np.int64)
+        for name, reference in shadow_references.items():  # same state, before the step; never executed
+            agree[name] += np.asarray(reference(raw_env, step)) == action
+        state, reward, terminated, truncated, step_info = raw_env.step(action)
         total += reward
         for ts, r in step_info["reward_per_signal"].items():
             per_signal[ts] += r
@@ -145,6 +156,8 @@ def run_episode(raw_env, action_fn, scenario_seed: int) -> dict:
               "waiting_mean": waiting / step, "queue_mean": queue / step, "arrivals": arrivals,
               **{f"switches_{ts}": int(s) for ts, s in zip(TRAFFIC_SIGNAL_IDS, switches)},
               "pulse_offset": int(info["pulse_offset"]), "steps": step, "seconds": time.perf_counter() - t0}
+    for name, counts in agree.items():
+        record |= {f"agree_{name}_{ts}": float(c / step) for ts, c in zip(TRAFFIC_SIGNAL_IDS, counts)}
     return record
 
 
@@ -173,6 +186,9 @@ def summarize(episodes: list[dict], names: list[str], scenarios: list[int], thre
         for extra in ("waiting_mean", "queue_mean", "arrivals"):
             entry[extra] = float(np.mean([e[extra] for e in rows]))
         entry["switches_mean"] = {ts: float(np.mean([e[f"switches_{ts}"] for e in rows])) for ts in TRAFFIC_SIGNAL_IDS}
+        agree_keys = sorted(k for k in rows[0] if k.startswith("agree_"))
+        if agree_keys:
+            entry["agreement_mean"] = {k[len("agree_"):]: float(np.mean([e[k] for e in rows])) for k in agree_keys}
         summary[name] = entry
     return summary
 
@@ -236,11 +252,12 @@ def save_results(output: Path, record: dict, episodes: list[dict], summary: dict
     fields = ["policy", "kind", "seed_label", "scenario_seed", "reward", *[f"reward_{ts}" for ts in TRAFFIC_SIGNAL_IDS],
               "waiting_mean", "queue_mean", "arrivals", *[f"switches_{ts}" for ts in TRAFFIC_SIGNAL_IDS],
               "pulse_offset", "steps", "seconds"]
+    fields += sorted({k for e in episodes for k in e if k.startswith("agree_")})
     with output.with_suffix(".csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for e in episodes:
-            writer.writerow({k: e[k] for k in fields})
+            writer.writerow({k: e.get(k) for k in fields})
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -251,6 +268,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--confirm-held-out", action="store_true", help="required for --split test / ood")
     parser.add_argument("--compare", action="append", default=[], help="A:B[:METRIC], METRIC in total, A0..D0")
     parser.add_argument("--level", type=float, default=0.95, help="CI level (the addendum's corrected one: 1 - 0.05/6)")
+    parser.add_argument("--reference-agreement", action="store_true",
+                        help="record, per step, whether each reference would have chosen the same action")
     parser.add_argument("--catastrophic-threshold", type=float, default=CATASTROPHIC_THRESHOLD)
     parser.add_argument("--output", type=Path, required=True, help="output path without extension")
     args = parser.parse_args(argv)
@@ -271,12 +290,17 @@ def main(argv: list[str] | None = None) -> None:
 
     scaled_env = ScaledCorridorEnvironment()  # one simulation; every episode starts from its own reset(seed)
     raw_env = scaled_env.env
+    shadow = {}
+    if args.reference_agreement:
+        from scripts.v2.corridor_policies import REFERENCE_POLICIES, make_reference_policy
+
+        shadow = {name: make_reference_policy(name) for name in REFERENCE_POLICIES}
     episodes = []
     try:
         for policy in args.policy:
             for label, action_fn in build_action_functions(policy, scaled_env):
                 for scenario in scenarios:
-                    record = run_episode(raw_env, action_fn, scenario)
+                    record = run_episode(raw_env, action_fn, scenario, shadow)
                     record.update({"policy": policy.name, "kind": policy.kind, "seed_label": label,
                                    "scenario_seed": scenario})
                     episodes.append(record)
@@ -289,6 +313,7 @@ def main(argv: list[str] | None = None) -> None:
     comparisons = [compare(summary, a, b, metric, args.level) for a, b, metric in pairs]
     print_report(summary, comparisons, scenarios)
     record = {"split": args.split, "scenarios": scenarios, "level": args.level,
+              "reference_agreement": args.reference_agreement,
               "catastrophic_threshold": args.catastrophic_threshold,
               "policies": [{"name": p.name, "kind": p.kind, "reference": p.reference,
                             "checkpoints": [c.as_posix() for c in p.checkpoints]} for p in args.policy]}
