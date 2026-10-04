@@ -560,3 +560,55 @@ entre las 10 semillas del brazo**. La razón frente al RL directo se calcula en 
 #### Lo que no se hizo
 
 No se cambió nada del sueño, del dataset ni de las reglas. El RL directo y OOD son la etapa 3.
+
+## 12. Enmienda del 4 de octubre de 2026, ESCRITA DESPUÉS de ver los resultados en test de la etapa 2
+
+Esta sección se escribió **después de conocer los resultados en test de la etapa 2** (sección
+11.4), por decisión del autor, y antes de lanzar la etapa 3 (ningún entrenamiento ni evaluación del
+RL directo existía al escribirla). No reescribe ninguna regla anterior: amplía el plan y lo dice.
+
+### 12.0 Qué cambia y qué no
+
+1. **P1 queda registrado tal como salió.** IC de Welch al 99.17% [−34,707.5, +7,052.2], que
+   incluye 0, así que por la regla de la sección 5.2 **se adopta la LSTM**. La regla no se
+   reescribe. P4–P6 siguen siendo las del brazo adoptado (LSTM), ya evaluadas.
+2. **Ampliación posterior a test: P2 y P3 comparan el RL directo con los DOS brazos del sueño**,
+   no solo con el adoptado:
+
+   | # | Comparación | Métrica |
+   |---|---|---|
+   | P1 | `sueno_lstm` − `sueno_transformer` | total |
+   | P2a | `sueno_lstm` − `directo_10k` | total |
+   | P2b | `sueno_transformer` − `directo_10k` | total |
+   | P3a | `sueno_lstm` − `directo_30k` | total |
+   | P3b | `sueno_transformer` − `directo_30k` | total |
+   | P4 | `sueno_lstm` − `espera_mas_larga` | total |
+   | P5 | `sueno_lstm` − `espera_mas_larga` | B0 |
+   | P6 | `sueno_lstm` − `min_verde_y_cambiar` | C0 |
+
+   **8 comparaciones planificadas → Bonferroni α' = 0.05 / 8 = 0.00625; IC al 99.375%.** Fijado
+   aquí, antes de evaluar. Se aplica a las 8, también a P1 y P4–P6, que ya se evaluaron con
+   α' = 0.00833. Con el nivel nuevo ninguna conclusión de 11.4 cambia (recalculado con los mismos
+   datos):
+
+   | # | p por semilla | IC al 99.375% |
+   |---|---|---|
+   | P1 | 0.053 | [−35,831.4, +8,176.1] |
+   | P4 | 0.040 | [−36,904.3, +7,127.3] |
+   | P5 | 0.028 | [−5,037.4, +758.5] |
+   | P6 | 0.245 | [−19,513.9, +9,379.3] |
+
+   Los cuatro IC siguen incluyendo 0.
+3. **Test principal: Welch sobre las medias por semilla** (10 frente a 10; t de una muestra frente
+   a una referencia determinista). La t pareada y el Wilcoxon por escenario se reportan solo como
+   **secundarios**, marcados como **pseudorreplicación respecto del método**: sus unidades son los
+   escenarios evaluados por las mismas 10 políticas, no entrenamientos independientes.
+4. **OOD (23000–23029) NO se evalúa en la etapa 3.** Queda reservado para la comparación final.
+   Esto reemplaza la sección 5.3 en cuanto a cuándo se corre.
+5. **Cualquier rediseño del sueño (v2.1) se evaluará en semillas nuevas**, nunca en las de test
+   (22000–22023) ni en OOD (23000–23029).
+6. Etapa 3: los 20 entrenamientos del RL directo (10,000 y 30,000 pasos, semillas 0–9, escenarios
+   de entrenamiento desde 30000, selección en validación 21000–21004) y su evaluación **solo en
+   test**, una vez. El sueño y las 5 referencias **no se reevalúan**: sus episodios de test son los
+   de `test_stage2.json` (episodios deterministas por escenario, mismas 24 semillas) y se combinan
+   con los del RL directo para P2–P3.
