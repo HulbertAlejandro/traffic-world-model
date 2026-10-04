@@ -19,6 +19,9 @@ from environments.four_intersections import TRAFFIC_SIGNAL_IDS
 from scripts.v2.validate_corridor_demand import _Topology, make_policy
 
 COLLECTION_POLICIES = ("aleatoria", "fijo_2_3", "cola_mas_larga")
+# Non-learned references of the control phase (docs/v2/ADDENDUM_CONTROL.md, section 1): the
+# validator's own policies, through the same keep/switch adapter as the collection policies.
+REFERENCE_POLICIES = ("fijo_2_3", "min_verde_y_cambiar", "cola_mas_larga", "max_presion", "espera_mas_larga")
 
 
 def _from_validator(name: str):
@@ -49,3 +52,10 @@ def make_collection_policy(name: str, episode_seed: int):
     if name in ("fijo_2_3", "cola_mas_larga"):
         return _from_validator(name)
     raise ValueError(f"unknown collection policy {name!r}; expected one of {COLLECTION_POLICIES}")
+
+
+def make_reference_policy(name: str):
+    """One of the five control-phase references; deterministic, so the same object serves every episode."""
+    if name not in REFERENCE_POLICIES:
+        raise ValueError(f"unknown reference policy {name!r}; expected one of {REFERENCE_POLICIES}")
+    return _from_validator(name)
