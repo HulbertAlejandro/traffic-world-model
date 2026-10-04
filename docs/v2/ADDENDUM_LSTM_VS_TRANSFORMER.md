@@ -290,3 +290,16 @@ Tres comparaciones por pares, sin emparejar por semilla (como en la sección 4):
 - Ninguna corrida se repite ni se descarta por su resultado. Si alguna llega al tope de 300 épocas,
   se reporta. Si el entrenamiento se interrumpe, se reanuda sin reentrenar lo que ya tenga
   `evaluation.json`, y se reporta.
+
+### 9.6 Enmienda: alcance del criterio global (4 de octubre de 2026)
+
+**Escrita mientras se entrenaban los TSMixer, antes de ver ningún resultado de ellos y antes de
+correr el análisis de las tres arquitecturas** (ningún TSMixer había terminado; no existía
+`analysis_three_architectures.json`).
+
+- En 9.3, "se adopta como modelo temporal oficial de la v2" se lee como **"gana la comparación de
+  predicción"**.
+- **La arquitectura oficial de la v2 no se decide con este experimento.** Se decide con el
+  resultado de la fase de control real, entre las arquitecturas que avancen según 9.4.
+- Lo demás no cambia: los IC del 98.33%, el criterio por pares, el criterio global (ahora con este
+  alcance) y la regla de avance.

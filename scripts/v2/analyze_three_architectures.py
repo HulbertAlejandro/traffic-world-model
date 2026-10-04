@@ -11,7 +11,8 @@ randomness with seed N of another):
 - Percentile bootstrap CI at the same level: 10,000 resamples, numpy seed 0, each arm drawn separately.
 - Pair decision: both corrected CIs exclude 0 on the same side -> the lower-error architecture wins the
   pair; otherwise "sin evidencia suficiente".
-- Overall: an architecture is adopted as v2's official temporal model only if it wins BOTH of its pairs.
+- Overall: an architecture wins the prediction comparison only if it wins BOTH of its pairs. It is not
+  v2's official model: that is decided by the real control phase (amendment, section 9.6).
 - Advance to the control phase (section 9.4): every architecture that loses none of its pairs. All three
   advance if no pair is resolved. This decides who is tested in control, not which one is official.
 
