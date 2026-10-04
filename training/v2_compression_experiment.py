@@ -150,7 +150,15 @@ def reconstruction_report(ae: Autoencoder, val_npz: Path) -> dict:
 
 
 # --------------------------------------------------------------------------- temporal model (both branches)
-def _architecture_hparams(architecture: str, protocol: LSTMProtocol) -> dict:
+def _architecture_hparams(architecture: str, protocol: LSTMProtocol, override: dict | None = None) -> dict:
+    """Phase 2 sizes by default. ``override`` replaces them (same keys only): the parameter-matched
+    LSTM vs Transformer comparison (docs/v2/ADDENDUM_LSTM_VS_TRANSFORMER.md) uses other sizes with
+    the same training protocol."""
+    if override is not None:
+        default = _architecture_hparams(architecture, protocol)
+        if set(override) != set(default):
+            raise ValueError(f"{architecture} hyperparameters must be exactly {sorted(default)}, got {sorted(override)}")
+        return dict(override)
     if architecture == "lstm":
         return {"hidden_dim": protocol.hidden_dim}
     if architecture == "transformer":
@@ -175,7 +183,8 @@ def build_temporal_model(hp: dict) -> nn.Module:
 
 
 def train_temporal_model(train_seq: Path, val_seq: Path, input_dim: int, seed: int, out_dir: Path,
-                         protocol: LSTMProtocol = LSTM_PROTOCOL, architecture: str = "lstm") -> dict:
+                         protocol: LSTMProtocol = LSTM_PROTOCOL, architecture: str = "lstm",
+                         architecture_hparams: dict | None = None) -> dict:
     """The single training path of both branches. ``input_dim`` is k (branch z) or 104 (raw)."""
     out_dir.mkdir(parents=True, exist_ok=True)
     v1_lstm._set_seeds(seed)
@@ -188,7 +197,7 @@ def train_temporal_model(train_seq: Path, val_seq: Path, input_dim: int, seed: i
     val_loader = DataLoader(LatentSequenceDataset(val_seq, protocol.sequence_length, protocol.action_dim),
                             batch_size=protocol.batch_size, shuffle=False)
     hparams = {"architecture": architecture, "latent_dim": input_dim, "action_dim": protocol.action_dim,
-               "sequence_length": protocol.sequence_length, **_architecture_hparams(architecture, protocol),
+               "sequence_length": protocol.sequence_length, **_architecture_hparams(architecture, protocol, architecture_hparams),
                "seed": seed, "protocol": asdict(protocol)}
     model = build_temporal_model(hparams)
     if protocol.optimizer != "adam":
@@ -215,7 +224,7 @@ def train_temporal_model(train_seq: Path, val_seq: Path, input_dim: int, seed: i
 
 def train_branch(branch: str, train_seq: Path, val_seq: Path, seed: int, out_dir: Path,
                  latent_dim: int | None = None, protocol: LSTMProtocol = LSTM_PROTOCOL,
-                 architecture: str = "lstm") -> dict:
+                 architecture: str = "lstm", architecture_hparams: dict | None = None) -> dict:
     """Entry point of each branch. The ONLY difference between branches is input_dim."""
     if branch == "z":
         if latent_dim is None:
@@ -227,7 +236,8 @@ def train_branch(branch: str, train_seq: Path, val_seq: Path, seed: int, out_dir
         input_dim = STATE_DIM
     else:
         raise ValueError(f"unknown branch {branch!r}")
-    return train_temporal_model(train_seq, val_seq, input_dim, seed, out_dir, protocol, architecture)
+    return train_temporal_model(train_seq, val_seq, input_dim, seed, out_dir, protocol, architecture,
+                                architecture_hparams)
 
 
 # --------------------------------------------------------------------------- evaluation

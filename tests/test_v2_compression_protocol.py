@@ -32,10 +32,11 @@ def test_both_branches_call_the_same_training_function_with_the_same_protocol(mo
         exp.train_branch("z", Path("t"), Path("v"), 3, tmp_path / "z", latent_dim=32, architecture=arch)
         exp.train_branch("raw", Path("t"), Path("v"), 3, tmp_path / "raw", architecture=arch)
         (z_args, z_kwargs), (raw_args, raw_kwargs) = calls
-        # (train_seq, val_seq, input_dim, seed, out_dir, protocol, architecture)
+        # (train_seq, val_seq, input_dim, seed, out_dir, protocol, architecture, architecture_hparams)
         assert z_args[2] == 32 and raw_args[2] == exp.STATE_DIM
         assert z_args[5] is raw_args[5] is exp.LSTM_PROTOCOL
         assert z_args[6] == raw_args[6] == arch
+        assert z_args[7] is raw_args[7] is None  # Phase 2 sizes
         assert z_args[0] == raw_args[0] and z_args[1] == raw_args[1] and z_args[3] == raw_args[3]
 
 
@@ -103,3 +104,10 @@ def test_tiny_real_runs_of_both_branches_record_identical_protocols(tmp_path, ar
     for branch in ("z", "raw"):
         model = exp.build_temporal_model(runs[branch])
         model.load_state_dict(torch.load(tmp_path / branch / "world_model_best.pt", weights_only=True))
+
+
+def test_architecture_hparams_override_needs_the_same_keys():
+    assert exp._architecture_hparams("lstm", exp.LSTM_PROTOCOL, {"hidden_dim": 137}) == {"hidden_dim": 137}
+    assert exp._architecture_hparams("lstm", exp.LSTM_PROTOCOL) == {"hidden_dim": 128}
+    with pytest.raises(ValueError):
+        exp._architecture_hparams("transformer", exp.LSTM_PROTOCOL, {"d_model": 80})
