@@ -612,3 +612,82 @@ RL directo existía al escribirla). No reescribe ninguna regla anterior: amplía
    test**, una vez. El sueño y las 5 referencias **no se reevalúan**: sus episodios de test son los
    de `test_stage2.json` (episodios deterministas por escenario, mismas 24 semillas) y se combinan
    con los del RL directo para P2–P3.
+
+### 12.1 Diagnóstico: fidelidad on-policy (descriptivo, no entrena nada)
+
+`scripts/v2/control_fidelity_onpolicy.py` → `docs/results/v2/control/fidelity_onpolicy_validation.json`.
+
+**Qué se hizo.**
+
+- Cada uno de los 20 controladores del sueño se corrió en SUMO real en las semillas de validación
+  21000–21005, registrando sus estados, acciones y recompensas.
+- Para cada ventana (39 por episodio), el modelo del mundo de la misma semilla y arquitectura se
+  sembró con la ventana real de 16 pasos y avanzó 7 pasos con **las acciones que el controlador
+  tomó de verdad**. Se usa el mismo `CorridorDreamEnvironment` en que entrenó PPO.
+- Se comparó el retorno imaginado (recortado, como lo vio PPO, y sin recortar) con el real.
+- Total: 2,340 ventanas por arquitectura. Bootstrap por escenario: 6 unidades, así que los IC son
+  orientativos.
+- **Control de reproducibilidad:** en 21000–21004, el retorno real de estas trayectorias coincide
+  con el mejor retorno de validación que registró la selección (`evaluations.npz`) en los 20
+  controladores (diferencia máxima 0.0008).
+
+**a) Pearson y sesgo (imaginado − real), media de los 10 controladores, recompensa recortada:**
+
+| | Pearson on-policy | Pearson con acciones del dataset (10.2) | Sesgo on-policy | Sesgo con acciones del dataset |
+|---|---|---|---|---|
+| LSTM | **0.433** [0.364, 0.563] | 0.871 | **+970.1** [+564.4, +1,334.5] | +6.2 |
+| Transformer | **0.667** [0.579, 0.709] | 0.897 | **+32.2** [+18.0, +44.9] | +25.0 |
+
+- Sin recortar, el resultado es prácticamente igual: LSTM 0.440 y +965.9; Transformer 0.667 y
+  +32.4.
+- **El recorte no es lo que oculta el costo:** las predicciones sin recortar ya son mucho más
+  suaves que la realidad.
+
+**b) Sesgo según la fase mantenida más larga entre los 4 semáforos, al empezar a imaginar**
+(pasos de control desde el último cambio real, `floor(elapsed_phase_time / 5 s)`):
+
+| Retención | LSTM: ventanas | LSTM: real medio | LSTM: sesgo | LSTM: imaginado > real | Transformer: ventanas | Transformer: real medio | Transformer: sesgo | Transformer: imaginado > real |
+|---|---|---|---|---|---|---|---|---|
+| 0–5 | 1,020 | −329.1 | +85.7 | 77% | 1,555 | −231.8 | +31.3 | 71% |
+| 6–10 | 318 | −658.9 | +345.9 | 84% | 400 | −235.3 | +28.2 | 65% |
+| 11–19 | 402 | −1,259.4 | +842.0 | 90% | 283 | −241.2 | +32.3 | 65% |
+| ≥ 20 | 600 | −3,465.0 | **+2,890.2** | 92% | 102 | −232.8 | +62.3 | 83% |
+
+Las ventanas con alguna retención de 20 o más, según en qué semáforo ocurre:
+
+| | LSTM | Transformer |
+|---|---|---|
+| A0 | 42 ventanas, sesgo +8,883 | 0 ventanas |
+| B0 | 146 ventanas, sesgo +1,833 | 54 ventanas, sesgo +73 |
+| C0 | 13 ventanas, sesgo +27,002 | 3 ventanas, sesgo +444 |
+| D0 | 468 ventanas, sesgo +2,505 | 55 ventanas, sesgo +44 |
+
+**Corrección a la premisa del pedido.** Retenciones de 20 pasos o más **sí existen** en el train,
+pero solo en B0 y D0:
+
+| Semáforo | Estados del train con retención ≥ 20 | Máximo |
+|---|---|---|
+| A0 | 1 | 20 pasos |
+| B0 | 191 | 44 pasos |
+| C0 | 0 | 16 pasos |
+| D0 | 224 | 54 pasos |
+
+Todos vienen de `cola_mas_larga`, que deja el verde a la arterial donde la transversal es ligera.
+Así que la LSTM se bloquea sobre todo en D0, donde el dataset **sí** tiene retenciones largas, pero
+de una política que las usaba cuando la transversal estaba casi vacía.
+
+**c) ¿Sesgo positivo justo con 20 o más pasos?** **Sí, en las dos arquitecturas**: LSTM +2,890
+(92% de las ventanas imaginan menos costo que el real) y Transformer +62 (83%).
+
+**Lectura descriptiva (no prueba causalidad):**
+
+- En los estados que visita su propio controlador, el modelo LSTM **subestima el costo de forma
+  creciente cuanto más tiempo lleva una fase mantenida**, y el costo real crece mucho más rápido
+  que el imaginado.
+- Esto es consistente con que PPO aprendió en el sueño a mantener fases, porque allí casi no
+  costaba.
+- El sesgo por retención está **confundido con la congestión**: las ventanas largas son también
+  las más congestionadas (real −3,465 frente a −329). Este diagnóstico no separa las dos cosas.
+- El Transformer visita pocos estados de retención larga, que en sus trayectorias son benignos
+  (real −233). Su sesgo crece algo con la retención, pero es chico.
+- No se cambió nada del sueño ni del dataset.

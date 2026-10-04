@@ -36,19 +36,22 @@ def available_gb() -> float:
     return psutil.virtual_memory().available / 2**30
 
 
-def run(arm: str, seed: int) -> tuple[str, int, int, float]:
-    out_dir = CONTROL_DIR / f"{arm}_s{seed}"
+def run(arm: str, seed: int, name: str | None = None, extra: tuple[str, ...] = ()) -> tuple[str, int, int, float]:
+    """One training in its own process. ``name`` (default ``arm``) names the folder <name>_s<seed>;
+    ``extra`` adds arguments (stage 3: --total-timesteps)."""
+    name = name or arm
+    out_dir = CONTROL_DIR / f"{name}_s{seed}"
     if (out_dir / "run_info.json").exists():
-        return arm, seed, 0, 0.0
+        return name, seed, 0, 0.0
     out_dir.mkdir(parents=True, exist_ok=True)
     cmd = [sys.executable, str(ROOT_DIR / "training" / "train_controller_v2.py"), "--arm", arm, "--seed", str(seed),
-           "--output-dir", str(out_dir), "--overwrite"]
+           "--output-dir", str(out_dir), "--overwrite", *extra]
     env = os.environ | {"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"}
-    print(f"start {arm} s{seed} (available {available_gb():.2f} GB)", flush=True)
+    print(f"start {name} s{seed} (available {available_gb():.2f} GB)", flush=True)
     t0 = time.perf_counter()
     with (out_dir / "train.log").open("w", encoding="utf-8") as log:
         code = subprocess.run(cmd, cwd=ROOT_DIR, stdout=log, stderr=subprocess.STDOUT, env=env).returncode
-    return arm, seed, code, time.perf_counter() - t0
+    return name, seed, code, time.perf_counter() - t0
 
 
 def main() -> None:
