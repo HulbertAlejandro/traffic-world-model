@@ -197,6 +197,29 @@ evaluación única):
   consumió el entrenamiento del RL directo).
 - Pesos en `models/checkpoints/v2/control/` (no versionados; sus `.json` sí).
 
+**Hallazgo (5 de octubre): desfase de la ventana de acciones en el Dream Environment. Efecto aún sin
+medir.**
+
+- **El defecto.** `DreamEnvironment.step` (v1, `environments/dream_environment.py`) y
+  `CorridorDreamEnvironment.step` (v2) avanzan la ventana de acciones con la ventana anterior a
+  insertar la acción elegida. Así, la acción aplicada en un estado nunca queda emparejada con él
+  en la historia: desde el tercer paso imaginado (el segundo si la acción difiere de la registrada)
+  cada estado lleva la acción del paso anterior.
+- El Experimento 1 (`rollout_episode`) y el entrenamiento de los modelos del mundo **no** tienen
+  el defecto.
+- **(a) A qué afecta:** al sueño de la v1 y de la v2, y por lo tanto a los PPO del sueño de la v1
+  y a los 20 PPO del sueño de la Fase 3 de la v2, todos entrenados con él.
+- **(b) Los diagnósticos de fidelidad de la v2** (`ADDENDUM_CONTROL.md`, secciones 10.2 y 12.1)
+  se midieron con el sueño desalineado. La explicación del "punto ciego" (el sesgo que crece con
+  las fases largas) **queda sin confirmar**.
+- **(c) El efecto puede ser mixto:** en 3 ventanas de prueba (LSTM s0, episodio 21000), el sueño
+  con el defecto quedó más cerca de lo real en una.
+- **(d) Los resultados publicados no cambian; solo se anotan.**
+- `CorridorDreamEnvironment(window_alignment=...)`: `"legacy"` es el valor por defecto y reproduce
+  exactamente lo publicado; `"aligned"` coincide con `rollout_episode`. La v1 no se modificó;
+  `tests/test_dream_window_alignment.py` documenta su desfase con un test `xfail` estricto.
+- El planificador de la v2.1-A (`ADDENDUM_PLANIFICACION.md`) usa la alineación correcta.
+
 ## Decisiones de diseño ya tomadas
 
 - El estado (`TrafficState`) tiene **26 dimensiones**: 4 carriles × 5 variables
@@ -355,7 +378,7 @@ scripts/        datos: collect_dataset.py, split_dataset.py, merge_dataset.py, n
                 control: evaluate_controller.py, evaluate_controller_sumo.py,
                   evaluate_direct_vs_dream.py, evaluate_final_comparison.py,
                   evaluate_multiseed_statistical.py, analyze_controller_actions.py
-tests/          23 archivos, 136 tests (pytest -v)
+tests/          25 archivos, 158 tests (pytest -v; 1 xfail estricto documenta el desfase del sueño de la v1)
 ver_controlador.py (demo del PPO del sueño oficial en la GUI de SUMO, escenario nuevo 7025),
 ver_tiempo_fijo.py (el mismo demo con la política de tiempo fijo, para comparar a simple vista),
 CLAUDE.md, PROJECT_STATUS.md, TODO.md, README.md, pytest.ini, requirements.txt, .gitignore, LICENSE

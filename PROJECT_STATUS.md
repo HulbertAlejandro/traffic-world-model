@@ -1,8 +1,9 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `3b33b7c` (rama `v2/four-intersections`), 136/136 tests en verde,
+Última verificación: commit `3cda7dc` (rama `v2/four-intersections`), 157 passed y 1 xfail esperado,
 incluidos los de SUMO en vivo. **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
-intersecciones), cerrada el 5 de octubre**; ver la primera sección de abajo. Lo que sigue en esta
+intersecciones), cerrada el 5 de octubre**, y un **hallazgo posterior: un desfase en el Dream
+Environment de la v1 y la v2, con efecto aún sin medir**; ver las dos primeras secciones de abajo. Lo que sigue en esta
 introducción es el estado de la v1. **Lo más reciente: la extensión
 del PPO a 10 semillas por controlador (30 de septiembre; sección siguiente)**, que actualiza el
 resultado de control. Antes, una auditoría técnica del repositorio (26 de septiembre),
@@ -42,6 +43,52 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
   el resultado oficial (ver el final del punto 5).
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
+
+## ⚠️ Hallazgo (5 de octubre): desfase de la ventana de acciones en el Dream Environment, v1 y v2 — efecto aún sin medir
+
+**Qué es.** `DreamEnvironment.step` (v1) y `CorridorDreamEnvironment.step` (v2) avanzan la ventana
+de acciones con `self._window_actions[1:]`, la ventana **anterior** a insertar la acción elegida,
+en vez de con la ventana que ya la contiene. La acción aplicada en un estado nunca queda emparejada
+con ese estado en la historia: desde el tercer paso imaginado (el segundo si la acción difiere de la
+registrada), cada estado lleva la acción del paso anterior.
+
+El Experimento 1 (`rollout_episode`) y el entrenamiento de los modelos del mundo **no** tienen el
+defecto: ahí las acciones se alinean por índice de tiempo.
+
+**Cómo se encontró.** El test del planificador de la v2.1-A, que compara sus retornos imaginados con
+los de `control_fidelity.py`, no coincidía. El planificador sí coincide con `rollout_episode`.
+
+**Comprobación** con la LSTM de la v2, s0, en el episodio de validación 21000, con las acciones
+registradas:
+
+| Inicio | `rollout_episode` | Sueño con el defecto | Real |
+|---|---|---|---|
+| 0 | −546.22 | −628.44 | −600 |
+| 10 | −1,444.01 | −1,318.26 | −1,661 |
+| 20 | −537.58 | −552.31 | −560 |
+
+En la v1 (3 episodios de validación, `tests/test_dream_window_alignment.py`), el sueño reproduce
+exactamente el desplazamiento "legacy" y difiere de `rollout_episode`. En 6 episodios, 226 ventanas
+difieren en más de 0.01, con una diferencia máxima de 244.9.
+
+**Puntos:**
+
+- **(a) Afecta al sueño de la v1 y de la v2**, y por lo tanto a los PPO del sueño oficiales de la
+  v1 (y sus semillas) y a los 20 PPO del sueño de la Fase 3, todos entrenados con él.
+- **(b) Los diagnósticos de fidelidad de la v2** (`ADDENDUM_CONTROL.md`, 10.2 y 12.1) se midieron
+  con el sueño desalineado. La explicación del "punto ciego" (el modelo subestima el costo cuanto
+  más tiempo lleva una fase mantenida) **queda sin confirmar**.
+- **(c) El efecto puede ser mixto:** en las 3 ventanas de arriba, el sueño con el defecto quedó más
+  cerca de lo real en una (inicio 0).
+- **(d) Los resultados publicados no cambian; solo se anotan.** No se reentrenó ni se reevaluó nada.
+
+**Qué se hizo, sin cambiar nada de la v1 ni ningún controlador entrenado:**
+
+- `CorridorDreamEnvironment` tiene ahora `window_alignment`. `"legacy"` es el valor por defecto y
+  reproduce lo publicado con tolerancia 1e-9 (test). `"aligned"` coincide con `rollout_episode`
+  (test).
+- La v1 queda documentada con un test `xfail` estricto.
+- La medición barata con `"aligned"` está en `ADDENDUM_PLANIFICACION.md`, sección 12.
 
 ## ✅ v2, Fase 3: control en el corredor de 4 intersecciones (4–5 de octubre) — cerrada
 
