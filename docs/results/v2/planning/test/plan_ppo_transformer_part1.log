@@ -1,0 +1,18 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 10ms, vehicles TOT 0 ACT 0 BUF 0)                     
+plan_ppo_transformer   transformer_s5: media -1151.4
+Warning: Vehicle 'C0_south_straight_flow_s0.1' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=103.00.
+Warning: Vehicle 'C0_south_straight_flow_s0.0' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=73.00.
+plan_ppo_transformer   transformer_s6: media -1140.5
+plan_ppo_transformer   transformer_s7: media -1135.5
+Warning: Vehicle 'C0_south_straight_flow_s2.0' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=283.00.
+Warning: Vehicle 'D0_south_straight_flow_s2.0' performs emergency braking on lane ':D0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=278.00.
+plan_ppo_transformer   transformer_s8: media -1243.2
+Warning: Vehicle 'C0_south_straight_flow_s2.0' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=283.00.
+plan_ppo_transformer   transformer_s9: media -1155.8
+
+Escenarios: 48 (25000..25047)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_ppo_transformer   |    5 |   -1165.3 |   -320.4 |   -169.7 |   -515.2 |   -160.0 |  -2494.0 |        0 | [-1151.4, -1140.5, -1135.5, -1243.2, -1155.8]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\test\plan_ppo_transformer_part1.json y .csv

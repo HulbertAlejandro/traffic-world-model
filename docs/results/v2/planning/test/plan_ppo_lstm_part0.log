@@ -1,0 +1,15 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 4ms, vehicles TOT 0 ACT 0 BUF 0)                      
+plan_ppo_lstm          lstm_s0: media -1387.4
+plan_ppo_lstm          lstm_s1: media -2059.8
+plan_ppo_lstm          lstm_s2: media -1465.7
+Warning: Vehicle 'C0_south_straight_flow_s2.5' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=283.00.
+plan_ppo_lstm          lstm_s3: media -1546.5
+Warning: Vehicle 'C0_north_straight_flow_s2.0' performs emergency braking on lane ':C0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=298.00.
+plan_ppo_lstm          lstm_s4: media -1400.6
+
+Escenarios: 48 (25000..25047)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_ppo_lstm          |    5 |   -1572.0 |   -374.3 |   -268.9 |   -545.9 |   -382.8 |  -5874.0 |        4 | [-1387.4, -2059.8, -1465.7, -1546.5, -1400.6]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\test\plan_ppo_lstm_part0.json y .csv

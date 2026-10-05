@@ -1,0 +1,18 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 9ms, vehicles TOT 0 ACT 0 BUF 0)                      
+fijo_2_3               deterministic: media -1630.5
+Warning: Vehicle 'C0_north_straight_flow_s0.1' performs emergency braking on lane ':C0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=103.00.
+min_verde_y_cambiar    deterministic: media -1313.8
+cola_mas_larga         deterministic: media -1218.7
+max_presion            deterministic: media -7053.0
+espera_mas_larga       deterministic: media -1191.8
+
+Escenarios: 48 (25000..25047)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+fijo_2_3               |    1 |   -1630.5 |   -377.1 |   -219.7 |   -857.0 |   -176.8 |  -2779.0 |        0 | [-1630.5]
+min_verde_y_cambiar    |    1 |   -1313.8 |   -460.1 |   -252.3 |   -316.5 |   -285.0 |  -2216.0 |        0 | [-1313.8]
+cola_mas_larga         |    1 |   -1218.7 |   -356.3 |   -100.2 |   -634.7 |   -127.5 |  -2228.0 |        0 | [-1218.7]
+max_presion            |    1 |   -7053.0 |  -1616.6 |  -2145.7 |  -1186.0 |  -2104.6 | -19917.0 |       46 | [-7053.0]
+espera_mas_larga       |    1 |   -1191.8 |   -336.9 |    -98.3 |   -645.0 |   -111.6 |  -2913.0 |        0 | [-1191.8]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\test\references.json y .csv

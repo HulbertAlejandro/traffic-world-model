@@ -611,3 +611,147 @@ P*_lstm = `plan_ppo_lstm` H3 y P*_transformer = `plan_ppo_transformer` H3.
 
 Hasta este momento no se ha simulado nada en 25000–25047. Lo siguiente es la evaluación única de
 la sección 17 (`run_planning_test.py`, con `--confirm-held-out`).
+
+## 18. Resultados de la etapa 2 en el test nuevo (escrito después de la evaluación única)
+
+**Ejecución.**
+
+- 17 trabajos con 4 procesos, sin fallos ni interrupciones, en **1 h 44 min** (12:25:50–14:10:15
+  del 6 de octubre). El equipo estuvo enchufado todo el tiempo.
+- Una sola evaluación por controlador en 25000–25047: 4,080 episodios.
+- Resultados por episodio en `docs/results/v2/planning/test/`; el análisis
+  (`scripts/v2/analyze_planning_test.py`, escrito antes de simular) en
+  `docs/results/v2/planning/test_analysis.json`.
+
+**Retorno en test** (48 escenarios; en los aprendidos, media de las 10 medias por réplica o
+semilla; catastróficos con < −3,700):
+
+| Política | Media | Mediana | A0 | B0 | C0 | D0 | Catastróficos | Episodios bloqueados | Controladores bloqueados | Cambios A0/B0/C0/D0 | ms por decisión |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `plan_solo_lstm` | −6,084.4 | −3,232.5 | −933.7 | −2,905.1 | −672.7 | −1,572.8 | 206/480 | 57/480 | **1/10 (s7)** | 21.9 / 7.2 / 27.2 / 10.3 | 10.2 |
+| **`plan_ppo_lstm`** (P*) | **−1,625.0** | −1,438.0 | −399.3 | −360.6 | −554.7 | −310.4 | **14/480** | 0/480 | 0/10 | 23.5 / 19.7 / 26.8 / 20.5 | 12.4 |
+| `plan_solo_transformer` | −1,457.0 | −1,333.5 | −351.2 | −327.4 | −559.1 | −219.3 | 5/480 | 3/480 | 0/10 | 22.5 / 10.9 / 24.8 / 11.4 | 11.3 |
+| **`plan_ppo_transformer`** (P*) | **−1,165.4** | **−1,157.5** | −327.0 | −168.1 | −517.7 | −152.6 | **0/480** | 0/480 | 0/10 | 23.6 / 19.0 / 25.7 / 19.2 | 13.5 |
+| `sueno_lstm` (Fase 3) | −17,256.5 | −3,012.0 | −4,128.7 | −2,776.9 | −5,787.9 | −4,562.9 | 214/480 | 126/480 | 1/10 (s1) | 19.6 / 17.1 / 21.8 / 14.7 | — |
+| `sueno_transformer` (Fase 3) | −3,473.8 | −1,592.0 | −911.0 | −509.2 | −1,622.3 | −431.3 | 36/480 | 7/480 | 0/10 | 20.9 / 18.3 / 23.8 / 18.4 | — |
+| `directo_10k` | −5,736.8 | −2,990.5 | −1,756.5 | −1,269.6 | −1,783.2 | −927.5 | 179/480 | 7/480 | 0/10 | 20.4 / 16.7 / 21.0 / 17.0 | — |
+| `directo_30k` | −1,752.3 | −1,729.0 | −508.9 | −290.1 | −688.4 | −265.0 | 1/480 | 0/480 | 0/10 | 21.1 / 17.3 / 23.5 / 18.9 | — |
+| `fijo_2_3` | −1,630.5 | −1,559.5 | −377.1 | −219.7 | −857.0 | −176.8 | 0/48 | 0/48 | — | 23 / 23 / 23 / 23 | — |
+| `min_verde_y_cambiar` | −1,313.8 | −1,317.0 | −460.1 | −252.3 | **−316.5** | −285.0 | 0/48 | 0/48 | — | 29 / 29 / 29 / 29 | — |
+| `cola_mas_larga` | −1,218.7 | −1,168.5 | −356.3 | **−100.2** | −634.7 | −127.5 | 0/48 | 2/48 | — | 19.4 / 8.1 / 20.8 / 8.8 | — |
+| `max_presion` | −7,053.0 | −6,175.5 | −1,616.6 | −2,145.7 | −1,186.0 | −2,104.6 | 46/48 | 11/48 | — | 13.8 / 4.3 / 16.9 / 4.7 | — |
+| `espera_mas_larga` | −1,191.8 | −1,145.5 | −336.9 | −98.3 | −645.0 | −111.6 | 0/48 | 2/48 | — | 19.5 / 8.2 / 20.9 / 8.9 | — |
+
+**Medias por réplica o semilla (s0–s9):**
+
+| Política | Medias |
+|---|---|
+| `plan_ppo_lstm` | −1,387, −2,060, −1,466, −1,547, −1,401, −1,553, −1,676, −1,331, −1,318, −2,512 |
+| `plan_ppo_transformer` | −1,175, −1,201, −1,192, −1,072, −1,188, −1,151, −1,141, −1,136, −1,243, −1,156 |
+| `plan_solo_lstm` | −2,301, −3,049, −6,629, −7,087, −4,565, −8,376, −3,840, **−15,737**, −4,646, −4,613 |
+| `plan_solo_transformer` | −1,497, −1,381, −1,863, −1,379, −1,862, −1,109, −1,609, −1,312, −1,314, −1,243 |
+| `sueno_lstm` | −27,314, −23,883, −4,952, −4,859, −1,915, **−76,630**, −15,979, −5,825, −6,032, −5,175 |
+| `sueno_transformer` | −1,522, **−18,480**, −1,411, −1,445, −1,340, −1,975, −3,818, −1,399, −1,676, −1,672 |
+| `directo_10k` | −4,255, −5,358, −2,818, −3,678, −4,628, −5,638, **−19,011**, −3,673, −4,827, −3,481 |
+| `directo_30k` | −1,830, −1,550, −1,870, −1,575, −1,766, −1,922, −1,615, −1,772, −1,910, −1,713 |
+
+**Qué semilla domina la varianza** (fracción de la suma de desvíos al cuadrado de las medias por
+semilla):
+
+| Política | Semilla | Fracción |
+|---|---|---|
+| `plan_solo_lstm` | s7 | 69% |
+| `plan_ppo_lstm` | s9 | 60% |
+| `plan_solo_transformer` | s2 | 29% |
+| `plan_ppo_transformer` | s3 | 45%, con un rango total de solo −1,072 a −1,243 |
+| `sueno_lstm` | s5 | 76% |
+| `sueno_transformer` | s1 | 88% |
+| `directo_10k` | s6 | 87% |
+| `directo_30k` | s1 | 25% |
+
+**Un planificador queda bloqueado:** `plan_solo_lstm`, réplica **s7**, con **2.8** cambios por
+episodio en **D0**. Su media es −15,737 y explica el 69% de la varianza de su brazo. Los demás
+`plan_solo_lstm` tienen un mínimo de 3.9–7.5 cambios por episodio en algún semáforo. A nivel de
+episodio: `plan_solo_lstm` 57/480 y `plan_solo_transformer` 3/480. Ningún `plan_ppo` se bloquea.
+
+### Las 12 comparaciones planificadas
+
+α' = 0.05/12 = 0.004167, IC al 99.583%. Test principal: Welch sobre las 10 medias (t de una
+muestra contra una regla). La t pareada y el Wilcoxon por escenario son secundarios
+(pseudorreplicación).
+
+| # | Comparación | Diferencia | p principal | IC al 99.583% | ¿Significativo? | t pareada | Wilcoxon | Gana |
+|---|---|---|---|---|---|---|---|---|
+| Q1_lstm | `plan_ppo_lstm` − `sueno_lstm` | +15,631.5 | 0.057 | [−11,635.3, +42,898.2] | no | 1.1e-15 | 7.1e-15 | 48/48 |
+| Q2_lstm | `plan_ppo_lstm` − `directo_30k` | +127.4 | 0.34 | [−329.8, +584.5] | no | 0.0060 | 1.3e-6 | 42/48 |
+| Q3_lstm | `plan_ppo_lstm` − `directo_10k` | +4,111.8 | 0.023 | [−1,598.7, +9,822.3] | no | 1.3e-10 | 7.1e-15 | 48/48 |
+| Q4_lstm | `plan_ppo_lstm` − `espera_mas_larga` (total) | −433.2 | 0.0057 | [−891.1, +24.7] | no | 2.6e-8 | 1.4e-7 | 7/48 |
+| Q5_lstm | `plan_ppo_lstm` − `cola_mas_larga` (B0) | −260.4 | 0.012 | [−574.3, +53.5] | no | 1.1e-7 | 3.2e-12 | 3/48 |
+| Q6_lstm | `plan_ppo_lstm` − `min_verde_y_cambiar` (C0) | **−238.2** | **2.9e-8** | [−289.9, −186.5] | **sí, en contra** | 1.6e-17 | 2.2e-9 | 1/48 |
+| Q1_transformer | `plan_ppo_transformer` − `sueno_transformer` | +2,308.4 | 0.20 | [−4,102.1, +8,718.9] | no | 8.6e-5 | 7.1e-15 | 48/48 |
+| Q2_transformer | `plan_ppo_transformer` − `directo_30k` | **+587.0** | **5.4e-8** | [**+423.3, +750.6**] | **sí, a favor** | 2.2e-30 | 7.1e-15 | 48/48 |
+| Q3_transformer | `plan_ppo_transformer` − `directo_10k` | +4,571.4 | 0.014 | [−1,143.4, +10,286.2] | no | 8.4e-12 | 7.1e-15 | 48/48 |
+| Q4_transformer | `plan_ppo_transformer` − `espera_mas_larga` (total) | +26.4 | 0.10 | [−29.0, +81.8] | no | 0.57 | 0.35 | 16/48 |
+| Q5_transformer | `plan_ppo_transformer` − `cola_mas_larga` (B0) | **−67.9** | **0.00043** | [−115.8, −20.1] | **sí, en contra** | 1.8e-7 | 2.4e-7 | 4/48 |
+| Q6_transformer | `plan_ppo_transformer` − `min_verde_y_cambiar` (C0) | **−201.2** | **8.9e-11** | [−224.0, −178.4] | **sí, en contra** | 5.3e-14 | 1.5e-12 | 1/48 |
+
+### Interacciones reales por réplica o semilla (sección 13)
+
+| | Sin compartir | Compartido |
+|---|---|---|
+| Planificador | 21,240 | 6,552 |
+| Sueño | 12,600 | 3,960 |
+| Directo 10k | 13,240 | 13,240 |
+| Directo 30k | 39,208 | 39,208 |
+
+- Frente al **directo de 30k**, el planificador usa **1.8x menos sin compartir y 6.0x menos
+  compartiendo**.
+- Frente al de 10k, sin compartir el planificador cuesta **1.6x más**, y compartiendo, 2.0x menos.
+
+### Parecido con las referencias, en los mismos estados
+
+Fracción de pasos con la misma decisión (A0 / B0 / C0 / D0; 0.5 es azar):
+
+| Referencia | `plan_ppo_lstm` | `plan_ppo_transformer` | `plan_solo_lstm` | `plan_solo_transformer` | `directo_30k` |
+|---|---|---|---|---|---|
+| `min_verde_y_cambiar` | 0.69 / 0.60 / **0.77** / 0.62 | 0.67 / 0.56 / **0.72** / 0.58 | 0.69 / 0.22 / **0.85** / 0.33 | 0.69 / 0.34 / 0.72 / 0.35 | 0.57 / 0.49 / 0.66 / 0.53 |
+| `espera_mas_larga` | 0.61 / 0.54 / 0.59 / 0.53 | 0.63 / 0.61 / 0.64 / 0.59 | 0.54 / 0.52 / 0.55 / 0.56 | 0.59 / 0.67 / 0.64 / 0.68 | 0.63 / 0.63 / 0.61 / 0.63 |
+| `max_presion` | 0.61 / 0.66 / 0.54 / 0.64 | 0.58 / 0.62 / 0.57 / 0.65 | 0.61 / **0.79** / 0.53 / **0.77** | 0.62 / **0.78** / 0.59 / **0.79** | 0.63 / 0.69 / 0.55 / 0.67 |
+
+Las demás combinaciones están en `test_analysis.json`. `fijo_2_3` queda en ≈ 0.5 para todos.
+
+### Lectura (sin adornos)
+
+1. **Planificar desde el estado real elimina casi todo el bloqueo y los catastróficos del PPO del
+   sueño** (H1p, descriptiva):
+
+   | | Catastróficos | Episodios bloqueados |
+   |---|---|---|
+   | `plan_ppo_lstm` | 14/480 | 0 |
+   | `sueno_lstm` | 214/480 | 126 |
+   | `plan_ppo_transformer` | 0/480 | 0 |
+   | `sueno_transformer` | 36/480 | 7 |
+
+2. **Pero la mejora de retorno frente al sueño NO es significativa en el test principal** (Q1;
+   H2p sin confirmar). La diferencia es enorme (+15,632 y +2,308) y el planificador gana en los 48
+   escenarios, pero el Welch por semilla no alcanza α' porque la varianza entre semillas del sueño
+   está dominada por una sola semilla: s5 de la LSTM (−76,630, 76%) y s1 del Transformer (−18,480,
+   88%).
+3. **`plan_ppo_transformer` supera de forma significativa al RL directo de 30k (Q2_transformer:
+   +587, IC [+423, +751])** con 1.8x a 6.0x menos interacciones reales.
+   - Es la primera diferencia de control significativa a favor de un método basado en el modelo
+     del mundo en la v2. No se esperaba: ningún resultado de validación ni de la Fase 3 la
+     anticipaba.
+   - La varianza entre réplicas del planificador es muy baja (todas entre −1,072 y −1,243).
+4. **Ningún planificador supera a la mejor regla en el total.** `plan_ppo_transformer` queda
+   **empatado** con `espera_mas_larga` (+26.4, p = 0.10, gana 16/48): es una brecha no
+   significativa. `plan_ppo_lstm` queda por debajo (−433, p = 0.0057, apenas por encima de α').
+5. **En B0 y C0 el planificador pierde contra la mejor regla, y de forma significativa** (Q6 en las
+   dos arquitecturas; Q5 con el Transformer). Iguala en el total porque mejora a `espera_mas_larga`
+   en C0 (−518 frente a −645) y un poco en A0 (−327 frente a −337), y pierde en B0 y D0. **La hipótesis original de la Fase 3 (el aprendido
+   supera a las reglas en B0 y C0) sigue sin apoyo**, y aquí se contradice con significancia en C0
+   frente a `min_verde_y_cambiar`.
+6. **`plan_solo` es peor que `plan_ppo`**, como en validación. `plan_solo_lstm` tiene una réplica
+   bloqueada (s7, D0) y 206/480 catastróficos: la continuación "mantener" lleva el modelo a los
+   mismos puntos ciegos.
+7. **Costo:** de 10 a 14 ms por decisión con H = 3, en línea con la validación.

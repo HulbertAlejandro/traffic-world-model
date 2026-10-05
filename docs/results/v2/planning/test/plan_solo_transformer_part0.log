@@ -1,0 +1,14 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 11ms, vehicles TOT 0 ACT 0 BUF 0)                     
+Warning: Vehicle 'C0_north_straight_flow_s1.4' performs emergency braking on lane ':C0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=253.00.
+plan_solo_transformer  transformer_s0: media -1496.5
+plan_solo_transformer  transformer_s1: media -1381.4
+plan_solo_transformer  transformer_s2: media -1863.2
+plan_solo_transformer  transformer_s3: media -1378.8
+plan_solo_transformer  transformer_s4: media -1862.4
+
+Escenarios: 48 (25000..25047)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_solo_transformer  |    5 |   -1596.5 |   -359.5 |   -466.9 |   -557.6 |   -212.4 | -15660.0 |        5 | [-1496.5, -1381.4, -1863.2, -1378.8, -1862.4]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\test\plan_solo_transformer_part0.json y .csv

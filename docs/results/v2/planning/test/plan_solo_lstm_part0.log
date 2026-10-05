@@ -1,0 +1,15 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 4ms, vehicles TOT 0 ACT 0 BUF 0)                      
+plan_solo_lstm         lstm_s0: media -2301.4
+Warning: Vehicle 'C0_south_straight_flow_s0.0' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=73.00.
+plan_solo_lstm         lstm_s1: media -3048.6
+Warning: Vehicle 'C0_south_straight_flow_s0.1' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=103.00.
+plan_solo_lstm         lstm_s2: media -6629.2
+plan_solo_lstm         lstm_s3: media -7087.1
+plan_solo_lstm         lstm_s4: media -4565.4
+
+Escenarios: 48 (25000..25047)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_solo_lstm         |    5 |   -4726.4 |   -523.2 |  -2349.5 |   -615.6 |  -1238.1 | -36636.0 |       73 | [-2301.4, -3048.6, -6629.2, -7087.1, -4565.4]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\test\plan_solo_lstm_part0.json y .csv

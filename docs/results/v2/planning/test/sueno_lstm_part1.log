@@ -1,0 +1,16 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 11ms, vehicles TOT 0 ACT 0 BUF 0)                     
+Warning: Vehicle 'C0_north_straight_flow_s2.0' performs emergency braking on lane ':C0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=298.00.
+sueno_lstm             models/checkpoints/v2/control/dream_lstm_s5/best_model.zip: media -76630.1
+sueno_lstm             models/checkpoints/v2/control/dream_lstm_s6/best_model.zip: media -15978.8
+sueno_lstm             models/checkpoints/v2/control/dream_lstm_s7/best_model.zip: media -5824.8
+Warning: Vehicle 'C0_north_straight_flow_s0.1' performs emergency braking on lane ':C0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=103.00.
+Warning: Vehicle 'C0_north_straight_flow_s1.6' performs emergency braking on lane ':C0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=138.00.
+sueno_lstm             models/checkpoints/v2/control/dream_lstm_s8/best_model.zip: media -6031.9
+sueno_lstm             models/checkpoints/v2/control/dream_lstm_s9/best_model.zip: media -5175.2
+
+Escenarios: 48 (25000..25047)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+sueno_lstm             |    5 |  -21928.2 |  -4889.8 |  -3183.3 |  -9627.8 |  -4227.3 | -208051.0 |       97 | [-76630.1, -15978.8, -5824.8, -6031.9, -5175.2]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\test\sueno_lstm_part1.json y .csv
