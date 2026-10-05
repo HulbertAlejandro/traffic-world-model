@@ -1,58 +1,127 @@
-# Traffic World Model
+# Traffic World Model — v2: corredor de 4 intersecciones
 
-Control de un semáforo en una intersección simulada con SUMO mediante un *World Model*
-(Ha & Schmidhuber, 2018): el controlador se entrena dentro de un modelo aprendido de la
-dinámica del tráfico, sin interactuar con el simulador, y se compara contra un controlador
-entrenado directamente en SUMO. Trabajo de grado de Ingeniería de Sistemas, Universidad
-del Quindío.
+Control de semáforos con un *World Model* (Ha & Schmidhuber, 2018) en un corredor simulado en SUMO
+con **cuatro intersecciones coordinadas** (A0, B0, C0, D0). Se compara contra el RL directo sobre
+el simulador y contra reglas sin aprendizaje. Trabajo de grado de Ingeniería de Sistemas,
+Universidad del Quindío.
 
-## Estado actual
+Esta rama (`v2/four-intersections`) es la **versión 2**. La versión 1, con una sola intersección,
+está congelada (ver [Versión 1](#versión-1)).
 
-El sistema está completo, entrenado y evaluado en SUMO real:
+## Qué es la v2
 
 ```text
-SUMO → estado (26 dims) → Autoencoder → z (16 dims) → LSTM → (ẑ_{t+1}, r̂_{t+1})
-     → Dream Environment → PPO (entrenado sin tocar SUMO) → evaluación en SUMO real
+SUMO (corredor A0-B0-C0-D0) → estado de 104 dims (26 por semáforo) → normalización (scaler.pkl)
+  → modelo del mundo: LSTM o Transformer (~152k parámetros, 10 semillas cada uno)
+  → (a) PPO entrenado en el sueño     (b) planificador que imagina desde el estado real
+  → evaluación en SUMO real, con pre-registro y conjuntos de test reservados
 ```
 
-| Experimento | Pregunta | Resultado |
-|---|---|---|
-| 0 | ¿Ayuda comprimir el estado con un Autoencoder? | Sí, de forma moderada y mayoritaria: 5 semillas por rama, 37/50 pares semilla × horizonte, mejora mediana +10.9%; se mantiene |
-| 1 | ¿El LSTM predice mejor que un baseline persistente? | Sí, en los 10 horizontes |
-| 2 | ¿Un PPO entrenado en el sueño controla bien en SUMO real? | Sí; ver el resultado principal |
-| 3 | ¿Transformer o TSMixer mejoran al LSTM? | No: el LSTM gana en los 10 horizontes; se mantiene |
+- **Acción:** 4 bits, mantener o cambiar la fase en cada semáforo.
+- **Recompensa:** suma de la recompensa estilo v1 de los 4 semáforos (espera más cola).
+- **Sin Autoencoder:** el modelo del mundo trabaja sobre el estado normalizado.
+- **Planificador (v2.1-A):** en cada paso real, con la ventana real de los últimos 16 pasos,
+  evalúa en lote las 16 acciones conjuntas. Imagina H = 3 pasos, continuando con el PPO del
+  sueño, y aplica la de mayor retorno imaginado. No reentrena nada.
+- **Referencias sin aprendizaje:** `fijo_2_3`, `min_verde_y_cambiar`, `cola_mas_larga`,
+  `max_presion` y `espera_mas_larga`.
 
-**Resultado principal:** el World Model iguala o supera al RL directo usando muchas menos
-interacciones reales con SUMO. Media de las 10 semillas de entrenamiento de cada controlador,
-en SUMO real:
+## Resultados
 
-| | Escenarios oficiales | Escenarios nuevos (7000–7029) | Interacciones reales por semilla |
-|---|---|---|---|
-| PPO del sueño (World Model) | **-326.89** | -305.53 | 7,800 sin compartir el dataset (3,480 compartiéndolo entre las 10 semillas) |
-| RL directo, 10k pasos | -455.02 | -445.39 | 13,240 |
-| RL directo, 30k pasos | -403.83 | **-303.51** | 39,208 |
-| Tiempo fijo | -411.27 | -391.70 | — |
+Cada controlador aprendido tiene 10 semillas o réplicas. Retorno medio por episodio (más cerca de
+0 es mejor). Catastróficos: episodios con retorno < −3,700. Las cifras son de
+[`docs/v2/ADDENDUM_PLANIFICACION.md`](docs/v2/ADDENDUM_PLANIFICACION.md), sección 18 (test
+25000–25047, 48 escenarios), y de [`docs/v2/ADDENDUM_OOD.md`](docs/v2/ADDENDUM_OOD.md), sección 7
+(OOD 23000–23029, 30 escenarios). Cada conjunto se evaluó una sola vez.
 
-- **Frente al RL directo de 10k**, el World Model es mejor en los dos conjuntos de
-  escenarios (t pareada por escenario p = 2.0e-6 y p = 5.0e-11).
-- **Frente al de 30k no se detecta una diferencia de control en ningún conjunto.** En los
-  escenarios oficiales hay una brecha numérica de magnitud similar a la publicada (+76.94),
-  pero con 10 semillas ya no alcanza significancia (t pareada p = 0.068); en los nuevos no hay
-  brecha (-2.02, p = 0.91).
-- El World Model lo logra con entre 1.7x y 5.0x menos interacciones reales sin compartir el
-  dataset (3.8x a 11.3x compartiéndolo entre las 10 semillas). Entre los controladores
-  aprendidos, es el que tiene menos episodios catastróficos.
+| Política | Test: media | Test: catastróficos | OOD: media | OOD: catastróficos |
+|---|---|---|---|---|
+| **Planificador con Transformer** (`plan_ppo_transformer`, H = 3) | **−1,165.4** | **0/480** | **−1,149.9** | **0/300** |
+| Planificador con LSTM (`plan_ppo_lstm`, H = 3) | −1,625.0 | 14/480 | −1,658.9 | 7/300 |
+| PPO del sueño, Transformer | −3,473.8 | 36/480 | −3,104.6 | 26/300 |
+| PPO del sueño, LSTM | −17,256.5 | 214/480 | −16,335.0 | 132/300 |
+| RL directo, 30k pasos | −1,752.3 | 1/480 | −1,703.1 | 1/300 |
+| RL directo, 10k pasos | −5,736.8 | 179/480 | −6,309.2 | 106/300 |
+| Mejor regla en el total (`espera_mas_larga`) | −1,191.8 | 0/48 | −1,169.6 | 0/30 |
 
-Detalle y pruebas estadísticas en [`PROJECT_STATUS.md`](PROJECT_STATUS.md); resultados
-por episodio en [`docs/results/`](docs/results/).
+**Lo que muestran las comparaciones pre-registradas** (12 por conjunto, Bonferroni α' = 0.05/12;
+test principal: Welch sobre las 10 medias por semilla):
+
+- **El planificador con Transformer supera al RL directo de 30k, de forma significativa en los dos
+  conjuntos:** +587.0 en test (IC al 99.58% [+423.3, +750.6]) y +553.2 en OOD (IC
+  [+365.7, +740.8]).
+  - Usa 21,240 interacciones reales por réplica sin compartir el dataset, o 6,552
+    compartiéndolo, frente a 39,208 del RL directo: entre **1.8x y 6.0x menos**.
+- **Empata con la mejor regla en el total:** +26.4 en test (p = 0.10) y +19.7 en OOD (p = 0.30),
+  brechas no significativas.
+- **Pierde, de forma significativa, frente a la mejor regla de cada intersección en B0 y C0**, en
+  los dos conjuntos. En C0, `min_verde_y_cambiar` es mejor que todos los métodos aprendidos.
+- **Frente al PPO del sueño sin planificación**, el planificador elimina casi todos los episodios
+  catastróficos y el bloqueo de fases. La diferencia de retorno no es significativa en el test
+  principal porque una sola semilla del sueño domina la varianza (LSTM s5 y Transformer s1).
+- **Ningún método aprendido de la v2 supera a la mejor regla sin aprendizaje en el total.**
+
+El resto se registra en los addendums: el control con PPO del sueño (Fase 3), el hallazgo de un
+desfase en la ventana de acciones del Dream Environment (corregirlo no cambió el control), la
+validación y todas las cifras por intersección. Ver la sección de documentación.
+
+## Estructura del repositorio
+
+```text
+traffic-world-model/
+├── configs/                 # Configuración: entorno, recompensas (v1 y corredor), modelos, PPO
+├── datasets/                # Datasets de PyTorch; los datos generados no se versionan
+├── docs/
+│   ├── v2/                  # Diseños, pre-registros y resultados de la v2 (ver abajo)
+│   ├── v1/README_v1.md      # El README de la v1, conservado
+│   ├── results/v2/          # Resultados por episodio de la v2 (JSON y CSV), versionados
+│   └── PROPUESTA.md, DOCUMENTACION_PROYECTO.md, ...   # documentos de la v1
+├── environments/
+│   ├── four-intersection-corridor/   # Red y demanda SUMO del corredor
+│   ├── corridor_environment.py       # Entorno real: estado de 104, acción de 4 bits, recompensa sumada
+│   ├── scaled_corridor_environment.py# Puente: normaliza con el mismo scaler.pkl del modelo
+│   ├── corridor_dream_environment.py # Dream Environment de la v2 (window_alignment legacy/aligned)
+│   ├── corridor_planner.py           # Planificador con el modelo del mundo (v2.1-A)
+│   └── ...                           # Entornos de la v1
+├── evaluation/              # Evaluación del modelo temporal (rollout_episode, Experimento 1)
+├── models/
+│   ├── world_model/         # LSTM, Transformer, TSMixer
+│   └── checkpoints/v2/      # Pesos (no versionados); sí sus .json y run_info.json
+├── scripts/v2/              # Puntos de entrada de la v2: dataset, entrenamiento, evaluación, análisis
+├── training/                # train_controller_v2.py (PPO del sueño y RL directo) y entrenamientos de modelos
+├── tests/                   # pytest
+├── CLAUDE.md, PROJECT_STATUS.md
+└── requirements.txt
+```
+
+**Documentos de la v2, en orden:**
+
+1. [`docs/v2/DISENO_RED_4_INTERSECCIONES.md`](docs/v2/DISENO_RED_4_INTERSECCIONES.md): la red y la
+   calibración de la demanda.
+2. [`docs/v2/DISENO_ESTADO_ACCION_RECOMPENSA.md`](docs/v2/DISENO_ESTADO_ACCION_RECOMPENSA.md): el
+   estado, la acción y la recompensa.
+3. [`docs/v2/ADDENDUM_DATASET.md`](docs/v2/ADDENDUM_DATASET.md): el dataset y los splits de
+   semillas.
+4. [`docs/v2/ADDENDUM_AUTOENCODER.md`](docs/v2/ADDENDUM_AUTOENCODER.md) y
+   [`docs/v2/ADDENDUM_LSTM_VS_TRANSFORMER.md`](docs/v2/ADDENDUM_LSTM_VS_TRANSFORMER.md): el modelo
+   del mundo.
+5. [`docs/v2/DISENO_CONTROL.md`](docs/v2/DISENO_CONTROL.md) y
+   [`docs/v2/ADDENDUM_CONTROL.md`](docs/v2/ADDENDUM_CONTROL.md): Fase 3, el PPO del sueño frente al
+   RL directo y las reglas.
+6. [`docs/v2/ADDENDUM_SUENO_CORREGIDO.md`](docs/v2/ADDENDUM_SUENO_CORREGIDO.md): el desfase de la
+   ventana y su corrección.
+7. [`docs/v2/ADDENDUM_PLANIFICACION.md`](docs/v2/ADDENDUM_PLANIFICACION.md): el planificador
+   (v2.1-A), su validación y el test nuevo.
+8. [`docs/v2/ADDENDUM_OOD.md`](docs/v2/ADDENDUM_OOD.md): la confirmación final en OOD.
+
+[`PROJECT_STATUS.md`](PROJECT_STATUS.md) resume el estado y las cifras;
+[`CLAUDE.md`](CLAUDE.md) recoge las decisiones de diseño y las convenciones de trabajo.
 
 ## Instalación
 
-Requiere Python 3.11 (los resultados se obtuvieron con 3.11.9) y
-[SUMO](https://eclipse.dev/sumo/) **1.27.1**, que se instala aparte con el instalador oficial
-de SUMO, no con pip. La variable de entorno `SUMO_HOME` debe apuntar a su carpeta de
-instalación. `requirements.txt` fija las versiones exactas de las librerías de Python; `traci`
-y `sumolib` deben coincidir con la versión de SUMO instalada.
+Igual que la v1: Python 3.11 (los resultados se obtuvieron con 3.11.9) y
+[SUMO](https://eclipse.dev/sumo/) **1.27.1**, instalado aparte, con `SUMO_HOME` apuntando a su
+carpeta. `requirements.txt` fija las versiones de las librerías de Python.
 
 ```powershell
 python -m venv .venv
@@ -60,89 +129,27 @@ python -m venv .venv
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 sumo --version
-python scripts\test_environment.py   # prueba de humo del entorno
 ```
 
-## Estructura
+## Reproducir
 
-```text
-traffic-world-model/
-├── configs/            # Dataclasses de configuración: entorno, recompensa, Autoencoder, modelo temporal, PPO
-├── datasets/           # Datasets de PyTorch; raw/ y processed/ se generan con los scripts (no versionados)
-├── docs/               # PROPUESTA.md y DOCUMENTACION_PROYECTO.md
-├── environments/       # TrafficEnvironment (SUMO), estado, acción, recompensa, DreamEnvironment,
-│   └── single-intersection/   # red SUMO propia (demanda asimétrica)
-├── evaluation/         # Utilidades de evaluación del Autoencoder y del modelo temporal
-├── models/
-│   ├── representation/ # Encoder, Decoder, Autoencoder
-│   ├── world_model/    # TemporalModel, LSTM, Transformer, TSMixer
-│   └── checkpoints/    # Pesos generados (no versionados); sí se versionan sus .json de hiperparámetros
-├── scripts/            # Puntos de entrada: datos, evaluación, comparaciones
-├── tests/              # Pruebas automatizadas (pytest)
-├── training/           # Bucles de entrenamiento
-├── ver_controlador.py  # Visualiza el PPO del sueño en la GUI de SUMO
-├── CLAUDE.md, PROJECT_STATUS.md, TODO.md
-├── pytest.ini
-└── requirements.txt
-```
+Los datasets y los pesos no se versionan; se regeneran con los scripts. Cada paso tiene su
+pre-registro en `docs/v2/`.
 
-## Pipeline completo
+1. **Dataset:** `scripts/v2/collect_dataset_v2.py` y `scripts/v2/prepare_dataset_v2.py`.
+2. **Modelos del mundo:** `scripts/v2/run_lstm_vs_transformer.py`.
+3. **Controladores:**
+   - PPO del sueño: `scripts/v2/run_control_stage2.py`.
+   - RL directo: `scripts/v2/run_control_stage3.py`.
+   - Sueño corregido: `scripts/v2/run_control_aligned.py`.
+4. **Evaluación:**
+   - `scripts/v2/evaluate_control_v2.py`, con políticas `dream:`, `direct:`, `ref:` y `plan:`.
+   - Validación y test del planificador: `run_planning_validation.py` y `run_planning_test.py`.
+   - OOD: `run_ood.py`.
+5. **Análisis:** los `scripts/v2/analyze_*.py`, que no simulan nada.
 
-Orden de ejecución. Los scripts de entrenamiento que escriben en carpetas oficiales
-(`train_world_model.py`, `train_controller_direct.py`) **se niegan a sobrescribirlas** sin
-`--overwrite-official`: en un clon nuevo, donde esas carpetas solo tienen los `.json`,
-hay que pasar esa bandera para regenerarlas. `train_autoencoder.py`, `train_controller.py`
-y los entrenamientos del Experimento 3 no tienen ese guardia y escriben directamente en
-`models/checkpoints/`: respalda esa carpeta antes de ejecutarlos.
-
-```powershell
-# 1. Datos: 80 episodios con semilla de SUMO distinta, split por episodio, normalización
-python scripts\collect_dataset.py
-python scripts\split_dataset.py
-python scripts\normalize_dataset.py
-
-# 2. Representación y dinámica (Experimento 1)
-python training\train_autoencoder.py
-python scripts\encode_latent_dataset.py
-python training\train_world_model.py --overwrite-official
-python scripts\evaluate_world_model.py
-
-# 3. Experimento 0: modelo temporal sobre el estado crudo frente a z, 5 semillas por rama,
-#    entrenadas hasta que corte el early stopping (tope de 300 épocas)
-python scripts\prepare_raw_sequence_dataset.py
-foreach ($s in 0..4) {
-  python training\train_world_model.py --seed $s --epochs 300 --output-dir models\checkpoints\exp0_multiseed_300ep\z\seed$s
-  python training\train_world_model_raw.py --seed $s --epochs 300 --output-dir models\checkpoints\exp0_multiseed_300ep\raw\seed$s
-}
-python scripts\compare_experiment_0_multiseed.py `
-  --z-dirs (0..4 | % { "models\checkpoints\exp0_multiseed_300ep\z\seed$_" }) `
-  --raw-dirs (0..4 | % { "models\checkpoints\exp0_multiseed_300ep\raw\seed$_" }) `
-  --output docs\results\experiment_0_multiseed_300ep.json
-
-# 4. Experimento 3: Transformer y TSMixer (requieren el reward_scaler.json del paso 2)
-python training\train_world_model_transformer.py
-python training\train_world_model_tsmixer.py
-python scripts\evaluate_world_model_transformer.py
-python scripts\evaluate_world_model_tsmixer.py
-python scripts\compare_experiment_3.py
-
-# 5. Controladores. PPO en el sueño (semilla oficial 2 por defecto; las semillas 0 y 1
-#    requieren cambiar ControllerConfig.seed). RL directo: semillas 0-3 × 10k y 30k pasos,
-#    cada una en su carpeta. Las semillas 3-9 del sueño y 4-9 del RL directo (extensión a
-#    10 semillas) se entrenan con docs/results/ppo_10_seeds/run_training.sh.
-python training\train_controller.py
-foreach ($s in 0..3) {
-  python training\train_controller_direct.py --seed $s --total-timesteps 10000 --output-dir models\checkpoints\direct_10k\seed$s
-  python training\train_controller_direct.py --seed $s --total-timesteps 30000 --output-dir models\checkpoints\direct_30k\seed$s
-}
-
-# 6. Evaluación en SUMO real: todas las semillas de cada método, escenarios oficiales
-#    (3000 y 5000) y nuevos (7000-7029), con pruebas estadísticas y resultados por episodio
-python scripts\evaluate_multiseed_statistical.py --help
-python scripts\evaluate_final_comparison.py   # solo los checkpoints oficiales
-```
-
-Los pasos 3 y 4 son experimentos de validación y no los necesitan los pasos 5 y 6.
+Los lanzadores usan 4 procesos y son reanudables. Se niegan a arrancar sin corriente o con 2 GB o
+menos de memoria, y a escribir sobre resultados oficiales.
 
 ## Tests
 
@@ -150,20 +157,28 @@ Los pasos 3 y 4 son experimentos de validación y no los necesitan los pasos 5 y
 pytest -v
 ```
 
-87 tests en 17 archivos.
+159 tests en 25 archivos. Uno es un `xfail` estricto que documenta el desfase de ventana del
+Dream Environment de la v1.
 
-## Documentación
+## Versión 1
 
-- [`docs/DOCUMENTACION_PROYECTO.md`](docs/DOCUMENTACION_PROYECTO.md): el proyecto
-  explicado archivo por archivo, para estudiarlo a fondo.
-- [`docs/PROPUESTA.md`](docs/PROPUESTA.md): la propuesta académica, con el diseño
-  experimental, las hipótesis evaluadas y la justificación de cada tecnología.
-- [`PROJECT_STATUS.md`](PROJECT_STATUS.md): registro detallado de resultados y hallazgos,
-  con todas las cifras.
-- [`docs/EXPLORACION_LATENT_DIM.md`](docs/EXPLORACION_LATENT_DIM.md): exploración posterior del
-  Experimento 0 (semillas, `latent_dim` y varianza entre Autoencoders), sin cambios en el pipeline
-  oficial. Conclusión: no hay evidencia de que el Autoencoder mejore ni empeore la predicción de la
-  recompensa con la LSTM.
+La **versión 1** (una intersección con demanda asimétrica: Autoencoder, LSTM y PPO del sueño
+frente a RL directo) está **congelada** en la rama `main` y en la etiqueta
+[`v1-final`](https://github.com/HulbertAlejandro/traffic-world-model/tree/v1-final). No recibe
+cambios, y la v2 no se fusiona en ella.
+
+- Su README está en [`docs/v1/README_v1.md`](docs/v1/README_v1.md).
+- Su código, datos y documentos siguen en esta rama, en `docs/`, `scripts/`, `environments/`,
+  etc.
+- Su resultado principal: el World Model igualó o superó al RL directo con muchas menos
+  interacciones reales, en el escenario de una intersección.
+- Dos hallazgos de la v2 sobre la v1:
+  - el Dream Environment de la v1 tiene el mismo desfase de ventana, y su efecto allí no se
+    midió;
+  - en la v1 el controlador del sueño solo se comparó con tiempo fijo y con una regla de fase
+    contraria.
+
+  Ver [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
 
 ## Referencias
 
