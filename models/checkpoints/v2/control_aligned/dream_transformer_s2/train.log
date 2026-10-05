@@ -1,0 +1,28 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 11ms, vehicles TOT 0 ACT 0 BUF 0)                     
+dream_transformer seed 2: 50000 steps -> C:\Users\hulbe\VisualProjects\traffic-world-model\models\checkpoints\v2\control_aligned\dream_transformer_s2
+Warning: Vehicle 'C0_south_straight_flow_s2.2' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=283.00.
+Eval num_timesteps=5000, episode_reward=-7049.60 +/- 6371.11
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=10000, episode_reward=-10369.20 +/- 8961.64
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=15000, episode_reward=-1901.80 +/- 345.28
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=20000, episode_reward=-1798.60 +/- 286.95
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=25000, episode_reward=-1645.60 +/- 329.37
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=30000, episode_reward=-1774.40 +/- 305.25
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=35000, episode_reward=-1798.60 +/- 274.16
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=40000, episode_reward=-1671.60 +/- 214.03
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=45000, episode_reward=-1749.60 +/- 358.08
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=50000, episode_reward=-1668.60 +/- 394.90
+Episode length: 60.00 +/- 0.00
+done in 453 s; real steps 3000; best real eval -1645.6

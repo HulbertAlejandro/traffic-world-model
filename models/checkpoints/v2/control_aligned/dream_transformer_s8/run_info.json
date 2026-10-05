@@ -1,0 +1,40 @@
+{
+  "arm": "dream_transformer",
+  "seed": 8,
+  "config": {
+    "seed": 8,
+    "total_timesteps": 50000,
+    "learning_rate": 0.0003,
+    "n_steps": 256,
+    "batch_size": 64,
+    "n_epochs": 10,
+    "gamma": 0.99,
+    "dream_max_steps": 7,
+    "normalize_reward": true,
+    "reward_clip": 10.0,
+    "normalize_obs": false
+  },
+  "world_model_dir": "models/checkpoints/v2/arch_comparison/transformer_raw_s8",
+  "observation": "scaler.pkl-normalized state (ScaledCorridorEnvironment)",
+  "window_alignment": "aligned",
+  "selection_seeds": [
+    21000,
+    21001,
+    21002,
+    21003,
+    21004
+  ],
+  "direct_training_seed_start": null,
+  "timesteps_done": 50176,
+  "imagined_steps": 50176,
+  "real_steps_train": 0,
+  "real_episodes_train": 0,
+  "real_steps_eval": 3000,
+  "real_episodes_eval": 60,
+  "real_steps_total": 3000,
+  "wall_seconds": 477.1620319000067,
+  "eval_sumo_seconds": 253.99487350025447,
+  "train_sumo_seconds": null,
+  "seconds_per_training_step": 0.004447687308668531,
+  "best_mean_reward": -2038.0
+}

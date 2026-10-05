@@ -1,0 +1,25 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 4ms, vehicles TOT 0 ACT 0 BUF 0)                      
+dream_transformer seed 1: 50000 steps -> C:\Users\hulbe\VisualProjects\traffic-world-model\models\checkpoints\v2\control_aligned\dream_transformer_s1
+Eval num_timesteps=5000, episode_reward=-87466.40 +/- 99197.56
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=10000, episode_reward=-6067.80 +/- 3428.49
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=15000, episode_reward=-16495.80 +/- 12578.10
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=20000, episode_reward=-14913.40 +/- 10024.65
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=25000, episode_reward=-17254.80 +/- 10414.05
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=30000, episode_reward=-21546.00 +/- 5762.27
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=35000, episode_reward=-6139.00 +/- 3841.76
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=40000, episode_reward=-7575.60 +/- 8508.23
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=45000, episode_reward=-8933.40 +/- 8089.91
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=50000, episode_reward=-6610.20 +/- 4918.81
+Episode length: 60.00 +/- 0.00
+done in 471 s; real steps 3000; best real eval -6067.8

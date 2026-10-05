@@ -1,0 +1,716 @@
+{
+ "arms": {
+  "phase3_lstm": {
+   "n_episodes": 240,
+   "mean": -14785.316666666668,
+   "median": -2969.5,
+   "per_signal": {
+    "A0": -3442.475,
+    "B0": -1845.2,
+    "C0": -6100.675,
+    "D0": -3396.9666666666667
+   },
+   "catastrophic": 109,
+   "blocked_episodes": 66,
+   "blocked_controllers": 1,
+   "switches_mean": {
+    "A0": 19.325,
+    "B0": 17.220833333333335,
+    "C0": 21.408333333333335,
+    "D0": 14.979166666666666
+   },
+   "agreement": {
+    "cola_mas_larga_A0": 0.5289583333333333,
+    "cola_mas_larga_B0": 0.5524305555555554,
+    "cola_mas_larga_C0": 0.5900694444444443,
+    "cola_mas_larga_D0": 0.4479166666666667,
+    "espera_mas_larga_A0": 0.5326388888888888,
+    "espera_mas_larga_B0": 0.5527777777777777,
+    "espera_mas_larga_C0": 0.5924999999999999,
+    "espera_mas_larga_D0": 0.44631944444444444,
+    "fijo_2_3_A0": 0.522361111111111,
+    "fijo_2_3_B0": 0.54375,
+    "fijo_2_3_C0": 0.4996527777777778,
+    "fijo_2_3_D0": 0.5502083333333334,
+    "max_presion_A0": 0.5459027777777777,
+    "max_presion_B0": 0.6706944444444445,
+    "max_presion_C0": 0.5452083333333333,
+    "max_presion_D0": 0.6398611111111111,
+    "min_verde_y_cambiar_A0": 0.5657638888888888,
+    "min_verde_y_cambiar_B0": 0.5274305555555555,
+    "min_verde_y_cambiar_C0": 0.6638194444444444,
+    "min_verde_y_cambiar_D0": 0.4682638888888889
+   },
+   "seed_means": [
+    -18290.583333333332,
+    -22376.458333333332,
+    -2339.75,
+    -6432.458333333333,
+    -1986.9166666666667,
+    -66892.25,
+    -14973.125,
+    -1772.75,
+    -5102.625,
+    -7686.25
+   ],
+   "controllers": {
+    "models/checkpoints/v2/control/dream_lstm_s0/best_model.zip": {
+     "mean": -18290.583333333332,
+     "switches_mean": {
+      "A0": 16.291666666666668,
+      "B0": 22.791666666666668,
+      "C0": 22.75,
+      "D0": 5.833333333333333
+     },
+     "blocked": false,
+     "catastrophic": 20
+    },
+    "models/checkpoints/v2/control/dream_lstm_s1/best_model.zip": {
+     "mean": -22376.458333333332,
+     "switches_mean": {
+      "A0": 20.208333333333332,
+      "B0": 23.666666666666668,
+      "C0": 26.458333333333332,
+      "D0": 1.25
+     },
+     "blocked": true,
+     "catastrophic": 23
+    },
+    "models/checkpoints/v2/control/dream_lstm_s2/best_model.zip": {
+     "mean": -2339.75,
+     "switches_mean": {
+      "A0": 25.5,
+      "B0": 15.541666666666666,
+      "C0": 25.333333333333332,
+      "D0": 15.125
+     },
+     "blocked": false,
+     "catastrophic": 2
+    },
+    "models/checkpoints/v2/control/dream_lstm_s3/best_model.zip": {
+     "mean": -6432.458333333333,
+     "switches_mean": {
+      "A0": 21.416666666666668,
+      "B0": 5.25,
+      "C0": 22.25,
+      "D0": 19.958333333333332
+     },
+     "blocked": false,
+     "catastrophic": 11
+    },
+    "models/checkpoints/v2/control/dream_lstm_s4/best_model.zip": {
+     "mean": -1986.9166666666667,
+     "switches_mean": {
+      "A0": 18.458333333333332,
+      "B0": 13.958333333333334,
+      "C0": 21.083333333333332,
+      "D0": 27.25
+     },
+     "blocked": false,
+     "catastrophic": 2
+    },
+    "models/checkpoints/v2/control/dream_lstm_s5/best_model.zip": {
+     "mean": -66892.25,
+     "switches_mean": {
+      "A0": 19.833333333333332,
+      "B0": 13.375,
+      "C0": 9.125,
+      "D0": 15.083333333333334
+     },
+     "blocked": false,
+     "catastrophic": 23
+    },
+    "models/checkpoints/v2/control/dream_lstm_s6/best_model.zip": {
+     "mean": -14973.125,
+     "switches_mean": {
+      "A0": 10.5,
+      "B0": 16.291666666666668,
+      "C0": 18.75,
+      "D0": 3.4583333333333335
+     },
+     "blocked": false,
+     "catastrophic": 19
+    },
+    "models/checkpoints/v2/control/dream_lstm_s7/best_model.zip": {
+     "mean": -1772.75,
+     "switches_mean": {
+      "A0": 26.458333333333332,
+      "B0": 27.416666666666668,
+      "C0": 23.083333333333332,
+      "D0": 24.375
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control/dream_lstm_s8/best_model.zip": {
+     "mean": -5102.625,
+     "switches_mean": {
+      "A0": 15.833333333333334,
+      "B0": 18.666666666666668,
+      "C0": 22.458333333333332,
+      "D0": 21.291666666666668
+     },
+     "blocked": false,
+     "catastrophic": 2
+    },
+    "models/checkpoints/v2/control/dream_lstm_s9/best_model.zip": {
+     "mean": -7686.25,
+     "switches_mean": {
+      "A0": 18.75,
+      "B0": 15.25,
+      "C0": 22.791666666666668,
+      "D0": 16.166666666666668
+     },
+     "blocked": false,
+     "catastrophic": 7
+    }
+   }
+  },
+  "aligned_lstm": {
+   "n_episodes": 240,
+   "mean": -10758.5625,
+   "median": -4065.5,
+   "per_signal": {
+    "A0": -3479.65,
+    "B0": -2558.2833333333333,
+    "C0": -1146.9833333333333,
+    "D0": -3573.6458333333335
+   },
+   "catastrophic": 126,
+   "blocked_episodes": 55,
+   "blocked_controllers": 2,
+   "switches_mean": {
+    "A0": 21.1625,
+    "B0": 16.0625,
+    "C0": 23.691666666666666,
+    "D0": 12.925
+   },
+   "agreement": {
+    "cola_mas_larga_A0": 0.5304166666666668,
+    "cola_mas_larga_B0": 0.508125,
+    "cola_mas_larga_C0": 0.5991666666666667,
+    "cola_mas_larga_D0": 0.4663888888888889,
+    "espera_mas_larga_A0": 0.5361805555555555,
+    "espera_mas_larga_B0": 0.508888888888889,
+    "espera_mas_larga_C0": 0.6038888888888889,
+    "espera_mas_larga_D0": 0.46527777777777773,
+    "fijo_2_3_A0": 0.5232638888888889,
+    "fijo_2_3_B0": 0.5472916666666665,
+    "fijo_2_3_C0": 0.5043055555555556,
+    "fijo_2_3_D0": 0.5606944444444444,
+    "max_presion_A0": 0.5446527777777778,
+    "max_presion_B0": 0.6707638888888889,
+    "max_presion_C0": 0.5585416666666667,
+    "max_presion_D0": 0.6965972222222222,
+    "min_verde_y_cambiar_A0": 0.6286805555555556,
+    "min_verde_y_cambiar_B0": 0.4924305555555556,
+    "min_verde_y_cambiar_C0": 0.7404166666666666,
+    "min_verde_y_cambiar_D0": 0.391875
+   },
+   "seed_means": [
+    -27812.333333333332,
+    -14269.375,
+    -8704.916666666666,
+    -11572.833333333334,
+    -5126.958333333333,
+    -12272.0,
+    -20323.583333333332,
+    -1730.7916666666667,
+    -2355.125,
+    -3417.7083333333335
+   ],
+   "controllers": {
+    "models/checkpoints/v2/control_aligned/dream_lstm_s0/best_model.zip": {
+     "mean": -27812.333333333332,
+     "switches_mean": {
+      "A0": 14.583333333333334,
+      "B0": 16.833333333333332,
+      "C0": 24.458333333333332,
+      "D0": 1.75
+     },
+     "blocked": true,
+     "catastrophic": 22
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s1/best_model.zip": {
+     "mean": -14269.375,
+     "switches_mean": {
+      "A0": 25.333333333333332,
+      "B0": 22.5,
+      "C0": 25.958333333333332,
+      "D0": 2.0833333333333335
+     },
+     "blocked": true,
+     "catastrophic": 24
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s2/best_model.zip": {
+     "mean": -8704.916666666666,
+     "switches_mean": {
+      "A0": 24.625,
+      "B0": 23.958333333333332,
+      "C0": 24.208333333333332,
+      "D0": 9.625
+     },
+     "blocked": false,
+     "catastrophic": 16
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s3/best_model.zip": {
+     "mean": -11572.833333333334,
+     "switches_mean": {
+      "A0": 23.708333333333332,
+      "B0": 6.958333333333333,
+      "C0": 24.875,
+      "D0": 14.208333333333334
+     },
+     "blocked": false,
+     "catastrophic": 17
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s4/best_model.zip": {
+     "mean": -5126.958333333333,
+     "switches_mean": {
+      "A0": 21.25,
+      "B0": 8.541666666666666,
+      "C0": 23.166666666666668,
+      "D0": 25.666666666666668
+     },
+     "blocked": false,
+     "catastrophic": 8
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s5/best_model.zip": {
+     "mean": -12272.0,
+     "switches_mean": {
+      "A0": 19.541666666666668,
+      "B0": 10.291666666666666,
+      "C0": 20.166666666666668,
+      "D0": 4.875
+     },
+     "blocked": false,
+     "catastrophic": 19
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s6/best_model.zip": {
+     "mean": -20323.583333333332,
+     "switches_mean": {
+      "A0": 17.25,
+      "B0": 10.75,
+      "C0": 24.833333333333332,
+      "D0": 7.375
+     },
+     "blocked": false,
+     "catastrophic": 15
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s7/best_model.zip": {
+     "mean": -1730.7916666666667,
+     "switches_mean": {
+      "A0": 27.5,
+      "B0": 28.375,
+      "C0": 21.125,
+      "D0": 23.541666666666668
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s8/best_model.zip": {
+     "mean": -2355.125,
+     "switches_mean": {
+      "A0": 15.25,
+      "B0": 16.541666666666668,
+      "C0": 25.208333333333332,
+      "D0": 23.625
+     },
+     "blocked": false,
+     "catastrophic": 2
+    },
+    "models/checkpoints/v2/control_aligned/dream_lstm_s9/best_model.zip": {
+     "mean": -3417.7083333333335,
+     "switches_mean": {
+      "A0": 22.583333333333332,
+      "B0": 15.875,
+      "C0": 22.916666666666668,
+      "D0": 16.5
+     },
+     "blocked": false,
+     "catastrophic": 3
+    }
+   }
+  },
+  "phase3_transformer": {
+   "n_episodes": 240,
+   "mean": -4025.4125,
+   "median": -1466.5,
+   "per_signal": {
+    "A0": -1236.6875,
+    "B0": -471.09583333333336,
+    "C0": -1905.3708333333334,
+    "D0": -412.2583333333333
+   },
+   "catastrophic": 23,
+   "blocked_episodes": 4,
+   "blocked_controllers": 0,
+   "switches_mean": {
+    "A0": 20.629166666666666,
+    "B0": 18.208333333333332,
+    "C0": 23.516666666666666,
+    "D0": 18.025
+   },
+   "agreement": {
+    "cola_mas_larga_A0": 0.6431944444444445,
+    "cola_mas_larga_B0": 0.6161111111111112,
+    "cola_mas_larga_C0": 0.6120833333333332,
+    "cola_mas_larga_D0": 0.6174999999999999,
+    "espera_mas_larga_A0": 0.6442361111111111,
+    "espera_mas_larga_B0": 0.6161111111111112,
+    "espera_mas_larga_C0": 0.6171527777777777,
+    "espera_mas_larga_D0": 0.6177777777777778,
+    "fijo_2_3_A0": 0.5568055555555556,
+    "fijo_2_3_B0": 0.5356249999999999,
+    "fijo_2_3_C0": 0.5077777777777778,
+    "fijo_2_3_D0": 0.5552083333333333,
+    "max_presion_A0": 0.673888888888889,
+    "max_presion_B0": 0.67125,
+    "max_presion_C0": 0.5609722222222222,
+    "max_presion_D0": 0.7126388888888889,
+    "min_verde_y_cambiar_A0": 0.5613194444444444,
+    "min_verde_y_cambiar_B0": 0.5552083333333333,
+    "min_verde_y_cambiar_C0": 0.7144444444444444,
+    "min_verde_y_cambiar_D0": 0.5309722222222223
+   },
+   "seed_means": [
+    -1476.1666666666667,
+    -25319.666666666668,
+    -1325.4166666666667,
+    -1421.625,
+    -1317.0416666666667,
+    -1544.25,
+    -3221.6666666666665,
+    -1418.75,
+    -1651.1666666666667,
+    -1558.375
+   ],
+   "controllers": {
+    "models/checkpoints/v2/control/dream_transformer_s0/best_model.zip": {
+     "mean": -1476.1666666666667,
+     "switches_mean": {
+      "A0": 22.916666666666668,
+      "B0": 22.583333333333332,
+      "C0": 24.291666666666668,
+      "D0": 16.375
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control/dream_transformer_s1/best_model.zip": {
+     "mean": -25319.666666666668,
+     "switches_mean": {
+      "A0": 17.25,
+      "B0": 15.833333333333334,
+      "C0": 16.583333333333332,
+      "D0": 15.125
+     },
+     "blocked": false,
+     "catastrophic": 15
+    },
+    "models/checkpoints/v2/control/dream_transformer_s2/best_model.zip": {
+     "mean": -1325.4166666666667,
+     "switches_mean": {
+      "A0": 21.25,
+      "B0": 21.25,
+      "C0": 24.791666666666668,
+      "D0": 12.833333333333334
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control/dream_transformer_s3/best_model.zip": {
+     "mean": -1421.625,
+     "switches_mean": {
+      "A0": 22.291666666666668,
+      "B0": 23.0,
+      "C0": 26.458333333333332,
+      "D0": 19.833333333333332
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control/dream_transformer_s4/best_model.zip": {
+     "mean": -1317.0416666666667,
+     "switches_mean": {
+      "A0": 20.5,
+      "B0": 8.458333333333334,
+      "C0": 24.541666666666668,
+      "D0": 16.75
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control/dream_transformer_s5/best_model.zip": {
+     "mean": -1544.25,
+     "switches_mean": {
+      "A0": 22.291666666666668,
+      "B0": 23.083333333333332,
+      "C0": 24.083333333333332,
+      "D0": 23.166666666666668
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control/dream_transformer_s6/best_model.zip": {
+     "mean": -3221.6666666666665,
+     "switches_mean": {
+      "A0": 16.583333333333332,
+      "B0": 13.458333333333334,
+      "C0": 21.791666666666668,
+      "D0": 12.708333333333334
+     },
+     "blocked": false,
+     "catastrophic": 6
+    },
+    "models/checkpoints/v2/control/dream_transformer_s7/best_model.zip": {
+     "mean": -1418.75,
+     "switches_mean": {
+      "A0": 19.958333333333332,
+      "B0": 12.958333333333334,
+      "C0": 25.666666666666668,
+      "D0": 23.166666666666668
+     },
+     "blocked": false,
+     "catastrophic": 1
+    },
+    "models/checkpoints/v2/control/dream_transformer_s8/best_model.zip": {
+     "mean": -1651.1666666666667,
+     "switches_mean": {
+      "A0": 24.75,
+      "B0": 26.5,
+      "C0": 25.083333333333332,
+      "D0": 22.75
+     },
+     "blocked": false,
+     "catastrophic": 1
+    },
+    "models/checkpoints/v2/control/dream_transformer_s9/best_model.zip": {
+     "mean": -1558.375,
+     "switches_mean": {
+      "A0": 18.5,
+      "B0": 14.958333333333334,
+      "C0": 21.875,
+      "D0": 17.541666666666668
+     },
+     "blocked": false,
+     "catastrophic": 0
+    }
+   }
+  },
+  "aligned_transformer": {
+   "n_episodes": 240,
+   "mean": -3523.3416666666667,
+   "median": -1514.0,
+   "per_signal": {
+    "A0": -1067.5583333333334,
+    "B0": -593.7416666666667,
+    "C0": -1226.0083333333334,
+    "D0": -636.0333333333333
+   },
+   "catastrophic": 21,
+   "blocked_episodes": 10,
+   "blocked_controllers": 0,
+   "switches_mean": {
+    "A0": 19.775,
+    "B0": 18.508333333333333,
+    "C0": 23.308333333333334,
+    "D0": 16.491666666666667
+   },
+   "agreement": {
+    "cola_mas_larga_A0": 0.6243055555555554,
+    "cola_mas_larga_B0": 0.5945833333333332,
+    "cola_mas_larga_C0": 0.6298611111111111,
+    "cola_mas_larga_D0": 0.629375,
+    "espera_mas_larga_A0": 0.6255555555555555,
+    "espera_mas_larga_B0": 0.594375,
+    "espera_mas_larga_C0": 0.635625,
+    "espera_mas_larga_D0": 0.6294444444444445,
+    "fijo_2_3_A0": 0.5451388888888888,
+    "fijo_2_3_B0": 0.535486111111111,
+    "fijo_2_3_C0": 0.5142361111111111,
+    "fijo_2_3_D0": 0.5555555555555555,
+    "max_presion_A0": 0.655277777777778,
+    "max_presion_B0": 0.6627777777777778,
+    "max_presion_C0": 0.5655555555555555,
+    "max_presion_D0": 0.7294444444444445,
+    "min_verde_y_cambiar_A0": 0.5434722222222222,
+    "min_verde_y_cambiar_B0": 0.5700000000000001,
+    "min_verde_y_cambiar_C0": 0.7021527777777778,
+    "min_verde_y_cambiar_D0": 0.48486111111111113
+   },
+   "seed_means": [
+    -1360.6666666666667,
+    -11503.208333333334,
+    -1521.1666666666667,
+    -1439.875,
+    -1222.6666666666667,
+    -3289.2083333333335,
+    -1925.625,
+    -9471.208333333334,
+    -2228.875,
+    -1270.9166666666667
+   ],
+   "controllers": {
+    "models/checkpoints/v2/control_aligned/dream_transformer_s0/best_model.zip": {
+     "mean": -1360.6666666666667,
+     "switches_mean": {
+      "A0": 24.375,
+      "B0": 21.291666666666668,
+      "C0": 25.5,
+      "D0": 16.541666666666668
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s1/best_model.zip": {
+     "mean": -11503.208333333334,
+     "switches_mean": {
+      "A0": 19.75,
+      "B0": 17.416666666666668,
+      "C0": 19.416666666666668,
+      "D0": 15.916666666666666
+     },
+     "blocked": false,
+     "catastrophic": 9
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s2/best_model.zip": {
+     "mean": -1521.1666666666667,
+     "switches_mean": {
+      "A0": 18.541666666666668,
+      "B0": 21.291666666666668,
+      "C0": 24.75,
+      "D0": 11.25
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s3/best_model.zip": {
+     "mean": -1439.875,
+     "switches_mean": {
+      "A0": 19.958333333333332,
+      "B0": 15.5,
+      "C0": 26.208333333333332,
+      "D0": 16.583333333333332
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s4/best_model.zip": {
+     "mean": -1222.6666666666667,
+     "switches_mean": {
+      "A0": 20.125,
+      "B0": 13.458333333333334,
+      "C0": 24.125,
+      "D0": 18.25
+     },
+     "blocked": false,
+     "catastrophic": 0
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s5/best_model.zip": {
+     "mean": -3289.2083333333335,
+     "switches_mean": {
+      "A0": 20.666666666666668,
+      "B0": 23.0,
+      "C0": 21.708333333333332,
+      "D0": 21.208333333333332
+     },
+     "blocked": false,
+     "catastrophic": 2
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s6/best_model.zip": {
+     "mean": -1925.625,
+     "switches_mean": {
+      "A0": 19.916666666666668,
+      "B0": 8.75,
+      "C0": 22.5,
+      "D0": 13.041666666666666
+     },
+     "blocked": false,
+     "catastrophic": 1
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s7/best_model.zip": {
+     "mean": -9471.208333333334,
+     "switches_mean": {
+      "A0": 12.75,
+      "B0": 23.333333333333332,
+      "C0": 20.416666666666668,
+      "D0": 16.0
+     },
+     "blocked": false,
+     "catastrophic": 8
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s8/best_model.zip": {
+     "mean": -2228.875,
+     "switches_mean": {
+      "A0": 22.541666666666668,
+      "B0": 26.625,
+      "C0": 25.5,
+      "D0": 25.625
+     },
+     "blocked": false,
+     "catastrophic": 1
+    },
+    "models/checkpoints/v2/control_aligned/dream_transformer_s9/best_model.zip": {
+     "mean": -1270.9166666666667,
+     "switches_mean": {
+      "A0": 19.125,
+      "B0": 14.416666666666666,
+      "C0": 22.958333333333332,
+      "D0": 10.5
+     },
+     "blocked": false,
+     "catastrophic": 0
+    }
+   }
+  }
+ },
+ "comparisons": {
+  "lstm": {
+   "aligned_minus_phase3": {
+    "d": 4026.754166666671,
+    "t": 0.5946786647837251,
+    "df": 12.193867197423904,
+    "p": 0.5629305962548599,
+    "ci95": [
+     -10700.692017084548,
+     18754.20035041789
+    ]
+   },
+   "criteria": {
+    "blocked_episodes_halved": false,
+    "catastrophic_halved": false,
+    "return_ci_positive": false
+   },
+   "important": false
+  },
+  "transformer": {
+   "aligned_minus_phase3": {
+    "d": 502.07083333333367,
+    "t": 0.1892548129486875,
+    "df": 13.23719721542346,
+    "p": 0.8527641468887706,
+    "ci95": [
+     -5218.711940505031,
+     6222.853607171697
+    ]
+   },
+   "criteria": {
+    "blocked_episodes_halved": false,
+    "catastrophic_halved": false,
+    "return_ci_positive": false
+   },
+   "important": false
+  }
+ },
+ "plan_ppo": {
+  "lstm": {
+   "uses": "phase3",
+   "checkpoints": "models/checkpoints/v2/control/dream_lstm_s<i>"
+  },
+  "transformer": {
+   "uses": "phase3",
+   "checkpoints": "models/checkpoints/v2/control/dream_transformer_s<i>"
+  }
+ }
+}

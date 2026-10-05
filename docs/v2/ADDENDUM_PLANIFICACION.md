@@ -351,3 +351,9 @@ las cifras no cambian.
 
 Nada más cambia: brazos, H ∈ {3, 5, 7}, alineación del Experimento 1, relleno inicial, desempate,
 semillas, comparaciones y Bonferroni (12, α' = 0.05/12).
+
+### 13.1 Resultado de la regla de `plan_ppo` (6 de octubre de 2026)
+
+Con la evaluación de `ADDENDUM_SUENO_CORREGIDO.md`, sección 7, ninguna arquitectura tuvo un cambio
+importante. **`plan_ppo` usa los PPO de la Fase 3 en las dos arquitecturas**
+(`models/checkpoints/v2/control/dream_<arq>_s<i>/`). Ningún planificador se ha simulado todavía.
