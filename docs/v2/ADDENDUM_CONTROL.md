@@ -711,3 +711,119 @@ autorización del autor, y el equipo quedó enchufado.
 
 Hasta este momento no se ha visto ningún resultado del RL directo en test. Lo siguiente es la
 evaluación única de los 20 RL directos en 22000–22023 y `scripts/v2/analyze_control_stage3.py`.
+
+### 12.3 Resultados de la etapa 3 en test (escrito después de la evaluación única)
+
+Fuentes:
+
+- `docs/results/v2/control/test_stage3.json` / `.csv`: los 20 RL directos, una sola evaluación en
+  22000–22023, con acuerdo con las referencias.
+- `test_stage3_analysis.json`, de `scripts/v2/analyze_control_stage3.py`, escrito antes de la
+  evaluación. Combina estos episodios con los de la etapa 2, que no se reevaluaron.
+
+**Retorno en test** (media de 24 escenarios; en los brazos aprendidos, media de 10 semillas):
+
+| | Total | Mediana | A0 | B0 | C0 | D0 | Catastróficos |
+|---|---|---|---|---|---|---|---|
+| `sueno_lstm` (adoptado) | −16,168.1 | −3,225.0 | −3,394.4 | −2,247.3 | −5,432.6 | −5,093.7 | 118/240 |
+| `sueno_transformer` | −2,340.4 | −1,567.0 | −581.3 | −502.9 | −943.8 | −312.4 | 18/240 |
+| `directo_10k` | −6,138.3 | −3,192.5 | −1,826.9 | −1,737.0 | −1,736.7 | −837.8 | 96/240 |
+| `directo_30k` | −1,741.6 | −1,733.0 | −497.9 | −309.0 | −669.2 | −265.4 | 2/240 |
+| `espera_mas_larga` | −1,279.5 | −1,010.0 | −556.5 | −107.9 | −486.4 | −128.8 | 1/24 |
+| `min_verde_y_cambiar` | −1,309.7 | −1,305.5 | −451.5 | −230.4 | −365.3 | −262.5 | 0/24 |
+| `cola_mas_larga` | −1,260.0 | −1,049.5 | −565.8 | −107.0 | −485.0 | −102.2 | 1/24 |
+| `fijo_2_3` | −1,591.7 | −1,617.0 | −347.9 | −209.5 | −864.2 | −170.2 | 0/24 |
+| `max_presion` | −7,565.5 | −6,555.5 | −1,585.2 | −2,916.0 | −1,086.8 | −1,977.5 | 22/24 |
+
+**Medias por semilla del RL directo (total):**
+
+- 10k: −5,979.8, −7,513.5, −2,677.4, −3,578.4, −4,877.2, −5,163.3, −19,850.2, −3,028.6, −3,915.6
+  y −4,799.0.
+- 30k: −1,833.5, −1,573.4, −1,714.2, −1,572.9, −1,888.7, −1,908.0, −1,550.6, −1,784.2, −1,934.6
+  y −1,655.8.
+
+#### Las 8 comparaciones planificadas
+
+α' = 0.05/8 = 0.00625, IC al 99.375%. Test principal: Welch sobre las medias por semilla (t de una
+muestra contra una referencia). La t pareada y el Wilcoxon por escenario son secundarios y
+**pseudorreplicación respecto del método**.
+
+| # | Comparación | Diferencia | p principal | IC al 99.375% | ¿Significativo? | t pareada (secundaria) | Wilcoxon (secundario) | Escenarios ganados |
+|---|---|---|---|---|---|---|---|---|
+| P1 | LSTM − Transformer | −13,827.6 | 0.053 | [−35,831.4, +8,176.1] | no | 4.0e-10 | 1.2e-7 | 0/24 |
+| P2a | LSTM − directo 10k | −10,029.8 | 0.148 | [−32,027.3, +11,967.8] | no | 1.1e-6 | 1.2e-6 | 1/24 |
+| P2b | Transformer − directo 10k | **+3,797.9** | 0.046 | [−1,867.0, +9,462.7] | no | 1.2e-6 | 1.2e-7 | **24/24** |
+| P3a | LSTM − directo 30k | −14,426.5 | 0.045 | [−36,442.2, +7,589.2] | no | 2.6e-10 | 1.2e-7 | 0/24 |
+| P3b | Transformer − directo 30k | −598.8 | 0.336 | [−2,680.2, +1,482.5] | no | 0.022 | 0.0072 | 5/24 |
+| P4 | LSTM − `espera_mas_larga` (total) | −14,888.5 | 0.040 | [−36,904.3, +7,127.3] | no | 1.0e-10 | 1.2e-7 | 0/24 |
+| P5 | LSTM − `espera_mas_larga` (B0) | −2,139.5 | 0.028 | [−5,037.4, +758.5] | no | 5.2e-6 | 1.2e-7 | 0/24 |
+| P6 | LSTM − `min_verde_y_cambiar` (C0) | −5,067.3 | 0.245 | [−19,513.9, +9,379.3] | no | 1.1e-4 | 1.2e-7 | 0/24 |
+
+- **Ninguna de las 8 alcanza α' en el test principal: todas son brechas no significativas.**
+- Las brechas numéricas más claras:
+  - **P2b:** el sueño con Transformer supera al directo de 10k en los 24 escenarios (+3,798, p
+    por semilla 0.046).
+  - **P3b:** el directo de 30k supera al sueño con Transformer (−599, p 0.34; el sueño gana 5/24).
+  - En todo lo demás, la LSTM adoptada queda por debajo.
+- Ningún brazo aprendido supera a la mejor referencia en el total. El directo de 30k (−1,741.6)
+  también queda por debajo de `espera_mas_larga` (−1,279.5), de forma descriptiva.
+
+#### Interacciones reales por semilla (`run_info.json`)
+
+| | Pasos reales | Frente al sueño sin compartir el dataset (12,600) | Frente al sueño compartiéndolo entre 10 semillas (3,960) |
+|---|---|---|---|
+| Sueño (los dos brazos) | 3,000 de selección + el dataset de 9,600 | — | — |
+| Directo 10k | **13,240** | **1.05x** | **3.3x** |
+| Directo 30k | **39,208** | **3.1x** | **9.9x** |
+
+La razón va de **1.05x a 3.1x sin compartir el dataset** (la comparación conservadora) y de **3.3x
+a 9.9x compartiéndolo**. Como ningún brazo del sueño supera de forma significativa a ningún brazo
+directo, en la v2 **no hay ventaja de eficiencia demostrada**:
+
+- El sueño con Transformer gana en los números al directo de 10k, que cuesta 1.05x–3.3x más.
+- El sueño con Transformer pierde en los números contra el directo de 30k, que cuesta 3.1x–9.9x
+  más.
+- La LSTM adoptada pierde contra los dos.
+
+#### Bloqueo y selección del RL directo
+
+**Bloqueados, con la regla de 11.2:** **0/10 en 10k y 0/10 en 30k**.
+
+**A nivel de episodio, descriptivo:**
+
+| | Episodios con menos de 3 cambios en algún semáforo | Retorno medio de esos episodios |
+|---|---|---|
+| Directo 10k | 4/240 (B0 3, D0 1) | −27,201 |
+| Directo 30k | 0/240 | — |
+| Sueño LSTM | 75/240 | — |
+| Sueño Transformer | 2/240 | — |
+
+- Los catastróficos del directo de 10k (96/240) **no vienen del bloqueo**: hace 12–27 cambios
+  por semáforo.
+- **Selección, directo de 10k:** la mejor evaluación es casi siempre la última o la penúltima
+  (9 o 10 de 10; s5, la 5). Todavía estaba aprendiendo.
+- **Selección, directo de 30k:** la mejor está entre la 23 y la 30 de 30 (s5, la 15). Su
+  retorno en validación va de −1,495 a −1,901.
+
+#### Parecido con las referencias, en los mismos estados
+
+Fracción de pasos con la misma decisión, media de los 10 controladores; 0.5 es lo que daría el
+azar. Formato A0 / B0 / C0 / D0.
+
+| Referencia | Sueño LSTM | Sueño Transformer | Directo 10k | Directo 30k |
+|---|---|---|---|---|
+| `fijo_2_3` | 0.53 / 0.54 / 0.50 / 0.55 | 0.55 / 0.54 / 0.50 / 0.55 | 0.53 / 0.53 / 0.49 / 0.53 | 0.53 / 0.53 / 0.49 / 0.53 |
+| `min_verde_y_cambiar` | 0.57 / 0.54 / 0.68 / 0.46 | 0.57 / 0.56 / **0.73** / 0.55 | 0.56 / 0.48 / 0.60 / 0.47 | 0.56 / 0.49 / **0.66** / 0.52 |
+| `cola_mas_larga` | 0.52 / 0.55 / 0.58 / 0.43 | 0.64 / 0.61 / 0.60 / 0.62 | 0.54 / 0.50 / 0.53 / 0.55 | 0.63 / 0.63 / 0.59 / 0.63 |
+| `max_presion` | 0.54 / 0.66 / 0.54 / 0.61 | **0.68 / 0.67** / 0.56 / **0.70** | 0.56 / **0.65** / 0.52 / **0.64** | **0.64 / 0.69** / 0.55 / **0.67** |
+| `espera_mas_larga` | 0.52 / 0.55 / 0.59 / 0.43 | 0.64 / 0.62 / 0.61 / 0.62 | 0.54 / 0.50 / 0.54 / 0.55 | 0.64 / 0.63 / 0.60 / 0.63 |
+
+- **El sueño con Transformer y el directo de 30k se parecen entre sí en el patrón de acuerdo:**
+  más cerca de `max_presion`, `cola_mas_larga` y `espera_mas_larga` en A0, B0 y D0, y de
+  `min_verde_y_cambiar` en C0.
+- El directo de 10k y la LSTM quedan más cerca del azar.
+- Limitación: el acuerdo se mide en los estados que visita cada controlador.
+
+#### Lo que no se hizo
+
+No se cambió nada del sueño, del dataset ni de las reglas. OOD sigue reservado (12.0, punto 4).
