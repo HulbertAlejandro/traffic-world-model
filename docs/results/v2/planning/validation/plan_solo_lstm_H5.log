@@ -1,0 +1,11 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 16ms, vehicles TOT 0 ACT 0 BUF 0)                     
+plan_solo_lstm_H5      lstm_s0: media -9837.4
+plan_solo_lstm_H5      lstm_s1: media -5171.8
+plan_solo_lstm_H5      lstm_s2: media -8873.0
+
+Escenarios: 24 (24000..24023)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_solo_lstm_H5      |    3 |   -7960.7 |  -2442.0 |  -3012.5 |   -936.1 |  -1570.2 | -41362.0 |       51 | [-9837.4, -5171.8, -8873.0]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\validation\plan_solo_lstm_H5.json y .csv

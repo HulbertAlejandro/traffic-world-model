@@ -1,0 +1,11 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 11ms, vehicles TOT 0 ACT 0 BUF 0)                     
+plan_solo_transformer_H7 transformer_s0: media -6760.0
+plan_solo_transformer_H7 transformer_s1: media -2867.5
+plan_solo_transformer_H7 transformer_s2: media -4319.8
+
+Escenarios: 24 (24000..24023)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_solo_transformer_H7 |    3 |   -4649.1 |  -1133.7 |  -1126.1 |  -1367.5 |  -1021.7 | -27293.0 |       28 | [-6760.0, -2867.5, -4319.8]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\validation\plan_solo_transformer_H7.json y .csv

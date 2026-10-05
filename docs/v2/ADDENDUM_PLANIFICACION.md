@@ -429,3 +429,106 @@ reglas de las secciones 3, 5, 6 y 13 a la validación de la sección 14 (24000�
 
 Ningún empate exacto intervino. `plan_ppo` usa los PPO de la Fase 3 (13.1). Estos valores quedan
 fijos para la etapa 2 (test 25000–25047, 10 réplicas).
+
+## 16. Resultados de la validación del Paso 4 (escrito después de fijar la sección 15)
+
+**Ejecución y fuentes.**
+
+- 13 trabajos con 4 procesos, sin fallos, en **29 min** (10:15–10:44 del 6 de octubre). La
+  estimación de la sección 14 era de 1–1.5 h: el microbenchmark de la sección 12 se había medido
+  con el equipo ralentizado.
+- Resultados por episodio en `docs/results/v2/planning/validation/`; el análisis, en
+  `docs/results/v2/planning/validation_analysis.json`.
+- Los PPO del sueño de la Fase 3 son los mismos episodios de `ADDENDUM_SUENO_CORREGIDO.md`,
+  sección 7, contados aquí con el umbral de esta fase (−3,700). Por eso sus catastróficos difieren
+  un poco de los de allí, que usan −3,600.
+
+**Importante: son las réplicas 0–2 en el mismo conjunto en que se eligieron H y el brazo.** Los
+números de los brazos elegidos (\*) tienen un sesgo optimista de selección. La comparación válida
+es la de la etapa 2, en test, con 10 réplicas.
+
+| Brazo | Media | Mediana | A0 | B0 | C0 | D0 | Catastróficos (< −3,700) | Episodios bloqueados | Controladores bloqueados | Cambios A0/B0/C0/D0 | ms por decisión | s por episodio |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `plan_solo_lstm` H3 \* | −3,336.6 | −2,310.0 | −476.5 | −1,229.4 | −588.1 | −1,042.6 | 12/72 | 1/72 | 0/3 | 22.3 / 8.8 / 27.1 / 6.4 | 10 | 5.9 |
+| `plan_solo_lstm` H5 | −7,960.7 | −4,752.5 | −2,442.0 | −3,012.5 | −936.1 | −1,570.2 | 50/72 | 6/72 | 0/3 | 18.2 / 6.6 / 25.2 / 6.7 | 19 | 6.5 |
+| `plan_solo_lstm` H7 | −10,560.4 | −6,938.0 | −5,144.1 | −2,880.8 | −1,085.6 | −1,449.9 | 66/72 | 4/72 | 0/3 | 15.6 / 7.1 / 23.3 / 7.9 | 31 | 7.3 |
+| **`plan_ppo_lstm` H3 \*** | **−1,503.8** | **−1,303.5** | −348.1 | −173.8 | −506.2 | −475.7 | **0/72** | **0/72** | 0/3 | 24.1 / 22.5 / 26.5 / 14.9 | 12 | 6.1 |
+| `plan_ppo_lstm` H5 | −1,829.8 | −1,557.5 | −429.4 | −218.4 | −529.1 | −652.9 | 1/72 | 0/72 | 0/3 | 25.2 / 23.3 / 27.0 / 13.5 | 24 | 6.8 |
+| `plan_ppo_lstm` H7 | −1,791.0 | −1,604.5 | −419.2 | −245.1 | −552.0 | −574.7 | 1/72 | 0/72 | 0/3 | 24.2 / 23.5 / 26.3 / 14.2 | 38 | 7.6 |
+| `plan_solo_transformer` H3 \* | −1,360.7 | −1,199.0 | −330.6 | −318.0 | −556.4 | −155.7 | 1/72 | 0/72 | 0/3 | 23.7 / 10.1 / 24.9 / 10.8 | 11 | 5.8 |
+| `plan_solo_transformer` H5 | −2,901.3 | −2,349.0 | −540.5 | −1,021.3 | −833.5 | −506.0 | 17/72 | 1/72 | 0/3 | 21.9 / 7.8 / 22.2 / 9.8 | 19 | 6.5 |
+| `plan_solo_transformer` H7 | −4,649.1 | −3,214.0 | −1,133.7 | −1,126.1 | −1,367.5 | −1,021.7 | 28/72 | 0/72 | 0/3 | 19.6 / 8.7 / 20.0 / 9.7 | 27 | 6.9 |
+| **`plan_ppo_transformer` H3 \*** | **−1,123.9** | **−1,069.5** | −318.4 | −155.4 | −509.0 | −141.1 | **0/72** | **0/72** | 0/3 | 24.6 / 21.1 / 25.9 / 18.9 | 13 | 5.9 |
+| `plan_ppo_transformer` H5 | −1,221.0 | −1,183.0 | −331.9 | −228.1 | −513.8 | −147.3 | 0/72 | 0/72 | 0/3 | 26.1 / 24.5 / 26.0 / 19.8 | 23 | 6.8 |
+| `plan_ppo_transformer` H7 | −1,256.6 | −1,176.5 | −342.9 | −254.4 | −489.2 | −170.1 | 0/72 | 0/72 | 0/3 | 25.0 / 24.2 / 25.8 / 20.9 | 34 | 7.3 |
+| Sueño LSTM, Fase 3 (10 semillas) | −14,785.3 | −2,969.5 | −3,442.5 | −1,845.2 | −6,100.7 | −3,397.0 | 109/240 | 66/240 | 1/10 | 19.3 / 17.2 / 21.4 / 15.0 | — | 5.5 |
+| Sueño LSTM, Fase 3 (semillas 0–2) | −14,335.6 | −8,054.5 | −5,313.6 | −1,497.8 | −1,263.4 | −6,260.7 | 45/72 | 29/72 | 1/3 | 20.7 / 20.7 / 24.8 / 7.4 | — | 5.5 |
+| Sueño Transformer, Fase 3 (10 semillas) | −4,025.4 | −1,466.5 | −1,236.7 | −471.1 | −1,905.4 | −412.3 | 20/240 | 4/240 | 0/10 | 20.6 / 18.2 / 23.5 / 18.0 | — | 5.4 |
+| Sueño Transformer, Fase 3 (semillas 0–2) | −9,373.8 | −1,620.5 | −3,184.0 | −986.6 | −4,728.7 | −474.5 | 12/72 | 4/72 | 0/3 | 20.5 / 19.9 / 21.9 / 14.8 | — | 5.5 |
+| `fijo_2_3` | −1,622.4 | −1,612.0 | −392.8 | −163.2 | −893.5 | −172.9 | 0/24 | 0/24 | — | 23 / 23 / 23 / 23 | — | 4.2 |
+| `min_verde_y_cambiar` | −1,247.2 | −1,206.5 | −409.8 | −230.4 | **−322.6** | −284.5 | 0/24 | 0/24 | — | 29 / 29 / 29 / 29 | — | 2.4 |
+| `cola_mas_larga` | −1,112.7 | −989.0 | −375.3 | **−83.8** | −561.0 | −92.6 | 0/24 | 0/24 | — | 18.1 / 8.0 / 20.2 / 7.3 | — | 2.4 |
+| `max_presion` | −6,329.5 | −6,013.0 | −1,304.5 | −2,028.0 | −1,189.2 | −1,807.9 | 23/24 | 2/24 | — | 12.3 / 4.7 / 16.8 / 4.6 | — | 2.6 |
+| `espera_mas_larga` | **−1,033.6** | **−954.0** | −313.8 | −86.2 | −563.6 | −70.1 | 0/24 | 0/24 | — | 18.5 / 8.2 / 20.6 / 7.4 | — | 2.5 |
+
+\* = el H elegido para ese brazo. Los "s por episodio" incluyen SUMO, la planificación y las
+consultas de acuerdo con las referencias, con 4 procesos a la vez.
+
+**Medias por réplica (s0, s1, s2):**
+
+| Brazo | H3 | H5 | H7 |
+|---|---|---|---|
+| `plan_ppo_lstm` | −1,303, −2,031, −1,177 | −1,410, −2,440, −1,640 | −1,521, −2,375, −1,477 |
+| `plan_ppo_transformer` | −1,138, −1,103, −1,131 | −1,208, −1,250, −1,206 | −1,180, −1,319, −1,270 |
+| `plan_solo_lstm` | −2,299, −2,851, −4,860 | — | — |
+| `plan_solo_transformer` | −1,499, −1,203, −1,380 | — | — |
+
+**Bloqueo** (las reglas de la Fase 3):
+
+- **Ningún planificador queda bloqueado como controlador**: ninguna réplica tiene una media de
+  menos de 3 cambios por episodio en ningún semáforo.
+- **Los valores más bajos:**
+  - `plan_solo_lstm` H7 s2: 4.4 cambios por episodio en un semáforo.
+  - `plan_ppo_lstm` s1 con H5 y H7: 5.8 y 5.6.
+  - `plan_solo_lstm` H3: 5.6–6.4.
+- **A nivel de episodio:** `plan_solo_lstm` 1, 6 y 4 de 72 (H3, H5 y H7) y `plan_solo_transformer`
+  H5 1/72. Los `plan_ppo`, 0/72 en todos los H.
+- **`plan_solo` cambia poco en B0 y D0** (6–11 cambios por episodio), parecido a
+  `cola_mas_larga` y `espera_mas_larga` (≈ 8). Con H largo la continuación "mantener" lo empuja a
+  mantener más, y el costo crece.
+
+**Acuerdo con las referencias en los mismos estados, H = 3** (A0 / B0 / C0 / D0; 0.5 es azar):
+
+| Referencia | `plan_solo_lstm` | `plan_ppo_lstm` | `plan_solo_transformer` | `plan_ppo_transformer` |
+|---|---|---|---|---|
+| `fijo_2_3` | 0.53 / 0.57 / 0.48 / 0.57 | 0.53 / 0.52 / 0.50 / 0.56 | 0.48 / 0.56 / 0.49 / 0.56 | 0.51 / 0.52 / 0.49 / 0.53 |
+| `min_verde_y_cambiar` | 0.71 / 0.27 / **0.86** / 0.21 | 0.69 / 0.68 / **0.78** / 0.45 | **0.74** / 0.31 / 0.73 / 0.34 | **0.73** / 0.60 / **0.73** / 0.59 |
+| `cola_mas_larga` | 0.55 / 0.59 / 0.54 / 0.58 | 0.63 / 0.54 / 0.61 / 0.56 | 0.57 / 0.66 / 0.64 / 0.70 | 0.60 / 0.58 / 0.65 / 0.57 |
+| `max_presion` | 0.64 / **0.80** / 0.52 / **0.84** | 0.62 / 0.63 / 0.56 / **0.73** | 0.58 / **0.79** / 0.61 / **0.79** | 0.56 / 0.57 / 0.57 / 0.66 |
+| `espera_mas_larga` | 0.55 / 0.59 / 0.55 / 0.57 | 0.63 / 0.54 / 0.61 / 0.56 | 0.57 / 0.66 / 0.64 / 0.70 | 0.60 / 0.58 / 0.65 / 0.57 |
+
+**Lectura descriptiva** (validación y 3 réplicas; no es un resultado de test):
+
+1. **Planificar desde el estado real con H = 3 elimina el bloqueo y los catastróficos del PPO del
+   sueño**:
+
+   | Arquitectura | PPO del sueño, Fase 3, s0–s2 | `plan_ppo`, H = 3 |
+   |---|---|---|
+   | LSTM | −14,336; 45/72 catastróficos; 29/72 episodios bloqueados | −1,504; 0/72; 0/72 |
+   | Transformer | −9,374; 12/72 catastróficos | −1,124; 0/72 |
+
+2. **Horizonte más largo, peor, en los 4 brazos.** Es consistente con los diagnósticos de
+   fidelidad: el error del modelo crece con los pasos imaginados. Con `plan_solo` es mucho más
+   marcado, porque la continuación "mantener" lleva el modelo a fases largas.
+3. **Frente a las reglas:**
+   - `plan_ppo_transformer` H3 (−1,124) queda cerca de `cola_mas_larga` (−1,113) y de
+     `espera_mas_larga` (−1,034), sin superarlas.
+   - `plan_ppo_lstm` H3 (−1,504) queda entre `fijo_2_3` (−1,622) y `min_verde_y_cambiar`
+     (−1,247).
+   - En C0, el mejor (−506 a −509) no alcanza a `min_verde_y_cambiar` (−323), aunque se le parece
+     en las decisiones (0.73–0.78).
+4. **Costo:** de 10 a 38 ms por decisión con un hilo por proceso (≈ 6 s por episodio con SUMO y
+   el acuerdo). El costo crece con H y es similar entre arquitecturas.
+
+**Nada de esto decide nada.** Las decisiones de la etapa 2 (sección 15) ya están fijadas, y la
+comparación con test se hará con las 10 réplicas.

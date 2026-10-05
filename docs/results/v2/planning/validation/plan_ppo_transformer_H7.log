@@ -1,0 +1,11 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 10ms, vehicles TOT 0 ACT 0 BUF 0)                     
+plan_ppo_transformer_H7 transformer_s0: media -1180.3
+plan_ppo_transformer_H7 transformer_s1: media -1319.5
+plan_ppo_transformer_H7 transformer_s2: media -1270.1
+
+Escenarios: 24 (24000..24023)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_ppo_transformer_H7 |    3 |   -1256.6 |   -342.9 |   -254.4 |   -489.2 |   -170.1 |  -2415.0 |        0 | [-1180.3, -1319.5, -1270.1]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\validation\plan_ppo_transformer_H7.json y .csv

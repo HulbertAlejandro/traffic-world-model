@@ -1,0 +1,17 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 10ms, vehicles TOT 0 ACT 0 BUF 0)                     
+fijo_2_3               deterministic: media -1622.4
+min_verde_y_cambiar    deterministic: media -1247.2
+cola_mas_larga         deterministic: media -1112.7
+max_presion            deterministic: media -6329.5
+espera_mas_larga       deterministic: media -1033.6
+
+Escenarios: 24 (24000..24023)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+fijo_2_3               |    1 |   -1622.4 |   -392.8 |   -163.2 |   -893.5 |   -172.9 |  -2402.0 |        0 | [-1622.4]
+min_verde_y_cambiar    |    1 |   -1247.2 |   -409.8 |   -230.4 |   -322.6 |   -284.5 |  -2085.0 |        0 | [-1247.2]
+cola_mas_larga         |    1 |   -1112.7 |   -375.3 |    -83.8 |   -561.0 |    -92.6 |  -2280.0 |        0 | [-1112.7]
+max_presion            |    1 |   -6329.5 |  -1304.5 |  -2028.0 |  -1189.2 |  -1807.9 | -12146.0 |       23 | [-6329.5]
+espera_mas_larga       |    1 |   -1033.6 |   -313.8 |    -86.2 |   -563.6 |    -70.1 |  -1899.0 |        0 | [-1033.6]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\planning\validation\references.json y .csv
