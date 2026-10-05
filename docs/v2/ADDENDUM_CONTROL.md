@@ -827,3 +827,48 @@ azar. Formato A0 / B0 / C0 / D0.
 #### Lo que no se hizo
 
 No se cambió nada del sueño, del dataset ni de las reglas. OOD sigue reservado (12.0, punto 4).
+
+## 13. Semillas para validar la v2.1 (definidas el 5 de octubre de 2026; todavía sin usar)
+
+Escrito después de la etapa 3 y **antes de diseñar ninguna v2.1**. Ninguna de estas semillas se ha
+simulado. El test de la v2 (22000–22023) ya se vio completo y no sirve para validar rediseños
+(sección 12.0, punto 5), y OOD (23000–23029) sigue reservado para la comparación final.
+
+| Rango | Escenarios | Uso |
+|---|---|---|
+| **24000–24023** | 24 | **Validación de la v2.1:** decisiones de diseño, selección de checkpoints (como en la v2, con las 5 primeras, 24000–24004, en la evaluación periódica), umbrales y mejores referencias. |
+| **25000–25047** | **48** | **Test de la v2.1:** comparación principal, **una sola vez**, al final, con todo ya decidido y pre-registrado. |
+| 26000–26999 | — | Reserva por si la v2.1 recolecta un dataset nuevo. No se evalúa nada en este rango. |
+
+**Por qué 48 en el test.** Con 24 escenarios, las pruebas por escenario de la v2 fueron muy
+significativas, pero el test principal es por semilla y su potencia depende de las 10 semillas,
+no de los escenarios. Duplicar los escenarios reduce el ruido de cada media por semilla (cada
+controlador se evalúa en más tráfico) a un costo moderado: unos 2.5 s por episodio, es decir,
+≈ 40 min para 20 controladores. La validación queda en 24, como en la v2.
+
+**Comprobación de que no se solapan** (hecha con un script, contra todas las semillas usadas en el
+proyecto):
+
+| Grupo | Rangos |
+|---|---|
+| v2, Fase 0, demanda y dataset | calibración 11000–11019, piloto del dataset 19000–19017 |
+| v2, splits | train 20000–20111, validación 21000–21023, test 22000–22023, OOD 23000–23029 |
+| v2, entrenamiento del RL directo | **30000–30503** usadas, reserva 30000–30999 |
+| Tests | 19900–19901 (concurrencia) |
+| v1 | 3000–3014, 5000–5014, 7000–7029, 9000–9035, entrenamiento del RL directo 10000–~10700, evaluación periódica 20000–20004 |
+
+Resultado: **ningún solapamiento**, ni con esos rangos ni entre los tres nuevos.
+
+**Corrección.** El entrenamiento del RL directo de la v2 no usó solo 30000–30009. Cada episodio
+consume una semilla nueva (`ReseedingWrapper.training_seeds(30000)`):
+
+| Corrida | Episodios | Semillas |
+|---|---|---|
+| 30k | 504 | 30000–30503 |
+| 10k | 171 | 30000–30170 |
+
+Un RL directo de la v2.1 con hasta ~1,000 episodios sigue dentro de la reserva 30000–30999.
+
+Cuando se use, el rango se agrega a `SPLIT_SEEDS` de `scripts/v2/evaluate_control_v2.py`, con la
+misma confirmación explícita para el test que tienen `test` y `ood`, y se pre-registra antes de
+entrenar.
