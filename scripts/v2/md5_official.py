@@ -4,6 +4,7 @@
     python scripts/v2/md5_official.py --tag after --compare before
     python scripts/v2/md5_official.py --control --tag control_before    # Phase 3 (docs/v2/ADDENDUM_CONTROL.md)
     python scripts/v2/md5_official.py --planning --tag planning_before  # v2.1-A (docs/v2/ADDENDUM_PLANIFICACION.md)
+    python scripts/v2/md5_official.py --ood --tag ood_before            # OOD (docs/v2/ADDENDUM_OOD.md)
 
 Covers v1's network, dataset (raw and processed), official checkpoints (Autoencoder, LSTM,
 Transformer/TSMixer, the three PPO controllers) and the v2 network, route file and raw dataset.
@@ -48,6 +49,14 @@ PLANNING_PATTERNS = (
     "docs/results/v2/control/*",
 )
 
+# --ood adds, on top of --planning, the v2.1 results and controllers the OOD run must not modify.
+OOD_PATTERNS = (
+    "models/checkpoints/v2/control_aligned/*/*",
+    "docs/results/v2/dream_alignment/*",
+    "docs/results/v2/planning/*",
+    "docs/results/v2/planning/*/*",
+)
+
 
 def snapshot(patterns: tuple[str, ...] = PATTERNS) -> dict[str, str]:
     files = sorted({p for pat in patterns for p in ROOT.glob(pat) if p.is_file()})
@@ -60,12 +69,15 @@ def main() -> None:
     parser.add_argument("--compare")
     parser.add_argument("--control", action="store_true", help="also cover the Phase 3 inputs (CONTROL_PATTERNS)")
     parser.add_argument("--planning", action="store_true", help="--control plus the Phase 3 controllers and results")
+    parser.add_argument("--ood", action="store_true", help="--planning plus the v2.1 controllers and results")
     args = parser.parse_args()
     patterns = PATTERNS
-    if args.control or args.planning:
+    if args.control or args.planning or args.ood:
         patterns += CONTROL_PATTERNS
-    if args.planning:
+    if args.planning or args.ood:
         patterns += PLANNING_PATTERNS
+    if args.ood:
+        patterns += OOD_PATTERNS
     snap = snapshot(patterns)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"md5_{args.tag}.json").write_text(json.dumps(snap, indent=1), encoding="utf-8")
