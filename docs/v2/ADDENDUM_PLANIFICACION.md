@@ -407,3 +407,25 @@ referencias agrega algo):
   (`md5_official.py --planning`, que incluye `models/checkpoints/v2/control/` y
   `docs/results/v2/control/`).
 - Equipo enchufado; 3.0 GB disponibles tras cerrar Edge, con la autorización del autor.
+
+## 15. Valores fijados por las reglas en validación (6 de octubre de 2026; escrito antes que cualquier otra cosa)
+
+Salen de `docs/results/v2/planning/validation_analysis.json`
+(`scripts/v2/analyze_planning_validation.py`, escrito antes de simular), aplicando sin cambios las
+reglas de las secciones 3, 5, 6 y 13 a la validación de la sección 14 (24000–24023; réplicas 0–2):
+
+| Qué | Valor | Detalle |
+|---|---|---|
+| Umbral de catastróficos | **−3,700** | Peor `fijo_2_3`: −2,402.0; 1.5 × −2,402.0 = −3,603 → −3,700 |
+| Mejor regla, total (Q4) | **`espera_mas_larga`** | −1,033.6 |
+| Mejor regla, B0 (Q5) | **`cola_mas_larga`** | −83.8 |
+| Mejor regla, C0 (Q6) | **`min_verde_y_cambiar`** | −322.6 |
+| H de `plan_solo_lstm` | **3** | |
+| H de `plan_ppo_lstm` | **3** | |
+| H de `plan_solo_transformer` | **3** | |
+| H de `plan_ppo_transformer` | **3** | |
+| Mejor brazo LSTM (P*_lstm) | **`plan_ppo_lstm`**, H = 3 | −1,503.8, frente a `plan_solo_lstm` H = 3: −3,336.6 |
+| Mejor brazo Transformer (P*_transformer) | **`plan_ppo_transformer`**, H = 3 | −1,123.9, frente a `plan_solo_transformer` H = 3: −1,360.7 |
+
+Ningún empate exacto intervino. `plan_ppo` usa los PPO de la Fase 3 (13.1). Estos valores quedan
+fijos para la etapa 2 (test 25000–25047, 10 réplicas).
