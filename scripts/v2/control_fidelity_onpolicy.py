@@ -13,6 +13,9 @@ block), in control steps. Bias is reported by the longest hold over the four sig
 11-19, >= 20 steps) and, for >= 20, by which signal holds.
 
     python scripts/v2/control_fidelity_onpolicy.py   # -> docs/results/v2/control/fidelity_onpolicy_validation.json
+    python scripts/v2/control_fidelity_onpolicy.py --window-alignment aligned --output docs/results/v2/dream_alignment/fidelity_onpolicy_validation_aligned.json
+
+--window-alignment and --output as in control_fidelity.py (the published run is "legacy").
 """
 
 from __future__ import annotations
@@ -32,7 +35,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from environments.corridor_dream_environment import CorridorDreamEnvironment, world_model_dir  # noqa: E402
 from environments.four_intersections import TRAFFIC_SIGNAL_IDS  # noqa: E402
-from scripts.v2.control_fidelity import HORIZON, imagined_vs_real  # noqa: E402
+from scripts.v2.control_fidelity import HORIZON, imagined_vs_real, parse_args  # noqa: E402
 
 SCENARIOS = tuple(range(21000, 21006))   # validation only (section 12, Paso 2)
 ARCHITECTURES = ("lstm", "transformer")
@@ -72,7 +75,8 @@ def holds(raw_states: np.ndarray) -> np.ndarray:
     return np.floor(raw_states[:, cols] / STEP_SECONDS).astype(int)
 
 
-def windows_for_controller(arch: str, seed: int, trajectories: dict, tmp: Path) -> list[dict]:
+def windows_for_controller(arch: str, seed: int, trajectories: dict, tmp: Path,
+                           window_alignment: str = "legacy") -> list[dict]:
     path = tmp / f"{arch}_s{seed}.npz"
     ids = sorted(trajectories)
     np.savez(path, z=np.concatenate([trajectories[s]["z"] for s in ids]),
@@ -81,7 +85,8 @@ def windows_for_controller(arch: str, seed: int, trajectories: dict, tmp: Path) 
              rewards=np.concatenate([trajectories[s]["rewards"] for s in ids]),
              episode_id=np.concatenate([np.full(len(trajectories[s]["z"]), s) for s in ids]),
              time_step=np.concatenate([np.arange(len(trajectories[s]["z"])) for s in ids]))
-    dream = CorridorDreamEnvironment(world_model_dir(arch, seed), seed_episodes_path=path, max_dream_steps=HORIZON)
+    dream = CorridorDreamEnvironment(world_model_dir(arch, seed), seed_episodes_path=path, max_dream_steps=HORIZON,
+                                     window_alignment=window_alignment)
     rows = imagined_vs_real(dream)
     L = dream.sequence_length
     records = []
@@ -161,6 +166,7 @@ def summarize(records: list[dict]) -> dict:
 
 
 def main() -> None:
+    args = parse_args(OUTPUT)
     from stable_baselines3 import PPO
 
     from environments.scaled_corridor_environment import ScaledCorridorEnvironment
@@ -175,7 +181,7 @@ def main() -> None:
                 for seed in SEEDS:
                     model = PPO.load(CONTROL_DIR / f"dream_{arch}_s{seed}" / "best_model.zip", device="cpu")
                     trajectories = record_trajectories(model, scaled_env, SCENARIOS)
-                    records += windows_for_controller(arch, seed, trajectories, Path(tmp))
+                    records += windows_for_controller(arch, seed, trajectories, Path(tmp), args.window_alignment)
                     # Check: on the selection seeds 21000-21004 the recorded trajectories must give
                     # the best mean real return the training's EvalCallback logged.
                     with np.load(CONTROL_DIR / f"dream_{arch}_s{seed}" / "evaluations.npz") as ev:
@@ -189,7 +195,9 @@ def main() -> None:
     result = {"scenarios": list(SCENARIOS), "horizon": HORIZON, "n_boot": N_BOOT,
               "dataset_action_fidelity": "docs/results/v2/control/fidelity_validation.json",
               "summary": summarize(records), "selection_reproduction": reproduction, "windows": records, "seconds": time.perf_counter() - t0}
-    OUTPUT.write_text(json.dumps(result, indent=1), encoding="utf-8")
+    result["window_alignment"] = args.window_alignment
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, indent=1), encoding="utf-8")
     for arch, e in result["summary"].items():
         for label in ("clipped", "raw"):
             s = e[label]
@@ -202,7 +210,7 @@ def main() -> None:
         print("   >=20 por semaforo:", {ts: v for ts, v in e["hold_ge_20_by_signal"].items()})
     worst = max(abs(r["logged"] - r["replayed"]) for r in reproduction)
     print(f"reproduccion de la seleccion (21000-21004): diferencia maxima {worst:.4f}")
-    print(f"-> {OUTPUT}")
+    print(f"-> {args.output}")
 
 
 if __name__ == "__main__":

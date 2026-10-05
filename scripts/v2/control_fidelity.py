@@ -11,6 +11,10 @@ Per model: Pearson and bias (mean imagined - real), with 95% CIs from a bootstra
 architecture: the mean over its 10 models, bootstrapped with the same episode resamples.
 
     python scripts/v2/control_fidelity.py     # -> docs/results/v2/control/fidelity_validation.json
+    python scripts/v2/control_fidelity.py --window-alignment aligned --output docs/results/v2/dream_alignment/fidelity_validation_aligned.json
+
+--window-alignment picks CorridorDreamEnvironment's window alignment (default "legacy", the published
+run; docs/v2/ADDENDUM_PLANIFICACION.md, section 11). An existing --output is never replaced.
 """
 
 from __future__ import annotations
@@ -95,7 +99,20 @@ def _stats(rows: np.ndarray, col: int) -> tuple[float, float]:
     return float(np.corrcoef(imagined, real)[0, 1]), float((imagined - real).mean())
 
 
+def parse_args(default_output: Path, argv=None):
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--window-alignment", choices=("legacy", "aligned"), default="legacy")
+    parser.add_argument("--output", type=Path, default=default_output)
+    args = parser.parse_args(argv)
+    if args.output.exists():
+        raise SystemExit(f"{args.output} already exists: choose another --output (published results are never replaced)")
+    return args
+
+
 def main() -> None:
+    args = parse_args(OUTPUT)
     torch.set_num_threads(1)
     episodes = None
     per_model = {}
@@ -103,7 +120,7 @@ def main() -> None:
     for arch in ARCHITECTURES:
         for seed in SEEDS:
             dream = CorridorDreamEnvironment(world_model_dir(arch, seed), seed_episodes_path=VALIDATION_SEQ,
-                                             max_dream_steps=HORIZON)
+                                             max_dream_steps=HORIZON, window_alignment=args.window_alignment)
             data = imagined_vs_real(dream)
             episodes = episodes or sorted(data)
             per_model[(arch, seed)] = data
@@ -112,7 +129,7 @@ def main() -> None:
 
     rng = np.random.default_rng(0)
     resamples = [rng.integers(0, len(episodes), len(episodes)) for _ in range(N_BOOT)]
-    result = {"split": "validation", "episodes": episodes, "horizon": HORIZON, "n_boot": N_BOOT,
+    result = {"split": "validation", "window_alignment": args.window_alignment, "episodes": episodes, "horizon": HORIZON, "n_boot": N_BOOT,
               "windows_per_model": int(sum(len(v) for v in per_model[("lstm", 0)].values())),
               "models": {}, "architectures": {}}
     boot = {}
@@ -141,8 +158,8 @@ def main() -> None:
                 "bias_max": float(point[:, 1].max()),
                 "bias_mean_ci95": np.percentile(mean_boot[:, 1], [2.5, 97.5]).tolist()}
     result["seconds"] = time.perf_counter() - t0
-    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(result, indent=1), encoding="utf-8")
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, indent=1), encoding="utf-8")
 
     for arch in ARCHITECTURES:
         for label in ("clipped", "raw"):
@@ -151,7 +168,7 @@ def main() -> None:
                   f"{a['pearson_mean_ci95'][1]:.3f}] (modelos {a['pearson_min']:.3f}..{a['pearson_max']:.3f}); "
                   f"sesgo {a['bias_mean']:+.1f} [{a['bias_mean_ci95'][0]:+.1f}, {a['bias_mean_ci95'][1]:+.1f}] "
                   f"(modelos {a['bias_min']:+.1f}..{a['bias_max']:+.1f})")
-    print(f"-> {OUTPUT}")
+    print(f"-> {args.output}")
 
 
 if __name__ == "__main__":
