@@ -308,3 +308,46 @@ Por episodio (60 decisiones + ~2.5 s de SUMO):
 **Total ≈ 11.9 h en serie, ≈ 4 h con 4 procesos** (en la etapa 3, 4 procesos rindieron unas
 3 veces más que uno). Si el costo de la LSTM con el equipo a plena potencia resulta la mitad,
 serían ≈ 2.5 h. La LSTM domina el costo.
+
+## 13. Enmienda del 5 de octubre de 2026: escrita ANTES de simular ningún planificador y DESPUÉS de ver los diagnósticos de fidelidad (sección 12)
+
+Ningún planificador se ha simulado todavía. Esta enmienda también se escribió **antes de entrenar
+y evaluar los PPO del sueño corregido** (`ADDENDUM_SUENO_CORREGIDO.md`).
+
+**1. H se elige con 3 réplicas, no con 10.**
+
+- En validation_v21 (24000–24023) se evalúan, para cada brazo, solo los modelos del mundo de
+  semillas **0, 1 y 2**, con H ∈ {3, 5, 7}.
+- Misma regla de la sección 3: el H de **menor costo** (mayor retorno medio, media de las 3
+  réplicas de su media por episodio); ante empate exacto, el H más chico.
+- H queda fijo. **En el test nuevo (25000–25047) se usan las 10 semillas.**
+- El mejor brazo por arquitectura (sección 6) se elige con esas mismas 3 réplicas y su H, con la
+  misma regla.
+- Motivo: el costo. La validación con 10 réplicas se estimó en ≈ 4 h con 4 procesos (sección 12).
+  Con 3 son ≈ 1.2 h.
+
+**2. Definición de `plan_ppo` según la Parte A, por arquitectura.** El criterio de "cambio
+importante" es el de la sección 5 de `ADDENDUM_SUENO_CORREGIDO.md`:
+
+- Si los PPO corregidos de esa arquitectura **cambian de forma importante**, `plan_ppo_<arq>` usa
+  como continuación los **PPO corregidos**
+  (`models/checkpoints/v2/control_aligned/dream_<arq>_s<i>/best_model.zip`).
+- **Si no**, usa los **PPO de la Fase 3** (`models/checkpoints/v2/control/dream_<arq>_s<i>/`),
+  como fija la sección 11.
+- La decisión se toma con el resultado de validation_v21 de la Parte A, se escribe en
+  `ADDENDUM_SUENO_CORREGIDO.md`, y no se cambia después.
+
+**3. Contabilidad de interacciones (sección 8), ajustada a 3 réplicas.** La validación de H y del
+brazo cuesta 2 brazos × 3 H × 24 episodios × 60 pasos × 3 réplicas = **25,920 pasos reales por
+arquitectura**, que sirven a las 10 réplicas del test:
+
+| | Por réplica |
+|---|---|
+| Sin compartir (lo que costaría la validación a una réplica sola: 2 × 3 × 24 × 60) | 8,640 pasos de validación + 9,600 del dataset + 3,000 de la selección del PPO = **21,240** |
+| Compartiéndolos entre las 10 réplicas | 2,592 + 960 + 3,000 = **6,552** |
+
+Si `plan_ppo` usa los PPO corregidos, su selección también cuesta 3,000 pasos por semilla, así que
+las cifras no cambian.
+
+Nada más cambia: brazos, H ∈ {3, 5, 7}, alineación del Experimento 1, relleno inicial, desempate,
+semillas, comparaciones y Bonferroni (12, α' = 0.05/12).
