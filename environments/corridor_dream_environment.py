@@ -18,6 +18,15 @@ each choice), applied to the corridor (docs/v2/DISENO_CONTROL.md, section 2.5):
 
 Shared with v1 and with the world-model evaluation, imported: ``predict_next_step`` (windowing and
 reward de-normalization) and ``load_episodes``.
+
+``window_alignment`` (docs/v2/ADDENDUM_PLANIFICACION.md, section 11):
+- ``"legacy"`` (default, every Phase 3 result): after a step the action window is shifted from the
+  window as it was BEFORE the chosen action was inserted, as v1's DreamEnvironment does. The action
+  applied at a state is therefore never paired with that state in later windows; from the third
+  imagined step (the second, if the action differs from the recorded one) each state carries the
+  previous step's action. Kept so published results reproduce exactly.
+- ``"aligned"``: the window is shifted from the window WITH the chosen action, so every state stays
+  paired with the action applied at it -- Experiment 1's rollout_episode alignment.
 """
 
 from __future__ import annotations
@@ -43,6 +52,7 @@ DEFAULT_SEED_EPISODES_PATH = SEQUENCE_DATA_DIR / "train_seq.npz"
 # as v1's REWARD_CLIP_MIN/MAX; recompute if the dataset is regenerated.
 REWARD_CLIP_MIN = -345.43
 REWARD_CLIP_MAX = 0.0
+WINDOW_ALIGNMENTS = ("legacy", "aligned")
 
 
 def world_model_dir(architecture: str, seed: int) -> Path:
@@ -67,10 +77,13 @@ class CorridorDreamEnvironment(gym.Env):
     """Gymnasium env over the model's imagination of the corridor; usable by SB3's PPO as is."""
 
     def __init__(self, model_dir: str | Path, seed_episodes_path: str | Path = DEFAULT_SEED_EPISODES_PATH,
-                 max_dream_steps: int = 7, eval_seed: int | None = None) -> None:
+                 max_dream_steps: int = 7, eval_seed: int | None = None, window_alignment: str = "legacy") -> None:
         super().__init__()
         if max_dream_steps <= 0:
             raise ValueError(f"max_dream_steps must be positive, got {max_dream_steps}")
+        if window_alignment not in WINDOW_ALIGNMENTS:
+            raise ValueError(f"window_alignment must be one of {WINDOW_ALIGNMENTS}, got {window_alignment!r}")
+        self.window_alignment = window_alignment
         self.max_dream_steps = max_dream_steps
         self.device = torch.device("cpu")
         self.model, hparams, reward_scaler = load_temporal_model(model_dir)
@@ -143,7 +156,10 @@ class CorridorDreamEnvironment(gym.Env):
         reward = float(np.clip(raw_reward, REWARD_CLIP_MIN, REWARD_CLIP_MAX))
 
         self._window_z = torch.cat([self._window_z[1:], pred_z.unsqueeze(0)], dim=0)
-        self._window_actions = torch.cat([self._window_actions[1:], action_encoded.unsqueeze(0)], dim=0)
+        # "legacy" shifts the window from before the chosen action was inserted (see the module docstring);
+        # "aligned" shifts the window that holds it. The new last row is a placeholder replaced next step.
+        previous = self._window_actions if self.window_alignment == "legacy" else action_window
+        self._window_actions = torch.cat([previous[1:], action_encoded.unsqueeze(0)], dim=0)
         self._steps_taken += 1
         truncated = self._steps_taken >= self.max_dream_steps
         info = {"dream_step": self._steps_taken, "imagined": True,

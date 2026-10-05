@@ -64,19 +64,21 @@ def imagined_vs_real(dream: CorridorDreamEnvironment) -> dict[int, np.ndarray]:
 
 
 def rollout_episode_returns(model, reward_scaler: dict, episode: dict, sequence_length: int,
-                            horizon: int = HORIZON) -> np.ndarray:
+                            horizon: int = HORIZON, clip: tuple[float, float] | None = None) -> np.ndarray:
     """Reference imagined returns from Experiment 1's own rollout_episode (actions aligned by time
     index), one per window start 0..T-L-horizon: the per-step predicted rewards are captured from
-    the predict_next_step calls rollout_episode makes, clipped like the dream, and summed."""
+    the predict_next_step calls rollout_episode makes, clipped like the dream, and summed.
+    ``clip`` defaults to the v2 dream's [REWARD_CLIP_MIN, REWARD_CLIP_MAX] (v1 passes its own)."""
     from evaluation import world_model_evaluation as wme
     from environments.corridor_dream_environment import REWARD_CLIP_MAX, REWARD_CLIP_MIN
 
+    low, high = clip if clip is not None else (REWARD_CLIP_MIN, REWARD_CLIP_MAX)
     captured = []
     original = wme.predict_next_step
 
     def capture(*args, **kwargs):
         pred_z, pred_r = original(*args, **kwargs)
-        captured.append(float(np.clip(pred_r.item(), REWARD_CLIP_MIN, REWARD_CLIP_MAX)))
+        captured.append(float(np.clip(pred_r.item(), low, high)))
         return pred_z, pred_r
 
     wme.predict_next_step = capture
