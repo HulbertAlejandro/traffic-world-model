@@ -36,11 +36,12 @@ def available_gb() -> float:
     return psutil.virtual_memory().available / 2**30
 
 
-def run(arm: str, seed: int, name: str | None = None, extra: tuple[str, ...] = ()) -> tuple[str, int, int, float]:
-    """One training in its own process. ``name`` (default ``arm``) names the folder <name>_s<seed>;
-    ``extra`` adds arguments (stage 3: --total-timesteps)."""
+def run(arm: str, seed: int, name: str | None = None, extra: tuple[str, ...] = (),
+        root: Path = CONTROL_DIR) -> tuple[str, int, int, float]:
+    """One training in its own process. ``name`` (default ``arm``) names the folder <root>/<name>_s<seed>;
+    ``extra`` adds arguments (stage 3: --total-timesteps; v2.1-0: --window-alignment)."""
     name = name or arm
-    out_dir = CONTROL_DIR / f"{name}_s{seed}"
+    out_dir = root / f"{name}_s{seed}"
     if (out_dir / "run_info.json").exists():
         return name, seed, 0, 0.0
     out_dir.mkdir(parents=True, exist_ok=True)

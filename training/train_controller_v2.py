@@ -68,7 +68,9 @@ PROTECTED_DIRS = tuple(CHECKPOINT_DIR / name for name in (
     "controller", "controller_direct", "controller_direct_30k", "controller_direct_prefix_bug",
     "controller_direct_30k_prefix_bug", "controller_10seeds", "controller_direct_10seeds",
     "controller_direct_30k_10seeds"))
-PROTECTED_ROOTS = (CHECKPOINT_DIR / "v2" / "arch_comparison", CHECKPOINT_DIR / "v2" / "compression")
+# Since the Phase 3 controllers were evaluated on test, models/checkpoints/v2/control/ is protected too.
+PROTECTED_ROOTS = (CHECKPOINT_DIR / "v2" / "arch_comparison", CHECKPOINT_DIR / "v2" / "compression",
+                   CHECKPOINT_DIR / "v2" / "control")
 OUTPUT_FILES = (
     "best_model.zip", "best_model.json", "best_model_vecnormalize.pkl", "evaluations.npz",
     "ppo_controller_final.zip", "ppo_controller_final.json", "ppo_controller_final_vecnormalize.pkl",
@@ -132,7 +134,8 @@ def check_v2_output_dir(output_dir: Path, overwrite: bool, overwrite_official: b
     return check_output_dir(resolved, PROTECTED_DIRS, OUTPUT_FILES, overwrite, overwrite_official)
 
 
-def make_envs(arm: str, seed: int, config: ControllerConfig, train_counter: dict, eval_counter: dict):
+def make_envs(arm: str, seed: int, config: ControllerConfig, train_counter: dict, eval_counter: dict,
+              window_alignment: str = "legacy"):
     """(make_train_env, make_eval_env) for build_normalized_envs."""
     from environments.corridor_environment import CorridorTrafficEnvironment
     from environments.scaled_corridor_environment import ScaledCorridorEnvironment
@@ -143,7 +146,8 @@ def make_envs(arm: str, seed: int, config: ControllerConfig, train_counter: dict
         from environments.corridor_dream_environment import CorridorDreamEnvironment, world_model_dir
 
         model_dir = world_model_dir(DREAM_ARMS[arm], seed)
-        return (lambda: CorridorDreamEnvironment(model_dir, max_dream_steps=config.dream_max_steps),
+        return (lambda: CorridorDreamEnvironment(model_dir, max_dream_steps=config.dream_max_steps,
+                                                 window_alignment=window_alignment),
                 lambda: RealStepCounter(ReseedingWrapper(ScaledCorridorEnvironment(), eval_seeds()), eval_counter))
     return (lambda: RealStepCounter(ReseedingWrapper(CorridorTrafficEnvironment(),
                                                      ReseedingWrapper.training_seeds(DIRECT_TRAINING_SEED_START)),
@@ -158,6 +162,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--total-timesteps", type=int, default=None,
                         help="imagined steps (dream, default ControllerConfig's 50,000) or real steps (direct, required)")
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--window-alignment", choices=("legacy", "aligned"), default="legacy",
+                        help="dream window alignment (docs/v2/ADDENDUM_SUENO_CORREGIDO.md); legacy = Phase 3")
     parser.add_argument("--overwrite", action="store_true", help="allow replacing files already in --output-dir")
     parser.add_argument("--overwrite-official", action="store_true",
                         help="allow writing into v1's official controller folders or the v2 world-model folders")
@@ -166,6 +172,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
+    if args.arm not in DREAM_ARMS and args.window_alignment != "legacy":
+        raise SystemExit("--window-alignment only applies to the dream arms")
     output_dir = check_v2_output_dir(args.output_dir, args.overwrite, args.overwrite_official)
     config = ppo_config(args.arm, args.seed, args.total_timesteps)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -175,8 +183,8 @@ def main(argv: list[str] | None = None) -> None:
     from stable_baselines3.common.callbacks import EvalCallback
 
     train_counter, eval_counter = {}, {}
-    train_env, eval_env = build_normalized_envs(*make_envs(args.arm, args.seed, config, train_counter, eval_counter),
-                                                config)
+    train_env, eval_env = build_normalized_envs(
+        *make_envs(args.arm, args.seed, config, train_counter, eval_counter, args.window_alignment), config)
     model = PPO("MlpPolicy", train_env, verbose=0, **ppo_kwargs(config))
     eval_callback = EvalCallback(
         eval_env, best_model_save_path=str(output_dir), log_path=str(output_dir),
@@ -203,6 +211,7 @@ def main(argv: list[str] | None = None) -> None:
         "world_model_dir": (Path("models/checkpoints/v2/arch_comparison") / f"{DREAM_ARMS[args.arm]}_raw_s{args.seed}").as_posix()
         if dream else None,
         "observation": "scaler.pkl-normalized state (ScaledCorridorEnvironment)" if dream else "raw state + VecNormalize",
+        "window_alignment": args.window_alignment if dream else None,
         "selection_seeds": list(SELECTION_SEEDS),
         "direct_training_seed_start": None if dream else DIRECT_TRAINING_SEED_START,
         "timesteps_done": int(model.num_timesteps),

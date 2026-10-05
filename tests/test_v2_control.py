@@ -292,3 +292,26 @@ def test_reference_agreement_only_reads_the_simulation():
     assert all(with_shadow[f"agree_espera_mas_larga_{ts}"] == 1.0 for ts in ("A0", "B0", "C0", "D0"))
     assert "agree_espera_mas_larga_A0" not in plain
     assert any(with_shadow[f"agree_max_presion_{ts}"] < 1.0 for ts in ("A0", "B0", "C0", "D0"))
+
+
+def test_window_alignment_reaches_the_training_dream_and_phase3_controllers_are_protected():
+    """v2.1-0 (docs/v2/ADDENDUM_SUENO_CORREGIDO.md): --window-alignment is passed to the dream the PPO
+    trains in, the default stays "legacy" (Phase 3), the direct arm refuses it, and nothing can be
+    written into the Phase 3 controller folders."""
+    from environments.corridor_dream_environment import world_model_dir
+
+    if not (world_model_dir("lstm", 0) / "world_model_best.pt").exists():
+        pytest.skip("v2 world-model weights not present (not committed)")
+    config = tc.ppo_config("dream_lstm", 0)
+    for alignment in ("legacy", "aligned"):
+        make_train, _ = tc.make_envs("dream_lstm", 0, config, {}, {}, alignment)
+        assert make_train().window_alignment == alignment
+    make_train, _ = tc.make_envs("dream_lstm", 0, config, {}, {})
+    assert make_train().window_alignment == "legacy"
+    assert tc.parse_args(["--arm", "dream_lstm", "--seed", "0", "--output-dir", "x"]).window_alignment == "legacy"
+    with pytest.raises(SystemExit):
+        tc.main(["--arm", "direct", "--seed", "0", "--total-timesteps", "10000", "--output-dir", "x",
+                 "--window-alignment", "aligned"])
+    for folder in (tc.CHECKPOINT_DIR / "v2" / "control", tc.CHECKPOINT_DIR / "v2" / "control" / "dream_lstm_s0"):
+        with pytest.raises(SystemExit):
+            tc.check_v2_output_dir(folder, overwrite=True, overwrite_official=False)
