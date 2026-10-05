@@ -128,3 +128,10 @@ Ninguna de estas lecturas cambia lo publicado en `ADDENDUM_CONTROL.md` ni en
   ≈ 13 ms por decisión con H = 3, ya incluido en esa tasa.
 - **Integridad:** md5 antes y después de los 40 controladores de la Fase 3 y de sus resultados;
   pytest encadenado con `&&` antes de cada commit.
+
+## 6. Evaluación en OOD iniciada: 2026-10-05 14:36 (hora local)
+
+Hasta este momento no se ha evaluado ningún controlador, planificador ni regla en 23000–23029 en
+esta fase. El lanzador (`scripts/v2/run_ood.py`) y el análisis (`scripts/v2/analyze_ood.py`)
+están commiteados (`335e97a`), y los md5 de antes en `md5_ood_before.json` (1,037 archivos). Lo
+siguiente es la evaluación única con `--confirm-held-out`.
