@@ -1,0 +1,29 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 26ms, vehicles TOT 0 ACT 0 BUF 0)                     
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 9ms, vehicles TOT 0 ACT 0 BUF 0)                      
+direct seed 2: 10000 steps -> C:\Users\hulbe\VisualProjects\traffic-world-model\models\checkpoints\v2\control\direct_10k_s2
+Eval num_timesteps=1000, episode_reward=-59427.80 +/- 69345.34
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=2000, episode_reward=-15109.00 +/- 4705.70
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=3000, episode_reward=-46200.40 +/- 16889.02
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=4000, episode_reward=-19041.40 +/- 7623.04
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=5000, episode_reward=-6659.20 +/- 3201.55
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=6000, episode_reward=-7854.60 +/- 5472.48
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=7000, episode_reward=-3566.60 +/- 1549.52
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=8000, episode_reward=-14510.60 +/- 14746.50
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=9000, episode_reward=-3791.60 +/- 1653.05
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=10000, episode_reward=-2351.60 +/- 495.31
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+done in 1027 s; real steps 13240; best real eval -2351.6

@@ -1,0 +1,39 @@
+{
+  "arm": "direct",
+  "seed": 0,
+  "config": {
+    "seed": 0,
+    "total_timesteps": 10000,
+    "learning_rate": 0.0003,
+    "n_steps": 256,
+    "batch_size": 64,
+    "n_epochs": 10,
+    "gamma": 0.99,
+    "dream_max_steps": 7,
+    "normalize_reward": true,
+    "reward_clip": 10.0,
+    "normalize_obs": true
+  },
+  "world_model_dir": null,
+  "observation": "raw state + VecNormalize",
+  "selection_seeds": [
+    21000,
+    21001,
+    21002,
+    21003,
+    21004
+  ],
+  "direct_training_seed_start": 30000,
+  "timesteps_done": 10240,
+  "imagined_steps": 0,
+  "real_steps_train": 10240,
+  "real_episodes_train": 171,
+  "real_steps_eval": 3000,
+  "real_episodes_eval": 60,
+  "real_steps_total": 13240,
+  "wall_seconds": 1035.5734694999992,
+  "eval_sumo_seconds": 235.39026780007407,
+  "train_sumo_seconds": 761.1507845996239,
+  "seconds_per_training_step": 0.07814289079100831,
+  "best_mean_reward": -3021.4
+}

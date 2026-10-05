@@ -691,3 +691,23 @@ de una política que las usaba cuando la transversal estaba casi vacía.
 - El Transformer visita pocos estados de retención larga, que en sus trayectorias son benignos
   (real −233). Su sesgo crece algo con la retención, pero es chico.
 - No se cambió nada del sueño ni del dataset.
+
+### 12.2 Etapa 3: evaluación en test iniciada, 2026-10-04 23:57 (hora local)
+
+Los 20 entrenamientos del RL directo terminaron. Cada semilla consumió 13,240 pasos reales con 10k
+y 39,208 con 30k (`run_info.json`). Hubo tres lanzamientos, todos con el mismo lanzador, 4
+procesos y sin cambiar nada:
+
+1. **Interrumpido por una suspensión del equipo de 17:47 a 22:17** (eventos de Kernel-Power). Al
+   reanudar, Claude Code detuvo el lanzador por memoria baja. Las 8 corridas de 30k (s0–s7) ya
+   habían terminado.
+2. **Detenido por Claude Code por memoria crítica**, después de terminar 10k s0–s3.
+3. **Completó el resto.**
+
+En cada relanzamiento, las corridas sin `run_info.json` se reentrenaron desde cero con la misma
+semilla, y las terminadas se saltaron. Las 8 de 30k terminadas tienen el mismo md5 y la misma
+fecha antes y después (72 archivos). Antes de los relanzamientos se cerró Edge, con la
+autorización del autor, y el equipo quedó enchufado.
+
+Hasta este momento no se ha visto ningún resultado del RL directo en test. Lo siguiente es la
+evaluación única de los 20 RL directos en 22000–22023 y `scripts/v2/analyze_control_stage3.py`.

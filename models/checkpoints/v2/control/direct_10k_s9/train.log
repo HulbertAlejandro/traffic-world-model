@@ -1,0 +1,32 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 9ms, vehicles TOT 0 ACT 0 BUF 0)                      
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 10ms, vehicles TOT 0 ACT 0 BUF 0)                     
+direct seed 9: 10000 steps -> C:\Users\hulbe\VisualProjects\traffic-world-model\models\checkpoints\v2\control\direct_10k_s9
+Warning: Vehicle 'C0_south_straight_flow_s1.3' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=173.00.
+Warning: Vehicle 'D0_south_straight_flow_s1.1' performs emergency braking on lane 'bottom3D0_0' with decel=9.00, wished=4.50, severity=1.00, time=233.00.
+Eval num_timesteps=1000, episode_reward=-107412.20 +/- 52922.20
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=2000, episode_reward=-44967.20 +/- 38265.99
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=3000, episode_reward=-7708.80 +/- 4974.22
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=4000, episode_reward=-6115.00 +/- 3943.83
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=5000, episode_reward=-6961.60 +/- 4549.74
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=6000, episode_reward=-11412.80 +/- 9470.33
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=7000, episode_reward=-4355.40 +/- 1668.40
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=8000, episode_reward=-4463.60 +/- 740.20
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=9000, episode_reward=-3903.40 +/- 1250.20
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=10000, episode_reward=-4205.20 +/- 1956.68
+Episode length: 60.00 +/- 0.00
+done in 942 s; real steps 13240; best real eval -3903.4

@@ -1,0 +1,29 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 10ms, vehicles TOT 0 ACT 0 BUF 0)                     
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 4ms, vehicles TOT 0 ACT 0 BUF 0)                      
+direct seed 5: 10000 steps -> C:\Users\hulbe\VisualProjects\traffic-world-model\models\checkpoints\v2\control\direct_10k_s5
+Warning: Vehicle 'D0_south_straight_flow_s2.0' performs emergency braking on lane ':D0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=278.00.
+Eval num_timesteps=1000, episode_reward=-46066.00 +/- 45588.69
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=2000, episode_reward=-9606.20 +/- 4507.17
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=3000, episode_reward=-27406.40 +/- 23056.08
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=4000, episode_reward=-7665.60 +/- 5227.30
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=5000, episode_reward=-3254.40 +/- 1336.08
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=6000, episode_reward=-4521.80 +/- 1621.10
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=7000, episode_reward=-8597.80 +/- 4945.47
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=8000, episode_reward=-5326.80 +/- 3793.09
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=9000, episode_reward=-3529.80 +/- 657.01
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=10000, episode_reward=-3322.60 +/- 1257.09
+Episode length: 60.00 +/- 0.00
+done in 1022 s; real steps 13240; best real eval -3254.4

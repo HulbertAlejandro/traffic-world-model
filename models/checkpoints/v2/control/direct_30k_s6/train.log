@@ -1,0 +1,81 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 11ms, vehicles TOT 0 ACT 0 BUF 0)                     
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 13ms, vehicles TOT 0 ACT 0 BUF 0)                     
+direct seed 6: 30000 steps -> C:\Users\hulbe\VisualProjects\traffic-world-model\models\checkpoints\v2\control\direct_30k_s6
+Warning: Vehicle 'C0_north_straight_flow_s1.1' performs emergency braking on lane ':C0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=148.00.
+Warning: Vehicle 'D0_north_straight_flow_s1.2' performs emergency braking on lane ':D0_1_0' with decel=9.00, wished=4.50, severity=1.00, time=268.00.
+Warning: Vehicle 'C0_south_straight_flow_s1.3' performs emergency braking on lane ':C0_9_0' with decel=9.00, wished=4.50, severity=1.00, time=173.00.
+Eval num_timesteps=1000, episode_reward=-52441.20 +/- 38809.72
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=2000, episode_reward=-13631.20 +/- 4331.78
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=3000, episode_reward=-18879.00 +/- 10859.59
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=4000, episode_reward=-29477.60 +/- 22583.59
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=5000, episode_reward=-40892.40 +/- 40235.10
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=6000, episode_reward=-43774.80 +/- 41515.80
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=7000, episode_reward=-52644.80 +/- 42516.97
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=8000, episode_reward=-34363.00 +/- 25698.92
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=9000, episode_reward=-8558.40 +/- 3558.64
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=10000, episode_reward=-27354.40 +/- 33310.91
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=11000, episode_reward=-11600.00 +/- 11013.92
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=12000, episode_reward=-13051.60 +/- 10293.09
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=13000, episode_reward=-2554.80 +/- 758.17
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=14000, episode_reward=-2697.20 +/- 877.19
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=15000, episode_reward=-3061.80 +/- 1834.73
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=16000, episode_reward=-2483.00 +/- 603.07
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=17000, episode_reward=-2377.80 +/- 639.77
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=18000, episode_reward=-2104.80 +/- 310.33
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=19000, episode_reward=-2346.40 +/- 651.25
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=20000, episode_reward=-2004.80 +/- 480.34
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=21000, episode_reward=-1954.20 +/- 585.40
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=22000, episode_reward=-2140.80 +/- 502.92
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=23000, episode_reward=-2038.60 +/- 414.11
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=24000, episode_reward=-1952.20 +/- 518.47
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=25000, episode_reward=-1876.40 +/- 411.57
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=26000, episode_reward=-1717.20 +/- 224.07
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=27000, episode_reward=-1646.60 +/- 274.35
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+Eval num_timesteps=28000, episode_reward=-1660.20 +/- 88.97
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=29000, episode_reward=-1692.00 +/- 505.75
+Episode length: 60.00 +/- 0.00
+Eval num_timesteps=30000, episode_reward=-1612.40 +/- 280.54
+Episode length: 60.00 +/- 0.00
+New best mean reward!
+done in 3452 s; real steps 39208; best real eval -1612.4
