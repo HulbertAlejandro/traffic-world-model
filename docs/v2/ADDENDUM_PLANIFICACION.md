@@ -606,3 +606,8 @@ P*_lstm = `plan_ppo_lstm` H3 y P*_transformer = `plan_ppo_transformer` H3.
 4,080 episodios, **≈ 2–2.5 h**.
 
 **Integridad:** md5 antes y después de los 40 controladores y los resultados de la Fase 3.
+
+### 17.1 Etapa 2 del planificador: evaluación en test iniciada, 2026-10-05 12:23 (hora local)
+
+Hasta este momento no se ha simulado nada en 25000–25047. Lo siguiente es la evaluación única de
+la sección 17 (`run_planning_test.py`, con `--confirm-held-out`).
