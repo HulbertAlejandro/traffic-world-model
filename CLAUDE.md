@@ -219,6 +219,86 @@ medir.**
   exactamente lo publicado; `"aligned"` coincide con `rollout_episode`. La v1 no se modificó;
   `tests/test_dream_window_alignment.py` documenta su desfase con un test `xfail` estricto.
 - El planificador de la v2.1-A (`ADDENDUM_PLANIFICACION.md`) usa la alineación correcta.
+- **Corregir el desfase no cambió el control** (`docs/v2/ADDENDUM_SUENO_CORREGIDO.md`). Se
+  reentrenaron los 20 PPO del sueño con `"aligned"` y se evaluaron con los de la Fase 3 en
+  24000–24023:
+  - LSTM: −14,785 → −10,759 (Welch p = 0.56), catastróficos 109 → 126, episodios bloqueados
+    66 → 55.
+  - Transformer: −4,025 → −3,523 (p = 0.85).
+  - Ningún criterio pre-registrado de "cambio importante" se cumplió. El bloqueo de la LSTM no
+    viene del desfase.
+
+## v2.1-A: planificación con el modelo del mundo (`docs/v2/ADDENDUM_PLANIFICACION.md`)
+
+**Qué es.** En cada paso real, con la ventana real de 16 pasos (`scaler.pkl`), se evalúan las 16
+acciones conjuntas en lote; luego se avanza H − 1 pasos con una continuación fija y se elige el
+mayor retorno imaginado recortado. Desempate: "mantener". No reentrena nada: usa los 20 modelos
+del mundo.
+
+**Brazos:**
+
+- `plan_solo`: continuación "mantener".
+- `plan_ppo`: continuación con el PPO del sueño de la Fase 3 de la misma semilla. Se usan esos y
+  no los corregidos, por la regla de la sección 13.
+
+**Valores fijados en validación** (24000–24023, réplicas 0–2, sección 15):
+
+- **H = 3** en los 4 brazos.
+- **Mejor brazo: `plan_ppo`** en las dos arquitecturas.
+- **Umbral de catastróficos: −3,700.**
+- **Mejores reglas:** `espera_mas_larga` en el total, `cola_mas_larga` en B0 y
+  `min_verde_y_cambiar` en C0.
+
+**Resultado en el test nuevo** (25000–25047, 48 escenarios, 10 réplicas, evaluación única,
+sección 18):
+
+| | Media | Catastróficos |
+|---|---|---|
+| `plan_ppo_transformer` | −1,165 | 0/480 |
+| `plan_ppo_lstm` | −1,625 | 14/480 |
+| `plan_solo_transformer` | −1,457 | 5/480 |
+| `plan_solo_lstm` | −6,084 | 206/480 |
+| Sueño LSTM (Fase 3) | −17,257 | 214/480 |
+| Sueño Transformer (Fase 3) | −3,474 | 36/480 |
+| Directo 10k | −5,737 | 179/480 |
+| Directo 30k | −1,752 | 1/480 |
+| `espera_mas_larga` | −1,192 | 0/48 |
+
+**12 comparaciones planificadas, Bonferroni α' = 0.05/12** (Welch por semilla principal):
+
+- **Significativa a favor:** `plan_ppo_transformer` − `directo_30k` = **+587**, IC al 99.58%
+  [+423, +751]. Es la primera diferencia de control significativa a favor del modelo del mundo en
+  la v2.
+- **Significativas en contra:**
+  - C0 frente a `min_verde_y_cambiar`, en las dos arquitecturas: −238 y −201.
+  - B0 frente a `cola_mas_larga`, con el Transformer: −68.
+- **Empate en el total:** `plan_ppo_transformer` − `espera_mas_larga` = +26 (p = 0.10), brecha no
+  significativa. Ningún planificador supera a la mejor regla.
+- **Frente a su sueño (Q1):** +15,632 y +2,308, no significativas. Una semilla del sueño domina
+  la varianza (s5 de la LSTM, −76,630; s1 del Transformer, −18,480). Aun así, los catastróficos
+  bajan de 214 a 14 y de 36 a 0, y el bloqueo desaparece.
+- **Bloqueo:** `plan_solo_lstm`, réplica s7, con 2.8 cambios por episodio en D0 (−15,737). Ningún
+  `plan_ppo` se bloquea.
+
+**Interacciones reales por réplica o semilla** (sección 13):
+
+| | Sin compartir | Compartido |
+|---|---|---|
+| Planificador | 21,240 | 6,552 |
+| Directo 30k | 39,208 | 39,208 |
+| Directo 10k | 13,240 | 13,240 |
+
+Frente al de 30k, el planificador usa **1.8x menos** sin compartir y **6.0x menos** compartiendo.
+Frente al de 10k cuesta 1.6x **más** sin compartir y 2.0x menos compartiendo.
+
+**Avisos:**
+
+- **(a) El test 25000–25047 ya se vio completo.**
+- **(b) OOD 23000–23029 sigue virgen para todo controlador.** Sus 30 escenarios se simularon solo
+  al recolectar el dataset, con las 3 políticas de recolección, y sus retornos están en el
+  manifiesto. Su evaluación final está pre-registrada en `docs/v2/ADDENDUM_OOD.md`, sin ejecutar.
+- **(c) Los resultados de la Fase 3 y de la v1 no cambian.**
+- **(d) El efecto del defecto de ventana en la v1 quedó sin medir.**
 
 ## Decisiones de diseño ya tomadas
 
@@ -378,7 +458,7 @@ scripts/        datos: collect_dataset.py, split_dataset.py, merge_dataset.py, n
                 control: evaluate_controller.py, evaluate_controller_sumo.py,
                   evaluate_direct_vs_dream.py, evaluate_final_comparison.py,
                   evaluate_multiseed_statistical.py, analyze_controller_actions.py
-tests/          25 archivos, 158 tests (pytest -v; 1 xfail estricto documenta el desfase del sueño de la v1)
+tests/          25 archivos, 159 tests (pytest -v; 1 xfail estricto documenta el desfase del sueño de la v1)
 ver_controlador.py (demo del PPO del sueño oficial en la GUI de SUMO, escenario nuevo 7025),
 ver_tiempo_fijo.py (el mismo demo con la política de tiempo fijo, para comparar a simple vista),
 CLAUDE.md, PROJECT_STATUS.md, TODO.md, README.md, pytest.ini, requirements.txt, .gitignore, LICENSE

@@ -1,9 +1,10 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `3cda7dc` (rama `v2/four-intersections`), 157 passed y 1 xfail esperado,
+Última verificación: rama `v2/four-intersections` (tras `8947e18`), 158 passed y 1 xfail esperado,
 incluidos los de SUMO en vivo. **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
-intersecciones), cerrada el 5 de octubre**, y un **hallazgo posterior: un desfase en el Dream
-Environment de la v1 y la v2, con efecto aún sin medir**; ver las dos primeras secciones de abajo. Lo que sigue en esta
+intersecciones), cerrada el 5 de octubre**, un **hallazgo posterior: un desfase en el Dream
+Environment de la v1 y la v2**, y la **v2.1-A (planificación con el modelo del mundo), evaluada en el test
+nuevo el 6 de octubre**; ver las tres primeras secciones de abajo. Lo que sigue en esta
 introducción es el estado de la v1. **Lo más reciente: la extensión
 del PPO a 10 semillas por controlador (30 de septiembre; sección siguiente)**, que actualiza el
 resultado de control. Antes, una auditoría técnica del repositorio (26 de septiembre),
@@ -43,6 +44,90 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
   el resultado oficial (ver el final del punto 5).
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
+
+## ✅ v2.1-A: planificación con el modelo del mundo (5–6 de octubre) — evaluada en el test nuevo
+
+Pre-registro, enmiendas y todos los números: `docs/v2/ADDENDUM_PLANIFICACION.md` (secciones 1–18).
+Experimento del sueño corregido: `docs/v2/ADDENDUM_SUENO_CORREGIDO.md`. Resultados por episodio:
+`docs/results/v2/planning/` y `docs/results/v2/dream_alignment/`.
+
+**Qué se probó.**
+
+- Un planificador que decide en cada paso real desde el estado real:
+  - con la ventana real de 16 pasos, evalúa las 16 acciones conjuntas en lote;
+  - después avanza H − 1 pasos con una continuación fija y elige el mayor retorno imaginado
+    recortado.
+- Usa los 20 modelos del mundo sin reentrenar.
+- Brazos:
+  - `plan_solo`: continuación "mantener".
+  - `plan_ppo`: continuación con el PPO del sueño de la Fase 3 de la misma semilla.
+
+**Hallazgo previo: desfase de la ventana** (sección siguiente).
+
+- El planificador usa la alineación del Experimento 1.
+- Corregir el desfase y reentrenar los 20 PPO del sueño **no cambió el control** (validación
+  24000–24023; ningún criterio pre-registrado de "cambio importante"):
+
+  | | Media | Catastróficos | Episodios bloqueados |
+  |---|---|---|---|
+  | LSTM, Fase 3 → corregido | −14,785 → −10,759 (p = 0.56) | 109 → 126 | 66 → 55 |
+  | Transformer, Fase 3 → corregido | −4,025 → −3,523 (p = 0.85) | — | — |
+
+- Por la regla pre-registrada, `plan_ppo` usa los PPO de la Fase 3.
+
+**Validación** (24000–24023, réplicas 0–2; los valores fijados están en la sección 15):
+
+- **H = 3** en los 4 brazos: más horizonte empeora en todos.
+- **Mejor brazo: `plan_ppo`** en las dos arquitecturas.
+- **Umbral de catastróficos: −3,700.**
+- **Mejores reglas:** `espera_mas_larga` (total), `cola_mas_larga` (B0) y `min_verde_y_cambiar`
+  (C0).
+
+**Test nuevo** (25000–25047, 48 escenarios, 10 réplicas, evaluación única, 1 h 44 min):
+
+| | Media | Catastróficos | Episodios bloqueados |
+|---|---|---|---|
+| `plan_ppo_transformer` | −1,165 | 0/480 | 0 |
+| `plan_ppo_lstm` | −1,625 | 14/480 | 0 |
+| `plan_solo_transformer` | −1,457 | 5/480 | 3 |
+| `plan_solo_lstm` | −6,084 | 206/480 | 57 |
+| Sueño Transformer (Fase 3) | −3,474 | 36/480 | 7 |
+| Sueño LSTM (Fase 3) | −17,257 | 214/480 | 126 |
+| Directo 30k | −1,752 | 1/480 | 0 |
+| Directo 10k | −5,737 | 179/480 | 7 |
+| `espera_mas_larga` | −1,192 | 0/48 | 2 |
+| `min_verde_y_cambiar` | −1,314 | 0/48 | 0 |
+
+**Las 12 comparaciones** (α' = 0.05/12; Welch por semilla principal; pareados como
+pseudorreplicación):
+
+- **A favor, significativa:** `plan_ppo_transformer` − `directo_30k` = **+587**, IC al 99.58%
+  [+423, +751], p = 5e-8.
+- **En contra, significativas:**
+  - C0 frente a `min_verde_y_cambiar`: LSTM −238, Transformer −201.
+  - B0 frente a `cola_mas_larga`: Transformer −68.
+- **Empate en el total:** `plan_ppo_transformer` − `espera_mas_larga` = +26 (p = 0.10). Ningún
+  planificador supera a la mejor regla.
+- **No significativas:**
+  - frente al sueño (Q1: +15,632 y +2,308, por la varianza de una semilla del sueño);
+  - frente al directo de 10k (+4,112 y +4,571);
+  - LSTM frente al directo de 30k (+127);
+  - LSTM frente a `espera_mas_larga` (−433, p = 0.0057) y frente a `cola_mas_larga` en B0 (−260).
+- **Bloqueo:** `plan_solo_lstm`, réplica s7 (2.8 cambios por episodio en D0, media −15,737).
+  Ningún `plan_ppo` se bloquea.
+- **Interacciones por réplica o semilla:** planificador 21,240 sin compartir y 6,552 compartido;
+  directo 30k 39,208, es decir **1.8x a 6.0x más** que el planificador; directo 10k 13,240, que es
+  1.6x **menos** que el planificador sin compartir y 2.0x más compartido.
+- Costo de 10 a 14 ms por decisión.
+
+**Avisos:**
+
+- **(a) El test 25000–25047 ya se vio completo.**
+- **(b) OOD 23000–23029 sigue virgen para todo controlador** (solo se simuló al recolectar el
+  dataset, con las 3 políticas de recolección). Su evaluación final está pre-registrada en
+  `docs/v2/ADDENDUM_OOD.md`, sin ejecutar.
+- **(c) Los resultados de la Fase 3 y de la v1 no cambian.**
+- **(d) El efecto del defecto de ventana en la v1 quedó sin medir.**
 
 ## ⚠️ Hallazgo (5 de octubre): desfase de la ventana de acciones en el Dream Environment, v1 y v2 — efecto aún sin medir
 
