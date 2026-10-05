@@ -3,6 +3,20 @@
 
 # CLAUDE.md — Contexto permanente del proyecto
 
+## Política de ramas (decisión del autor, 6 de octubre de 2026)
+
+- **`main` = v1, congelada.** Contiene la v1 (una intersección) tal como quedó, y la etiqueta
+  anotada `v1-final` marca ese estado (`588c5ea`). En `main` **no se commitea nada y no se
+  fusiona nada**.
+- **La v2 vive en su propia rama, `v2/four-intersections`**, que será la rama por defecto en
+  GitHub (lo cambia el autor en Settings). **No se fusiona a `main`** y no se abren pull requests
+  hacia `main`.
+- El README de esta rama es la portada de la v2. El de la v1 se conserva en
+  `docs/v1/README_v1.md`.
+- La `main` local tiene un commit que nunca se subió (`d8c8d36`, "docs: marcar como resueltos los
+  5 tests de SUMO bloqueados por Smart App Control", solo `CLAUDE.md`). No está en `origin/main`
+  ni en `v1-final`. Qué hacer con él lo decide el autor; no se sube sin su decisión.
+
 ## Objetivo académico
 
 Trabajo de grado de Ingeniería de Sistemas (Universidad del Quindío). Implementar un
@@ -189,7 +203,8 @@ evaluación única):
 
 - **(a) El test 22000–22023 ya se vio completo** (etapas 2 y 3). No sirve para validar rediseños:
   cualquier v2.1 se evalúa en semillas nuevas (rango fijado en `ADDENDUM_CONTROL.md`, sección 13).
-- **(b) OOD 23000–23029 sigue virgen.** Está reservado para la comparación final.
+- **(b) OOD 23000–23029** estaba reservado en la Fase 3; se evaluó después, una sola vez (ver la
+  sección de la v2.1-A, aviso (b), y `docs/v2/ADDENDUM_OOD.md`).
 - **(c) Por la regla de desempate pre-registrada se adoptó la LSTM**: el IC de P1 incluye 0, así
   que gana la LSTM aunque es la peor. La regla no se reescribió. La enmienda de la sección 12
   (posterior a test) compara con el RL directo **los dos brazos** del sueño.
@@ -197,8 +212,8 @@ evaluación única):
   consumió el entrenamiento del RL directo).
 - Pesos en `models/checkpoints/v2/control/` (no versionados; sus `.json` sí).
 
-**Hallazgo (5 de octubre): desfase de la ventana de acciones en el Dream Environment. Efecto aún sin
-medir.**
+**Hallazgo (5 de octubre): desfase de la ventana de acciones en el Dream Environment (v1 y v2). En la v2
+se midió y no cambia el control; en la v1 no se midió.**
 
 - **El defecto.** `DreamEnvironment.step` (v1, `environments/dream_environment.py`) y
   `CorridorDreamEnvironment.step` (v2) avanzan la ventana de acciones con la ventana anterior a
@@ -215,6 +230,17 @@ medir.**
 - **(c) El efecto puede ser mixto:** en 3 ventanas de prueba (LSTM s0, episodio 21000), el sueño
   con el defecto quedó más cerca de lo real en una.
 - **(d) Los resultados publicados no cambian; solo se anotan.**
+**Hallazgos de la v2 sobre la v1** (no se harán trabajos nuevos en la v1, que está congelada):
+
+- **Comparación con reglas fuertes.** En la v1, el controlador del sueño solo se comparó con tiempo
+  fijo y con una regla de "fase contraria". En la v2 se probaron cinco reglas (`fijo_2_3`,
+  `min_verde_y_cambiar`, `cola_mas_larga`, `max_presion` y `espera_mas_larga`), y ningún
+  controlador aprendido las supera en el total. Lo más cercano es el planificador con Transformer,
+  que empata con `espera_mas_larga` en el test nuevo y en OOD. No se sabe si en la v1 una regla
+  dependiente del estado habría superado al World Model: no se probó, y no se probará en la v1.
+- **Desfase de ventana.** Existe también en el `DreamEnvironment` de la v1, con el que se
+  entrenaron sus PPO del sueño, y **su efecto en la v1 no se midió**. En la v2, corregirlo y
+  reentrenar no cambió el control (`ADDENDUM_SUENO_CORREGIDO.md`).
 - `CorridorDreamEnvironment(window_alignment=...)`: `"legacy"` es el valor por defecto y reproduce
   exactamente lo publicado; `"aligned"` coincide con `rollout_episode`. La v1 no se modificó;
   `tests/test_dream_window_alignment.py` documenta su desfase con un test `xfail` estricto.
@@ -294,11 +320,16 @@ Frente al de 10k cuesta 1.6x **más** sin compartir y 2.0x menos compartiendo.
 **Avisos:**
 
 - **(a) El test 25000–25047 ya se vio completo.**
-- **(b) OOD 23000–23029 sigue virgen para todo controlador.** Sus 30 escenarios se simularon solo
-  al recolectar el dataset, con las 3 políticas de recolección, y sus retornos están en el
-  manifiesto. Su evaluación final está pre-registrada en `docs/v2/ADDENDUM_OOD.md`, sin ejecutar.
+- **(b) OOD 23000–23029 ya se evaluó, una sola vez** (`docs/v2/ADDENDUM_OOD.md`, sección 7).
+  **Confirma** el hallazgo principal: `plan_ppo_transformer` − `directo_30k` = +553.2, IC al
+  99.58% [+365.7, +740.8]. También repite el empate con `espera_mas_larga` en el total (+19.7,
+  p = 0.30) y las derrotas significativas en B0 y C0. Con la LSTM, el total y B0 frente a la mejor
+  regla pasan a ser significativos en contra (−489.3 y −273.3). Antes de esa evaluación, sus
+  escenarios solo se habían simulado al recolectar el dataset; la reproducibilidad contra el
+  manifiesto fue exacta.
 - **(c) Los resultados de la Fase 3 y de la v1 no cambian.**
-- **(d) El efecto del defecto de ventana en la v1 quedó sin medir.**
+- **(d) El efecto del defecto de ventana en la v1 no se midió**, y no se medirá en la v1, que está
+  congelada. Ver "Hallazgos de la v2 sobre la v1".
 
 ## Decisiones de diseño ya tomadas
 

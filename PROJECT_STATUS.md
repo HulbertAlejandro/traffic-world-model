@@ -1,5 +1,19 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
+## 🌿 Política de ramas (decisión del autor, 6 de octubre de 2026)
+
+- **`main` = v1, congelada.** Contiene la v1 (una intersección) tal como quedó, y la etiqueta
+  anotada `v1-final` marca ese estado (`588c5ea`). En `main` **no se commitea nada y no se
+  fusiona nada**.
+- **La v2 vive en su propia rama, `v2/four-intersections`**, que será la rama por defecto en
+  GitHub (lo cambia el autor en Settings). **No se fusiona a `main`** y no se abren pull requests
+  hacia `main`.
+- El README de esta rama es la portada de la v2. El de la v1 se conserva en
+  `docs/v1/README_v1.md`.
+- La `main` local tiene un commit que nunca se subió (`d8c8d36`, "docs: marcar como resueltos los
+  5 tests de SUMO bloqueados por Smart App Control", solo `CLAUDE.md`). No está en `origin/main`
+  ni en `v1-final`. Qué hacer con él lo decide el autor; no se sube sin su decisión.
+
 Última verificación: rama `v2/four-intersections` (tras `8947e18`), 158 passed y 1 xfail esperado,
 incluidos los de SUMO en vivo. **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
 intersecciones), cerrada el 5 de octubre**, un **hallazgo posterior: un desfase en el Dream
@@ -123,13 +137,16 @@ pseudorreplicación):
 **Avisos:**
 
 - **(a) El test 25000–25047 ya se vio completo.**
-- **(b) OOD 23000–23029 sigue virgen para todo controlador** (solo se simuló al recolectar el
-  dataset, con las 3 políticas de recolección). Su evaluación final está pre-registrada en
-  `docs/v2/ADDENDUM_OOD.md`, sin ejecutar.
+- **(b) OOD 23000–23029 ya se evaluó, una sola vez** (`docs/v2/ADDENDUM_OOD.md`, sección 7, 6 de
+  octubre). **Confirma** el hallazgo principal: `plan_ppo_transformer` − `directo_30k` = +553.2, IC
+  al 99.58% [+365.7, +740.8]. También repite el empate en el total con `espera_mas_larga` (+19.7)
+  y las derrotas significativas en B0 y C0. Con la LSTM, el total y B0 frente a la mejor regla son
+  significativos en contra (−489.3 y −273.3). La reproducibilidad contra el manifiesto fue exacta.
 - **(c) Los resultados de la Fase 3 y de la v1 no cambian.**
-- **(d) El efecto del defecto de ventana en la v1 quedó sin medir.**
+- **(d) El efecto del defecto de ventana en la v1 no se midió**, y no se medirá en la v1, que está
+  congelada (ver el hallazgo de abajo).
 
-## ⚠️ Hallazgo (5 de octubre): desfase de la ventana de acciones en el Dream Environment, v1 y v2 — efecto aún sin medir
+## ⚠️ Hallazgo (5 de octubre): desfase de la ventana de acciones en el Dream Environment, v1 y v2 — en la v2 no cambia el control; en la v1 no se midió
 
 **Qué es.** `DreamEnvironment.step` (v1) y `CorridorDreamEnvironment.step` (v2) avanzan la ventana
 de acciones con `self._window_actions[1:]`, la ventana **anterior** a insertar la acción elegida,
@@ -166,6 +183,19 @@ difieren en más de 0.01, con una diferencia máxima de 244.9.
 - **(c) El efecto puede ser mixto:** en las 3 ventanas de arriba, el sueño con el defecto quedó más
   cerca de lo real en una (inicio 0).
 - **(d) Los resultados publicados no cambian; solo se anotan.** No se reentrenó ni se reevaluó nada.
+- **Medido después en la v2** (`ADDENDUM_SUENO_CORREGIDO.md`): reentrenar los 20 PPO del sueño
+  con la ventana alineada no cambió el control (ningún criterio de "cambio importante").
+**Hallazgos de la v2 sobre la v1** (no se harán trabajos nuevos en la v1, que está congelada):
+
+- **Comparación con reglas fuertes.** En la v1, el controlador del sueño solo se comparó con tiempo
+  fijo y con una regla de "fase contraria". En la v2 se probaron cinco reglas (`fijo_2_3`,
+  `min_verde_y_cambiar`, `cola_mas_larga`, `max_presion` y `espera_mas_larga`), y ningún
+  controlador aprendido las supera en el total. Lo más cercano es el planificador con Transformer,
+  que empata con `espera_mas_larga` en el test nuevo y en OOD. No se sabe si en la v1 una regla
+  dependiente del estado habría superado al World Model: no se probó, y no se probará en la v1.
+- **Desfase de ventana.** Existe también en el `DreamEnvironment` de la v1, con el que se
+  entrenaron sus PPO del sueño, y **su efecto en la v1 no se midió**. En la v2, corregirlo y
+  reentrenar no cambió el control (`ADDENDUM_SUENO_CORREGIDO.md`).
 
 **Qué se hizo, sin cambiar nada de la v1 ni ningún controlador entrenado:**
 
@@ -235,7 +265,8 @@ principal: Welch sobre las medias por semilla; t pareada y Wilcoxon por escenari
 **Avisos para trabajo futuro:**
 
 - **(a) El test 22000–22023 ya se vio completo.** No sirve para validar rediseños.
-- **(b) OOD 23000–23029 sigue virgen**, reservado para la comparación final.
+- **(b) OOD 23000–23029** estaba reservado en la Fase 3; se evaluó después, una sola vez (ver la
+  sección de la v2.1-A, aviso (b), y `docs/v2/ADDENDUM_OOD.md`).
 - **(c) Por la regla de desempate pre-registrada se adoptó la LSTM, aunque es la peor:** el IC de
   P1 incluye 0. La regla no se reescribió. La enmienda de la sección 12, escrita después de ver
   test, compara con el RL directo los dos brazos del sueño.
