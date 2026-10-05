@@ -357,3 +357,53 @@ semillas, comparaciones y Bonferroni (12, α' = 0.05/12).
 Con la evaluación de `ADDENDUM_SUENO_CORREGIDO.md`, sección 7, ninguna arquitectura tuvo un cambio
 importante. **`plan_ppo` usa los PPO de la Fase 3 en las dos arquitecturas**
 (`models/checkpoints/v2/control/dream_<arq>_s<i>/`). Ningún planificador se ha simulado todavía.
+
+## 14. Plan de ejecución del Paso 4, validación (escrito el 6 de octubre de 2026, antes de simular)
+
+**Qué se evalúa en validation_v21 (24000–24023), una vez:**
+
+- Las 5 reglas: 120 episodios.
+- Los planificadores de las réplicas 0, 1 y 2 de cada brazo (`plan_solo` y `plan_ppo`, con LSTM y
+  con Transformer), con H ∈ {3, 5, 7}: 4 brazos × 3 H × 3 réplicas × 24 = **864 episodios**.
+  `plan_ppo` continúa con los PPO de la Fase 3 (13.1).
+- Todo con acuerdo con las referencias en los mismos estados.
+
+No se evalúan las 10 réplicas ni nada en 25000–25047 o 23000–23029.
+
+**Cómo:**
+
+- `python scripts/v2/run_planning_validation.py --workers 4`: 13 trabajos, cada uno una llamada a
+  `evaluate_control_v2.py` en su propio proceso con un hilo de PyTorch.
+- Los más lentos (LSTM, H largo) van primero.
+- Reanudable: salta los trabajos cuyo JSON ya existe.
+- Se niega a arrancar sin corriente o con 2 GB o menos.
+- Salida: `docs/results/v2/planning/validation/`.
+
+**Después,** `python scripts/v2/analyze_planning_validation.py`, escrito antes de simular, aplica
+sin cambios:
+
+- **H por brazo:** menor costo; ante empate exacto, el H más chico.
+- **Mejor brazo por arquitectura:** con las réplicas 0–2 y su H; ante empate, `plan_solo`.
+- **Umbral de catastróficos:** 1.5 × el peor `fijo_2_3` en 24000–24023, redondeado hacia abajo a
+  la centena.
+- **Mejor regla:** en total, B0 y C0.
+
+Esos valores se escriben aquí (sección 15) antes que cualquier otra cosa.
+
+**Estimación** (microbenchmark de la sección 12; SUMO ≈ 2.5 s por episodio; el acuerdo con las
+referencias agrega algo):
+
+| Trabajos | Por episodio | Total en serie |
+|---|---|---|
+| 6 de LSTM (72 episodios cada uno) | ≈ 15–30 s | ≈ 2.5 h |
+| 6 de Transformer | ≈ 5–10 s | ≈ 50 min |
+| Reglas | | ≈ 5 min |
+
+**≈ 3.3 h en serie; ≈ 1–1.5 h con 4 procesos.**
+
+**Integridad:**
+
+- md5 antes y después de los controladores y resultados de la Fase 3
+  (`md5_official.py --planning`, que incluye `models/checkpoints/v2/control/` y
+  `docs/results/v2/control/`).
+- Equipo enchufado; 3.0 GB disponibles tras cerrar Edge, con la autorización del autor.
