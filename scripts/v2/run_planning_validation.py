@@ -40,18 +40,21 @@ def jobs() -> list[tuple[str, list[str]]]:
     return planner + [("references", [f"{r}=ref:{r}" for r in REFERENCES])]
 
 
-def run(name: str, policies: list[str]) -> tuple[str, int, float]:
-    output = OUT_DIR / name
+def run(name: str, policies: list[str], split: str = "validation_v21", out_dir: Path = OUT_DIR,
+        extra: tuple[str, ...] = ()) -> tuple[str, int, float]:
+    """One evaluate_control_v2.py call in its own process; skipped if its .json exists. ``split``,
+    ``out_dir`` and ``extra`` (e.g. --confirm-held-out) let the test launcher reuse it."""
+    output = out_dir / name
     if output.with_suffix(".json").exists():
         return name, 0, 0.0
-    cmd = [sys.executable, str(ROOT_DIR / "scripts" / "v2" / "evaluate_control_v2.py"), "--split", "validation_v21",
-           "--reference-agreement", "--output", str(output), "--overwrite"]
+    cmd = [sys.executable, str(ROOT_DIR / "scripts" / "v2" / "evaluate_control_v2.py"), "--split", split,
+           "--reference-agreement", "--output", str(output), "--overwrite", *extra]
     for policy in policies:
         cmd += ["--policy", policy]
     env = os.environ | {"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1"}
     print(f"start {name} (available {psutil.virtual_memory().available / 2**30:.2f} GB)", flush=True)
     t0 = time.perf_counter()
-    with (OUT_DIR / f"{name}.log").open("w", encoding="utf-8") as log:
+    with (out_dir / f"{name}.log").open("w", encoding="utf-8") as log:
         code = subprocess.run(cmd, cwd=ROOT_DIR, stdout=log, stderr=subprocess.STDOUT, env=env).returncode
     return name, code, time.perf_counter() - t0
 

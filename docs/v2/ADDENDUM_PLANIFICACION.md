@@ -532,3 +532,77 @@ consultas de acuerdo con las referencias, con 4 procesos a la vez.
 
 **Nada de esto decide nada.** Las decisiones de la etapa 2 (sección 15) ya están fijadas, y la
 comparación con test se hará con las 10 réplicas.
+
+## 17. Etapa 2: plan de la evaluación en el test nuevo (escrito el 6 de octubre de 2026, antes de simular en 25000–25047)
+
+Nada de lo fijado en las secciones 6, 13, 14 y 15 cambia: ni reglas, ni H, ni brazos.
+
+**Qué se evalúa en 25000–25047 (48 escenarios), una sola vez por controlador:**
+
+| Política | Controladores | Episodios |
+|---|---|---|
+| Los 4 brazos del planificador (`plan_solo_lstm`, `plan_ppo_lstm`, `plan_solo_transformer`, `plan_ppo_transformer`), con **H = 3** y las **10 réplicas** (s0–s9); `plan_ppo` continúa con los PPO de la Fase 3 (13.1) | 40 | 1,920 |
+| Los 20 PPO del sueño de la Fase 3 (`sueno_lstm`, `sueno_transformer`, `models/checkpoints/v2/control/dream_<arq>_s<i>`) | 20 | 960 |
+| Los 20 RL directos de la Fase 3 (`directo_10k`, `directo_30k`) | 20 | 960 |
+| Las 5 reglas | 5 | 240 |
+
+- **Los episodios del test viejo (22000–22023) no se reutilizan.** No se usan 20000–23029 ni OOD.
+- Todo con acuerdo con las referencias en los mismos estados.
+
+**Comparaciones planificadas** (sección 6), con los mejores brazos fijados en la sección 15:
+P*_lstm = `plan_ppo_lstm` H3 y P*_transformer = `plan_ppo_transformer` H3.
+
+| # | Comparación | Métrica |
+|---|---|---|
+| Q1_lstm | `plan_ppo_lstm` − `sueno_lstm` | total |
+| Q2_lstm | `plan_ppo_lstm` − `directo_30k` | total |
+| Q3_lstm | `plan_ppo_lstm` − `directo_10k` | total |
+| Q4_lstm | `plan_ppo_lstm` − `espera_mas_larga` | total |
+| Q5_lstm | `plan_ppo_lstm` − `cola_mas_larga` | B0 |
+| Q6_lstm | `plan_ppo_lstm` − `min_verde_y_cambiar` | C0 |
+| Q1_transformer | `plan_ppo_transformer` − `sueno_transformer` | total |
+| Q2_transformer | `plan_ppo_transformer` − `directo_30k` | total |
+| Q3_transformer | `plan_ppo_transformer` − `directo_10k` | total |
+| Q4_transformer | `plan_ppo_transformer` − `espera_mas_larga` | total |
+| Q5_transformer | `plan_ppo_transformer` − `cola_mas_larga` | B0 |
+| Q6_transformer | `plan_ppo_transformer` − `min_verde_y_cambiar` | C0 |
+
+- **12 comparaciones → Bonferroni α' = 0.05/12 = 0.004167; IC al 99.583%.**
+- **Test principal:** Welch sobre las 10 medias por réplica o semilla; contra una regla, t de una
+  muestra.
+- t pareada y Wilcoxon por escenario (48): **solo secundarios, marcados como pseudorreplicación**.
+- Sin significancia en el test principal, se reporta "brecha no significativa".
+- **Se reportan TODOS los brazos**, sin regla de desempate que elija uno. `plan_solo_lstm` y
+  `plan_solo_transformer` se comparan con los mismos objetivos, de forma descriptiva y sin
+  corrección.
+- **Métricas por brazo:**
+  - retorno medio y mediana, y por intersección;
+  - catastróficos (< −3,700, sección 15);
+  - bloqueados, con las reglas de la Fase 3 (controlador y episodio);
+  - cambios de fase por semáforo y ms por decisión;
+  - acuerdo con las referencias;
+  - medias por semilla y la semilla que más aporta a la varianza.
+- **Interacciones reales por réplica o semilla**, las dos contabilidades:
+
+  | | Sin compartir | Compartiendo |
+  |---|---|---|
+  | Planificador (sección 13) | 21,240 | 6,552 |
+  | Sueño | 12,600 | 3,960 |
+  | Directo 10k | 13,240 | 13,240 |
+  | Directo 30k | 39,208 | 39,208 |
+
+**Cómo:**
+
+- `python scripts/v2/run_planning_test.py --workers 4`: 17 trabajos de unos 240 episodios. Cada
+  política aprendida se parte en dos mitades de 5 semillas.
+- Cada trabajo es `evaluate_control_v2.py --split test_v21 --confirm-held-out --reference-agreement`
+  en su propio proceso, con un hilo.
+- Reanudable. Se niega a arrancar sin corriente o con 2 GB o menos.
+- Salida: `docs/results/v2/planning/test/`.
+- Análisis: `scripts/v2/analyze_planning_test.py`, escrito y probado con datos sintéticos antes de
+  simular.
+
+**Estimación:** la validación de la sección 16 dio unos 1.8 s por episodio con 4 procesos. Para
+4,080 episodios, **≈ 2–2.5 h**.
+
+**Integridad:** md5 antes y después de los 40 controladores y los resultados de la Fase 3.
