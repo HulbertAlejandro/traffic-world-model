@@ -39,10 +39,12 @@ En **cada paso de control real** t (60 por episodio):
    orden fijo `itertools.product((0, 1), repeat=4)`. Los empates no son raros: con el recorte en
    0.0, varias acciones pueden puntuar igual con la red casi vacía.
 
-El ventaneo de cada paso imaginado es el del sueño (`CorridorDreamEnvironment.step`): la ventana
-avanza un paso, el estado predicho entra al final y la acción de la continuación ocupa su lugar.
-Un test comprueba que, con las acciones registradas, los retornos imaginados coinciden con los de
-`scripts/v2/control_fidelity.py`.
+**[Corregido por la enmienda de la sección 11.]** El ventaneo de cada paso imaginado es el del
+**Experimento 1** (`rollout_episode`): cada estado queda emparejado con la acción aplicada en él;
+la ventana avanza un paso, el estado predicho entra al final y la acción de la continuación ocupa
+la nueva última posición. **No** es el ventaneo del `CorridorDreamEnvironment` usado en la Fase 3,
+que tiene un desfase (sección 11). Un test comprueba que, con las acciones registradas, los retornos
+imaginados coinciden con los de `rollout_episode`.
 
 El planificador **no tiene aprendizaje propio**: cada modelo del mundo da una réplica.
 
@@ -52,7 +54,7 @@ El planificador **no tiene aprendizaje propio**: cada modelo del mundo da una r�
 |---|---|---|
 | `plan_solo_lstm` | "mantener" en los 4 semáforos | LSTM s0–s9 |
 | `plan_solo_transformer` | "mantener" en los 4 semáforos | Transformer s0–s9 |
-| `plan_ppo_lstm` | el PPO del sueño de la misma semilla y arquitectura (`models/checkpoints/v2/control/dream_lstm_s<i>/best_model.zip`), determinista, sobre el estado imaginado | LSTM s0–s9 |
+| `plan_ppo_lstm` | el PPO del sueño de la misma semilla y arquitectura (`models/checkpoints/v2/control/dream_lstm_s<i>/best_model.zip`), determinista, sobre el estado imaginado. **Son los PPO de la Fase 3, entrenados en el sueño con el defecto de ventaneo** (sección 11) | LSTM s0–s9 |
 | `plan_ppo_transformer` | ídem con `dream_transformer_s<i>` | Transformer s0–s9 |
 
 Son 4 brazos × 10 réplicas = **40 planificadores**. La réplica *i* usa el modelo del mundo de
@@ -61,10 +63,9 @@ semilla *i* (y en `plan_ppo`, el PPO de semilla *i*, entrenado en ese mismo mode
 ## 3. Horizonte H
 
 - Se elige **una sola vez, en validación (24000–24023)**, entre **{3, 5, 7}**, por brazo.
-- **Regla:** el H con **mayor retorno medio en validación** (menor costo; media de las 10
-  réplicas de su media por episodio). Si hay empate exacto, el H más chico, que es más barato.
-  - El ejemplo del pedido decía "menor retorno medio". Se interpreta como "menor costo": el
-    retorno es negativo y elegir el peor no tendría sentido.
+- **Regla:** el H de **menor COSTO**, es decir, de **mayor retorno medio en validación** (el
+  menos negativo; media de las 10 réplicas de su media por episodio). Si hay empate exacto, el H
+  más chico, que es más barato. Confirmado por el autor en la enmienda de la sección 11.
 - H queda fijo para el test. No se ajusta nada más, y nada con el test.
 
 ## 4. Arranque del episodio (menos de 16 pasos de historia)
@@ -166,3 +167,38 @@ Las 5 reglas en validación no se cuentan: son referencias.
 - **Etapa 2:** la nota "evaluación en test iniciada" con la hora, la evaluación única en
   25000–25047 y las comparaciones de la sección 6.
 - **OOD (23000–23029)** sigue reservado para la comparación final.
+
+## 11. Enmienda del 5 de octubre de 2026: escrita ANTES de simular ningún planificador, DESPUÉS de descubrir un defecto en el Dream Environment
+
+Ningún planificador, ni ninguna regla de esta fase, se ha simulado todavía en ninguna semilla.
+
+**El defecto.** `CorridorDreamEnvironment.step` (y el `DreamEnvironment` de la v1, con el mismo
+código) avanza la ventana de acciones con la ventana **anterior** a insertar la acción elegida
+(`self._window_actions[1:]`), en vez de con la ventana ya actualizada.
+
+- La acción aplicada en un estado nunca queda emparejada con ese estado en la historia; queda la
+  del paso anterior.
+- Con las acciones registradas, la diferencia aparece desde el **tercer** paso imaginado; con
+  acciones distintas de las registradas, desde el segundo.
+- Se detectó porque el test (b) del planificador no coincidía con `control_fidelity.py`.
+- Comprobado con la LSTM s0, en el episodio de validación 21000, con las acciones registradas:
+
+  | Inicio | `rollout_episode` (referencia) | Planificador | Sueño con el defecto | Real |
+  |---|---|---|---|---|
+  | 0 | −546.22 | −546.22 | −628.44 | −600 |
+  | 10 | −1,444.01 | −1,444.01 | −1,318.26 | −1,661 |
+  | 20 | −537.58 | −537.58 | −552.31 | −560 |
+
+**Lo que cambia en este pre-registro:**
+
+1. **El planificador usa la alineación del Experimento 1:** la acción de cada estado queda pegada
+   a ese estado. No usa la del Dream Environment. Se corrigió el texto de la sección 1.
+2. **El test (b) compara contra `rollout_episode`**, capturando sus predicciones con
+   `scripts/v2/control_fidelity.py::rollout_episode_returns`, no contra `control_fidelity.py`.
+3. **`plan_ppo` usa los PPO de la Fase 3, que se entrenaron en el sueño con el defecto.** Se
+   mantienen tal cual, porque son los controladores que existen, y queda escrito.
+4. **Regla de H:** el H de **menor costo** (mayor retorno, el menos negativo), como ya decía la
+   sección 3. Se corrige la redacción.
+
+Nada más cambia: brazos, H ∈ {3, 5, 7}, relleno inicial, desempate, semillas, comparaciones,
+Bonferroni y contabilidad.

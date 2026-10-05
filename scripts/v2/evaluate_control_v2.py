@@ -5,10 +5,15 @@ Policy specification, one --policy per method:
     NAME=dream:CKPT[,CKPT...]    PPO trained in CorridorDreamEnvironment (sees the scaler.pkl-normalized state)
     NAME=direct:CKPT[,CKPT...]   PPO trained on real SUMO (raw state, its own VecNormalize statistics)
     NAME=ref:POLICY              one of the five non-learned references (scripts/v2/corridor_policies.py)
+    NAME=plan:ARCH,CONT,H[,SEEDS]  v2.1-A planner (environments/corridor_planner.py): world models ARCH
+                                 (lstm|transformer) seeds SEEDS (default 0+1+...+9), continuation CONT
+                                 (solo = keep, ppo = the Phase 3 dream PPO of the same seed), horizon H
 CKPT is a best_model.zip or a folder holding one; each CKPT is one training seed.
 
-Scenarios: --split validation|test|ood (all its seeds, or --seeds, a subset of them). The train
-seeds 20000-20111 are refused, and test / ood need --confirm-held-out (addendum, section 2).
+Scenarios: --split validation|test|ood|validation_v21|test_v21 (all its seeds, or --seeds, a subset
+of them). The train seeds 20000-20111 are refused, and test / ood / test_v21 need --confirm-held-out
+(ADDENDUM_CONTROL.md, sections 2 and 13). An existing output is never replaced without --overwrite,
+and the Phase 3 results (docs/results/v2/control/) never without --overwrite-official.
 
 Writes every episode (total return, return per intersection A0..D0, waiting, queue, arrivals,
 real phase switches per signal) to <output>.json and .csv, and prints per-policy summaries.
@@ -50,8 +55,12 @@ SPLIT_SEEDS = {
     "validation": range(21000, 21024),
     "test": range(22000, 22024),
     "ood": range(23000, 23030),
+    "validation_v21": range(24000, 24024),   # ADDENDUM_CONTROL.md, section 13
+    "test_v21": range(25000, 25048),
 }
-HELD_OUT_SPLITS = ("test", "ood")
+HELD_OUT_SPLITS = ("test", "ood", "test_v21")
+PHASE3_RESULTS_DIR = ROOT_DIR / "docs" / "results" / "v2" / "control"
+CONTROL_CHECKPOINTS = ROOT_DIR / "models" / "checkpoints" / "v2" / "control"
 TRAIN_SPLIT_SEEDS = range(20000, 20112)
 METRICS = ("total", *TRAFFIC_SIGNAL_IDS)
 # docs/v2/ADDENDUM_CONTROL.md, section 4.3: 1.5 x the worst fijo_2_3 return on the 24 validation
@@ -66,6 +75,7 @@ class Policy:
     kind: str
     checkpoints: list[Path] = field(default_factory=list)
     reference: str | None = None
+    plan: dict | None = None
 
 
 def parse_policy(spec: str) -> Policy:
@@ -79,6 +89,13 @@ def parse_policy(spec: str) -> Policy:
         if arg not in REFERENCE_POLICIES:
             raise argparse.ArgumentTypeError(f"unknown reference {arg!r}; expected one of {REFERENCE_POLICIES}")
         return Policy(name, kind, reference=arg)
+    if kind == "plan":
+        fields = arg.split(",")
+        if len(fields) not in (3, 4) or fields[0] not in ("lstm", "transformer") or fields[1] not in ("solo", "ppo"):
+            raise argparse.ArgumentTypeError(f"plan policy needs ARCH,CONT,H[,SEEDS], got {arg!r}")
+        seeds = [int(x) for x in fields[3].split("+")] if len(fields) == 4 else list(range(10))
+        return Policy(name, kind, plan={"architecture": fields[0], "continuation": fields[1],
+                                        "horizon": int(fields[2]), "seeds": seeds})
     if kind not in {"dream", "direct"}:
         raise argparse.ArgumentTypeError(f"unknown policy kind {kind!r} in {spec!r}")
     checkpoints = []
@@ -105,6 +122,17 @@ def scenario_seeds(split: str, seeds: list[int] | None, confirm_held_out: bool) 
     return chosen
 
 
+def check_output(output: Path, overwrite: bool, overwrite_official: bool) -> None:
+    """Before simulating anything: never replace a result silently, never touch the Phase 3 results."""
+    resolved = Path(output).resolve()
+    if resolved.is_relative_to(PHASE3_RESULTS_DIR.resolve()) and not overwrite_official:
+        raise SystemExit(f"{resolved} is inside the Phase 3 results ({PHASE3_RESULTS_DIR}); pass --overwrite-official "
+                         "only if explicitly approved.")
+    existing = [p for p in (resolved.with_suffix(".json"), resolved.with_suffix(".csv")) if p.exists()]
+    if existing and not overwrite:
+        raise SystemExit(f"{existing} already exist(s); pass --overwrite to replace.")
+
+
 def build_action_functions(policy: Policy, scaled_env) -> list[tuple[str, callable]]:
     """One (label, fn(raw_state, step) -> joint action) per training seed of the policy."""
     raw_env = scaled_env.env
@@ -115,6 +143,28 @@ def build_action_functions(policy: Policy, scaled_env) -> list[tuple[str, callab
         return [("deterministic", lambda state, step: act(raw_env, step))]
 
     from stable_baselines3 import PPO
+
+    if policy.kind == "plan":
+        from environments.corridor_dream_environment import world_model_dir
+        from environments.corridor_planner import CorridorPlanner, keep_continuation, ppo_continuation
+
+        cfg, functions = policy.plan, []
+        for seed in cfg["seeds"]:
+            if cfg["continuation"] == "ppo":
+                ppo = PPO.load(CONTROL_CHECKPOINTS / f"dream_{cfg['architecture']}_s{seed}" / "best_model.zip", device="cpu")
+                continuation = ppo_continuation(ppo)
+            else:
+                continuation = keep_continuation
+            planner = CorridorPlanner(world_model_dir(cfg["architecture"], seed), cfg["horizon"], continuation)
+
+            def fn(state, step, planner=planner):
+                if step == 0:
+                    planner.reset()
+                return planner.act(scaled_env.observation(state))  # the same bridge as the dream PPO
+
+            fn.planner = planner
+            functions.append((f"{cfg['architecture']}_s{seed}", fn))
+        return functions
 
     from training.train_controller import load_obs_normalizer
 
@@ -252,7 +302,7 @@ def save_results(output: Path, record: dict, episodes: list[dict], summary: dict
     fields = ["policy", "kind", "seed_label", "scenario_seed", "reward", *[f"reward_{ts}" for ts in TRAFFIC_SIGNAL_IDS],
               "waiting_mean", "queue_mean", "arrivals", *[f"switches_{ts}" for ts in TRAFFIC_SIGNAL_IDS],
               "pulse_offset", "steps", "seconds"]
-    fields += sorted({k for e in episodes for k in e if k.startswith("agree_")})
+    fields += sorted({k for e in episodes for k in e if k.startswith("agree_") or k == "decision_seconds_mean"})
     with output.with_suffix(".csv").open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
@@ -272,7 +322,10 @@ def main(argv: list[str] | None = None) -> None:
                         help="record, per step, whether each reference would have chosen the same action")
     parser.add_argument("--catastrophic-threshold", type=float, default=CATASTROPHIC_THRESHOLD)
     parser.add_argument("--output", type=Path, required=True, help="output path without extension")
+    parser.add_argument("--overwrite", action="store_true", help="allow replacing an existing output")
+    parser.add_argument("--overwrite-official", action="store_true", help="allow writing into docs/results/v2/control/")
     args = parser.parse_args(argv)
+    check_output(args.output, args.overwrite, args.overwrite_official)
 
     names = [p.name for p in args.policy]
     if len(set(names)) != len(names):
@@ -301,6 +354,8 @@ def main(argv: list[str] | None = None) -> None:
             for label, action_fn in build_action_functions(policy, scaled_env):
                 for scenario in scenarios:
                     record = run_episode(raw_env, action_fn, scenario, shadow)
+                    if hasattr(action_fn, "planner"):
+                        record["decision_seconds_mean"] = float(np.mean(action_fn.planner.decision_seconds))
                     record.update({"policy": policy.name, "kind": policy.kind, "seed_label": label,
                                    "scenario_seed": scenario})
                     episodes.append(record)
@@ -315,7 +370,7 @@ def main(argv: list[str] | None = None) -> None:
     record = {"split": args.split, "scenarios": scenarios, "level": args.level,
               "reference_agreement": args.reference_agreement,
               "catastrophic_threshold": args.catastrophic_threshold,
-              "policies": [{"name": p.name, "kind": p.kind, "reference": p.reference,
+              "policies": [{"name": p.name, "kind": p.kind, "reference": p.reference, "plan": p.plan,
                             "checkpoints": [c.as_posix() for c in p.checkpoints]} for p in args.policy]}
     save_results(args.output, record, episodes, summary, comparisons)
     print(f"\n-> {args.output.with_suffix('.json')} y .csv")

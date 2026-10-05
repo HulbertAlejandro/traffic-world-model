@@ -63,6 +63,31 @@ def imagined_vs_real(dream: CorridorDreamEnvironment) -> dict[int, np.ndarray]:
     return out
 
 
+def rollout_episode_returns(model, reward_scaler: dict, episode: dict, sequence_length: int,
+                            horizon: int = HORIZON) -> np.ndarray:
+    """Reference imagined returns from Experiment 1's own rollout_episode (actions aligned by time
+    index), one per window start 0..T-L-horizon: the per-step predicted rewards are captured from
+    the predict_next_step calls rollout_episode makes, clipped like the dream, and summed."""
+    from evaluation import world_model_evaluation as wme
+    from environments.corridor_dream_environment import REWARD_CLIP_MAX, REWARD_CLIP_MIN
+
+    captured = []
+    original = wme.predict_next_step
+
+    def capture(*args, **kwargs):
+        pred_z, pred_r = original(*args, **kwargs)
+        captured.append(float(np.clip(pred_r.item(), REWARD_CLIP_MIN, REWARD_CLIP_MAX)))
+        return pred_z, pred_r
+
+    wme.predict_next_step = capture
+    try:
+        wme.rollout_episode(model, episode, sequence_length, model.action_dim,
+                            horizon, torch.device("cpu"), reward_scaler["reward_mean"], reward_scaler["reward_std"])
+    finally:
+        wme.predict_next_step = original
+    return np.array(captured).reshape(-1, horizon).sum(axis=1)
+
+
 def _stats(rows: np.ndarray, col: int) -> tuple[float, float]:
     imagined, real = rows[:, col], rows[:, 2]
     return float(np.corrcoef(imagined, real)[0, 1]), float((imagined - real).mean())
