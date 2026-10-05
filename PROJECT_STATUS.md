@@ -1,7 +1,9 @@
 # PROJECT_STATUS.md — Estado al momento de este handoff
 
-Última verificación: commit `7ecd337` (rama `v2/four-intersections`), 123/123 tests en verde,
-incluidos los de SUMO en vivo (ver la sección siguiente). **Lo más reciente: la extensión
+Última verificación: commit `3b33b7c` (rama `v2/four-intersections`), 136/136 tests en verde,
+incluidos los de SUMO en vivo. **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
+intersecciones), cerrada el 5 de octubre**; ver la primera sección de abajo. Lo que sigue en esta
+introducción es el estado de la v1. **Lo más reciente: la extensión
 del PPO a 10 semillas por controlador (30 de septiembre; sección siguiente)**, que actualiza el
 resultado de control. Antes, una auditoría técnica del repositorio (26 de septiembre),
 ejecutando el código, y las correcciones que salieron de ella. Estado actual:
@@ -40,6 +42,78 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
   el resultado oficial (ver el final del punto 5).
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
+
+## ✅ v2, Fase 3: control en el corredor de 4 intersecciones (4–5 de octubre) — cerrada
+
+Pre-registro, enmienda y todos los números: `docs/v2/ADDENDUM_CONTROL.md` (diseño en
+`docs/v2/DISENO_CONTROL.md`). Resultados por episodio: `docs/results/v2/control/`
+(`test_stage2.*`, `test_stage3.*` y sus `*_analysis.json`; `fidelity_*.json`;
+`references_validation.*`).
+
+**Brazos** (10 semillas cada uno):
+
+- PPO en el sueño de la LSTM y en el del Transformer: cada controlador usa el modelo del mundo de
+  su misma semilla, entrena 50,176 pasos imaginados y se selecciona en SUMO real con validación
+  21000–21004.
+- RL directo de 10k y de 30k pasos reales, con escenarios de entrenamiento 30000–30503.
+- 5 reglas sin aprendizaje.
+
+**Resultado en test** (22000–22023, una sola evaluación por controlador):
+
+| | Media | Mediana | Catastróficos (< −3,600) |
+|---|---|---|---|
+| Sueño LSTM | −16,168 | −3,225 | 118/240 |
+| Sueño Transformer | −2,340 | −1,567 | 18/240 |
+| RL directo 10k | −6,138 | −3,193 | 96/240 |
+| RL directo 30k | −1,742 | −1,733 | 2/240 |
+| `espera_mas_larga` (mejor regla en validación) | −1,280 | −1,010 | 1/24 |
+| `min_verde_y_cambiar` | −1,310 | −1,306 | 0/24 |
+
+**Las 8 comparaciones planificadas**, con Bonferroni α' = 0.05/8 = 0.00625 e IC al 99.375%. Test
+principal: Welch sobre las medias por semilla; t pareada y Wilcoxon por escenario como secundarios
+(pseudorreplicación). **Ninguna es significativa:**
+
+| # | Comparación | Diferencia | p |
+|---|---|---|---|
+| P1 | LSTM − Transformer | −13,828 | 0.053 |
+| P2a | LSTM − directo 10k | −10,030 | 0.15 |
+| P2b | Transformer − directo 10k | +3,798 | 0.046 (gana 24/24 escenarios) |
+| P3a | LSTM − directo 30k | −14,427 | 0.045 |
+| P3b | Transformer − directo 30k | −599 | 0.34 |
+| P4 | LSTM − mejor regla (total) | −14,889 | 0.040 |
+| P5 | LSTM − mejor regla (B0) | −2,140 | 0.028 |
+| P6 | LSTM − mejor regla (C0) | −5,067 | 0.245 |
+
+- **Ningún controlador aprendido supera a la mejor regla.** H1 (el aprendido supera a las reglas
+  en B0 y C0) no tiene apoyo.
+- **El sueño con Transformer queda cerca del RL directo de 30k** (−599, no significativo) **con
+  3.1x menos interacciones reales sin compartir el dataset (12,600 frente a 39,208) y 9.9x
+  compartiéndolo (3,960)**. Frente al de 10k (13,240) la razón es 1.05x y 3.3x. No hay ventaja de
+  control ni de eficiencia demostrada.
+- **La LSTM se bloquea.** 75/240 episodios tienen menos de 3 cambios de fase en algún semáforo
+  (56 en D0) y promedian −40,463. El Transformer tiene 2/240, el directo de 10k 4/240 y el de 30k
+  0/240.
+- **Diagnóstico de fidelidad on-policy** (validación 21000–21005, descriptivo):
+  - Pearson entre el retorno imaginado a 7 pasos y el real: LSTM 0.43 y Transformer 0.67 (con las
+    acciones del dataset, 0.87 y 0.90).
+  - El sesgo de la LSTM (imaginado − real) crece con el tiempo que una fase lleva mantenida: +86
+    con 0–5 pasos y +2,890 con 20 o más. El recorte no lo explica.
+  - Retenciones de 20 pasos o más sí existen en el train, en B0 y D0, por `cola_mas_larga`.
+
+**Avisos para trabajo futuro:**
+
+- **(a) El test 22000–22023 ya se vio completo.** No sirve para validar rediseños.
+- **(b) OOD 23000–23029 sigue virgen**, reservado para la comparación final.
+- **(c) Por la regla de desempate pre-registrada se adoptó la LSTM, aunque es la peor:** el IC de
+  P1 incluye 0. La regla no se reescribió. La enmienda de la sección 12, escrita después de ver
+  test, compara con el RL directo los dos brazos del sueño.
+- Cualquier v2.1 se valida en el rango nuevo de la sección 13 del addendum.
+
+**Incidencias de cómputo de la etapa 3:**
+
+- Una suspensión del equipo (17:47–22:17) y dos detenciones del lanzador por memoria crítica.
+- Se reanudó sin cambiar nada, reentrenando desde cero, con la misma semilla, las corridas sin
+  terminar. Las 8 ya terminadas no se tocaron (mismo md5 y fecha).
 
 ## ✅ Suite completa verificada el 4 de octubre, tras reiniciar: 123 passed
 

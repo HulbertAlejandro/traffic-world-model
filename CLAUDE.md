@@ -128,6 +128,75 @@ pre-registró antes de entrenar (`docs/results/ppo_10_seeds/ADDENDUM.md`):
 Detalle completo en PROJECT_STATUS.md ("Extensión del PPO a 10 semillas por controlador"), y
 el resultado anterior con 3 / 4 semillas en "Auditoría técnica y correcciones", punto 2.
 
+## v2: corredor de 4 intersecciones (rama `v2/four-intersections`), Fase 3 de control cerrada
+
+Lo de arriba es la v1 (una intersección). La v2 tiene:
+
+- **Estado:** 104 dimensiones, el de la v1 por semáforo (A0, B0, C0, D0).
+- **Acción:** conjunta de 4 bits, mantener o cambiar en cada semáforo.
+- **Recompensa:** suma de la recompensa estilo v1 de los 4 semáforos.
+- **Modelos del mundo:** sin Autoencoder; LSTM (oculta 137) y Transformer (d_model 80), con unos
+  152k parámetros y 10 semillas cada uno.
+
+El pre-registro y todos los resultados están en `docs/v2/ADDENDUM_CONTROL.md` (diseño en
+`docs/v2/DISENO_CONTROL.md`); los resultados por episodio, en `docs/results/v2/control/`.
+
+**Resultado en test** (22000–22023, 24 escenarios; brazos aprendidos con 10 semillas cada uno,
+evaluación única):
+
+| | Media | Catastróficos (< −3,600) |
+|---|---|---|
+| Sueño LSTM | −16,168 | 118/240 |
+| Sueño Transformer | −2,340 | 18/240 |
+| RL directo 10k | −6,138 | 96/240 |
+| RL directo 30k | −1,742 | 2/240 |
+| `espera_mas_larga` (mejor regla) | −1,280 | 1/24 |
+
+- **Ninguna de las 8 comparaciones planificadas es significativa** con Bonferroni
+  α' = 0.05/8 = 0.00625 (IC al 99.375%; test principal: Welch sobre las medias por semilla; la
+  t pareada por escenario es secundaria y pseudorreplicación).
+  - P1: LSTM − Transformer = −13,828 (p = 0.053).
+  - P2a/b, sueño − directo 10k: LSTM −10,030 (p = 0.15); Transformer +3,798 (p = 0.046, gana
+    24/24 escenarios).
+  - P3a/b, sueño − directo 30k: LSTM −14,427 (p = 0.045); Transformer −599 (p = 0.34).
+  - P4–P6, LSTM frente a la mejor regla en total, B0 y C0: p = 0.040, 0.028 y 0.245, todas en
+    contra del sueño.
+- **Ningún controlador aprendido supera a la mejor regla sin aprendizaje**, ni en el total ni en
+  B0 y C0. La hipótesis H1 no tiene apoyo.
+- **El sueño con Transformer queda cerca del RL directo de 30k** (brecha no significativa de −599)
+  **con 3.1x menos interacciones reales sin compartir el dataset y 9.9x compartiéndolo**:
+
+  | | Interacciones reales por semilla |
+  |---|---|
+  | Sueño, sin compartir el dataset | 12,600 |
+  | Sueño, compartiéndolo entre 10 semillas | 3,960 |
+  | RL directo 10k | 13,240 |
+  | RL directo 30k | 39,208 |
+
+  No es una ventaja de control demostrada: ninguna diferencia sueño − directo es significativa.
+- **La LSTM se bloquea:** mantiene una fase casi todo el episodio, sobre todo en D0.
+  - 75/240 episodios con menos de 3 cambios en algún semáforo, frente a 2/240 del Transformer
+    y 0/240 del directo de 30k.
+  - Esos episodios promedian −40,463.
+- **Diagnóstico de fidelidad on-policy** (validación 21000–21005, descriptivo):
+  - Con las acciones del propio controlador, Pearson entre el retorno imaginado a 7 pasos y el
+    real: LSTM 0.43 y Transformer 0.67 (0.87 y 0.90 con las acciones del dataset).
+  - El modelo LSTM subestima el costo, y más cuanto más tiempo lleva una fase mantenida: sesgo
+    +86 con 0–5 pasos y +2,890 con 20 o más.
+  - El recorte de la recompensa no lo explica. El efecto está confundido con la congestión.
+
+**Lo que no hay que olvidar de la v2:**
+
+- **(a) El test 22000–22023 ya se vio completo** (etapas 2 y 3). No sirve para validar rediseños:
+  cualquier v2.1 se evalúa en semillas nuevas (rango fijado en `ADDENDUM_CONTROL.md`, sección 13).
+- **(b) OOD 23000–23029 sigue virgen.** Está reservado para la comparación final.
+- **(c) Por la regla de desempate pre-registrada se adoptó la LSTM**: el IC de P1 incluye 0, así
+  que gana la LSTM aunque es la peor. La regla no se reescribió. La enmienda de la sección 12
+  (posterior a test) compara con el RL directo **los dos brazos** del sueño.
+- No se usan en evaluación: las semillas 20000–20111 (train del dataset) ni 30000–30503 (las que
+  consumió el entrenamiento del RL directo).
+- Pesos en `models/checkpoints/v2/control/` (no versionados; sus `.json` sí).
+
 ## Decisiones de diseño ya tomadas
 
 - El estado (`TrafficState`) tiene **26 dimensiones**: 4 carriles × 5 variables
@@ -286,7 +355,7 @@ scripts/        datos: collect_dataset.py, split_dataset.py, merge_dataset.py, n
                 control: evaluate_controller.py, evaluate_controller_sumo.py,
                   evaluate_direct_vs_dream.py, evaluate_final_comparison.py,
                   evaluate_multiseed_statistical.py, analyze_controller_actions.py
-tests/          17 archivos, 87 tests (pytest -v)
+tests/          23 archivos, 136 tests (pytest -v)
 ver_controlador.py (demo del PPO del sueño oficial en la GUI de SUMO, escenario nuevo 7025),
 ver_tiempo_fijo.py (el mismo demo con la política de tiempo fijo, para comparar a simple vista),
 CLAUDE.md, PROJECT_STATUS.md, TODO.md, README.md, pytest.ini, requirements.txt, .gitignore, LICENSE
