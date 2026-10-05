@@ -3,6 +3,7 @@
     python scripts/v2/md5_official.py --tag before
     python scripts/v2/md5_official.py --tag after --compare before
     python scripts/v2/md5_official.py --control --tag control_before    # Phase 3 (docs/v2/ADDENDUM_CONTROL.md)
+    python scripts/v2/md5_official.py --planning --tag planning_before  # v2.1-A (docs/v2/ADDENDUM_PLANIFICACION.md)
 
 Covers v1's network, dataset (raw and processed), official checkpoints (Autoencoder, LSTM,
 Transformer/TSMixer, the three PPO controllers) and the v2 network, route file and raw dataset.
@@ -40,6 +41,14 @@ CONTROL_PATTERNS = (
 )
 
 
+# --planning adds, on top of --control, what v2.1-A reuses and must not modify: the 40 Phase 3
+# controllers (dream and direct) and the Phase 3 results.
+PLANNING_PATTERNS = (
+    "models/checkpoints/v2/control/*/*",
+    "docs/results/v2/control/*",
+)
+
+
 def snapshot(patterns: tuple[str, ...] = PATTERNS) -> dict[str, str]:
     files = sorted({p for pat in patterns for p in ROOT.glob(pat) if p.is_file()})
     return {p.relative_to(ROOT).as_posix(): hashlib.md5(p.read_bytes()).hexdigest() for p in files}
@@ -50,8 +59,14 @@ def main() -> None:
     parser.add_argument("--tag", required=True)
     parser.add_argument("--compare")
     parser.add_argument("--control", action="store_true", help="also cover the Phase 3 inputs (CONTROL_PATTERNS)")
+    parser.add_argument("--planning", action="store_true", help="--control plus the Phase 3 controllers and results")
     args = parser.parse_args()
-    snap = snapshot(PATTERNS + CONTROL_PATTERNS if args.control else PATTERNS)
+    patterns = PATTERNS
+    if args.control or args.planning:
+        patterns += CONTROL_PATTERNS
+    if args.planning:
+        patterns += PLANNING_PATTERNS
+    snap = snapshot(patterns)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / f"md5_{args.tag}.json").write_text(json.dumps(snap, indent=1), encoding="utf-8")
     print(f"{len(snap)} files -> md5_{args.tag}.json")
