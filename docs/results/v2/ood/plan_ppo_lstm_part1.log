@@ -1,0 +1,13 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 3ms, vehicles TOT 0 ACT 0 BUF 0)                      
+plan_ppo_lstm          lstm_s5: media -1532.0
+plan_ppo_lstm          lstm_s6: media -1429.6
+plan_ppo_lstm          lstm_s7: media -1248.3
+plan_ppo_lstm          lstm_s8: media -1318.9
+plan_ppo_lstm          lstm_s9: media -1976.5
+
+Escenarios: 30 (23000..23029)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+plan_ppo_lstm          |    5 |   -1501.1 |   -419.7 |   -325.2 |   -538.4 |   -217.8 |  -6841.0 |        3 | [-1532.0, -1429.6, -1248.3, -1318.9, -1976.5]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\ood\plan_ppo_lstm_part1.json y .csv

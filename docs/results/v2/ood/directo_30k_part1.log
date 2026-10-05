@@ -1,0 +1,13 @@
+Step #0.00 (0ms ?*RT. ?UPS, TraCI: 11ms, vehicles TOT 0 ACT 0 BUF 0)                     
+directo_30k            models/checkpoints/v2/control/direct_30k_s5/best_model.zip: media -1774.5
+directo_30k            models/checkpoints/v2/control/direct_30k_s6/best_model.zip: media -1512.8
+directo_30k            models/checkpoints/v2/control/direct_30k_s7/best_model.zip: media -1660.5
+directo_30k            models/checkpoints/v2/control/direct_30k_s8/best_model.zip: media -2051.6
+directo_30k            models/checkpoints/v2/control/direct_30k_s9/best_model.zip: media -1616.9
+
+Escenarios: 30 (23000..23029)
+Politica               | sem. |     total |       A0 |       B0 |       C0 |       D0 |     peor | catastr. | medias por semilla (total)
+----------------------------------------------------------------------------------------------------------------------------------------
+directo_30k            |    5 |   -1723.3 |   -507.0 |   -258.3 |   -708.1 |   -249.9 |  -2617.0 |        0 | [-1774.5, -1512.8, -1660.5, -2051.6, -1616.9]
+
+-> C:\Users\hulbe\VisualProjects\traffic-world-model\docs\results\v2\ood\directo_30k_part1.json y .csv
