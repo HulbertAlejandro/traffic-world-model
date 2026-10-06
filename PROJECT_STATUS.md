@@ -59,6 +59,19 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
 
+## ✅ Scripts y figuras para el artículo (6 de octubre): solo lectura de resultados
+
+- `scripts/v2/make_article_report.py` (genera `docs/RESULTADOS_PARA_ARTICULO.md`),
+  `scripts/v2/make_article_figures.py` y `scripts/v2/make_figures_estilo_v1.py` (generan
+  `docs/figures_v2/`) **solo leen** los resultados versionados en `docs/results/`. No simulan, no
+  entrenan y no modifican ningún resultado.
+- Verificación antes del commit: al principio, Smart App Control bloqueó la DLL
+  `pandas._libs.testing` en la primera importación ("Una directiva de Control de aplicaciones
+  bloqueó este archivo"). Los reintentos siguientes cargaron pandas 3.0.5 sin error, sin cambiar
+  la configuración de seguridad. Por eso se corrió la suite completa y **no quedó ningún test sin
+  correr por pandas**: `pytest -v` dio **158 passed y 1 xfailed** (el xfail estricto del desfase
+  de la v1), con los tests de SUMO en vivo incluidos.
+
 ## ✅ v2.1-A: planificación con el modelo del mundo (5–6 de octubre) — evaluada en el test nuevo
 
 Pre-registro, enmiendas y todos los números: `docs/v2/ADDENDUM_PLANIFICACION.md` (secciones 1–18).

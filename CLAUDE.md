@@ -531,6 +531,12 @@ el equipo, sin cambiar configuración de seguridad, torch, pandas y SUMO cargaro
 sobre `7ecd337` dio **123 passed**, incluidos los 12 de SUMO (detalle en PROJECT_STATUS.md, "Suite
 completa verificada el 4 de octubre, tras reiniciar").
 
+Scripts para el artículo (6 de octubre): `scripts/v2/make_article_report.py`,
+`make_article_figures.py` y `make_figures_estilo_v1.py` solo leen `docs/results/` (generan
+`docs/RESULTADOS_PARA_ARTICULO.md` y `docs/figures_v2/`). Smart App Control bloqueó pandas en el
+primer intento y lo dejó cargar en los siguientes. La suite completa corrió: 158 passed y 1 xfailed,
+sin tests pendientes por pandas (detalle en PROJECT_STATUS.md).
+
 Resuelto también: la cuenta/app desconocida que apareció como colaborador en el repositorio de
 GitHub era Codex Connector; su acceso se revocó en ambas capas, y los colaboradores
 humanos son legítimos (investigado y confirmado por el autor directamente en GitHub).
