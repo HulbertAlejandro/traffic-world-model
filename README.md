@@ -157,6 +157,10 @@ menos de memoria, y a escribir sobre resultados oficiales.
 pytest -v
 ```
 
+Los tests se corren con el Python del entorno virtual del proyecto
+(`.\.venv\Scripts\python.exe -m pytest -v`), no con el `python` del sistema, que no tiene las
+dependencias.
+
 159 tests en 25 archivos. Uno es un `xfail` estricto que documenta el desfase de ventana del
 Dream Environment de la v1.
 
