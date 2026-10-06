@@ -83,3 +83,10 @@ models/checkpoints/v2/**/*.pkl
 # docs/results/exploratory/; by convention these checkpoint folders are not versioned
 models/checkpoints/exploratory_latent_sweep/
 models/checkpoints/exploratory_seed_zero_check/
+# Any future exploratory checkpoint folder follows the same convention
+models/checkpoints/exploratory_*/
+
+# Safety net: generated datasets (.npz) and pickled scalers/statistics (.pkl) are never versioned,
+# wherever they are written
+*.npz
+*.pkl
