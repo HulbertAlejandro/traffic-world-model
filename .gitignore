@@ -78,3 +78,8 @@ models/checkpoints/v2/**/*.npz
 # v2 Phase 3 (control): PPO weights (.zip) and VecNormalize statistics (.pkl); their .json are versioned
 models/checkpoints/v2/**/*.zip
 models/checkpoints/v2/**/*.pkl
+
+# v1 exploration (latent_dim sweep and seed-zero check): covered by the manifests in
+# docs/results/exploratory/; by convention these checkpoint folders are not versioned
+models/checkpoints/exploratory_latent_sweep/
+models/checkpoints/exploratory_seed_zero_check/
