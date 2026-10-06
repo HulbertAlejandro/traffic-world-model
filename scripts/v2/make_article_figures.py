@@ -239,58 +239,80 @@ def test_episodes() -> dict[str, list[dict]]:
     return eps
 
 
-METHODS = [  # nombre, rótulo, familia
-    ("plan_ppo_transformer", "Planificador + PPO, Transformer", "plan"),
-    ("plan_ppo_lstm", "Planificador + PPO, LSTM", "plan"),
-    ("plan_solo_transformer", "Planificador solo, Transformer", "plan"),
-    ("plan_solo_lstm", "Planificador solo, LSTM", "plan"),
-    ("sueno_transformer", "PPO del sueño, Transformer", "sueno"),
-    ("sueno_lstm", "PPO del sueño, LSTM", "sueno"),
-    ("directo_30k", "RL directo 30k", "directo"),
-    ("directo_10k", "RL directo 10k", "directo"),
+METHODS = [  # nombre, rótulo (los nombres del artículo), familia
+    ("plan_ppo_transformer", "Planificador (plan_ppo), Transformer", "plan"),
+    ("plan_ppo_lstm", "Planificador (plan_ppo), LSTM", "plan"),
+    ("plan_solo_transformer", "Planificador (plan_solo), Transformer", "plan"),
+    ("plan_solo_lstm", "Planificador (plan_solo), LSTM", "plan"),
+    ("sueno_transformer", "PPO en imaginación sin planificar, Transformer", "sueno"),
+    ("sueno_lstm", "PPO en imaginación sin planificar, LSTM", "sueno"),
+    ("directo_30k", "PPO directo, 30.000 pasos", "directo"),
+    ("directo_10k", "PPO directo, 10.000 pasos", "directo"),
     ("espera_mas_larga", "espera_mas_larga", "regla"),
     ("cola_mas_larga", "cola_mas_larga", "regla"),
     ("min_verde_y_cambiar", "min_verde_y_cambiar", "regla"),
-    ("fijo_2_3", "fijo_2_3", "regla"),
-    ("max_presion", "max_presion", "regla"),
+    ("fijo_2_3", "Tiempo fijo", "regla"),
+    ("max_presion", "Presión máxima", "regla"),
 ]
-FAMILY = {"plan": (ORANGE, "///", "Planificador"), "sueno": (LIGHT, "...", "PPO del sueño"),
-          "directo": (DARK, "", "RL directo"), "regla": (GRAY, "xx", "Regla sin aprendizaje")}
+FAMILY = {"plan": (ORANGE, "///", "Planificador"), "sueno": (LIGHT, "...", "PPO en imaginación sin planificar"),
+          "directo": (DARK, "", "PPO directo"), "regla": (GRAY, "xx", "Regla sin aprendizaje")}
+# Estilo sencillo de la v1: colores planos, sin tramas (morado para el PPO directo, la cuarta familia).
+FAMILY_V1 = {"plan": "#E67E22", "sueno": "#2E86AB", "directo": "#8E44AD", "regla": "#95A5A6"}
 CLIP = -8000.0
 
 
-def fig10(out: Path, eps) -> Path:
+def fig10(out: Path, eps, style: str = "article") -> Path:
+    """Cajas del retorno por episodio en la prueba final. style: "article" (300 dpi, tramas) o "v1"."""
+    v1 = style == "v1"
+
+    def thousands_dot(x, _pos=None) -> str:  # punto como separador de miles, como en el artículo
+        return f"{x:,.0f}".replace(",", ".").replace("-", "−")
+
     threshold = load("planning/test_analysis.json")["threshold"]
-    fig, ax = plt.subplots(figsize=(6.3, 4.6))
-    n_m = len(METHODS)
-    for i, (name, _lab, fam) in enumerate(METHODS):
-        r = np.array([float(x["reward"]) for x in eps[name]])
-        y = n_m - 1 - i
-        c, hatch, _ = FAMILY[fam]
-        bp = ax.boxplot(r, positions=[y], orientation="horizontal", widths=0.6, patch_artist=True, whis=1.5,
-                        medianprops={"color": INK, "linewidth": 1.4}, whiskerprops={"color": INK, "linewidth": 0.8},
-                        capprops={"color": INK, "linewidth": 0.8},
-                        flierprops={"marker": "o", "ms": 2.2, "mfc": "none", "mec": MUTED, "mew": 0.5})
-        for b in bp["boxes"]:
-            b.set(facecolor=c, edgecolor=INK, linewidth=0.7, hatch=hatch)
-        below = int((r < CLIP).sum())  # columna a la derecha del eje: episodios fuera del recorte
-        ax.annotate(f"{below}/{len(r)}" if below else "—", (1.01, y), xycoords=("axes fraction", "data"),
-                    va="center", ha="left", fontsize=7, color=INK if below else MUTED)
-    ax.axvline(threshold, color=INK, linestyle="--", linewidth=0.9)
-    ax.annotate(f"umbral de catastrófico ({thousands(threshold)})", (threshold, n_m - 0.45), xytext=(3, 0),
-                textcoords="offset points", fontsize=7, color=INK, va="bottom")
-    ax.annotate(f"< {thousands(CLIP)}", (1.01, n_m - 0.45), xycoords=("axes fraction", "data"),
-                va="bottom", ha="left", fontsize=7, color=MUTED)
-    ax.set_yticks(range(n_m), [lab for _n, lab, _f in reversed(METHODS)])
-    ax.set_xlim(CLIP, 0)
-    ax.set_ylim(-0.6, n_m - 0.1)
-    ax.xaxis.set_major_formatter(thousands)
-    ax.set_xlabel(f"Retorno por episodio (prueba 25000–25047; eje recortado en {thousands(CLIP)})")
-    ax.grid(axis="y", visible=False)
-    handles = [matplotlib.patches.Patch(facecolor=c, hatch=h, edgecolor=INK, linewidth=0.6, label=lab)
-               for c, h, lab in FAMILY.values()]
-    ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.0, 1.03), ncol=4, fontsize=7.5)
-    return save(fig, out, "fig10_cajas_prueba_final.png")
+    rc = {"axes.spines.top": True, "axes.spines.right": True, "axes.edgecolor": "black",
+          "xtick.color": "black", "ytick.color": "black", "grid.color": "#B0B0B0", "grid.alpha": 0.25,
+          "grid.linewidth": 0.8} if v1 else {}
+    with plt.rc_context(rc):
+        fig, ax = plt.subplots(figsize=(6.3, 4.6))
+        n_m = len(METHODS)
+        for i, (name, _lab, fam) in enumerate(METHODS):
+            r = np.array([float(x["reward"]) for x in eps[name]])
+            y = n_m - 1 - i
+            c, hatch, _ = FAMILY[fam]
+            if v1:
+                c, hatch = FAMILY_V1[fam], ""
+            bp = ax.boxplot(r, positions=[y], orientation="horizontal", widths=0.6, patch_artist=True, whis=1.5,
+                            medianprops={"color": INK, "linewidth": 1.4},
+                            whiskerprops={"color": INK, "linewidth": 0.8}, capprops={"color": INK, "linewidth": 0.8},
+                            flierprops={"marker": "o", "ms": 2.2, "mfc": "none", "mec": MUTED, "mew": 0.5})
+            for b in bp["boxes"]:
+                b.set(facecolor=c, edgecolor=INK, linewidth=0.7, hatch=hatch)
+            below = int((r < CLIP).sum())  # columna a la derecha del eje: episodios fuera del recorte
+            ax.annotate(f"{below}/{len(r)}" if below else "—", (1.01, y), xycoords=("axes fraction", "data"),
+                        va="center", ha="left", fontsize=7, color=INK if below else MUTED)
+        ax.axvline(threshold, color=INK, linestyle="--", linewidth=0.9)
+        ax.annotate(f"umbral de catastrófico ({thousands_dot(threshold)})", (threshold, n_m - 0.45),
+                    xytext=(3, 0), textcoords="offset points", fontsize=7, color=INK, va="bottom")
+        ax.annotate(f"< {thousands_dot(CLIP)}", (1.01, n_m - 0.45), xycoords=("axes fraction", "data"),
+                    va="bottom", ha="left", fontsize=7, color=MUTED)
+        ax.set_yticks(range(n_m), [lab for _n, lab, _f in reversed(METHODS)])
+        ax.set_xlim(CLIP, 0)
+        ax.set_ylim(-0.6, n_m + 0.25 if v1 else n_m - 0.1)  # en la v1 hay borde arriba: espacio para el umbral
+        ax.xaxis.set_major_formatter(thousands_dot)
+        ax.set_xlabel(f"Retorno por episodio (prueba 25000–25047; eje recortado en {thousands_dot(CLIP)})")
+        if v1:
+            ax.grid(True)
+        ax.grid(axis="y", visible=False)
+        handles = [matplotlib.patches.Patch(facecolor=FAMILY_V1[k] if v1 else c, hatch="" if v1 else h,
+                                            edgecolor=INK, linewidth=0.6, label=lab)
+                   for k, (c, h, lab) in FAMILY.items()]
+        ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.0, 1.03), ncol=2, fontsize=7.5)
+        if v1:
+            path = out / "fig10_cajas_prueba_final_v1.png"
+            fig.savefig(path, dpi=170)
+            plt.close(fig)
+            return path
+        return save(fig, out, "fig10_cajas_prueba_final.png")
 
 
 def fig11(out: Path, eps) -> Path:
@@ -327,11 +349,18 @@ def fig11(out: Path, eps) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=ROOT / "docs" / "figures_v2")
+    parser.add_argument("--only", type=int, choices=[10], help="regenera solo esa figura (10: sus dos estilos)")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     eps = test_episodes()
-    for path in (fig5(args.out), fig6(args.out), fig7(args.out), fig8(args.out), fig9(args.out),
-                 fig10(args.out, eps), fig11(args.out, eps)):
+    if args.only == 10:
+        makers = (lambda: fig10(args.out, eps), lambda: fig10(args.out, eps, style="v1"))
+    else:
+        makers = (lambda: fig5(args.out), lambda: fig6(args.out), lambda: fig7(args.out), lambda: fig8(args.out),
+                  lambda: fig9(args.out), lambda: fig10(args.out, eps), lambda: fig10(args.out, eps, style="v1"),
+                  lambda: fig11(args.out, eps))
+    for make in makers:
+        path = make()
         print(path.relative_to(ROOT) if path.is_relative_to(ROOT) else path)
 
 
