@@ -451,15 +451,27 @@ Frente al de 10k cuesta 1.6x **más** sin compartir y 2.0x menos compartiendo.
 
 ```
 configs/        EnvironmentConfig, RewardConfig, RepresentationConfig, WorldModelConfig,
-                ControllerConfig
-datasets/       transition_dataset.py, latent_sequence_dataset.py, metadata.json, raw/, processed/ (generados)
+                ControllerConfig; corridor_reward.py (CorridorRewardConfig, v2)
+datasets/       transition_dataset.py, latent_sequence_dataset.py, metadata.json, raw/, processed/ (generados);
+                v2/ (dataset del corredor, generado y no versionado)
 docs/           PROPUESTA.md (propuesta académica), DOCUMENTACION_PROYECTO.md (documento de estudio),
                 EXPLORACION_LATENT_DIM.md (exploración del Experimento 0, no oficial),
                 results/ (resultados por episodio de cada evaluación, versionados;
-                results/exploratory/ = exploraciones, no forman parte del pipeline oficial)
+                results/exploratory/ = exploraciones, no forman parte del pipeline oficial),
+                v1/README_v1.md (README de la v1, conservado)
+                v2: v2/ (DISENO_* y ADDENDUM_*: red, estado/acción/recompensa, dataset, autoencoder,
+                  lstm_vs_transformer, control, sueno_corregido, planificacion, ood),
+                  results/v2/ (resultados por episodio de la v2, versionados),
+                  RESULTADOS_PARA_ARTICULO.md y figures_v2/ (generados por scripts/v2/make_article_*.py
+                  y make_figures_estilo_v1.py, solo leen docs/results/)
 environments/   TrafficEnvironment, CustomStateBuilder, TrafficState, ProjectActionSpace,
                 ProjectRewardFunction, DreamEnvironment, EncodedTrafficEnvironment,
                 ReseedingWrapper, single-intersection/ (red SUMO propia, demanda asimétrica)
+                v2: corridor_environment.py (estado de 104, acción de 4 bits, recompensa sumada),
+                  scaled_corridor_environment.py (normaliza con el scaler.pkl del modelo del mundo),
+                  corridor_dream_environment.py (window_alignment "legacy"/"aligned"),
+                  corridor_planner.py (planificador de la v2.1-A),
+                  four-intersection-corridor/ (red y demanda SUMO del corredor)
 models/
   representation/  Encoder, Decoder, Autoencoder
   world_model/     base.py (Protocol TemporalModel), lstm.py (LatentDynamicsLSTM, el del sistema),
@@ -469,11 +481,14 @@ models/
                    controller_direct_30k_10seeds/ (semillas 4–9) (extensión a 10 semillas),
                    *_prefix_bug/ (RL directo antes del fix de C1), exp0_multiseed/ y
                    exp0_multiseed_300ep/ (Experimento 0), raw_state_old_protocol/ (archivo);
+                   v2/ (compression/, arch_comparison/, control/, control_aligned/, control_pilot/);
                    pesos no versionados, sus .json sí
 training/       train_autoencoder.py, train_world_model.py, train_world_model_raw.py,
                 train_world_model_transformer.py, train_world_model_tsmixer.py,
                 train_controller.py (PPO del sueño), train_controller_direct.py (RL directo),
                 output_guard.py (no sobrescribir resultados oficiales o archivados)
+                v2: v2_compression_experiment.py (Fase 2: Autoencoder y modelos temporales),
+                  train_controller_v2.py (PPO del sueño LSTM/Transformer y RL directo de la Fase 3)
 evaluation/     autoencoder_evaluation.py, evaluate_autoencoder.py,
                 world_model_evaluation.py (incluye build_world_model)
 scripts/        datos: collect_dataset.py, split_dataset.py, merge_dataset.py, normalize_dataset.py,
@@ -489,6 +504,9 @@ scripts/        datos: collect_dataset.py, split_dataset.py, merge_dataset.py, n
                 control: evaluate_controller.py, evaluate_controller_sumo.py,
                   evaluate_direct_vs_dream.py, evaluate_final_comparison.py,
                   evaluate_multiseed_statistical.py, analyze_controller_actions.py
+                v2/: puntos de entrada de la v2 (dataset, demanda, entrenamiento, evaluación con
+                  evaluate_control_v2.py, lanzadores run_*.py, análisis analyze_*.py y los scripts
+                  del artículo make_*.py)
 tests/          25 archivos, 159 tests (pytest -v; 1 xfail estricto documenta el desfase del sueño de la v1)
 ver_controlador.py (demo del PPO del sueño oficial en la GUI de SUMO, escenario nuevo 7025),
 ver_tiempo_fijo.py (el mismo demo con la política de tiempo fijo, para comparar a simple vista),
