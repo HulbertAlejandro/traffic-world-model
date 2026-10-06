@@ -2349,7 +2349,15 @@ handoff anterior.
 - Demanda variable en el tiempo (el escenario asimétrico ya está implementado; la
   variación temporal no).
 
-## Qué se estaba haciendo justo antes de este handoff
+## Qué se estaba haciendo justo antes de este handoff (histórico, v1, 30 de septiembre)
+
+> **Histórico.** Esta sección describe el estado del 30 de septiembre, antes de la v2, y ya no es
+> el estado actual. Lo más reciente está al principio de este archivo: la v2 (Fase 3, el hallazgo
+> del desfase, la v2.1-A con su test nuevo y el OOD, y los scripts y figuras para el artículo).
+> Desde el 6 de octubre, el `README.md` de esta rama es la portada de la v2, y el README de la v1
+> (con sus cifras de 10 semillas) se conserva en `docs/v1/README_v1.md`. La v1 está congelada en
+> `main` y en `v1-final`, así que la "consolidación de la documentación" que se menciona abajo no
+> se hará en ella.
 
 Extensión del PPO a 10 semillas por controlador (ver "Extensión del PPO a 10 semillas por
 controlador"), las Tablas 4a y 4b (costo de inferencia y fidelidad del retorno imaginado de los
