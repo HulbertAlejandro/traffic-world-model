@@ -14,8 +14,8 @@
   5 tests de SUMO bloqueados por Smart App Control", solo `CLAUDE.md`). No está en `origin/main`
   ni en `v1-final`. Qué hacer con él lo decide el autor; no se sube sin su decisión.
 
-Última verificación: rama `v2/four-intersections` (tras `8947e18`), 158 passed y 1 xfail esperado,
-incluidos los de SUMO en vivo. **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
+Última verificación: rama `v2/four-intersections` en `2129904` (6 de octubre), 158 passed y 1 xfail
+esperado, incluidos los de SUMO en vivo, con el Python del `.venv`. **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
 intersecciones), cerrada el 5 de octubre**, un **hallazgo posterior: un desfase en el Dream
 Environment de la v1 y la v2**, y la **v2.1-A (planificación con el modelo del mundo), evaluada en el test
 nuevo el 6 de octubre**; ver las tres primeras secciones de abajo. Lo que sigue en esta
