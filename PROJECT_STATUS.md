@@ -14,8 +14,9 @@
   5 tests de SUMO bloqueados por Smart App Control", solo `CLAUDE.md`). No está en `origin/main`
   ni en `v1-final`. Qué hacer con él lo decide el autor; no se sube sin su decisión.
 
-Última verificación: rama `v2/four-intersections` en `2129904` (6 de octubre), 158 passed y 1 xfail
-esperado, incluidos los de SUMO en vivo, con el Python del `.venv`. **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
+Última verificación: rama `v2/four-intersections` en `62ea05d` (6 de octubre, tras reiniciar),
+158 passed y 1 xfail esperado, incluidos los de SUMO en vivo, con el Python del `.venv` (ver la
+sección siguiente). **Lo más reciente: la Fase 3 de la v2 (control en el corredor de 4
 intersecciones), cerrada el 5 de octubre**, un **hallazgo posterior: un desfase en el Dream
 Environment de la v1 y la v2**, y la **v2.1-A (planificación con el modelo del mundo), evaluada en el test
 nuevo el 6 de octubre**; ver las tres primeras secciones de abajo. Lo que sigue en esta
@@ -58,6 +59,19 @@ ejecutando el código, y las correcciones que salieron de ella. Estado actual:
   el resultado oficial (ver el final del punto 5).
 - **Throughput:** la métrica usada era inválida (~13% de las llegadas reales). Se agregó
   `info["arrivals_total"]`, correcta; la recompensa no cambió.
+
+## ✅ Suite completa verificada el 6 de octubre, tras reiniciar: 158 passed y 1 xfailed
+
+- Después de reiniciar, sin cambiar la configuración de seguridad, todo cargó al primer intento:
+  `sumo --version` dio Eclipse SUMO 1.27.1 (código 0) e `import torch, pandas` dio torch
+  2.14.0+cpu y pandas 3.0.5 (código 0). Smart App Control no bloqueó nada.
+- `.\.venv\Scripts\python.exe -m pytest -v`, con la salida a un archivo y sin pipes: **código de
+  salida 0, 158 passed y 1 xfailed en 98.7 s** (el xfail estricto del desfase de ventana de la v1),
+  con los tests de SUMO en vivo incluidos.
+- El árbol verificado es `81d7bec` más la nota del README sobre usar el Python del `.venv`, que se
+  commiteó después como `62ea05d` y se subió a `origin/v2/four-intersections`.
+- Con `git ls-remote` se comprobó que `origin/main` y `v1-final` (desreferenciada) siguen en
+  `588c5ea`.
 
 ## ✅ Scripts y figuras para el artículo (6 de octubre): solo lectura de resultados
 

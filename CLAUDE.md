@@ -555,6 +555,12 @@ Scripts para el artículo (6 de octubre): `scripts/v2/make_article_report.py`,
 primer intento y lo dejó cargar en los siguientes. La suite completa corrió: 158 passed y 1 xfailed,
 sin tests pendientes por pandas (detalle en PROJECT_STATUS.md).
 
+Última verificación (6 de octubre, tras reiniciar): SUMO, torch y pandas cargaron al primer intento,
+sin cambiar configuración de seguridad, y `.\.venv\Scripts\python.exe -m pytest -v` dio código de
+salida 0, **158 passed y 1 xfailed**, incluidos los de SUMO, sobre el árbol commiteado como
+`62ea05d` (detalle en PROJECT_STATUS.md, "Suite completa verificada el 6 de octubre, tras
+reiniciar").
+
 Resuelto también: la cuenta/app desconocida que apareció como colaborador en el repositorio de
 GitHub era Codex Connector; su acceso se revocó en ambas capas, y los colaboradores
 humanos son legítimos (investigado y confirmado por el autor directamente en GitHub).
